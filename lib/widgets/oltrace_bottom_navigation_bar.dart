@@ -26,8 +26,14 @@ class TripBottomNavigationBar extends StatelessWidget {
         currentIndex: currentIndex,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              icon: Icon(Icons.arrow_upward), title: Text('Haul')),
-          BottomNavigationBarItem(icon: Icon(Icons.label), title: Text('Tag'))
+              icon: Icon(Icons.arrow_upward),
+              title: Text(
+                'Haul',
+                style: TextStyle(fontSize: 36),
+              )),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.label),
+              title: Text('Tag', style: TextStyle(fontSize: 36)))
         ]);
   }
 }

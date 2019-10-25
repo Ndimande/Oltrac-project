@@ -9,9 +9,8 @@ class Fishery implements Model {
   final String name;
   final String safsCode; // e.g ONLF
   final String jurisdiction; // e.g Commonwealth
-  final Country country;
 
-  Fishery({this.name, this.safsCode, this.jurisdiction, this.country})
+  Fishery({this.name, this.safsCode, this.jurisdiction})
       : this.uuid = Uuid().v1();
 
   Fishery copyWith(
@@ -19,8 +18,7 @@ class Fishery implements Model {
     return Fishery(
         name: name ?? this.name,
         safsCode: safsCode ?? this.safsCode,
-        jurisdiction: jurisdiction ?? this.jurisdiction,
-        country: country ?? this.country);
+        jurisdiction: jurisdiction ?? this.jurisdiction);
   }
 
   Map<String, dynamic> toMap() {
@@ -28,8 +26,7 @@ class Fishery implements Model {
       'id': uuid,
       'name': name,
       'safsCode': safsCode,
-      'jurisdiction': jurisdiction,
-      'country': country.toMap()
+      'jurisdiction': jurisdiction
     };
   }
 
@@ -37,6 +34,5 @@ class Fishery implements Model {
       : uuid = data['uuid'],
         name = data['name'],
         safsCode = data['safsCode'],
-        jurisdiction = data['jurisdiction'],
-        country = Country.fromMap(data['country']);
+        jurisdiction = data['jurisdiction'];
 }

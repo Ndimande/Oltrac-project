@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishery.dart';
+import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/models/vessel.dart';
 import 'package:uuid/uuid.dart';
 
@@ -45,6 +46,7 @@ class Trip implements Model {
 
     return Trip(
         vessel: Vessel(
+            skipper: Skipper.fromMap(data['skipper']),
             name: data['vessel']['name'],
             fishery: Fishery.fromMap(data['vessel']['fishery'])),
         startedAt: startedAt,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/trip_started.dart';
+import 'package:oltrace/widgets/location.dart';
 
 Widget _drawerHeader(Trip trip) {
   Widget _headerChild = Text('No active trip');
@@ -11,11 +11,7 @@ Widget _drawerHeader(Trip trip) {
       trip.vessel.name,
       style: TextStyle(color: Colors.white, fontSize: 26),
     );
-    final _skipperName = Text('Hardcoded name');
-    final _fisheryName = Text(
-      trip.vessel.fishery.name,
-      style: TextStyle(fontSize: 20, color: Colors.black),
-    );
+    final _skipperName = Text(trip.vessel.skipper.name);
 
     _headerChild = Container(
         child: Column(
@@ -24,10 +20,7 @@ Widget _drawerHeader(Trip trip) {
             children: <Widget>[
           _vesselName,
           Column(
-            children: <Widget>[
-              _fisheryName,
-              _skipperName,
-            ],
+            children: <Widget>[_skipperName, Location()],
           )
         ]));
   }
@@ -57,7 +50,7 @@ class OlTraceDrawer extends StatelessWidget {
         children: <Widget>[
           _drawerHeader(_appStore.currentTrip),
           ListTile(
-            title: Text('Trip'),
+            title: Text('Trip', style: TextStyle(fontSize: 26)),
             onTap: () {
               _appStore.changeMainView(MainViewIndex.home);
               Navigator.pop(context);
@@ -65,7 +58,7 @@ class OlTraceDrawer extends StatelessWidget {
           ),
           ListTile(
             enabled: _appStore.tripHasStarted,
-            title: Text('Haul'),
+            title: Text('Haul', style: TextStyle(fontSize: 26)),
             onTap: () {
               _appStore.changeMainView(MainViewIndex.haul);
               Navigator.pop(context);
@@ -73,14 +66,14 @@ class OlTraceDrawer extends StatelessWidget {
           ),
           ListTile(
             enabled: _appStore.tripHasStarted && _appStore.haulHasStarted,
-            title: Text('Tag'),
+            title: Text('Tag', style: TextStyle(fontSize: 26)),
             onTap: () {
               _appStore.changeMainView(MainViewIndex.tag);
               Navigator.pop(context);
             },
           ),
           ListTile(
-            title: Text('About'),
+            title: Text('About', style: TextStyle(fontSize: 26)),
             onTap: () {
               Navigator.pushNamed(context, '/about');
             },

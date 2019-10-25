@@ -52,6 +52,9 @@ abstract class _AppStore with Store {
 
   Haul get currentHaul => _haul;
 
+  @action
+  void startHaul(Haul haul) => _haul = haul;
+
   @computed
   bool get haulHasStarted => _haul != null;
 

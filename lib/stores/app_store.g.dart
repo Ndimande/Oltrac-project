@@ -149,6 +149,16 @@ mixin _$AppStore on _AppStore, Store {
   }
 
   @override
+  void startHaul(Haul haul) {
+    final _$actionInfo = _$_AppStoreActionController.startAction();
+    try {
+      return super.startHaul(haul);
+    } finally {
+      _$_AppStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setVessel(Vessel vessel) {
     final _$actionInfo = _$_AppStoreActionController.startAction();
     try {

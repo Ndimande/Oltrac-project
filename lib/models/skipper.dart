@@ -9,6 +9,10 @@ class Skipper extends Model {
 
   Skipper({this.name}) : this.uuid = Uuid().v1();
 
+  Skipper.fromMap(Map data)
+      : uuid = data['uuid'],
+        name = data['name'];
+
   Skipper copyWith({String name}) {
     return Skipper(name: name ?? this.name);
   }
