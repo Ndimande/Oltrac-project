@@ -48,27 +48,47 @@ class TripView extends StatelessWidget {
     if (_appStore.tripHasStarted) {
       _buttonLabel = 'End Trip';
     } else {
-      _buttonLabel = _appStore.vesselIsConfigured
-          ? 'Start Trip'
-          : 'Configure Vessel'; //todo or continue trip
+      _buttonLabel =
+          _appStore.vesselIsConfigured ? 'Start Trip' : 'Configure Vessel';
     }
 
-    return BigButton(
-      label: _buttonLabel,
-      onPressed: () async => await _onPressMainButton(context),
+    return Container(
+      child: BigButton(
+        label: _buttonLabel,
+        onPressed: () async => await _onPressMainButton(context),
+      ),
+      padding: EdgeInsets.all(20),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Trip> completedTrips = _appStore.completedTrips;
+
     return Center(
       child: Observer(builder: (_) {
-//        final _mainW =
-//            _appStore.vesselIsConfigured ? 'Start Trip' : 'Configure Vessel';
-
         return Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[VesselInfo(_appStore), _buildMainButton(context)],
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            _appStore.tripHasStarted
+                ? Text(
+                    'Trip Started ' +
+                        _appStore.currentTrip.startedAt.day.toString() +
+                        '-' +
+                        _appStore.currentTrip.startedAt.month.toString() +
+                        '-' +
+                        _appStore.currentTrip.startedAt.year.toString(),
+                    style: TextStyle(fontSize: 30))
+                : Text(
+                    'No active trip',
+                    style: TextStyle(fontSize: 30),
+                  ),
+            Column(
+              children: <Widget>[
+                _buildMainButton(context),
+              ],
+            )
+          ],
         );
       }),
     );

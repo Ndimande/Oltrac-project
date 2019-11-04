@@ -34,12 +34,17 @@ abstract class _AppStore with Store {
 
   Trip get currentTrip => _trip;
 
+  List<Trip> get completedTrips => _completedTrips;
+
   @action
   void startTrip(Trip trip) => _trip = trip;
 
   @action
   void endTrip() {
-    _completedTrips.add(_trip);
+    List _updatedTrips = _completedTrips;
+    _updatedTrips.add(_trip);
+    _completedTrips = _updatedTrips;
+    print(_completedTrips);
     _trip = null;
   }
 
@@ -47,13 +52,24 @@ abstract class _AppStore with Store {
   bool get tripHasStarted => _trip != null;
 
   /// [HAUL]
+
   @observable
   Haul _haul;
+
+  @observable
+  List<Haul> _completedHauls = [];
 
   Haul get currentHaul => _haul;
 
   @action
   void startHaul(Haul haul) => _haul = haul;
+
+  @action
+  void endHaul() {
+    List _updatedHauls = _completedHauls;
+    _updatedHauls.add(_haul);
+    _haul = null;
+  }
 
   @computed
   bool get haulHasStarted => _haul != null;

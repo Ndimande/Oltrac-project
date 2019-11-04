@@ -99,6 +99,23 @@ mixin _$AppStore on _AppStore, Store {
     }, _$_haulAtom, name: '${_$_haulAtom.name}_set');
   }
 
+  final _$_completedHaulsAtom = Atom(name: '_AppStore._completedHauls');
+
+  @override
+  List<Haul> get _completedHauls {
+    _$_completedHaulsAtom.context.enforceReadPolicy(_$_completedHaulsAtom);
+    _$_completedHaulsAtom.reportObserved();
+    return super._completedHauls;
+  }
+
+  @override
+  set _completedHauls(List<Haul> value) {
+    _$_completedHaulsAtom.context.conditionallyRunInAction(() {
+      super._completedHauls = value;
+      _$_completedHaulsAtom.reportChanged();
+    }, _$_completedHaulsAtom, name: '${_$_completedHaulsAtom.name}_set');
+  }
+
   final _$_vesselAtom = Atom(name: '_AppStore._vessel');
 
   @override
@@ -153,6 +170,16 @@ mixin _$AppStore on _AppStore, Store {
     final _$actionInfo = _$_AppStoreActionController.startAction();
     try {
       return super.startHaul(haul);
+    } finally {
+      _$_AppStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void endHaul() {
+    final _$actionInfo = _$_AppStoreActionController.startAction();
+    try {
+      return super.endHaul();
     } finally {
       _$_AppStoreActionController.endAction(_$actionInfo);
     }

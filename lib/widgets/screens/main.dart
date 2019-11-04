@@ -99,7 +99,7 @@ class MainScreenState extends State<MainScreen> {
       return WillPopScope(
           onWillPop: _onWillPop,
           child: Scaffold(
-//        bottomNavigationBar: OlTraceBottomNavigationBar(_appStore),
+            backgroundColor: Colors.white,
             bottomNavigationBar: _bottomNavigationBar,
             appBar: _appStore.vesselIsConfigured ? _appBar : null,
             drawer:

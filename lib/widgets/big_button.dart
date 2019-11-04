@@ -9,9 +9,9 @@ class BigButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
-      buttonColor: Colors.indigo,
-      minWidth: 300.0,
-      height: 150.0,
+      buttonColor: Colors.blueGrey,
+      minWidth: 280.0,
+      height: 100.0,
       child: RaisedButton(
         onPressed: onPressed,
         child: Text(

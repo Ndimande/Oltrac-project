@@ -15,7 +15,7 @@ class _FishingMethodDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButton<FishingMethod>(
       hint: Text('Fishing Method'),
-      style: TextStyle(fontSize: 30, color: Colors.black),
+      style: TextStyle(fontSize: 26, color: Colors.black),
       value: _selected,
       onChanged: _onChanged,
       items: fishingMethods.map<DropdownMenuItem<FishingMethod>>((method) {
@@ -54,30 +54,26 @@ class HaulViewState extends State<HaulView> {
             ),
           ),
           Container(
-            constraints: BoxConstraints.expand(),
             child: _FishingMethodDropdown(
                 _selectedMethod,
                 (_fishingMethod) =>
                     setState(() => _selectedMethod = _fishingMethod)),
           ),
           Container(
-            child: Column(
-              children: <Widget>[
-                BigButton(
-                    label: 'Start Haul',
-                    onPressed: () {
-                      if (_selectedMethod == null) {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text('Please select a fishing method'),
-                        ));
-                      } else {
-                        widget._appStore.startHaul(Haul(
-                            startedAt: DateTime.now(),
-                            fishingMethod: _selectedMethod));
-                      }
-                    }),
-              ],
-            ),
+            child: BigButton(
+                label: 'Start Haul',
+                onPressed: () {
+                  if (_selectedMethod == null) {
+                    Scaffold.of(context).showSnackBar(SnackBar(
+                      content: Text('Please select a fishing method'),
+                    ));
+                  } else {
+                    widget._appStore.startHaul(Haul(
+                        startedAt: DateTime.now(),
+                        fishingMethod: _selectedMethod));
+                    widget._appStore.changeMainView(MainViewIndex.tag);
+                  }
+                }),
           )
         ],
       ),

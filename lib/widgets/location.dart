@@ -39,7 +39,7 @@ class LocationState extends State<Location> {
   @override
   Widget build(BuildContext context) {
     if (_currentPosition == null) {
-      return Text('null');
+      return Text('-');
     }
     return Text(_currentPosition.toString());
   }

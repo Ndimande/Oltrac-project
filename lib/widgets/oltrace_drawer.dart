@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/models/vessel.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/location.dart';
 
-Widget _drawerHeader(Trip trip) {
-  Widget _headerChild = Text('No active trip');
+Widget _drawerHeader(Vessel vessel) {
+  final _vesselName = Text(
+    vessel.name,
+    style: TextStyle(color: Colors.white, fontSize: 28),
+  );
+  final _skipperName = Text(
+    vessel.skipper.name,
+    style: TextStyle(color: Colors.black, fontSize: 22),
+  );
 
-  if (trip != null) {
-    final _vesselName = Text(
-      trip.vessel.name,
-      style: TextStyle(color: Colors.white, fontSize: 26),
-    );
-    final _skipperName = Text(trip.vessel.skipper.name);
-
-    _headerChild = Container(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-          _vesselName,
-          Column(
-            children: <Widget>[_skipperName, Location()],
-          )
-        ]));
-  }
+  var _headerChild = Container(
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[_vesselName, _skipperName],
+        ),
+        Location()
+      ]));
 
   return DrawerHeader(
     child: _headerChild,
     decoration: BoxDecoration(
-      color: Colors.indigoAccent,
+      color: Colors.blueGrey,
     ),
   );
 }
@@ -48,7 +49,7 @@ class OlTraceDrawer extends StatelessWidget {
         // Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: <Widget>[
-          _drawerHeader(_appStore.currentTrip),
+          _drawerHeader(_appStore.vessel),
           ListTile(
             title: Text('Trip', style: TextStyle(fontSize: 26)),
             onTap: () {

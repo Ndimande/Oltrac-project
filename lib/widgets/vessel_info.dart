@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/vessel.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/location.dart';
 
 class VesselInfo extends StatelessWidget {
   final AppStore _appStore;
@@ -23,8 +24,9 @@ class VesselInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(_vessel.name, style: TextStyle(fontSize: 32)),
+              Location(),
               Text(_vessel.skipper.name),
-              Text(_vessel.country.name, style: TextStyle(fontSize: 29))
+              Text(_vessel.country.name, style: TextStyle(fontSize: 29)),
             ],
           ),
         ));
