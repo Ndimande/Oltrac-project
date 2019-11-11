@@ -18,7 +18,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      flutter/bin/flutter packages pub run build_runner build
+      $(Agent.ToolsDirectory)/Flutter/bin/flutter packages pub run build_runner build
 
 - task: FlutterBuild@0
   inputs:
