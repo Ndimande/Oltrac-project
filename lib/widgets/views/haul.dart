@@ -31,7 +31,6 @@ class _FishingMethodDropdown extends StatelessWidget {
 class HaulView extends StatefulWidget {
   final AppStore _appStore;
 
-// todo change to stateful widget so it can hold the selection
   HaulView(this._appStore);
 
   HaulViewState createState() => HaulViewState();
@@ -40,8 +39,29 @@ class HaulView extends StatefulWidget {
 class HaulViewState extends State<HaulView> {
   FishingMethod _selectedMethod;
 
+  Widget buildCurrentHaul() {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Text('Haul started at ' +
+            widget._appStore.activeHaul.startedAt.toIso8601String()),
+        BigButton(
+            label: 'End Haul',
+            onPressed: () {
+              setState(() {
+                widget._appStore.endHaul();
+              });
+            })
+      ],
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget._appStore.activeHaul != null) {
+      return buildCurrentHaul();
+    }
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -62,18 +82,23 @@ class HaulViewState extends State<HaulView> {
           Container(
             child: BigButton(
                 label: 'Start Haul',
-                onPressed: () {
-                  if (_selectedMethod == null) {
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text('Please select a fishing method'),
-                    ));
-                  } else {
-                    widget._appStore.startHaul(Haul(
-                        startedAt: DateTime.now(),
-                        fishingMethod: _selectedMethod));
-                    widget._appStore.changeMainView(MainViewIndex.tag);
-                  }
-                }),
+                onPressed: _selectedMethod == null
+                    ? null
+                    : () {
+                        if (_selectedMethod == null) {
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text('Please select a fishing method'),
+                          ));
+                        } else {
+                          setState(() {
+                            widget._appStore.startHaul(Haul(
+                                startedAt: DateTime.now(),
+                                fishingMethod: _selectedMethod));
+                          });
+
+//                    widget._appStore.changeMainView(MainViewIndex.tag);
+                        }
+                      }),
           )
         ],
       ),

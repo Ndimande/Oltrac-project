@@ -16,7 +16,7 @@ class VesselInfo extends StatelessWidget {
     }
     return FlatButton(
         onPressed: () {
-          _appStore.changeMainView(MainViewIndex.configureVessel);
+          _appStore.changeMainView(NavIndex.configureVessel);
         },
         child: Container(
           padding: EdgeInsets.all(10),

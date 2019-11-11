@@ -9,7 +9,7 @@ part 'app_store.g.dart';
 // This is the class used by rest of your codebase
 class AppStore = _AppStore with _$AppStore;
 
-enum MainViewIndex { home, haul, tag, configureVessel }
+enum NavIndex { home, haul, tag, tagPrimary, tagSecondary, configureVessel }
 enum ContextMenuIndex { about, endTrip }
 
 // The store-class
@@ -18,61 +18,69 @@ abstract class _AppStore with Store {
 
   /// [NAVIGATION]
   @observable
-  MainViewIndex currentMainViewIndex = MainViewIndex.home;
+  NavIndex currentNavIndex = NavIndex.home;
 
   @action
-  void changeMainView(MainViewIndex index) {
-    currentMainViewIndex = index;
+  void changeMainView(NavIndex index) {
+    currentNavIndex = index;
   }
 
   /// [TRIP]
-  @observable
-  Trip _trip;
 
+  /// The trip that is currently running.
+  @observable
+  Trip _activeTrip;
+  Trip get activeTrip => _activeTrip;
+
+  /// Trips that have been completed / ended.
   @observable
   List<Trip> _completedTrips = [];
-
-  Trip get currentTrip => _trip;
-
   List<Trip> get completedTrips => _completedTrips;
 
+  /// Begin a new trip
+  /// todo We shouldn't pass in a trip, one should be created here.
   @action
-  void startTrip(Trip trip) => _trip = trip;
+  void startTrip(Trip trip) => _activeTrip = trip;
 
   @action
   void endTrip() {
     List _updatedTrips = _completedTrips;
-    _updatedTrips.add(_trip);
+    _updatedTrips.add(_activeTrip);
     _completedTrips = _updatedTrips;
-    print(_completedTrips);
-    _trip = null;
+    _activeTrip = null;
   }
 
   @computed
-  bool get tripHasStarted => _trip != null;
+  bool get tripHasStarted => _activeTrip != null;
 
   /// [HAUL]
 
+  /// The current haul.
   @observable
-  Haul _haul;
+  Haul _activeHaul;
 
+  /// Public getter for the current haul.
+  Haul get activeHaul => _activeHaul;
+
+  /// Hauls that have been ended.
   @observable
   List<Haul> _completedHauls = [];
 
-  Haul get currentHaul => _haul;
+  List<Haul> get completedHauls => _completedHauls;
 
   @action
-  void startHaul(Haul haul) => _haul = haul;
+  void startHaul(Haul haul) => _activeHaul = haul;
 
   @action
   void endHaul() {
     List _updatedHauls = _completedHauls;
-    _updatedHauls.add(_haul);
-    _haul = null;
+    _updatedHauls.add(_activeHaul);
+    _completedHauls = _updatedHauls;
+    _activeHaul = null;
   }
 
   @computed
-  bool get haulHasStarted => _haul != null;
+  bool get haulHasStarted => _activeHaul != null;
 
   /// [VESSEL]
   @observable

@@ -6,6 +6,8 @@ import 'package:oltrace/widgets/oltrace_bottom_navigation_bar.dart';
 import 'package:oltrace/widgets/oltrace_drawer.dart';
 import 'package:oltrace/widgets/trip_started_ago.dart';
 import 'package:oltrace/widgets/views/configure_vessel.dart';
+import 'package:oltrace/widgets/views/tag_primary.dart';
+import 'package:oltrace/widgets/views/tag_secondary.dart';
 import 'package:oltrace/widgets/views/welcome.dart';
 import 'package:oltrace/widgets/views/trip.dart';
 import 'package:oltrace/widgets/views/tag.dart';
@@ -58,7 +60,7 @@ class MainScreenState extends State<MainScreen> {
                     builder: (_) => ConfirmDialog('End trip', 'Are you sure?'));
                 if (confirmed) {
                   _appStore.endTrip();
-                  _appStore.changeMainView(MainViewIndex.home);
+                  _appStore.changeMainView(NavIndex.home);
                 }
 
                 break;
@@ -69,13 +71,17 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<bool> _onWillPop() async {
-    switch (_appStore.currentMainViewIndex) {
-      case MainViewIndex.home:
+    switch (_appStore.currentNavIndex) {
+      case NavIndex.tagSecondary:
+      case NavIndex.tagPrimary:
+        _appStore.changeMainView(NavIndex.tag);
         break;
-      case MainViewIndex.haul:
-      case MainViewIndex.tag:
-      case MainViewIndex.configureVessel:
-        _appStore.changeMainView(MainViewIndex.home);
+      case NavIndex.home:
+        break;
+      case NavIndex.haul:
+      case NavIndex.tag:
+      case NavIndex.configureVessel:
+        _appStore.changeMainView(NavIndex.home);
         break;
     }
     return false;
@@ -86,13 +92,13 @@ class MainScreenState extends State<MainScreen> {
     return Observer(builder: (_) {
       /// The bar displayed at the top of the app
       final Widget _appBar = AppBar(
-          title: TripStartedAgo(trip: _appStore.currentTrip),
+          title: TripStartedAgo(trip: _appStore.activeTrip),
           actions: _appBarActions(context));
 
       // todo Does not update when TripView is changed due to being above the widget
       final Widget _bottomNavigationBar =
-          _appStore.currentMainViewIndex == MainViewIndex.haul ||
-                  _appStore.currentMainViewIndex == MainViewIndex.tag
+          _appStore.currentNavIndex == NavIndex.haul ||
+                  _appStore.currentNavIndex == NavIndex.tag
               ? TripBottomNavigationBar(_appStore)
               : null;
 
@@ -106,18 +112,21 @@ class MainScreenState extends State<MainScreen> {
                 _appStore.vesselIsConfigured ? OlTraceDrawer(_appStore) : null,
             body: Builder(builder: (_) {
               if (!_appStore.vesselIsConfigured &&
-                  _appStore.currentMainViewIndex !=
-                      MainViewIndex.configureVessel) {
+                  _appStore.currentNavIndex != NavIndex.configureVessel) {
                 return WelcomeView(_appStore);
               }
-              switch (_appStore.currentMainViewIndex) {
-                case MainViewIndex.home:
+              switch (_appStore.currentNavIndex) {
+                case NavIndex.home:
                   return TripView(_appStore);
-                case MainViewIndex.haul:
+                case NavIndex.haul:
                   return HaulView(_appStore);
-                case MainViewIndex.tag:
+                case NavIndex.tag:
                   return TagView(_appStore);
-                case MainViewIndex.configureVessel:
+                case NavIndex.tagPrimary:
+                  return TagPrimaryView(_appStore);
+                case NavIndex.tagSecondary:
+                  return TagSecondaryView(_appStore);
+                case NavIndex.configureVessel:
                   return ConfigureVesselView(_appStore);
               }
               return Container();

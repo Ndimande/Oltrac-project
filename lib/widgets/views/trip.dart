@@ -34,10 +34,10 @@ class TripView extends StatelessWidget {
         final bool confirmed = await _showConfirmDialog(context);
         if (confirmed) {
           _appStore.startTrip(_fakeTrip(_appStore));
-          _appStore.changeMainView(MainViewIndex.haul);
+          _appStore.changeMainView(NavIndex.haul);
         }
       } else {
-        _appStore.changeMainView(MainViewIndex.configureVessel);
+        _appStore.changeMainView(NavIndex.configureVessel);
       }
     }
   }
@@ -73,11 +73,11 @@ class TripView extends StatelessWidget {
             _appStore.tripHasStarted
                 ? Text(
                     'Trip Started ' +
-                        _appStore.currentTrip.startedAt.day.toString() +
+                        _appStore.activeTrip.startedAt.day.toString() +
                         '-' +
-                        _appStore.currentTrip.startedAt.month.toString() +
+                        _appStore.activeTrip.startedAt.month.toString() +
                         '-' +
-                        _appStore.currentTrip.startedAt.year.toString(),
+                        _appStore.activeTrip.startedAt.year.toString(),
                     style: TextStyle(fontSize: 30))
                 : Text(
                     'No active trip',

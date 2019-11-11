@@ -148,8 +148,8 @@ class ConfigureVesselViewState extends State<ConfigureVesselView> {
                         _skipperName == null) {
                       // Find the Scaffold in the widget tree and use it to show a SnackBar.
                       Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text(
-                              'Please complete the all the fields before saving.')));
+                          content:
+                              Text('Please complete the form before saving.')));
 
                       return;
                     }
@@ -159,7 +159,7 @@ class ConfigureVesselViewState extends State<ConfigureVesselView> {
                         fishery: _selectedFishery,
                         country: _selectedCountry);
                     widget._appStore.setVessel(_vessel);
-                    widget._appStore.changeMainView(MainViewIndex.home);
+                    widget._appStore.changeMainView(NavIndex.home);
                     Scaffold.of(context).showSnackBar(
                         SnackBar(content: Text('Vessel configuration saved.')));
                   })

@@ -21,7 +21,9 @@ class TagView extends StatelessWidget {
             children: <Widget>[
               BigButton(
                 label: 'Primary Product',
-                onPressed: () {},
+                onPressed: () {
+                  _appStore.changeMainView(NavIndex.tagPrimary);
+                },
               ),
               Container(
                 padding: EdgeInsets.all(10),
@@ -34,7 +36,9 @@ class TagView extends StatelessWidget {
             children: <Widget>[
               BigButton(
                 label: 'Secondary Product',
-                onPressed: () {},
+                onPressed: () {
+                  _appStore.changeMainView(NavIndex.tagSecondary);
+                },
               ),
               Container(
                   padding: EdgeInsets.all(10),

@@ -16,7 +16,7 @@ steps:
 
 - task: FlutterBuild@0
   inputs:
-    target: 'all'
+    target: 'apk'
     projectDirectory: '.'
 
 - task: CopyFiles@2

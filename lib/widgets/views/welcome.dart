@@ -17,19 +17,20 @@ class WelcomeView extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Welcome to OlTrace',
-                  style: TextStyle(fontSize: 42, color: Colors.white),
+                  style: TextStyle(fontSize: 32, color: Colors.black),
                   textAlign: TextAlign.center,
                 ),
                 Column(
                   children: <Widget>[
-                    Text('We need some information about your vessel.',
-                        style: TextStyle(fontSize: 28, color: Colors.white),
+                    Text(
+                        'Before you begin, we need some information about your vessel.',
+                        style: TextStyle(fontSize: 18, color: Colors.black),
                         textAlign: TextAlign.center),
                   ],
                 ),
                 BigButton(
                   onPressed: () {
-                    _appStore.changeMainView(MainViewIndex.configureVessel);
+                    _appStore.changeMainView(NavIndex.configureVessel);
                   },
                   label: 'Continue',
                 ),

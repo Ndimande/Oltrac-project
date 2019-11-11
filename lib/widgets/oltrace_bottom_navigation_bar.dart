@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/stores/app_store.dart';
 
-final Map<MainViewIndex, int> _index = {
-  MainViewIndex.haul: 0,
-  MainViewIndex.tag: 1,
+final Map<NavIndex, int> _index = {
+  NavIndex.haul: 0,
+  NavIndex.tag: 1,
 };
 
 class TripBottomNavigationBar extends StatelessWidget {
@@ -13,13 +13,22 @@ class TripBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int currentIndex = _index[_appStore.currentMainViewIndex];
+    int currentIndex = _index[_appStore.currentNavIndex];
     return BottomNavigationBar(
         onTap: (i) {
           if (i == 0) {
-            _appStore.changeMainView(MainViewIndex.haul);
+            _appStore.changeMainView(NavIndex.haul);
           } else if (i == 1) {
-            _appStore.changeMainView(MainViewIndex.tag);
+            if (_appStore.completedHauls.length > 0 ||
+                _appStore.activeHaul != null) {
+              _appStore.changeMainView(NavIndex.tag);
+            } else {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                duration: Duration(seconds: 1, milliseconds: 500),
+                content:
+                    Text('You must have an active or completed haul to tag.'),
+              ));
+            }
           }
           return null;
         },

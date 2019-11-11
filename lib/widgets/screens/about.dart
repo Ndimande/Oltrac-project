@@ -4,7 +4,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.blueGrey,
         body: Container(
           padding: EdgeInsets.all(100),
           child: Center(

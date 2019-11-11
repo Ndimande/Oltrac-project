@@ -53,7 +53,7 @@ class OlTraceDrawer extends StatelessWidget {
           ListTile(
             title: Text('Trip', style: TextStyle(fontSize: 26)),
             onTap: () {
-              _appStore.changeMainView(MainViewIndex.home);
+              _appStore.changeMainView(NavIndex.home);
               Navigator.pop(context);
             },
           ),
@@ -61,7 +61,7 @@ class OlTraceDrawer extends StatelessWidget {
             enabled: _appStore.tripHasStarted,
             title: Text('Haul', style: TextStyle(fontSize: 26)),
             onTap: () {
-              _appStore.changeMainView(MainViewIndex.haul);
+              _appStore.changeMainView(NavIndex.haul);
               Navigator.pop(context);
             },
           ),
@@ -69,7 +69,7 @@ class OlTraceDrawer extends StatelessWidget {
             enabled: _appStore.tripHasStarted && _appStore.haulHasStarted,
             title: Text('Tag', style: TextStyle(fontSize: 26)),
             onTap: () {
-              _appStore.changeMainView(MainViewIndex.tag);
+              _appStore.changeMainView(NavIndex.tag);
               Navigator.pop(context);
             },
           ),
