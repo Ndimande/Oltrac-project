@@ -14,6 +14,12 @@ steps:
     channel: 'stable'
     version: 'latest'
 
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      flutter packages pub run build_runner build
+
 - task: FlutterBuild@0
   inputs:
     target: 'apk'
