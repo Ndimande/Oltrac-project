@@ -1,10 +1,8 @@
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
-import 'package:uuid/uuid.dart';
 
 @immutable
-class Species implements Model {
-  final String uuid;
+class Species extends Model {
   final String englishName;
   final String scientificName;
   final String australianName;
@@ -32,8 +30,23 @@ class Species implements Model {
       this.isscaapGroup,
       this.cpcClass,
       this.cpcGroup,
-      this.caabCode})
-      : this.uuid = Uuid().v1();
+      this.caabCode});
+
+  Species.fromMap(Map data)
+      : englishName = data['englishName'],
+        alpha3Code = data['alpha3Code'],
+        scientificName = data['scientificName'],
+        taxonomicCode = data['taxonomicCode'],
+        australianName = data['australianName'],
+        family = data['family'],
+        order = data['order'],
+        majorGroup = data['majorGroup'],
+        yearbookGroup = data['yearbookGroup'],
+        isscaapGroup = data['isscaapGroup'],
+        cpcClass = data['cpcClass'],
+        cpcGroup = data['cpcGroup'],
+        caabCode = data['caabCode'],
+        super.fromMap(data);
 
   Species copyWith(
       {String name,

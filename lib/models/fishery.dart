@@ -1,17 +1,20 @@
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/country.dart';
-import 'package:uuid/uuid.dart';
 
 @immutable
-class Fishery implements Model {
-  final String uuid;
+class Fishery extends Model {
   final String name;
   final String safsCode; // e.g ONLF
   final String jurisdiction; // e.g Commonwealth
 
-  Fishery({this.name, this.safsCode, this.jurisdiction})
-      : this.uuid = Uuid().v1();
+  Fishery({this.name, this.safsCode, this.jurisdiction});
+
+  Fishery.fromMap(Map data)
+      : name = data['name'],
+        safsCode = data['safsCode'],
+        jurisdiction = data['jurisdiction'],
+        super.fromMap(data);
 
   Fishery copyWith(
       {String name, String safsCode, String jurisdiction, Country country}) {
@@ -23,16 +26,10 @@ class Fishery implements Model {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': uuid,
+      'uuid': uuid,
       'name': name,
       'safsCode': safsCode,
       'jurisdiction': jurisdiction
     };
   }
-
-  Fishery.fromMap(Map data)
-      : uuid = data['uuid'],
-        name = data['name'],
-        safsCode = data['safsCode'],
-        jurisdiction = data['jurisdiction'];
 }

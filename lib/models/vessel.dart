@@ -3,19 +3,26 @@ import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/country.dart';
 import 'package:oltrace/models/fishery.dart';
 import 'package:oltrace/models/skipper.dart';
-import 'package:uuid/uuid.dart';
 
 @immutable
-class Vessel implements Model {
-  final String uuid;
+class Vessel extends Model {
   final String name;
   final Fishery fishery;
   final Skipper skipper;
   final Country country;
 
   Vessel(
-      {@required this.name, this.fishery, @required this.skipper, this.country})
-      : uuid = Uuid().v1();
+      {@required this.name,
+      this.fishery,
+      @required this.skipper,
+      this.country});
+
+  Vessel.fromMap(Map data)
+      : name = data['name'],
+        fishery = Fishery.fromMap(data['fishery']),
+        skipper = Skipper.fromMap(data['skipper']),
+        country = Country.fromMap(data['country']),
+        super.fromMap(data);
 
   Map<String, dynamic> toMap() {
     return {

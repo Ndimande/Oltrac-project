@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishing_method.dart';
-import 'package:uuid/uuid.dart';
 
 @immutable
 class Haul extends Model {
-  final String uuid;
+  /// Timestamp of haul start
   final DateTime startedAt;
+
+  /// Timestamp of haul end
   final DateTime endedAt;
+
+  /// The fishing method used on the haul
   final FishingMethod fishingMethod;
 
-  Haul({this.startedAt, this.endedAt, this.fishingMethod})
-      : this.uuid = Uuid().v1();
+  Haul({this.startedAt, this.endedAt, this.fishingMethod});
+
+  Haul.fromMap(Map data)
+      : startedAt = data['startedAt'],
+        endedAt = data['endedAt'],
+        fishingMethod = FishingMethod.fromMap(data['fishingMethod']),
+        super.fromMap(data);
 
   Haul copyWith(
       {DateTime startedAt, DateTime endedAt, FishingMethod fishingMethod}) {
