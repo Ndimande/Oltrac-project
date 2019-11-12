@@ -60,7 +60,7 @@ class MainScreenState extends State<MainScreen> {
                     builder: (_) => ConfirmDialog('End trip', 'Are you sure?'));
                 if (confirmed) {
                   _appStore.endTrip();
-                  _appStore.changeMainView(NavIndex.home);
+                  _appStore.changeMainView(NavIndex.trip);
                 }
 
                 break;
@@ -70,18 +70,19 @@ class MainScreenState extends State<MainScreen> {
     ];
   }
 
+  /// Handles the back button navigation
   Future<bool> _onWillPop() async {
     switch (_appStore.currentNavIndex) {
       case NavIndex.tagSecondary:
       case NavIndex.tagPrimary:
         _appStore.changeMainView(NavIndex.tag);
         break;
-      case NavIndex.home:
+      case NavIndex.trip:
         break;
       case NavIndex.haul:
       case NavIndex.tag:
       case NavIndex.configureVessel:
-        _appStore.changeMainView(NavIndex.home);
+        _appStore.changeMainView(NavIndex.trip);
         break;
     }
     return false;
@@ -95,7 +96,6 @@ class MainScreenState extends State<MainScreen> {
           title: TripStartedAgo(trip: _appStore.activeTrip),
           actions: _appBarActions(context));
 
-      // todo Does not update when TripView is changed due to being above the widget
       final Widget _bottomNavigationBar =
           _appStore.currentNavIndex == NavIndex.haul ||
                   _appStore.currentNavIndex == NavIndex.tag
@@ -116,7 +116,7 @@ class MainScreenState extends State<MainScreen> {
                 return WelcomeView(_appStore);
               }
               switch (_appStore.currentNavIndex) {
-                case NavIndex.home:
+                case NavIndex.trip:
                   return TripView(_appStore);
                 case NavIndex.haul:
                   return HaulView(_appStore);

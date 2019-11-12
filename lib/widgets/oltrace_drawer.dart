@@ -53,7 +53,7 @@ class OlTraceDrawer extends StatelessWidget {
           ListTile(
             title: Text('Trip', style: TextStyle(fontSize: 26)),
             onTap: () {
-              _appStore.changeMainView(NavIndex.home);
+              _appStore.changeMainView(NavIndex.trip);
               Navigator.pop(context);
             },
           ),

@@ -159,7 +159,7 @@ class ConfigureVesselViewState extends State<ConfigureVesselView> {
                         fishery: _selectedFishery,
                         country: _selectedCountry);
                     widget._appStore.setVessel(_vessel);
-                    widget._appStore.changeMainView(NavIndex.home);
+                    widget._appStore.changeMainView(NavIndex.trip);
                     Scaffold.of(context).showSnackBar(
                         SnackBar(content: Text('Vessel configuration saved.')));
                   })

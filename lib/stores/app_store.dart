@@ -9,7 +9,7 @@ part 'app_store.g.dart';
 // This is the class used by rest of your codebase
 class AppStore = _AppStore with _$AppStore;
 
-enum NavIndex { home, haul, tag, tagPrimary, tagSecondary, configureVessel }
+enum NavIndex { trip, haul, tag, tagPrimary, tagSecondary, configureVessel }
 enum ContextMenuIndex { about, endTrip }
 
 // The store-class
@@ -18,7 +18,7 @@ abstract class _AppStore with Store {
 
   /// [NAVIGATION]
   @observable
-  NavIndex currentNavIndex = NavIndex.home;
+  NavIndex currentNavIndex = NavIndex.trip;
 
   @action
   void changeMainView(NavIndex index) {
