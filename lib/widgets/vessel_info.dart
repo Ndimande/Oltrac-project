@@ -24,7 +24,7 @@ class VesselInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(_vessel.name, style: TextStyle(fontSize: 32)),
-              Location(),
+              LocationCoords(),
               Text(_vessel.skipper.name),
               Text(_vessel.country.name, style: TextStyle(fontSize: 29)),
             ],

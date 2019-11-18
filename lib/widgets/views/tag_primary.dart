@@ -128,7 +128,7 @@ class _TagPrimaryViewState extends State<TagPrimaryView> {
   }
 
   List<Haul> _getAvailableHauls() {
-    List<Haul> availableHauls = widget._appStore.completedHauls;
+    List<Haul> availableHauls = widget._appStore.activeTrip.hauls;
     return widget._appStore.activeHaul == null
         ? availableHauls
         : [...availableHauls, widget._appStore.activeHaul];

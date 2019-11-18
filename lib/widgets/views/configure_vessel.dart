@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/data/countries.dart';
 import 'package:oltrace/models/country.dart';
-import 'package:oltrace/models/fishery.dart';
+import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/models/vessel.dart';
 import 'package:oltrace/stores/app_store.dart';
@@ -9,7 +9,7 @@ import 'package:oltrace/data/fisheries.dart';
 import 'package:oltrace/widgets/big_button.dart';
 
 class _FisheryDropdown extends StatelessWidget {
-  final Fishery _selected;
+  final FisheryType _selected;
   final Function _onChanged;
 
   _FisheryDropdown(this._selected, this._onChanged);
@@ -19,14 +19,15 @@ class _FisheryDropdown extends StatelessWidget {
     return Container(
       child: Column(
         children: <Widget>[
-          DropdownButton<Fishery>(
+          DropdownButton<FisheryType>(
             hint: Text('Fishery'),
             isExpanded: true,
             style: TextStyle(fontSize: 16, color: Colors.black),
             value: _selected,
             onChanged: _onChanged,
-            items: fisheries.map<DropdownMenuItem<Fishery>>((Fishery fishery) {
-              return DropdownMenuItem<Fishery>(
+            items: fisheries
+                .map<DropdownMenuItem<FisheryType>>((FisheryType fishery) {
+              return DropdownMenuItem<FisheryType>(
                 value: fishery,
                 child: Text(fishery.name),
               );
@@ -78,7 +79,7 @@ class ConfigureVesselView extends StatefulWidget {
 
 class ConfigureVesselViewState extends State<ConfigureVesselView> {
   Vessel _oldVessel;
-  Fishery _selectedFishery;
+  FisheryType _selectedFishery;
   Country _selectedCountry;
   String _vesselName;
   String _skipperName;
@@ -89,7 +90,7 @@ class ConfigureVesselViewState extends State<ConfigureVesselView> {
     _oldVessel = widget._appStore.vessel;
 
     if (_oldVessel != null) {
-      _selectedFishery = _oldVessel.fishery;
+      _selectedFishery = _oldVessel.fisheryType;
       _selectedCountry = _oldVessel.country;
       _vesselNameController.text = _oldVessel.name;
       _skipperNameController.text = _oldVessel.skipper?.name;
@@ -156,7 +157,7 @@ class ConfigureVesselViewState extends State<ConfigureVesselView> {
                     final _vessel = Vessel(
                         name: _vesselName,
                         skipper: Skipper(name: _skipperName),
-                        fishery: _selectedFishery,
+                        fisheryType: _selectedFishery,
                         country: _selectedCountry);
                     widget._appStore.setVessel(_vessel);
                     widget._appStore.changeMainView(NavIndex.trip);

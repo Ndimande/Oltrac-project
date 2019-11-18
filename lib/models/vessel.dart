@@ -1,25 +1,25 @@
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/country.dart';
-import 'package:oltrace/models/fishery.dart';
+import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/skipper.dart';
 
 @immutable
 class Vessel extends Model {
   final String name;
-  final Fishery fishery;
+  final FisheryType fisheryType;
   final Skipper skipper;
   final Country country;
 
   Vessel(
       {@required this.name,
-      this.fishery,
+      @required this.fisheryType,
       @required this.skipper,
-      this.country});
+      @required this.country});
 
   Vessel.fromMap(Map data)
       : name = data['name'],
-        fishery = Fishery.fromMap(data['fishery']),
+        fisheryType = FisheryType.fromMap(data['fishery']),
         skipper = Skipper.fromMap(data['skipper']),
         country = Country.fromMap(data['country']),
         super.fromMap(data);
@@ -28,17 +28,17 @@ class Vessel extends Model {
     return {
       'uuid': uuid,
       'name': name,
-      'fishery': fishery.toMap(),
+      'fishery': fisheryType.toMap(),
       'skipper': skipper.toMap(),
       'country': country.toMap()
     };
   }
 
   Vessel copyWith(
-      {String name, Fishery fishery, Skipper skipper, Country country}) {
+      {String name, FisheryType fishery, Skipper skipper, Country country}) {
     return Vessel(
         name: name ?? this.name,
-        fishery: fishery ?? this.fishery,
+        fisheryType: fishery ?? this.fisheryType,
         skipper: skipper ?? this.skipper,
         country: country ?? this.country);
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
 
 abstract class Model {
@@ -29,4 +31,6 @@ abstract class Model {
   /// Get hash code from uuid
   @override
   int get hashCode => uuid.hashCode;
+
+  String toJson() => jsonEncode(this.toMap());
 }

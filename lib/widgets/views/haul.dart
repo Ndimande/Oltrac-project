@@ -1,32 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/data/fishing_methods.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/big_button.dart';
-
-class _FishingMethodDropdown extends StatelessWidget {
-  final Function _onChanged;
-  final FishingMethod _selected;
-
-  _FishingMethodDropdown(this._selected, this._onChanged);
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<FishingMethod>(
-      hint: Text('Fishing Method'),
-      style: TextStyle(fontSize: 26, color: Colors.black),
-      value: _selected,
-      onChanged: _onChanged,
-      items: fishingMethods.map<DropdownMenuItem<FishingMethod>>((method) {
-        return DropdownMenuItem<FishingMethod>(
-          value: method,
-          child: Text(method.name),
-        );
-      }).toList(),
-    );
-  }
-}
+import 'package:oltrace/widgets/elapsed_counter.dart';
 
 class HaulView extends StatefulWidget {
   final AppStore _appStore;
@@ -37,8 +16,6 @@ class HaulView extends StatefulWidget {
 }
 
 class HaulViewState extends State<HaulView> {
-  FishingMethod _selectedMethod;
-
   Widget buildCurrentHaul() {
     return Center(
         child: Column(
@@ -57,51 +34,112 @@ class HaulViewState extends State<HaulView> {
     ));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (widget._appStore.activeHaul != null) {
-      return buildCurrentHaul();
-    }
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Container(
-            child: Column(
+  Widget _buildNoActiveHaul() {
+    return Container(
+        alignment: Alignment.center,
+        child: Text(
+          'No active haul.',
+          style: TextStyle(fontSize: 26),
+        ));
+  }
+
+  Widget _buildHaulInfo() {
+    return Container(
+        alignment: Alignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('No active haul', style: TextStyle(fontSize: 35))
+                Text(
+                  'Method',
+                  style: TextStyle(fontSize: 12),
+                ),
+                Text(
+                  widget._appStore.activeHaul.fishingMethod.name,
+                  style: TextStyle(fontSize: 22),
+                ),
               ],
             ),
-          ),
-          Container(
-            child: _FishingMethodDropdown(
-                _selectedMethod,
-                (_fishingMethod) =>
-                    setState(() => _selectedMethod = _fishingMethod)),
-          ),
-          Container(
-            child: BigButton(
-                label: 'Start Haul',
-                onPressed: _selectedMethod == null
-                    ? null
-                    : () {
-                        if (_selectedMethod == null) {
-                          Scaffold.of(context).showSnackBar(SnackBar(
-                            content: Text('Please select a fishing method'),
-                          ));
-                        } else {
-                          setState(() {
-                            widget._appStore.startHaul(Haul(
-                                startedAt: DateTime.now(),
-                                fishingMethod: _selectedMethod));
-                          });
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text('Started: ', style: TextStyle(fontSize: 12)),
+                    Text(friendlyTimestamp(
+                        widget._appStore.activeHaul.startedAt))
+                  ],
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text('Elapsed: ', style: TextStyle(fontSize: 12)),
+                      ElapsedCounter(widget._appStore.activeHaul.startedAt)
+                    ],
+                  ),
+                )
+              ],
+            )
+          ],
+        ));
+  }
 
-//                    widget._appStore.changeMainView(MainViewIndex.tag);
-                        }
-                      }),
-          )
-        ],
-      ),
+  Widget _buildTopSection() {
+    return widget._appStore.activeHaul == null
+        ? _buildNoActiveHaul()
+        : _buildHaulInfo();
+  }
+
+  Widget _buildBottomSection() {
+    final List<Haul> completedHauls = widget._appStore.activeTrip.hauls;
+    if (completedHauls.length == 0) {
+      return Text('No completed hauls in this trip');
+    }
+
+    return _buildHaulListView(completedHauls);
+  }
+
+  Widget _buildHaulListView(List<Haul> hauls) {
+    return ListView.builder(
+        itemCount: hauls.length,
+        itemBuilder: (context, index) {
+          final Haul haul = hauls[index];
+          final String startedAt = friendlyTimestamp(haul.startedAt);
+          final String endedAt = friendlyTimestamp(haul.endedAt);
+          final timePeriod = Text('$startedAt - $endedAt');
+
+          return FlatButton(
+              onPressed: () {},
+              child: ListTile(
+                title: timePeriod,
+                subtitle: Text(haul.fishingMethod.name),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ));
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(15),
+          child: _buildTopSection(),
+          height: 110,
+        ),
+        Divider(
+          thickness: 2,
+        ),
+        Expanded(child: _buildBottomSection()),
+      ],
     );
   }
 }

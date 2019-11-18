@@ -14,11 +14,12 @@ description: Track shark products.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  intl: ^0.16.0
   flutter_nfc_reader: ^0.1.0
   mobx: ^0.3.8
   flutter_mobx: ^0.3.3
@@ -26,6 +27,8 @@ dependencies:
   timeago: ^2.0.21
   geolocator: ^5.1.4+2
   cupertino_icons: ^0.1.2
+  dio: ^3.0.0
+  shared_preferences: ^0.5.4+5
 
 dev_dependencies:
   flutter_test:

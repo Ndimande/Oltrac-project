@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-class Location extends StatefulWidget {
+class LocationCoords extends StatefulWidget {
   @override
-  LocationState createState() => LocationState();
+  LocationCoordsState createState() => LocationCoordsState();
 
-  Location();
+  LocationCoords();
 }
 
-class LocationState extends State<Location> {
+class LocationCoordsState extends State<LocationCoords> {
   Timer updateTimer;
   final Geolocator geolocator = Geolocator();
   Position _currentPosition;

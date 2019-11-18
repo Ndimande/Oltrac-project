@@ -4,36 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
-class TripStartedAgo extends StatefulWidget {
+class TimeAgo extends StatefulWidget {
   @override
-  TripStartedAgoState createState() => TripStartedAgoState();
+  TimeAgoState createState() => TimeAgoState();
 
   final DateTime startedAt;
-  final Trip trip;
-
-  TripStartedAgo({this.trip})
-      : startedAt = trip != null ? trip.startedAt : null;
+  final String prefix;
+  final String suffix;
+  TimeAgo({this.startedAt, this.prefix = '', this.suffix = ''});
 }
 
-class TripStartedAgoState extends State<TripStartedAgo> {
+class TimeAgoState extends State<TimeAgo> {
   Timer updateTimer;
 
   @override
   void initState() {
     super.initState();
     updateTimer =
-        Timer.periodic(Duration(seconds: 10), (Timer timer) => setState(() {}));
+        Timer.periodic(Duration(seconds: 5), (Timer timer) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.startedAt == null) {
-      return Text('No active trip');
+      return Text('');
     }
 
     final Duration difference = DateTime.now().difference(widget.startedAt);
     final humanDiff = DateTime.now().subtract(difference);
-    return Text('Trip started ' + timeAgo.format(humanDiff));
+    return Text(widget.prefix + timeAgo.format(humanDiff));
   }
 
   @override

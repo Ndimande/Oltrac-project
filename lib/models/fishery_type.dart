@@ -3,22 +3,22 @@ import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/country.dart';
 
 @immutable
-class Fishery extends Model {
+class FisheryType extends Model {
   final String name;
   final String safsCode; // e.g ONLF
   final String jurisdiction; // e.g Commonwealth
 
-  Fishery({this.name, this.safsCode, this.jurisdiction});
+  FisheryType({this.name, this.safsCode, this.jurisdiction});
 
-  Fishery.fromMap(Map data)
+  FisheryType.fromMap(Map data)
       : name = data['name'],
         safsCode = data['safsCode'],
         jurisdiction = data['jurisdiction'],
         super.fromMap(data);
 
-  Fishery copyWith(
+  FisheryType copyWith(
       {String name, String safsCode, String jurisdiction, Country country}) {
-    return Fishery(
+    return FisheryType(
         name: name ?? this.name,
         safsCode: safsCode ?? this.safsCode,
         jurisdiction: jurisdiction ?? this.jurisdiction);

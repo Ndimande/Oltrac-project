@@ -10,8 +10,7 @@ class TagView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: ListView(
         children: <Widget>[
           Text(
             'What kind of tag?',
