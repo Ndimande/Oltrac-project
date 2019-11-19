@@ -74,7 +74,9 @@ class OlTraceDrawer extends StatelessWidget {
 //          ),
           ListTile(
             title: Text('Settings', style: TextStyle(fontSize: 26)),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/settings');
+            },
           ),
           ListTile(
             title: Text('About', style: TextStyle(fontSize: 26)),

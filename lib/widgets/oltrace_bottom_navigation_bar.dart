@@ -4,12 +4,6 @@ import 'package:oltrace/stores/app_store.dart';
 TextStyle _itemTextStyle(bool active) => TextStyle(
     fontSize: 18, decoration: active ? TextDecoration.underline : null);
 
-final Map<NavIndex, int> _index = {
-  NavIndex.haul: 0,
-  NavIndex.tag: 1,
-  NavIndex.trip: 2
-};
-
 class OlTraceBottomNavigationBar extends StatelessWidget {
   final AppStore _appStore;
 
@@ -48,10 +42,11 @@ class OlTraceBottomNavigationBar extends StatelessWidget {
           Row(
             children: <Widget>[
               FlatButton(
-                  child: Text('Trip',
-                      style: _itemTextStyle(
-                          _appStore.mainNavIndex == NavIndex.trip)),
-                  onPressed: getOnPressTrip()),
+                child: Text('Trip',
+                    style: _itemTextStyle(
+                        _appStore.mainNavIndex == NavIndex.trip)),
+                onPressed: getOnPressTrip(),
+              ),
               FlatButton(
                 child: Text(
                   'Haul',

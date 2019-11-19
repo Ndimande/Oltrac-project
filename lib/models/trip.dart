@@ -6,21 +6,32 @@ import 'package:oltrace/models/vessel.dart';
 @immutable
 class Trip extends Model {
   final Vessel vessel;
+
+  /// When the trip started
   final DateTime startedAt;
+
+  /// When the trip ended
   final DateTime endedAt;
+
+  // Hauls in this trip
   final List<Haul> hauls;
 
   Trip(
       {@required this.vessel,
-      this.startedAt,
+      @required this.startedAt,
       this.endedAt,
       this.hauls = const []});
 
   Trip.fromMap(Map data)
-      : startedAt = DateTime.parse(data['startedAt']),
-        endedAt = DateTime.parse(data['endedAt']),
+      : startedAt = data['startedAt'] != null
+            ? DateTime.parse(data['startedAt'])
+            : null,
+        endedAt =
+            data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
         vessel = Vessel.fromMap(data['vessel']),
-        hauls = data['hauls'];
+        hauls =
+            (data['hauls'] as List).map((haul) => Haul.fromMap(haul)).toList(),
+        super.fromMap(data);
 
   Trip copyWith(
       {Vessel vessel, DateTime startedAt, DateTime endedAt, List<Haul> hauls}) {
@@ -36,7 +47,8 @@ class Trip extends Model {
       'uuid': uuid,
       'vessel': vessel.toMap(),
       'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
-      'endedAt': endedAt == null ? null : endedAt.toIso8601String()
+      'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
+      'hauls': hauls.map((Haul haul) => haul.toMap()).toList()
     };
   }
 }

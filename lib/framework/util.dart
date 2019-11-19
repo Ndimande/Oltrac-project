@@ -7,7 +7,7 @@ String friendlyTimestamp(DateTime dateTime) {
   return DateFormat('d MMM y HH:mm').format(dateTime);
 }
 
-void printDebug(value) {
+void pd(value) {
   try {
     if (value is String) {
       print(value);

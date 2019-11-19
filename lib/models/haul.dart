@@ -20,13 +20,16 @@ class Haul extends Model {
       {@required this.startedAt,
       this.endedAt,
       @required this.fishingMethod,
-      this.tags});
+      this.tags = const []});
 
   Haul.fromMap(Map data)
-      : startedAt = data['startedAt'],
-        endedAt = data['endedAt'],
+      : startedAt = data['startedAt'] != null
+            ? DateTime.parse(data['startedAt'])
+            : null,
+        endedAt =
+            data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
         fishingMethod = FishingMethod.fromMap(data['fishingMethod']),
-        tags = data['tags'],
+        tags = data['tags'] as List<Tag>,
         super.fromMap(data);
 
   Haul copyWith(
@@ -40,8 +43,8 @@ class Haul extends Model {
   Map<String, dynamic> toMap() {
     return {
       'uuid': uuid,
-      'startedAt': startedAt,
-      'endedAt': endedAt,
+      'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
+      'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
       'fishingMethod': fishingMethod.toMap()
     };
   }

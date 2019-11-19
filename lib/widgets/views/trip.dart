@@ -21,44 +21,6 @@ class TripView extends StatelessWidget {
         builder: (_) => ConfirmDialog('Begin a new trip', 'Are you sure?'));
   }
 
-  _onPressMainButton(context) async {
-    if (_appStore.tripHasStarted) {
-      final bool confirmed = await _showConfirmDialog(context);
-      if (confirmed) {
-        _appStore.endTrip();
-      }
-    } else {
-      if (_appStore.vesselIsConfigured) {
-        final bool confirmed = await _showConfirmDialog(context);
-        if (confirmed) {
-          _appStore.startTrip();
-          _appStore.changeMainView(NavIndex.haul);
-        }
-      } else {
-        _appStore.changeMainView(NavIndex.configureVessel);
-      }
-    }
-  }
-
-  /// The big button at the bottom
-  Widget _buildMainButton(context) {
-    String _buttonLabel;
-    if (_appStore.tripHasStarted) {
-      _buttonLabel = 'End Trip';
-    } else {
-      _buttonLabel =
-          _appStore.vesselIsConfigured ? 'Start Trip' : 'Configure Vessel';
-    }
-
-    return Container(
-      child: BigButton(
-        label: _buttonLabel,
-        onPressed: () async => await _onPressMainButton(context),
-      ),
-      padding: EdgeInsets.all(20),
-    );
-  }
-
   Widget _buildTripInfo() {
     return Column(children: <Widget>[
       Container(
@@ -158,9 +120,7 @@ class TripView extends StatelessWidget {
           child: _buildTopSection(),
           height: 100,
         ),
-        Divider(
-          thickness: 2,
-        ),
+        Divider(),
         Expanded(child: _buildBottomSection()),
       ],
     );

@@ -12,15 +12,7 @@ part 'app_store.g.dart';
 // This is the class used by rest of your codebase
 class AppStore = _AppStore with _$AppStore;
 
-enum NavIndex {
-  welcome,
-  trip,
-  haul,
-  tag,
-  tagPrimary,
-  tagSecondary,
-  configureVessel
-}
+enum NavIndex { trip, haul, tag, tagPrimary, tagSecondary, configureVessel }
 enum ContextMenuIndex { about, endTrip }
 
 // The store-class
@@ -47,33 +39,37 @@ abstract class _AppStore with Store {
   @observable
   List<Trip> _completedTrips = [];
 
+  set completedTrips(trips) => _completedTrips = trips;
+
   List<Trip> get completedTrips => _completedTrips;
 
   /// Begin a new trip
   @action
-  void startTrip() {
+  Trip startTrip() {
     Trip trip = Trip(startedAt: DateTime.now(), vessel: _vessel);
     _activeTrip = trip;
     print('Trip started');
+    return _activeTrip;
   }
 
   @action
-  void endTrip() {
+  Trip endTrip() {
     if (_activeTrip == null) {
       throw Exception("No active trip");
     }
+
+    final endedTrip = _activeTrip.copyWith(endedAt: DateTime.now());
 
     // If the trip is being ended, Haul must be ended
     if (_activeHaul != null) {
       _endHaul();
     }
 
-    _completedTrips = [
-      ...completedTrips,
-      _activeTrip.copyWith(endedAt: DateTime.now())
-    ];
+    _completedTrips = [...completedTrips, endedTrip];
+    print('Trip ended');
 
     _activeTrip = null;
+    return endedTrip;
   }
 
   @computed
@@ -135,7 +131,7 @@ abstract class _AppStore with Store {
   @action
   void setVessel(Vessel vessel) {
     _vessel = vessel;
-    printDebug({'vessel': _vessel});
+    pd({'vessel': _vessel});
   }
 
   @computed

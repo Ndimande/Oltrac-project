@@ -6,7 +6,6 @@ import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/models/vessel.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/big_button.dart';
 
 class WelcomeScreen extends StatefulWidget {
   final AppStore _appStore;
@@ -85,7 +84,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     if (!_formKey.currentState.validate()) {
       return;
     }
-    var errors = [];
     if (_selectedFisheryType == null) {
       Scaffold.of(ctxt).showSnackBar(
           SnackBar(content: Text('Please select a fishery type')));
