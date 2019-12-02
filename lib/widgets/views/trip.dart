@@ -259,14 +259,15 @@ class TripView extends StatelessWidget {
         Expanded(
           child: Container(
             child: ListView.builder(
-                itemCount: hauls.length,
-                itemBuilder: (context, index) {
-                  final Haul haul = hauls[index];
-                  return HaulListItem(
-                    haul,
-                    () async => await _onPressHaulListItem(context, haul),
-                  );
-                }),
+              itemCount: hauls.length,
+              itemBuilder: (context, index) {
+                final Haul haul = hauls[index];
+                return HaulListItem(
+                  haul,
+                  () async => await _onPressHaulListItem(context, haul),
+                );
+              },
+            ),
           ),
         )
       ],

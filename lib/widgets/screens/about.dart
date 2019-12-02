@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/stores/app_store.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -16,7 +17,7 @@ class AboutScreen extends StatelessWidget {
     final copyright = '© 2019 OlSPS Marine';
 
     return Scaffold(
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: AppConfig.backgroundColor,
         body: Container(
           padding: EdgeInsets.all(100),
           child: Center(
@@ -37,7 +38,10 @@ class AboutScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white),
                 ),
-                BackButton(color: Colors.orange)
+                Container(
+                  padding: EdgeInsets.all(20),
+                  child: BackButton(color: AppConfig.primarySwatch),
+                )
               ],
             ),
           ),
