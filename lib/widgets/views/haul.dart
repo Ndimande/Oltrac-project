@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/big_button.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
+import 'package:oltrace/widgets/haul_list_item.dart';
 
 class HaulView extends StatefulWidget {
   final AppStore _appStore;
@@ -16,79 +14,68 @@ class HaulView extends StatefulWidget {
 }
 
 class HaulViewState extends State<HaulView> {
-  Widget buildCurrentHaul() {
-    return Center(
-        child: Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: <Widget>[
-        Text('Haul started at ' +
-            widget._appStore.activeHaul.startedAt.toIso8601String()),
-        BigButton(
-            label: 'End Haul',
-            onPressed: () {
-              setState(() {
-                widget._appStore.endHaul();
-              });
-            })
-      ],
-    ));
-  }
-
   Widget _buildNoActiveHaul() {
     return Container(
-        alignment: Alignment.center,
-        child: Text(
-          'No active haul.',
-          style: TextStyle(fontSize: 26),
-        ));
+      alignment: Alignment.center,
+      child: Text(
+        'No active haul.',
+        style: TextStyle(fontSize: 26),
+      ),
+    );
   }
 
   Widget _buildHaulInfo() {
     return Container(
-        alignment: Alignment.center,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Method',
-                  style: TextStyle(fontSize: 12),
-                ),
-                Text(
-                  widget._appStore.activeHaul.fishingMethod.name,
-                  style: TextStyle(fontSize: 22),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Column(
+      alignment: Alignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Method:',
+                style: TextStyle(fontSize: 14),
+              ),
+              Text(
+                widget._appStore.activeHaul.fishingMethod.name,
+                style: TextStyle(fontSize: 24),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text('Started: ', style: TextStyle(fontSize: 14)),
+                  Text(
+                    friendlyTimestamp(widget._appStore.activeHaul.startedAt),
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 10),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Text('Started: ', style: TextStyle(fontSize: 12)),
-                    Text(friendlyTimestamp(
-                        widget._appStore.activeHaul.startedAt))
+                    Text('Elapsed: ', style: TextStyle(fontSize: 14)),
+                    ElapsedCounter(
+                      widget._appStore.activeHaul.startedAt,
+                      textStyle: TextStyle(fontSize: 16),
+                    )
                   ],
                 ),
-                Container(
-                  margin: EdgeInsets.only(left: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Elapsed: ', style: TextStyle(fontSize: 12)),
-                      ElapsedCounter(widget._appStore.activeHaul.startedAt)
-                    ],
-                  ),
-                )
-              ],
-            )
-          ],
-        ));
+              )
+            ],
+          )
+        ],
+      ),
+    );
   }
 
   Widget _buildTopSection() {
@@ -108,21 +95,9 @@ class HaulViewState extends State<HaulView> {
 
   Widget _buildHaulListView(List<Haul> hauls) {
     return ListView.builder(
-        itemCount: hauls.length,
-        itemBuilder: (context, index) {
-          final Haul haul = hauls[index];
-          final String startedAt = friendlyTimestamp(haul.startedAt);
-          final String endedAt = friendlyTimestamp(haul.endedAt);
-          final timePeriod = Text('$startedAt - $endedAt');
-
-          return FlatButton(
-              onPressed: () {},
-              child: ListTile(
-                title: timePeriod,
-                subtitle: Text(haul.fishingMethod.name),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              ));
-        });
+      itemCount: hauls.length,
+      itemBuilder: (context, index) => HaulListItem(hauls[index], () {}),
+    );
   }
 
   @override

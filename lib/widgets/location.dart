@@ -12,27 +12,26 @@ class LocationCoords extends StatefulWidget {
 
 class LocationCoordsState extends State<LocationCoords> {
   Timer updateTimer;
-  final Geolocator geolocator = Geolocator();
+  final Geolocator geoLocator = Geolocator();
   Position _currentPosition;
+
+  _updatePosition() async {
+    final position = await geoLocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
+    setState(() {
+      if (mounted) {
+        _currentPosition = position;
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    geolocator
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-        .then((Position position) {
-      setState(() {
-        _currentPosition = position;
+    _updatePosition().then(() {
+      updateTimer = Timer.periodic(Duration(seconds: 10), (Timer timer) {
+        _updatePosition();
       });
-    }).catchError((e) => print(e));
-    updateTimer = Timer.periodic(Duration(seconds: 10), (Timer timer) {
-      geolocator
-          .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-          .then((Position position) {
-        setState(() {
-          _currentPosition = position;
-        });
-      }).catchError((e) => print(e));
     });
   }
 

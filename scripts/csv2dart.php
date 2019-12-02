@@ -37,6 +37,3 @@ $output .= $code;
 
 $output .= '];';
 file_put_contents('species.dart',$output);
-/*
-3Alpha_Code;Taxonomic_Code;Name_En;Scientific_Name;Author;Family;Order;Major_Group;Yearbook_Group;ISSCAAP_Group;CPC_Class;CPC_Group;CAABCode;AustralianStandardName
-*/

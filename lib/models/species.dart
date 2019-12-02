@@ -80,7 +80,6 @@ class Species extends Model {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': uuid,
       'name': englishName,
       'alpha3Code': alpha3Code,
       'scientificName': scientificName,
@@ -96,4 +95,6 @@ class Species extends Model {
       'caabCode': caabCode
     };
   }
+
+  Map<String, dynamic> toDatabaseMap() => toMap();
 }

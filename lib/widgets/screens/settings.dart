@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
 
 class SettingsScreen extends StatelessWidget {
   Widget _buildAllowMobile() {
     return Container(
-      padding: EdgeInsets.all(5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text('Allow mobile data'),
+          Text(
+            'Use mobile data',
+            style: TextStyle(fontSize: 16),
+          ),
           Switch(
             value: true,
-            onChanged: (state) {
-              return !state;
-            },
+            onChanged: (state) {},
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAutoUpload() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            'Upload automatically',
+            style: TextStyle(fontSize: 16),
+          ),
+          Switch(
+            value: true,
+            onChanged: (state) {},
           )
         ],
       ),
@@ -22,12 +41,14 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: AppConfig.backgroundColor,
         appBar: AppBar(
           title: Text('Settings'),
         ),
         body: Container(
+          margin: EdgeInsets.only(left: 10),
           child: Column(
-            children: <Widget>[_buildAllowMobile()],
+            children: <Widget>[_buildAllowMobile(), _buildAutoUpload()],
           ),
         ));
   }

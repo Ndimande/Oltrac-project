@@ -16,14 +16,22 @@ class Haul extends Model {
 
   final List<Tag> tags;
 
+  final int tripId;
+
+  static final tableName = 'hauls';
+
   Haul(
-      {@required this.startedAt,
+      {id,
+      @required this.tripId,
+      @required this.startedAt,
       this.endedAt,
       @required this.fishingMethod,
-      this.tags = const []});
+      this.tags = const []})
+      : super(id: id);
 
   Haul.fromMap(Map data)
-      : startedAt = data['startedAt'] != null
+      : tripId = data['trip_id'],
+        startedAt = data['startedAt'] != null
             ? DateTime.parse(data['startedAt'])
             : null,
         endedAt =
@@ -32,20 +40,32 @@ class Haul extends Model {
         tags = data['tags'] as List<Tag>,
         super.fromMap(data);
 
-  Haul copyWith(
-      {DateTime startedAt, DateTime endedAt, FishingMethod fishingMethod}) {
+  Haul copyWith({
+    int id,
+    int tripId,
+    DateTime startedAt,
+    DateTime endedAt,
+    FishingMethod fishingMethod,
+    List<Tag> tags,
+  }) {
     return Haul(
-        startedAt: startedAt ?? this.startedAt,
-        endedAt: endedAt ?? this.endedAt,
-        fishingMethod: fishingMethod ?? this.fishingMethod);
+      id: id ?? this.id,
+      tripId: tripId ?? this.tripId,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      fishingMethod: fishingMethod ?? this.fishingMethod,
+      tags: tags ?? this.tags,
+    );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'uuid': uuid,
+      'id': id,
+      'tripId': tripId,
       'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
       'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
-      'fishingMethod': fishingMethod.toMap()
+      'fishingMethod': fishingMethod.toMap(),
+      'tags': tags.map((t) => t.toMap()).toList()
     };
   }
 }

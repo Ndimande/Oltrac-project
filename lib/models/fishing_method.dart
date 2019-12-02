@@ -6,7 +6,7 @@ class FishingMethod extends Model {
   final String name;
   final String abbreviation;
 
-  FishingMethod({this.name, this.abbreviation});
+  FishingMethod({id, this.name, this.abbreviation}) : super(id: id);
 
   FishingMethod.fromMap(Map data)
       : name = data['name'],
@@ -15,11 +15,13 @@ class FishingMethod extends Model {
 
   FishingMethod copyWith({String name, String abbreviation}) {
     return FishingMethod(
-        name: name ?? this.name,
-        abbreviation: abbreviation ?? this.abbreviation);
+      id: id ?? this.id,
+      name: name ?? this.name,
+      abbreviation: abbreviation ?? this.abbreviation,
+    );
   }
 
   Map<String, dynamic> toMap() {
-    return {'uuid': uuid, 'name': name, 'abbreviation': abbreviation};
+    return {'id': id, 'name': name, 'abbreviation': abbreviation};
   }
 }

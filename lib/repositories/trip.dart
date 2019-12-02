@@ -1,59 +1,106 @@
-import 'dart:convert';
-
+import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database_provider.dart';
+import 'package:oltrace/repositories/haul.dart';
 
-import '../models/trip.dart';
-
-class TripRepository {
-  /// The name of the table
+class TripRepository extends DatabaseRepository<Trip> {
+  /// The name of the database table
   static const _tableName = 'trips';
-  static final _database = DatabaseProvider().database;
+  final _database = DatabaseProvider().database;
 
-  /// Get all trips in the database
-  static Future<List<Trip>> all() async {
-    List<Map<String, dynamic>> results = await _database.query(_tableName);
-    return results.map(
-      (Map<String, dynamic> result) {
-        final json = jsonDecode(result['json']);
-        json['id'] = result['id'];
-        return Trip.fromMap(json);
-      },
-    ).toList();
-  }
+  TripRepository();
 
-  /// Get a Trip by id
-  static Future<Trip> find(int id) async {
+  /// Get a Trip by [id]
+  Future<Trip> find(int id, {bool withHauls = false}) async {
     List results = await _database.query(_tableName, where: 'id = $id');
 
+    // Nothing found.
     if (results.length == 0) {
       return null;
     }
 
-    final Map result = results.first;
-    return Trip.fromMap(result);
+    final trip = fromDatabaseMap(results.first);
+
+    if (withHauls) {
+      final haulRepo = HaulRepository();
+
+      final tripHauls = await haulRepo.all(
+        where: 'trip_id = ${trip.id}',
+      );
+
+      return trip.copyWith(hauls: tripHauls);
+    }
+
+    return trip;
   }
 
-  /// Get the active Trip.
-  Future<Trip> getActiveTrip() async {
-    List results = await _database.query(_tableName, where: 'ended_at = NULL');
+  /// Get all trips in the database.
+  Future<List<Trip>> all({String where}) async {
+    final List<Map<String, dynamic>> tripResults =
+        await _database.query(_tableName);
 
+    final trips = tripResults
+        .map((Map<String, dynamic> result) => fromDatabaseMap(result))
+        .toList();
+
+    final tripsWithHaulsFutures = trips.map((trip) async {
+      final haulResults =
+          await _database.query('hauls', where: 'trip_id = ${trip.id}');
+
+      final hauls = haulResults
+          .map((Map result) => HaulRepository().fromDatabaseMap(result))
+          .toList();
+      return trip.copyWith(hauls: hauls);
+    }).toList();
+
+    return Future.wait(tripsWithHaulsFutures);
+  }
+
+  /// Store a Trip
+  /// returns id of new row
+  Future<int> store(Trip trip) async {
+    if (trip.id == null) {
+      return await _database.insert(_tableName, toDatabaseMap(trip));
+    }
+    final withoutId = toDatabaseMap(trip)..remove('id');
+    // remove null id
+    return await _database.update(_tableName, withoutId);
+  }
+
+  /// Get the active Trip. The active trip is the trip
+  /// that has ended_at = null.
+  Future<Trip> getActiveTrip() async {
+    List results = await _database.query(_tableName, where: "ended_at is null");
     if (results.length > 1) {
       throw Exception('More than one active Trip is not allowed');
     } else if (results.length == 0) {
       return null;
     }
 
-    return Trip.fromMap(results.first);
+    return fromDatabaseMap(results.first);
   }
 
-  /// @return id of new row
-  static Future<int> store(Trip trip) async {
-    final withoutId = trip.toMap()..remove('id');
-    if (trip.id == null) {
-      return await _database.insert(_tableName, {'json': trip.toJson()});
-    }
-    // remove null id
-    return await _database.update(_tableName, withoutId);
+  Trip fromDatabaseMap(Map<String, dynamic> result) {
+    final startedAt = result['started_at'] != null
+        ? DateTime.parse(result['started_at'])
+        : null;
+
+    final endedAt =
+        result['ended_at'] != null ? DateTime.parse(result['ended_at']) : null;
+
+    return Trip(
+      id: result['id'],
+      startedAt: startedAt,
+      endedAt: endedAt,
+    );
+  }
+
+  Map<String, dynamic> toDatabaseMap(Trip trip) {
+    return {
+      'id': trip.id,
+      'started_at':
+          trip.startedAt == null ? null : trip.startedAt.toIso8601String(),
+      'ended_at': trip.endedAt == null ? null : trip.endedAt.toIso8601String(),
+    };
   }
 }

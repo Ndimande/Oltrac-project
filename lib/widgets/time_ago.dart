@@ -1,8 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:oltrace/models/trip.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
+
+/// How frequently the text is updated
+final _updateInterval = const Duration(seconds: 5);
 
 class TimeAgo extends StatefulWidget {
   @override
@@ -11,33 +12,38 @@ class TimeAgo extends StatefulWidget {
   final DateTime startedAt;
   final String prefix;
   final String suffix;
-  TimeAgo({this.startedAt, this.prefix = '', this.suffix = ''});
+  final TextStyle textStyle;
+
+  TimeAgo(
+      {@required this.startedAt,
+      this.prefix = '',
+      this.suffix = '',
+      this.textStyle});
 }
 
 class TimeAgoState extends State<TimeAgo> {
-  Timer updateTimer;
+  Timer _updateTimer;
 
   @override
   void initState() {
     super.initState();
-    updateTimer =
-        Timer.periodic(Duration(seconds: 5), (Timer timer) => setState(() {}));
+    _updateTimer =
+        Timer.periodic(_updateInterval, (Timer timer) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.startedAt == null) {
-      return Text('');
-    }
-
     final Duration difference = DateTime.now().difference(widget.startedAt);
     final humanDiff = DateTime.now().subtract(difference);
-    return Text(widget.prefix + timeAgo.format(humanDiff));
+    return Text(
+      widget.prefix + timeAgo.format(humanDiff),
+      style: widget.textStyle,
+    );
   }
 
   @override
   void dispose() {
-    updateTimer.cancel();
+    _updateTimer.cancel();
     super.dispose();
   }
 }

@@ -4,7 +4,8 @@ import 'package:oltrace/data/fisheries.dart';
 import 'package:oltrace/models/country.dart';
 import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/skipper.dart';
-import 'package:oltrace/models/vessel.dart';
+import 'package:oltrace/models/profile.dart';
+import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/stores/app_store.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -17,9 +18,10 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class WelcomeScreenState extends State<WelcomeScreen> {
+  final _jsonRepo = JsonRepository();
+  final _formKey = GlobalKey<FormState>();
   FisheryType _selectedFisheryType;
   Country _selectedCountry;
-  final _formKey = GlobalKey<FormState>();
   String _vesselName;
   String _skipperName;
 
@@ -80,30 +82,31 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  _onPressSave(ctxt) {
+  Future<void> _onPressSave(BuildContext context) async {
     if (!_formKey.currentState.validate()) {
       return;
     }
     if (_selectedFisheryType == null) {
-      Scaffold.of(ctxt).showSnackBar(
-          SnackBar(content: Text('Please select a fishery type')));
+      Scaffold.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a fishery type')),
+      );
       return;
     }
     if (_selectedCountry == null) {
-      Scaffold.of(ctxt)
-          .showSnackBar(SnackBar(content: Text('Please select a country')));
+      Scaffold.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a country')),
+      );
       return;
     }
-    final _vessel = Vessel(
-        name: _vesselName,
-        skipper: Skipper(name: _skipperName),
-        fisheryType: _selectedFisheryType,
-        country: _selectedCountry);
-    widget._appStore.setVessel(_vessel);
-//    widget._appStore.changeMainView(NavIndex.trip);
-//    Scaffold.of(context)
-//        .showSnackBar(SnackBar(content: Text('Vessel configuration saved.')));
-    Navigator.pushReplacementNamed(ctxt, '/');
+    final _profile = Profile(
+      name: _vesselName,
+      skipper: Skipper(name: _skipperName),
+      fisheryType: _selectedFisheryType,
+      country: _selectedCountry,
+    );
+    await widget._appStore.saveProfile(_profile);
+
+    await Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
@@ -125,7 +128,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                   Container(
                     child: RaisedButton(
                         child: Text('Save'),
-                        onPressed: () => _onPressSave(context)),
+                        onPressed: () async => await _onPressSave(context)),
                     alignment: Alignment.bottomRight,
                   )
                 ],

@@ -8,7 +8,8 @@ class FisheryType extends Model {
   final String safsCode; // e.g ONLF
   final String jurisdiction; // e.g Commonwealth
 
-  FisheryType({this.name, this.safsCode, this.jurisdiction});
+  FisheryType({id, this.name, this.safsCode, this.jurisdiction})
+      : super(id: id);
 
   FisheryType.fromMap(Map data)
       : name = data['name'],
@@ -16,9 +17,9 @@ class FisheryType extends Model {
         jurisdiction = data['jurisdiction'],
         super.fromMap(data);
 
-  FisheryType copyWith(
-      {String name, String safsCode, String jurisdiction, Country country}) {
+  FisheryType copyWith({String name, String safsCode, String jurisdiction}) {
     return FisheryType(
+        id: id,
         name: name ?? this.name,
         safsCode: safsCode ?? this.safsCode,
         jurisdiction: jurisdiction ?? this.jurisdiction);
@@ -26,10 +27,12 @@ class FisheryType extends Model {
 
   Map<String, dynamic> toMap() {
     return {
-      'uuid': uuid,
+      'id': id,
       'name': name,
       'safsCode': safsCode,
-      'jurisdiction': jurisdiction
+      'jurisdiction': jurisdiction,
     };
   }
+
+  Map<String, dynamic> toDatabaseMap() => toMap();
 }

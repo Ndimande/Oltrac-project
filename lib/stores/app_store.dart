@@ -1,10 +1,14 @@
 import 'package:mobx/mobx.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/vessel.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:oltrace/models/profile.dart';
+import 'package:oltrace/repositories/haul.dart';
+import 'package:oltrace/repositories/json.dart';
+import 'package:oltrace/repositories/tag.dart';
+import 'package:oltrace/repositories/trip.dart';
+import 'package:package_info/package_info.dart';
 
 // Include generated file
 part 'app_store.g.dart';
@@ -12,154 +16,174 @@ part 'app_store.g.dart';
 // This is the class used by rest of your codebase
 class AppStore = _AppStore with _$AppStore;
 
-enum NavIndex { trip, haul, tag, tagPrimary, tagSecondary, configureVessel }
+enum NavIndex { trip, haul, tag, tagPrimary, tagSecondary }
 enum ContextMenuIndex { about, endTrip }
 
 // The store-class
 abstract class _AppStore with Store {
-  /// [NAVIGATION]
+  final tripRepo = TripRepository();
+  final haulRepo = HaulRepository();
+  final tagRepo = TagRepository();
+  final jsonRepo = JsonRepository();
+
+  /// The [MainScreen] view to be shown
   @observable
   NavIndex mainNavIndex = NavIndex.trip;
+
+  /// Trips that have been completed / ended.
+  @observable
+  List<Trip> completedTrips = [];
+
+  /// The active [Trip].
+  /// null if no trip is currently active.
+  ///
+  /// Also holds the hauls of the current
+  /// trip except the active [Haul].
+  @observable
+  Trip activeTrip;
+
+  /// The active [Haul]
+  /// null if no haul is currently active.
+  @observable
+  Haul activeHaul;
+
+  /// The profile of the user.
+  /// If null, the user will be prompted
+  /// to complete the profile form.
+  @observable
+  Profile profile;
 
   @action
   void changeMainView(NavIndex index) {
     mainNavIndex = index;
   }
 
-  /// [TRIP]
-
-  /// The trip that is currently running.
-  /// null if no active trip.
-  @observable
-  Trip _activeTrip;
-
-  Trip get activeTrip => _activeTrip;
-
-  /// Trips that have been completed / ended.
-  @observable
-  List<Trip> _completedTrips = [];
-
-  set completedTrips(trips) => _completedTrips = trips;
-
-  List<Trip> get completedTrips => _completedTrips;
-
-  /// Begin a new trip
+  /// [TAG]
   @action
-  Trip startTrip() {
-    Trip trip = Trip(startedAt: DateTime.now(), vessel: _vessel);
-    _activeTrip = trip;
-    print('Trip started');
-    return _activeTrip;
+  Future<Tag> saveTag(Tag tag) async {
+    final tagId = await tagRepo.store(tag);
+    tag = tag.copyWith(id: tagId);
+
+    // update trip
+    final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
+      if (haul.id == tag.haulId) {
+        return haul.copyWith(tags: [...haul.tags, tag]);
+      }
+      return haul;
+    }).toList();
+
+    final Trip updatedTrip = activeTrip.copyWith(hauls: updatedHauls);
+
+    activeTrip = updatedTrip;
+
+    return tag;
   }
-
-  @action
-  Trip endTrip() {
-    if (_activeTrip == null) {
-      throw Exception("No active trip");
-    }
-
-    final endedTrip = _activeTrip.copyWith(endedAt: DateTime.now());
-
-    // If the trip is being ended, Haul must be ended
-    if (_activeHaul != null) {
-      _endHaul();
-    }
-
-    _completedTrips = [...completedTrips, endedTrip];
-    print('Trip ended');
-
-    _activeTrip = null;
-    return endedTrip;
-  }
-
-  @computed
-  bool get tripHasStarted => _activeTrip != null;
 
   /// [HAUL]
-
-  /// The current haul.
-  @observable
-  Haul _activeHaul;
-
-  /// Public getter for the current haul.
-  Haul get activeHaul => _activeHaul;
-
   @action
-  void startHaul(FishingMethod method) {
-    if (_activeTrip == null) {
+  Future<Haul> startHaul(FishingMethod method) async {
+    if (activeTrip == null) {
       throw Exception('No active trip');
     }
-    final haul = Haul(fishingMethod: method, startedAt: DateTime.now());
-    _activeHaul = haul;
+    final haul = Haul(
+      fishingMethod: method,
+      startedAt: DateTime.now(),
+      tripId: activeTrip.id,
+    );
+
+    final haulId = await haulRepo.store(haul);
+    activeHaul = haul.copyWith(id: haulId);
+    return haul;
   }
 
-  void _endHaul() {
+  @action
+  Future<Haul> endHaul() async {
     // Make sure we don't get a funny state
-    if (_activeHaul == null) {
+    if (activeHaul == null) {
       throw Exception("No active haul");
     }
 
+    final endedHaul =
+        activeHaul.copyWith(endedAt: DateTime.now(), tripId: activeTrip.id);
+    await haulRepo.store(endedHaul);
+
     // Update the current trip's hauls
-    _activeTrip = _activeTrip.copyWith(hauls: [
-      ..._activeTrip.hauls,
-      _activeHaul.copyWith(endedAt: DateTime.now())
-    ]);
+    activeTrip = activeTrip.copyWith(hauls: [...activeTrip.hauls, endedHaul]);
 
     // There is no haul active now
-    _activeHaul = null;
-  }
+    activeHaul = null;
 
-  @action
-  void endHaul() {
-    _endHaul();
+    return endedHaul;
   }
 
   @computed
-  bool get haulHasStarted => _activeHaul != null;
-
-  /// [VESSEL]
-  @observable
-  Vessel _vessel;
-
-  Vessel get vessel => _vessel;
-
-  Future persistVessel() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('country', _vessel.country.toJson());
-  }
+  bool get haulHasStarted => activeHaul != null;
 
   @action
-  void setVessel(Vessel vessel) {
-    _vessel = vessel;
-    pd({'vessel': _vessel});
+  Future<void> saveProfile(Profile updatedProfile) async {
+    await jsonRepo.set('profile', updatedProfile);
+    profile = updatedProfile;
   }
 
   @computed
-  bool get vesselIsConfigured => _vessel != null;
+  bool get profileConfigured => profile != null;
 
   /// [TRIP]
   @computed
   bool get hasActiveOrCompleteTrip {
-    return _activeTrip != null || _completedTrips.length > 0;
+    return activeTrip != null || completedTrips.length > 0;
   }
 
   bool get activeTripHasActiveOrCompleteHaul {
-    if (_activeTrip == null) {
+    if (activeTrip == null) {
       throw Exception('No active trip');
     }
-    return _activeTrip.hauls.length > 0 || _activeHaul != null;
+    return activeTrip.hauls.length > 0 || activeHaul != null;
   }
 
   @computed
+  bool get tripHasStarted => activeTrip != null;
+
+  @computed
   int get activeTripTagsCount {
-    if (_activeTrip == null) {
+    if (activeTrip == null) {
       throw new Exception('No active trip');
     }
-    if (_activeTrip.hauls.length == 0 && _activeHaul == null) {
+    if (activeTrip.hauls.length == 0 && activeHaul == null) {
       return 0;
     }
-    return _activeTrip.hauls.fold(0, (int total, Haul elem) {
-      return total + elem.tags.length;
-    });
+    return activeTrip.hauls
+        .fold(0, (int total, Haul elem) => total + elem.tags.length);
   }
+
+  @action
+  Future<Trip> startTrip() async {
+    Trip trip = Trip(startedAt: DateTime.now());
+    int tripId = await tripRepo.store(trip);
+    activeTrip = trip.copyWith(id: tripId);
+    return activeTrip;
+  }
+
+  @action
+  Future<Trip> endTrip() async {
+    if (activeTrip == null) {
+      throw Exception("No active trip.");
+    }
+
+    final endedTrip = activeTrip.copyWith(endedAt: DateTime.now());
+
+    await tripRepo.store(endedTrip);
+
+    // If the trip is being ended, Haul must be ended
+    if (activeHaul != null) {
+      await endHaul();
+    }
+
+    completedTrips = [...completedTrips, endedTrip];
+
+    activeTrip = null;
+    return endedTrip;
+  }
+
+  PackageInfo packageInfo;
 }

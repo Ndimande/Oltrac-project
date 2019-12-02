@@ -5,41 +5,51 @@ import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/skipper.dart';
 
 @immutable
-class Vessel extends Model {
+class Profile extends Model {
   final String name;
   final FisheryType fisheryType;
   final Skipper skipper;
   final Country country;
+  final int fishingLicenseNumber;
 
-  Vessel(
-      {@required this.name,
+  Profile(
+      {id,
+      @required this.name,
       @required this.fisheryType,
       @required this.skipper,
-      @required this.country});
+      @required this.country,
+      this.fishingLicenseNumber})
+      : super(id: id);
 
-  Vessel.fromMap(Map data)
+  Profile.fromMap(Map data)
       : name = data['name'],
-        fisheryType = FisheryType.fromMap(data['fishery']),
+        fisheryType = FisheryType.fromMap(data['fisheryType']),
         skipper = Skipper.fromMap(data['skipper']),
         country = Country.fromMap(data['country']),
+        fishingLicenseNumber = data['fishingLicenseNumber'],
         super.fromMap(data);
 
   Map<String, dynamic> toMap() {
     return {
-      'uuid': uuid,
       'name': name,
-      'fishery': fisheryType.toMap(),
+      'fisheryType': fisheryType.toMap(),
       'skipper': skipper.toMap(),
-      'country': country.toMap()
+      'country': country.toMap(),
+      'fishingLicenseNumber': fishingLicenseNumber,
     };
   }
 
-  Vessel copyWith(
-      {String name, FisheryType fishery, Skipper skipper, Country country}) {
-    return Vessel(
+  Profile copyWith(
+      {String name,
+      FisheryType fisheryType,
+      Skipper skipper,
+      Country country}) {
+    return Profile(
         name: name ?? this.name,
-        fisheryType: fishery ?? this.fisheryType,
+        fisheryType: fisheryType ?? this.fisheryType,
         skipper: skipper ?? this.skipper,
         country: country ?? this.country);
   }
+
+  Map<String, dynamic> toDatabaseMap() => toMap();
 }

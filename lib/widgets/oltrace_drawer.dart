@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/models/vessel.dart';
+import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/location.dart';
 
-Widget _drawerHeader(Vessel vessel) {
+final double _drawerItemFontSize = 22;
+
+Widget _drawerHeader(Profile vessel) {
   final _vesselName = Text(
     vessel.name,
     style: TextStyle(color: Colors.white, fontSize: 28),
@@ -22,7 +24,7 @@ Widget _drawerHeader(Vessel vessel) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[_vesselName, _skipperName],
         ),
-        LocationCoords()
+//        LocationCoords()
       ]));
 
   return DrawerHeader(
@@ -48,41 +50,38 @@ class OlTraceDrawer extends StatelessWidget {
         // Important: Remove any padding from the ListView.
         padding: EdgeInsets.zero,
         children: <Widget>[
-          _drawerHeader(_appStore.vessel),
-//          ListTile(
-//            title: Text('Trip', style: TextStyle(fontSize: 26)),
-//            onTap: () {
-//              _appStore.changeMainView(NavIndex.trip);
-//              Navigator.pop(context);
-//            },
-//          ),
-//          ListTile(
-//            enabled: _appStore.tripHasStarted,
-//            title: Text('Haul', style: TextStyle(fontSize: 26)),
-//            onTap: () {
-//              _appStore.changeMainView(NavIndex.haul);
-//              Navigator.pop(context);
-//            },
-//          ),
-//          ListTile(
-//            enabled: _appStore.tripHasStarted && _appStore.haulHasStarted,
-//            title: Text('Tag', style: TextStyle(fontSize: 26)),
-//            onTap: () {
-//              _appStore.changeMainView(NavIndex.tag);
-//              Navigator.pop(context);
-//            },
-//          ),
+          _drawerHeader(_appStore.profile),
+
+          // Trip history
           ListTile(
-            title: Text('Settings', style: TextStyle(fontSize: 26)),
+            leading: Icon(Icons.history),
+            title: Text(
+              'Trip History',
+              style: TextStyle(fontSize: _drawerItemFontSize),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/trip_history'),
+          ),
+
+          // Settings
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text(
+              'Settings',
+              style: TextStyle(fontSize: _drawerItemFontSize),
+            ),
             onTap: () {
               Navigator.pushNamed(context, '/settings');
             },
           ),
+
+          // About
           ListTile(
-            title: Text('About', style: TextStyle(fontSize: 26)),
-            onTap: () {
-              Navigator.pushNamed(context, '/about');
-            },
+            leading: Icon(Icons.info),
+            title: Text(
+              'About',
+              style: TextStyle(fontSize: _drawerItemFontSize),
+            ),
+            onTap: () => Navigator.pushNamed(context, '/about'),
           ),
         ],
       ),

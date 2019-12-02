@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 class Skipper extends Model {
   final String name;
 
-  Skipper({this.name});
+  Skipper({id, this.name}) : super(id: id);
 
   Skipper.fromMap(Map data)
       : name = data['name'],
@@ -16,6 +16,8 @@ class Skipper extends Model {
   }
 
   Map<String, dynamic> toMap() {
-    return {'uuid': uuid, 'name': name};
+    return {'id': id, 'name': name};
   }
+
+  Map<String, dynamic> toDatabaseMap() => toMap();
 }
