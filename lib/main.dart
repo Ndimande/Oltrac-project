@@ -146,9 +146,6 @@ class OlTraceAppState extends State<OlTraceApp> {
     ).then((AppStore appStore) async {
       print('State initialised in ${stopwatch.elapsed}');
 
-      // TODO For effect, remove in future
-      await Future.delayed(Duration(seconds: 1));
-
       if (appStore.profileConfigured) {
         await navigatorKey.currentState.pushReplacementNamed('/');
       } else {

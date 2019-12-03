@@ -104,7 +104,6 @@ class HaulScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final Haul haulArg = ModalRoute.of(context).settings.arguments;
 
-    final int haulArgTripId = haulArg.tripId;
     final bool isActiveTrip = _appStore.activeTrip != null
         ? _appStore.activeTrip.id == haulArg.tripId
         : false;
@@ -114,7 +113,7 @@ class HaulScreen extends StatelessWidget {
       trip = _appStore.activeTrip;
     } else {
       trip = _appStore.completedTrips
-          .firstWhere((trip) => trip.id == haulArgTripId);
+          .firstWhere((trip) => trip.id == haulArg.tripId);
     }
 // get the haul from the trip from the store
     final haul = trip.hauls.firstWhere((h) => haulArg.id == h.id);

@@ -179,7 +179,7 @@ class TripView extends StatelessWidget {
           children: <Widget>[
             _appStore.activeTrip.hauls.length == 0
                 ? Container(
-                    height: 100,
+                    height: 50,
                   )
                 : Container(
                     child: FlatButton(
