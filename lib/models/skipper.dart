@@ -3,21 +3,24 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Skipper extends Model {
-  final String name;
+  final String firstName;
+  final String lastName;
 
-  Skipper({id, this.name}) : super(id: id);
+  Skipper({@required this.firstName, @required this.lastName});
+
+  Skipper copyWith({String firstName, String lastName}) {
+    return Skipper(
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+    );
+  }
 
   Skipper.fromMap(Map data)
-      : name = data['name'],
+      : firstName = data['firstName'],
+        lastName = data['lastName'],
         super.fromMap(data);
 
-  Skipper copyWith({String name}) {
-    return Skipper(name: name ?? this.name);
-  }
-
   Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name};
+    return {'firstName': firstName, 'lastName': lastName};
   }
-
-  Map<String, dynamic> toDatabaseMap() => toMap();
 }

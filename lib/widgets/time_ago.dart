@@ -14,11 +14,12 @@ class TimeAgo extends StatefulWidget {
   final String suffix;
   final TextStyle textStyle;
 
-  TimeAgo(
-      {@required this.startedAt,
-      this.prefix = '',
-      this.suffix = '',
-      this.textStyle});
+  TimeAgo({
+    @required this.startedAt,
+    this.prefix = '',
+    this.suffix = '',
+    this.textStyle,
+  });
 }
 
 class TimeAgoState extends State<TimeAgo> {
@@ -27,8 +28,7 @@ class TimeAgoState extends State<TimeAgo> {
   @override
   void initState() {
     super.initState();
-    _updateTimer =
-        Timer.periodic(_updateInterval, (Timer timer) => setState(() {}));
+    _updateTimer = Timer.periodic(_updateInterval, (Timer timer) => setState(() {}));
   }
 
   @override
@@ -36,7 +36,7 @@ class TimeAgoState extends State<TimeAgo> {
     final Duration difference = DateTime.now().difference(widget.startedAt);
     final humanDiff = DateTime.now().subtract(difference);
     return Text(
-      widget.prefix + timeAgo.format(humanDiff),
+      widget.prefix + timeAgo.format(humanDiff) + widget.suffix,
       style: widget.textStyle,
     );
   }

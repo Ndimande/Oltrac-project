@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 
 const GRAMS = 'GRAMS';
@@ -24,14 +25,17 @@ class Tag extends Model {
 
   final LengthUnit lengthUnit;
 
+  final Location location;
+
   Tag({
     id,
     @required this.tagCode,
     @required this.haulId,
     @required this.species,
     @required this.createdAt,
-    this.weight,
-    this.length,
+    @required this.location,
+    @required this.weight,
+    @required this.length,
     weightUnit,
     lengthUnit,
   })  : this.weightUnit = weightUnit ?? WeightUnit.GRAMS,
@@ -43,6 +47,7 @@ class Tag extends Model {
         haulId = data['haulId'],
         species = Species.fromMap(data['species']),
         createdAt = data['createdAt'],
+        location = Location.fromMap(data['location']),
         weight = data['weight'],
         length = data['length'],
         weightUnit = data['weightUnit'],
@@ -55,6 +60,7 @@ class Tag extends Model {
     int haulId,
     Species species,
     DateTime createdAt,
+    Location location,
     int weight,
     int length,
     WeightUnit weightUnit,
@@ -66,6 +72,7 @@ class Tag extends Model {
       haulId: haulId ?? this.haulId,
       species: species ?? this.species,
       createdAt: createdAt ?? this.createdAt,
+      location: location ?? this.location,
       weight: weight ?? this.weight,
       length: length ?? this.length,
       weightUnit: weightUnit ?? this.weightUnit,
@@ -80,6 +87,7 @@ class Tag extends Model {
       'haulId': haulId,
       'species': species.toMap(),
       'createdAt': createdAt,
+      'location': location.toMap(),
       'weight': weight,
       'length': length,
       'weightUnit': weightUnit,

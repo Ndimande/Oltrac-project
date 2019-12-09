@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/providers/database_provider.dart';
+import 'package:oltrace/providers/database.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/tag.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
+import 'package:oltrace/widgets/screens/create_product.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/main.dart';
 import 'package:oltrace/widgets/screens/settings.dart';
 import 'package:oltrace/widgets/screens/splash.dart';
+import 'package:oltrace/widgets/screens/tag.dart';
 import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/screens/trip_history.dart';
 import 'package:oltrace/widgets/screens/welcome.dart';
@@ -28,7 +30,8 @@ void main() {
   final stopwatch = Stopwatch()..start();
   _connectDatabase().then((Database database) {
     // MobX store holds global ephemeral state.
-    final AppStore _appStore = AppStore();
+    final AppStore _appStore = StoreProvider().appStore;
+
     runApp(OlTraceApp(_appStore, database));
     print('booted in ${stopwatch.elapsed}');
   });
@@ -78,47 +81,46 @@ Future<AppStore> _restoreState(Database database, AppStore appStore) async {
   final Trip activeTrip = await tripRepo.getActiveTrip();
 
   if (activeTrip != null) {
-    final List<Haul> activeTripHauls =
-        await haulRepo.all(where: 'trip_id = ${activeTrip.id}');
+    final List<Haul> activeTripHauls = await haulRepo.all(where: 'trip_id = ${activeTrip.id}');
 
     var newHauls = <Haul>[];
     for (Haul haul in activeTripHauls) {
-      final List<Tag> haulTags =
-          await tagRepo.all(where: 'haul_id = ${haul.id}');
+      final List<Tag> haulTags = await tagRepo.all(where: 'haul_id = ${haul.id}');
 
       final newHaul = haul.copyWith(tags: haulTags);
       newHauls.add(newHaul);
     }
-    final newActiveTrip = activeTrip.copyWith(hauls: newHauls);
-    appStore.activeTrip = newActiveTrip;
-  }
 
-  // Active haul
-  appStore.activeHaul = await haulRepo.getActiveHaul();
+    appStore.activeTrip = activeTrip.copyWith(hauls: newHauls);
+  }
 
   _restoreCompletedTrips(appStore);
   return appStore;
 }
 
-_restoreCompletedTrips(appStore) async {
+Future<void> _restoreCompletedTrips(appStore) async {
   final tripRepo = TripRepository();
   final haulRepo = HaulRepository();
-  final jsonRepo = JsonRepository();
   final tagRepo = TagRepository();
 
-  final trips = await tripRepo.all(where: 'ended_at IS NOT NULL');
+  final completedTrips = await tripRepo.all(where: 'ended_at IS NOT NULL');
+
   final updatedTrips = <Trip>[];
 
-  for (Trip currentTrip in trips) {
-    final tripHauls = await haulRepo.all(
-        where: 'trip_id = ${currentTrip.id} AND ended_at IS NOT NULL');
+  for (Trip trip in completedTrips) {
+    // Get all hauls for this trip
+    final tripHauls = await haulRepo.all(where: 'trip_id = ${trip.id} AND ended_at IS NOT NULL');
+
     final updatedHauls = <Haul>[];
+
     for (Haul currentHaul in tripHauls) {
+      // Get tags for this haul
       final haulTags = await tagRepo.all(where: 'haul_id = ${currentHaul.id}');
       updatedHauls.add(currentHaul.copyWith(tags: haulTags));
     }
-    updatedTrips.add(currentTrip.copyWith(hauls: updatedHauls));
+    updatedTrips.add(trip.copyWith(hauls: updatedHauls));
   }
+
   appStore.completedTrips = updatedTrips;
 }
 
@@ -146,6 +148,7 @@ class OlTraceAppState extends State<OlTraceApp> {
     ).then((AppStore appStore) async {
       print('State initialised in ${stopwatch.elapsed}');
 
+      // If profile is not already setup, show welcome screen
       if (appStore.profileConfigured) {
         await navigatorKey.currentState.pushReplacementNamed('/');
       } else {
@@ -163,13 +166,15 @@ class OlTraceAppState extends State<OlTraceApp> {
       initialRoute: 'splash',
       routes: {
         'splash': (context) => SplashScreen(),
-        '/': (context) => MainScreen(widget._appStore),
-        '/about': (context) => AboutScreen(widget._appStore),
-        '/trip': (context) => TripScreen(widget._appStore),
+        '/': (context) => MainScreen(),
+        '/about': (context) => AboutScreen(),
+        '/trip': (context) => TripScreen(),
         '/fishing_methods': (context) => FishingMethodScreen(),
-        '/welcome': (context) => WelcomeScreen(widget._appStore),
-        '/trip_history': (context) => TripHistoryScreen(widget._appStore),
+        '/welcome': (context) => WelcomeScreen(),
+        '/trip_history': (context) => TripHistoryScreen(),
         '/settings': (context) => SettingsScreen(),
+        '/tag': (context) => TagScreen(),
+        '/create_product': (context) => CreateProductScreen(),
       },
     );
   }

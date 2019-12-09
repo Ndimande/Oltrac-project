@@ -1,6 +1,5 @@
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
-import 'package:oltrace/models/country.dart';
 
 @immutable
 class FisheryType extends Model {
@@ -8,8 +7,7 @@ class FisheryType extends Model {
   final String safsCode; // e.g ONLF
   final String jurisdiction; // e.g Commonwealth
 
-  FisheryType({id, this.name, this.safsCode, this.jurisdiction})
-      : super(id: id);
+  FisheryType({id, this.name, this.safsCode, this.jurisdiction}) : super(id: id);
 
   FisheryType.fromMap(Map data)
       : name = data['name'],
@@ -17,10 +15,10 @@ class FisheryType extends Model {
         jurisdiction = data['jurisdiction'],
         super.fromMap(data);
 
-  FisheryType copyWith({String name, String safsCode, String jurisdiction}) {
+  FisheryType copyWith({String firstName, String safsCode, String jurisdiction}) {
     return FisheryType(
         id: id,
-        name: name ?? this.name,
+        name: firstName ?? this.name,
         safsCode: safsCode ?? this.safsCode,
         jurisdiction: jurisdiction ?? this.jurisdiction);
   }

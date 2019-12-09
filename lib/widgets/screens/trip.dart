@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 
 class TripScreen extends StatelessWidget {
-  final AppStore _appStore;
+  final AppStore _appStore = StoreProvider().appStore;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  TripScreen(this._appStore);
 
   Widget _buildInfoItem(String label, String text) {
     return Row(
@@ -29,6 +29,8 @@ class TripScreen extends StatelessWidget {
   }
 
   Widget _buildTripInfo(Trip trip) {
+    final Position startPosition = _appStore.activeTrip.startPosition;
+
     return Container(
       padding: EdgeInsets.all(10),
       child: Column(
@@ -36,7 +38,7 @@ class TripScreen extends StatelessWidget {
         children: <Widget>[
           _buildInfoItem('Total hauls: ', trip.hauls.length.toString()),
           _buildInfoItem('Started: ', friendlyTimestamp(trip.startedAt)),
-          _buildInfoItem('Ended: ', friendlyTimestamp(trip.endedAt)),
+          _buildInfoItem('Ended: ', trip.endedAt != null ? friendlyTimestamp(trip.endedAt) : '-'),
         ],
       ),
     );
@@ -47,14 +49,15 @@ class TripScreen extends StatelessWidget {
       child: ListView(
         children: hauls
             .map((haul) => HaulListItem(haul, () async {
+                  final pageRoute = MaterialPageRoute(
+                    builder: (context) => HaulScreen(),
+                    settings: RouteSettings(
+                      arguments: haul,
+                    ),
+                  );
                   await Navigator.push(
                     _scaffoldKey.currentContext,
-                    MaterialPageRoute(
-                      builder: (context) => HaulScreen(_appStore),
-                      settings: RouteSettings(
-                        arguments: haul,
-                      ),
-                    ),
+                    pageRoute,
                   );
                 }))
             .toList(),
@@ -79,7 +82,6 @@ class TripScreen extends StatelessWidget {
 
     return Scaffold(
         key: _scaffoldKey,
-        backgroundColor: AppConfig.backgroundColor,
         appBar: AppBar(
           title: Text('Trip ${trip.id}'),
         ),
@@ -91,7 +93,7 @@ class TripScreen extends StatelessWidget {
               _buildTripInfo(trip),
               Divider(),
               _buildHaulsLabel(trip),
-              _buildHaulsList(trip.hauls)
+              _buildHaulsList(trip.hauls.reversed.toList())
             ],
           ),
         ));

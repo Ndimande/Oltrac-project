@@ -49,7 +49,7 @@ class Species extends Model {
         super.fromMap(data);
 
   Species copyWith(
-      {String name,
+      {String firstName,
       String alpha3Code,
       String scientificName,
       String taxonomicCode,
@@ -63,7 +63,7 @@ class Species extends Model {
       String cpcGroup,
       String caabCode}) {
     return Species(
-        englishName: name ?? this.englishName,
+        englishName: firstName ?? this.englishName,
         alpha3Code: alpha3Code ?? this.alpha3Code,
         scientificName: scientificName ?? this.scientificName,
         taxonomicCode: taxonomicCode ?? this.taxonomicCode,

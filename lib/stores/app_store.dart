@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/tag.dart';
@@ -16,19 +17,13 @@ part 'app_store.g.dart';
 // This is the class used by rest of your codebase
 class AppStore = _AppStore with _$AppStore;
 
-enum NavIndex { trip, haul, tag, tagPrimary, tagSecondary }
-enum ContextMenuIndex { about, endTrip }
-
 // The store-class
 abstract class _AppStore with Store {
   final tripRepo = TripRepository();
   final haulRepo = HaulRepository();
   final tagRepo = TagRepository();
   final jsonRepo = JsonRepository();
-
-  /// The [MainScreen] view to be shown
-  @observable
-  NavIndex mainNavIndex = NavIndex.trip;
+  final Geolocator geoLocator = Geolocator();
 
   /// Trips that have been completed / ended.
   @observable
@@ -44,8 +39,13 @@ abstract class _AppStore with Store {
 
   /// The active [Haul]
   /// null if no haul is currently active.
-  @observable
-  Haul activeHaul;
+  @computed
+  Haul get activeHaul {
+    if (activeTrip == null) {
+      return null;
+    }
+    return activeTrip.hauls.firstWhere((Haul haul) => haul.endedAt == null, orElse: () => null);
+  }
 
   /// The profile of the user.
   /// If null, the user will be prompted
@@ -53,12 +53,6 @@ abstract class _AppStore with Store {
   @observable
   Profile profile;
 
-  @action
-  void changeMainView(NavIndex index) {
-    mainNavIndex = index;
-  }
-
-  /// [TAG]
   @action
   Future<Tag> saveTag(Tag tag) async {
     final tagId = await tagRepo.store(tag);
@@ -79,20 +73,32 @@ abstract class _AppStore with Store {
     return tag;
   }
 
-  /// [HAUL]
   @action
   Future<Haul> startHaul(FishingMethod method) async {
     if (activeTrip == null) {
       throw Exception('No active trip');
     }
+
+    Position position = await geoLocator.getLastKnownPosition();
+    if (position == null) {
+      // This can take a few seconds
+      position = await geoLocator.getCurrentPosition();
+    }
+
     final haul = Haul(
       fishingMethod: method,
       startedAt: DateTime.now(),
       tripId: activeTrip.id,
+      startPosition: position,
     );
 
     final haulId = await haulRepo.store(haul);
-    activeHaul = haul.copyWith(id: haulId);
+    final newHaul = haul.copyWith(id: haulId);
+
+    final updatedTrip = activeTrip.copyWith(hauls: [...activeTrip.hauls, newHaul]);
+
+    activeTrip = updatedTrip;
+
     return haul;
   }
 
@@ -103,64 +109,49 @@ abstract class _AppStore with Store {
       throw Exception("No active haul");
     }
 
-    final endedHaul =
-        activeHaul.copyWith(endedAt: DateTime.now(), tripId: activeTrip.id);
+    Position position = await geoLocator.getLastKnownPosition();
+
+    if (position == null) {
+      // This can take a few seconds
+      position = await geoLocator.getCurrentPosition();
+    }
+
+    final endedHaul = activeHaul.copyWith(
+      endedAt: DateTime.now(),
+      tripId: activeTrip.id,
+      endPosition: position,
+    );
+
     await haulRepo.store(endedHaul);
 
-    // Update the current trip's hauls
-    activeTrip = activeTrip.copyWith(hauls: [...activeTrip.hauls, endedHaul]);
+    final updatedHauls = activeTrip.hauls.map((Haul haul) {
+      if (haul.id == endedHaul.id) {
+        return endedHaul;
+      }
+      return haul;
+    }).toList();
 
-    // There is no haul active now
-    activeHaul = null;
-
+    // update state
+    activeTrip = activeTrip.copyWith(hauls: updatedHauls);
+    print(activeTrip);
     return endedHaul;
-  }
-
-  @computed
-  bool get haulHasStarted => activeHaul != null;
-
-  @action
-  Future<void> saveProfile(Profile updatedProfile) async {
-    await jsonRepo.set('profile', updatedProfile);
-    profile = updatedProfile;
-  }
-
-  @computed
-  bool get profileConfigured => profile != null;
-
-  /// [TRIP]
-  @computed
-  bool get hasActiveOrCompleteTrip {
-    return activeTrip != null || completedTrips.length > 0;
-  }
-
-  bool get activeTripHasActiveOrCompleteHaul {
-    if (activeTrip == null) {
-      throw Exception('No active trip');
-    }
-    return activeTrip.hauls.length > 0 || activeHaul != null;
-  }
-
-  @computed
-  bool get tripHasStarted => activeTrip != null;
-
-  @computed
-  int get activeTripTagsCount {
-    if (activeTrip == null) {
-      throw new Exception('No active trip');
-    }
-    if (activeTrip.hauls.length == 0 && activeHaul == null) {
-      return 0;
-    }
-    return activeTrip.hauls
-        .fold(0, (int total, Haul elem) => total + elem.tags.length);
   }
 
   @action
   Future<Trip> startTrip() async {
-    Trip trip = Trip(startedAt: DateTime.now());
-    int tripId = await tripRepo.store(trip);
+    Position position = await geoLocator.getLastKnownPosition();
+
+    if (position == null) {
+      // This can take a few seconds
+      position = await geoLocator.getCurrentPosition();
+    }
+
+    final trip = Trip(startedAt: DateTime.now(), startPosition: position);
+
+    final int tripId = await tripRepo.store(trip);
+
     activeTrip = trip.copyWith(id: tripId);
+
     return activeTrip;
   }
 
@@ -170,7 +161,14 @@ abstract class _AppStore with Store {
       throw Exception("No active trip.");
     }
 
-    final endedTrip = activeTrip.copyWith(endedAt: DateTime.now());
+    Position position = await geoLocator.getLastKnownPosition();
+
+    if (position == null) {
+      // This can take a few seconds
+      position = await geoLocator.getCurrentPosition();
+    }
+
+    final endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endPosition: position);
 
     await tripRepo.store(endedTrip);
 
@@ -183,6 +181,45 @@ abstract class _AppStore with Store {
 
     activeTrip = null;
     return endedTrip;
+  }
+
+  @action
+  Future<void> saveProfile(Profile updatedProfile) async {
+    await jsonRepo.set('profile', updatedProfile);
+    profile = updatedProfile;
+  }
+
+  @computed
+  bool get hasActiveHaul => activeHaul != null;
+
+  @computed
+  bool get profileConfigured => profile != null;
+
+  @computed
+  bool get hasActiveOrCompleteTrip {
+    return activeTrip != null || completedTrips.length > 0;
+  }
+
+  @computed
+  bool get activeTripHasActiveOrCompleteHaul {
+    if (activeTrip == null) {
+      throw Exception('No active trip');
+    }
+    return activeTrip.hauls.length > 0 || activeHaul != null;
+  }
+
+  @computed
+  bool get hasActiveTrip => activeTrip != null;
+
+  @computed
+  int get activeTripTagsCount {
+    if (activeTrip == null) {
+      throw new Exception('No active trip');
+    }
+    if (activeTrip.hauls.length == 0 && activeHaul == null) {
+      return 0;
+    }
+    return activeTrip.hauls.fold(0, (int total, Haul elem) => total + elem.tags.length);
   }
 
   PackageInfo packageInfo;

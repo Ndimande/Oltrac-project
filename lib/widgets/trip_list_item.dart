@@ -36,7 +36,6 @@ class TripListItem extends StatelessWidget {
     );
 
     return Card(
-      color: Colors.blueGrey,
       child: FlatButton(
         child: ListTile(
           title: title,

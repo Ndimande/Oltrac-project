@@ -74,3 +74,4 @@
 
 **/*.g.dart
 bash.exe.stackdump
+gradle.properties

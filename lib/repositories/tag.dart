@@ -1,7 +1,7 @@
-import 'package:oltrace/data/species.dart';
 import 'package:oltrace/data/species.dart' as speciesData;
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 import 'package:oltrace/models/tag.dart';
 
@@ -26,9 +26,7 @@ class TagRepository extends DatabaseRepository<Tag> {
 
   @override
   Tag fromDatabaseMap(Map<String, dynamic> result) {
-    final createdAt = result['created_at'] != null
-        ? DateTime.parse(result['created_at'])
-        : null;
+    final createdAt = result['created_at'] != null ? DateTime.parse(result['created_at']) : null;
 
     final lengthUnitResult = result['length_unit'];
     final weightUnitResult = result['weight_unit'];
@@ -50,13 +48,16 @@ class TagRepository extends DatabaseRepository<Tag> {
         id: result['id'],
         tagCode: result['tag_code'],
         createdAt: createdAt,
+        location: Location.fromMap({
+          'latitude': result['latitude'],
+          'longitude': result['longitude'],
+        }),
         haulId: result['haul_id'],
         length: result['length'],
         weight: result['weight'],
         lengthUnit: lengthUnit,
         weightUnit: weightUnit,
-        species: speciesData.species
-            .firstWhere((Species s) => s.id == result['species_id']));
+        species: speciesData.species.firstWhere((Species s) => s.id == result['species_id']));
   }
 
   @override
@@ -64,8 +65,9 @@ class TagRepository extends DatabaseRepository<Tag> {
     return {
       'haul_id': tag.haulId,
       'tag_code': tag.tagCode,
-      'created_at':
-          tag.createdAt == null ? null : tag.createdAt.toIso8601String(),
+      'created_at': tag.createdAt == null ? null : tag.createdAt.toIso8601String(),
+      'latitude': tag.location.latitude,
+      'longitude': tag.location.longitude,
       'species_code': tag.species.alpha3Code,
       'weight_unit': tag.weightUnit.toString(),
       'length_unit': tag.lengthUnit.toString(),

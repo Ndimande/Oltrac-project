@@ -1,21 +1,32 @@
 <?php
-$output = <<<DART
-import 'package:oltrace/models/species.dart';
+/*
+ * USAGE
+ * php csv2model.php filename.csv
+ */
 
-final List<Species> species = <Species>[
+$model_name = 'Species';
+$model_name_lower = strtolower($model_name);
+
+$output = <<<DART
+import 'package:oltrace/models/$model_name_lower.dart';
+
+final List<$model_name> $model_name_lower = <$model_name>[
 
 DART;
-
+echo $output;
 $csv_file = file_get_contents($argv[1]);
 $lines = explode("\n",$csv_file);
 $lines = array_reverse($lines);
 array_pop($lines);
 $lines = array_reverse($lines);
+$id = 0;
+
 foreach($lines as $line) {
     $column = explode(';', $line);
     $column = array_map('rtrim',$column);
     $code = <<<DART
-    Species(
+    $model_name(
+        id: $id,
         alpha3Code: '{$column[0]}',
         taxonomicCode: '{$column[1]}',
         englishName: '{$column[2]}',
@@ -33,6 +44,7 @@ foreach($lines as $line) {
 
 DART;
 $output .= $code;
+$id++;
 }
 
 $output .= '];';

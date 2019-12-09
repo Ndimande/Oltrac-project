@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 final double _actionFontSize = 22;
-final double _titleFontSize = 32;
-final double _bodyFontSize = 20;
 
 Text _actionText(String text) => Text(
       text,
@@ -19,7 +17,6 @@ class ConfirmDialog extends StatelessWidget {
   Widget _buildTitle() {
     return Text(
       this._title,
-      style: TextStyle(fontSize: _titleFontSize),
     );
   }
 
@@ -42,15 +39,10 @@ class ConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        titleTextStyle: TextStyle(color: Colors.black),
-        backgroundColor: Colors.white,
         title: _buildTitle(),
         actions: _buildActions(context),
         content: SingleChildScrollView(
-          child: Text(
-            this._question,
-            style: TextStyle(fontSize: _bodyFontSize, color: Colors.black),
-          ),
+          child: Text(this._question),
         ));
   }
 }

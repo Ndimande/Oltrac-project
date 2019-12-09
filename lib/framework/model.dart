@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:uuid/uuid.dart';
 
 abstract class Model {
   /// The id assigned by sqlite upon storing.

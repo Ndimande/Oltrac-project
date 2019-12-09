@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
@@ -9,8 +8,8 @@ class FishingMethodScreen extends StatelessWidget {
     bool answer = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog('Start haul?',
-          'Are you sure you want to start a ${method.name.toLowerCase()} haul?'),
+      builder: (_) => ConfirmDialog(
+          'Start Haul?', 'Are you sure you want to start a ${method.name.toLowerCase()} haul?'),
     );
 
     if (answer) {
@@ -19,15 +18,33 @@ class FishingMethodScreen extends StatelessWidget {
   }
 
   Widget _buildFishingMethodCard(FishingMethod method) {
+    final child = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          method.abbreviation,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.all(10),
+          child: Divider(),
+        ),
+        Text(
+          method.name,
+          style: TextStyle(fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
     return Builder(builder: (BuildContext context) {
       return Card(
+        margin: EdgeInsets.all(5),
         child: FlatButton(
-          color: AppConfig.primarySwatch,
-          child: Text(
-            method.name,
-            style: TextStyle(fontSize: 22, color: Colors.white),
-            textAlign: TextAlign.center,
-          ),
+          child: child,
           onPressed: () async => _onCardPressed(context, method),
         ),
       );
@@ -39,7 +56,6 @@ class FishingMethodScreen extends StatelessWidget {
     final fishingMethodsAlphabetical = fishingMethods;
     fishingMethodsAlphabetical.sort((a, b) => a.name.compareTo(b.name));
     return Scaffold(
-        backgroundColor: AppConfig.backgroundColor,
         appBar: AppBar(title: Text('Select Fishing Method')),
         body: Container(
           padding: EdgeInsets.all(10),

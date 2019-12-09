@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
-import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/haul_list_item.dart';
 import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 class TripHistoryScreen extends StatelessWidget {
-  final AppStore _appStore;
-
-  TripHistoryScreen(this._appStore);
-
+  final AppStore _appStore = StoreProvider().appStore;
   Widget _buildBottomSection() {
-    final List<Trip> trips = _appStore.completedTrips
-        .where((Trip trip) => trip.endedAt != null)
-        .toList();
+    final List<Trip> trips =
+        _appStore.completedTrips.where((Trip trip) => trip.endedAt != null).toList();
 
     if (trips.length == 0) {
       return Text('No completed trips.');
@@ -31,7 +24,7 @@ class TripHistoryScreen extends StatelessWidget {
             await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TripScreen(_appStore),
+                builder: (context) => TripScreen(),
                 settings: RouteSettings(
                   arguments: trip,
                 ),
@@ -44,7 +37,6 @@ class TripHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppConfig.backgroundColor,
         appBar: AppBar(
           title: Text('Trip History'),
         ),

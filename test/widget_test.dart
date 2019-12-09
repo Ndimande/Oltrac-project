@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:oltrace/main.dart';
-import 'package:oltrace/providers/database_provider.dart';
+import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/stores/app_store.dart';
 
 void main() {

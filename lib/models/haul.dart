@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/tag.dart';
@@ -20,25 +21,19 @@ class Haul extends Model {
 
   static final tableName = 'hauls';
 
-  Haul(
-      {id,
-      @required this.tripId,
-      @required this.startedAt,
-      this.endedAt,
-      @required this.fishingMethod,
-      this.tags = const []})
-      : super(id: id);
+  final Position startPosition;
+  final Position endPosition;
 
-  Haul.fromMap(Map data)
-      : tripId = data['trip_id'],
-        startedAt = data['startedAt'] != null
-            ? DateTime.parse(data['startedAt'])
-            : null,
-        endedAt =
-            data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
-        fishingMethod = FishingMethod.fromMap(data['fishingMethod']),
-        tags = data['tags'] as List<Tag>,
-        super.fromMap(data);
+  Haul({
+    id,
+    @required this.tripId,
+    @required this.startedAt,
+    this.endedAt,
+    @required this.fishingMethod,
+    this.tags = const [],
+    @required this.startPosition,
+    this.endPosition,
+  }) : super(id: id);
 
   Haul copyWith({
     int id,
@@ -47,6 +42,8 @@ class Haul extends Model {
     DateTime endedAt,
     FishingMethod fishingMethod,
     List<Tag> tags,
+    Position startPosition,
+    Position endPosition,
   }) {
     return Haul(
       id: id ?? this.id,
@@ -55,8 +52,20 @@ class Haul extends Model {
       endedAt: endedAt ?? this.endedAt,
       fishingMethod: fishingMethod ?? this.fishingMethod,
       tags: tags ?? this.tags,
+      startPosition: startPosition ?? this.startPosition,
+      endPosition: endPosition ?? this.endPosition,
     );
   }
+
+  Haul.fromMap(Map data)
+      : tripId = data['trip_id'],
+        startedAt = data['startedAt'] != null ? DateTime.parse(data['startedAt']) : null,
+        endedAt = data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
+        fishingMethod = FishingMethod.fromMap(data['fishingMethod']),
+        tags = data['tags'] as List<Tag>,
+        startPosition = Position.fromMap(data['startPosition']),
+        endPosition = Position.fromMap(data['endPosition']),
+        super.fromMap(data);
 
   Map<String, dynamic> toMap() {
     return {
@@ -65,7 +74,9 @@ class Haul extends Model {
       'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
       'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
       'fishingMethod': fishingMethod.toMap(),
-      'tags': tags.map((t) => t.toMap()).toList()
+      'tags': tags.map((t) => t.toMap()).toList(),
+      'startPosition': startPosition?.toJson(),
+      'endPosition': endPosition?.toJson(),
     };
   }
 }

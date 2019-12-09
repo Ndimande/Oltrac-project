@@ -1,5 +1,5 @@
 import 'package:oltrace/framework/model.dart';
-import 'package:oltrace/providers/database_provider.dart';
+import 'package:oltrace/providers/database.dart';
 
 /// Implement this interface to store and retrieve
 /// database records.
@@ -9,8 +9,7 @@ abstract class DatabaseRepository<T extends Model> {
 
   /// Get all items from the database.
   Future<List<T>> all({String where}) async {
-    List<Map<String, dynamic>> results =
-        await database.query(tableName, where: where);
+    List<Map<String, dynamic>> results = await database.query(tableName, where: where);
     return results
         .map(
           (Map<String, dynamic> result) => fromDatabaseMap(result),
@@ -31,8 +30,7 @@ abstract class DatabaseRepository<T extends Model> {
     // to set id = null
     final withoutId = toDatabaseMap(model)..remove('id');
 
-    return await database.update(tableName, withoutId,
-        where: 'id = ${model.id}');
+    return await database.update(tableName, withoutId, where: 'id = ${model.id}');
   }
 
   /// Parse the map returned by sqflite into

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/screens/create_tag.dart';
 import 'package:oltrace/widgets/screens/tag.dart';
 import 'package:oltrace/widgets/tag_list_item.dart';
 
 class HaulScreen extends StatelessWidget {
-  final AppStore _appStore;
+  final AppStore _appStore = StoreProvider().appStore;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  HaulScreen(this._appStore);
+  HaulScreen();
 
   Widget _buildDetailRow(String label, String value) {
     return Container(
@@ -37,13 +39,12 @@ class HaulScreen extends StatelessWidget {
 
   Widget _buildHaulDetails(Haul haul) {
     return Container(
-      padding: EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _buildDetailRow('Fishing method', haul.fishingMethod.name),
           _buildDetailRow('Started', friendlyTimestamp(haul.startedAt)),
-          _buildDetailRow('Ended', friendlyTimestamp(haul.endedAt)),
+          _buildDetailRow('Ended', friendlyTimestamp(haul.endedAt) ?? '-'),
         ],
       ),
     );
@@ -52,7 +53,16 @@ class HaulScreen extends StatelessWidget {
   Widget _buildTagsList(List<Tag> tags) {
     return Expanded(
       child: ListView(
-        children: tags.map((tag) => TagListItem(tag, () {})).toList(),
+        children: tags
+            .map((tag) => TagListItem(tag, () async {
+                  final pageRoute = MaterialPageRoute(
+                    builder: (context) => TagScreen(),
+                    settings: RouteSettings(arguments: tag),
+                  );
+
+                  await Navigator.push(_scaffoldKey.currentContext, pageRoute);
+                }))
+            .toList(),
       ),
     );
   }
@@ -61,7 +71,7 @@ class HaulScreen extends StatelessWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(_appStore),
+        builder: (context) => CreateTagScreen(_appStore),
         settings: RouteSettings(
           arguments: haul,
         ),
@@ -71,7 +81,6 @@ class HaulScreen extends StatelessWidget {
 
   _floatingActionButton({onPressed}) {
     return Container(
-      margin: EdgeInsets.only(top: 100),
       height: 65,
       width: 180,
       child: FloatingActionButton.extended(
@@ -93,53 +102,63 @@ class HaulScreen extends StatelessWidget {
         text,
         style: TextStyle(fontSize: 20),
       ),
-      padding: EdgeInsets.only(top: 10, left: 10),
     );
   }
 
-  bool _isHaulOfActiveTrip(Haul haul) =>
-      haul.tripId == _appStore.activeTrip?.id;
+  bool _isHaulOfActiveTrip(Haul haul) => haul.tripId == _appStore.activeTrip?.id;
 
   @override
   Widget build(BuildContext context) {
     final Haul haulArg = ModalRoute.of(context).settings.arguments;
 
-    final bool isActiveTrip = _appStore.activeTrip != null
-        ? _appStore.activeTrip.id == haulArg.tripId
-        : false;
+    // is the haul arg in the current trip
+    final bool isActiveTrip =
+        _appStore.hasActiveTrip ? _appStore.activeTrip.id == haulArg.tripId : false;
 
-    Trip trip;
-    if (isActiveTrip) {
-      trip = _appStore.activeTrip;
-    } else {
-      trip = _appStore.completedTrips
-          .firstWhere((trip) => trip.id == haulArg.tripId);
-    }
-// get the haul from the trip from the store
+    // either the active trip or a completed trip
+    final Trip trip = isActiveTrip
+        ? _appStore.activeTrip
+        : _appStore.completedTrips.firstWhere((trip) => trip.id == haulArg.tripId);
+
+    // look through all hauls including hauls in the active trip
     final haul = trip.hauls.firstWhere((h) => haulArg.id == h.id);
 
-    print(_appStore.completedTrips);
+    final floatingActionButton = _isHaulOfActiveTrip(haul)
+        ? _floatingActionButton(
+            onPressed: () async => await _onPressTagButton(haul, context),
+          )
+        : null;
+
+    final isActiveHaul = _appStore.activeHaul?.id == haul.id;
+
+    final titleText = isActiveHaul ? 'Haul ${haul.id} (Active)' : 'Haul ${haul.id}';
+
     return Scaffold(
-        backgroundColor: AppConfig.backgroundColor,
-        floatingActionButton: _isHaulOfActiveTrip(haul)
-            ? _floatingActionButton(
-                onPressed: () async => await _onPressTagButton(haul, context),
-              )
-            : null,
-        appBar: AppBar(
-          title: Text('Haul ${haul.id}'),
+      key: _scaffoldKey,
+      floatingActionButton: floatingActionButton,
+      appBar: AppBar(
+        title: Text(titleText),
+      ),
+      body: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(15),
+              child: _buildHaulDetails(haul),
+            ),
+            Container(
+              padding: EdgeInsets.only(bottom: 10),
+              child: Divider(),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 15, bottom: 5),
+              child: _buildTagsLabel(haul.tags),
+            ),
+            _buildTagsList(haul.tags)
+          ],
         ),
-        body: Container(
-          padding: EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _buildHaulDetails(haul),
-              Divider(),
-              _buildTagsLabel(haul.tags),
-              _buildTagsList(haul.tags)
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }

@@ -1,47 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 
-class SettingsScreen extends StatelessWidget {
+final double _fontSize = 20;
+
+class SettingsScreen extends StatefulWidget {
+  SettingsScreen();
+
+  @override
+  State<StatefulWidget> createState() => SettingsScreenState();
+}
+
+class SettingsScreenState extends State<SettingsScreen> {
+  bool _allowMobileData = false;
+  bool _uploadAutomatically = false;
+
   Widget _buildAllowMobile() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            'Use mobile data',
-            style: TextStyle(fontSize: 16),
-          ),
-          Switch(
-            value: true,
-            onChanged: (state) {},
-          )
-        ],
+    final title = 'Use Mobile Data';
+    final subtitle = 'Allow uploading data with a cellular connection';
+
+    return SwitchListTile(
+      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: _fontSize),
       ),
+      value: _allowMobileData,
+      onChanged: (state) {
+        setState(() {
+          _allowMobileData = state;
+        });
+      },
     );
   }
 
   Widget _buildAutoUpload() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            'Upload automatically',
-            style: TextStyle(fontSize: 16),
-          ),
-          Switch(
-            value: true,
-            onChanged: (state) {},
-          )
-        ],
+    final title = 'Upload Automatically';
+    final subtitle = 'Upload data as soon as the internet becomes available';
+
+    return SwitchListTile(
+      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: _fontSize),
       ),
+      value: _uploadAutomatically,
+      onChanged: (state) {
+        setState(() {
+          _uploadAutomatically = !_uploadAutomatically;
+        });
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppConfig.backgroundColor,
         appBar: AppBar(
           title: Text('Settings'),
         ),

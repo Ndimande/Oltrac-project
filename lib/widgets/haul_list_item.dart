@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/stores/app_store.dart';
 
 class HaulListItem extends StatelessWidget {
+  final AppStore _appStore = StoreProvider().appStore;
+
   final Haul _haul;
   final Function onPressed;
 
@@ -12,22 +17,25 @@ class HaulListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final String startedAt = friendlyTimestamp(_haul.startedAt);
     final String endedAt = friendlyTimestamp(_haul.endedAt);
-    final timePeriod = Text('$startedAt - $endedAt');
+
+    final timePeriodText = endedAt == null ? 'Started: $startedAt' : '$startedAt - $endedAt';
+    final timePeriod = Text(timePeriodText, style: TextStyle(fontWeight: FontWeight.bold));
+
+    final bool isActiveHaul = _appStore.activeHaul?.id == _haul.id;
 
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Haul ${_haul.id}',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          isActiveHaul
+              ? 'Haul ${_haul.id} (Active) - ${_haul.fishingMethod.name}'
+              : 'Haul ${_haul.id} - ${_haul.fishingMethod.name}',
         ),
-        Text('${_haul.fishingMethod.name}')
       ],
     );
     return Card(
-      color: Colors.blueGrey,
+      color: isActiveHaul ? AppConfig.accentColor : null,
       elevation: 2,
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: FlatButton(
           onPressed: onPressed,
           child: ListTile(

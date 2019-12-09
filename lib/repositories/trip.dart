@@ -1,6 +1,7 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/providers/database_provider.dart';
+import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/haul.dart';
 
 class TripRepository extends DatabaseRepository<Trip> {
@@ -34,22 +35,18 @@ class TripRepository extends DatabaseRepository<Trip> {
     return trip;
   }
 
-  /// Get all trips in the database.
+  /// Get all trips in the database with hauls.
   Future<List<Trip>> all({String where}) async {
-    final List<Map<String, dynamic>> tripResults =
-        await _database.query(_tableName);
+    final List<Map<String, dynamic>> tripResults = await _database.query(_tableName);
 
-    final trips = tripResults
-        .map((Map<String, dynamic> result) => fromDatabaseMap(result))
-        .toList();
+    final trips =
+        tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
 
     final tripsWithHaulsFutures = trips.map((trip) async {
-      final haulResults =
-          await _database.query('hauls', where: 'trip_id = ${trip.id}');
+      final haulResults = await _database.query('hauls', where: 'trip_id = ${trip.id}');
 
-      final hauls = haulResults
-          .map((Map result) => HaulRepository().fromDatabaseMap(result))
-          .toList();
+      final hauls =
+          haulResults.map((Map result) => HaulRepository().fromDatabaseMap(result)).toList();
       return trip.copyWith(hauls: hauls);
     }).toList();
 
@@ -81,26 +78,38 @@ class TripRepository extends DatabaseRepository<Trip> {
   }
 
   Trip fromDatabaseMap(Map<String, dynamic> result) {
-    final startedAt = result['started_at'] != null
-        ? DateTime.parse(result['started_at'])
-        : null;
+    final startedAt = result['started_at'] != null ? DateTime.parse(result['started_at']) : null;
 
-    final endedAt =
-        result['ended_at'] != null ? DateTime.parse(result['ended_at']) : null;
+    final endedAt = result['ended_at'] != null ? DateTime.parse(result['ended_at']) : null;
+
+    final Position endPosition = result['end_latitude'] == null || result['end_longitude'] == null
+        ? null
+        : Position(
+            latitude: result['end_latitude'],
+            longitude: result['end_longitude'],
+          );
 
     return Trip(
       id: result['id'],
       startedAt: startedAt,
       endedAt: endedAt,
+      startPosition: Position(
+        latitude: result['start_latitude'],
+        longitude: result['start_longitude'],
+      ),
+      endPosition: endPosition,
     );
   }
 
   Map<String, dynamic> toDatabaseMap(Trip trip) {
     return {
       'id': trip.id,
-      'started_at':
-          trip.startedAt == null ? null : trip.startedAt.toIso8601String(),
+      'started_at': trip.startedAt == null ? null : trip.startedAt.toIso8601String(),
       'ended_at': trip.endedAt == null ? null : trip.endedAt.toIso8601String(),
+      'start_latitude': trip.startPosition.latitude,
+      'start_longitude': trip.startPosition.longitude,
+      'end_latitude': trip.startPosition.latitude,
+      'end_longitude': trip.startPosition.longitude,
     };
   }
 }

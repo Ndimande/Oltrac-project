@@ -1,181 +1,105 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
-import 'package:oltrace/app_config.dart';
-import 'package:oltrace/data/species.dart';
-import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/species.dart';
 import 'package:oltrace/models/tag.dart';
-import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
+import 'package:oltrace/widgets/screens/create_product.dart';
 
-class TagScreen extends StatefulWidget {
-  final AppStore _appStore;
+final _fontStyle = TextStyle(fontSize: 16);
 
-  TagScreen(this._appStore);
-
-  @override
-  State<StatefulWidget> createState() => TagScreenState();
-}
-
-class TagScreenState extends State<TagScreen> {
-  String _tagCode;
-  Species _selectedSpecies;
+class TagScreen extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _lengthController = TextEditingController();
+  _buildRow(String key, String val) => Container(
+        margin: EdgeInsets.symmetric(vertical: 3),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                key,
+                style: _fontStyle,
+              ),
+            ),
+            Expanded(
+              child: Text(val, style: _fontStyle),
+            ),
+          ],
+        ),
+      );
 
-  TagScreenState();
-
-  Widget buildRfid() {
-    final String tagCodeText = _tagCode ?? 'No tag scanned';
-
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Text('Tag code:'),
-          Text(
-            tagCodeText,
-            style: TextStyle(fontSize: 28),
-          )
-        ],
+  _onPressFloatingActionButton(Tag tag) async {
+    await Navigator.push(
+      _scaffoldKey.currentContext,
+      MaterialPageRoute(
+        builder: (context) => CreateProductScreen(),
+        settings: RouteSettings(
+          arguments: tag,
+        ),
       ),
     );
   }
 
-  @override
-  void initState() {
-    FlutterNfcReader.onTagDiscovered().listen((NfcData onData) {
-      setState(() {
-        _tagCode = onData.id;
-      });
-    });
-
-    super.initState();
-  }
-
-  _onPressSaveButton(haul, context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) =>
-          ConfirmDialog('Confirm', 'Are you sure you want to save the tag?'),
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    final tag = await widget._appStore.saveTag(
-      Tag(
-        tagCode: _tagCode,
-        species: _selectedSpecies,
-        createdAt: DateTime.now(),
-        weight: int.parse(_weightController.value.text) * 1000, // kg -> g
-        length: int.parse(_lengthController.value.text),
-        haulId: haul.id,
-      ),
-    );
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      duration: Duration(seconds: 1),
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: AppConfig.primarySwatch,
-      content: Text(
-        'Tag ${tag.id.toString()} saved',
-        style: TextStyle(fontSize: 30),
-      ),
-    ));
-  }
-
-  _floatingActionButton(Haul haul, context) {
+  _floatingActionButton(onPressed) {
     return Container(
       margin: EdgeInsets.only(top: 100),
       height: 65,
-      width: 180,
+      width: 220,
       child: FloatingActionButton.extended(
         backgroundColor: Colors.green,
         label: Text(
-          'Save',
+          'Create Product',
           style: TextStyle(fontSize: 22),
         ),
-        icon: Icon(Icons.save),
-        onPressed: () async => await _onPressSaveButton(haul, context),
+        icon: Icon(Icons.add_circle_outline),
+        onPressed: onPressed,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Haul haul = ModalRoute.of(context).settings.arguments;
-    // todo sort this
+    final Tag tagArg = ModalRoute.of(context).settings.arguments;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: AppConfig.backgroundColor,
-      floatingActionButton: _floatingActionButton(haul, context),
+      floatingActionButton: _floatingActionButton(() async => _onPressFloatingActionButton(tagArg)),
       appBar: AppBar(
-        title: Text('Haul ${haul.id} - Create Tag'),
+        title: Text('Tag - ${tagArg.tagCode}'),
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(15),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              buildRfid(),
-              Text(
-                'Haul ${haul.id}',
+            children: [
+              _buildRow('Tag code', tagArg.tagCode),
+              _buildRow('Weight', (tagArg.weight / 1000).toString() + ' kg'),
+              _buildRow('Length', tagArg.length.toString() + ' cm'),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(),
               ),
-              _speciesDropdown(_selectedSpecies, (Species species) {
-                setState(() {
-                  _selectedSpecies = species;
-                });
-              }),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                    labelText: 'Weight (kg)',
-                    labelStyle: TextStyle(color: Colors.white)),
-                controller: _weightController,
-              ),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Length (cm)',
-                  labelStyle: TextStyle(color: Colors.white),
+              Container(
+                margin: EdgeInsets.only(bottom: 10),
+                child: Text(
+                  'Species',
+                  style: TextStyle(fontSize: 20),
                 ),
-                controller: _lengthController,
               ),
-              RaisedButton(
-                child: Text('Fake RFID scan'),
-                onPressed: () => setState(() {
-                  _tagCode = '0xFA7E5C46';
-                }),
-              )
+              _buildRow('English name', tagArg.species.englishName),
+              _buildRow('Australian name', tagArg.species.australianName),
+              _buildRow('Scientific name', tagArg.species.scientificName),
+              _buildRow('Alpha3 Code', tagArg.species.alpha3Code),
+              _buildRow('Family', tagArg.species.family),
+              _buildRow('CPC class', tagArg.species.cpcClass),
+              _buildRow('CPC Group', tagArg.species.cpcGroup),
+              _buildRow('Major group', tagArg.species.majorGroup),
+              _buildRow('ISSCAAP group', tagArg.species.isscaapGroup),
+              _buildRow('Yearbook group', tagArg.species.yearbookGroup),
+              _buildRow('Caab Code', tagArg.species.caabCode),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-Widget _speciesDropdown(Species _selected, Function _onChanged) {
-  return DropdownButton<Species>(
-    hint: Text('Select species'),
-    value: _selected,
-    onChanged: _onChanged,
-    items: species.map<DropdownMenuItem<Species>>(
-      (Species species) {
-        return DropdownMenuItem<Species>(
-          value: species,
-          child: Text(
-            species.englishName,
-            style: TextStyle(color: Colors.black),
-          ),
-        );
-      },
-    ).toList(),
-  );
 }

@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/location.dart';
 
+final Color _drawerHeaderColor = AppConfig.backgroundColor;
+final Color _drawerHeaderTextColor = AppConfig.textColor1;
 final double _drawerItemFontSize = 22;
 
-Widget _drawerHeader(Profile vessel) {
+Widget _drawerHeader(Profile profile) {
   final _vesselName = Text(
-    vessel.name,
-    style: TextStyle(color: Colors.white, fontSize: 28),
+    profile.vesselName,
+    style: TextStyle(color: _drawerHeaderTextColor, fontSize: 30),
   );
-  final _skipperName = Text(
-    vessel.skipper.name,
-    style: TextStyle(color: Colors.black, fontSize: 22),
+  final _skipperNameText = Text(
+    profile.skipper.firstName + ' ' + profile.skipper.lastName,
+    style: TextStyle(
+      color: _drawerHeaderTextColor,
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+    ),
   );
 
   final _headerChild = Container(
@@ -22,7 +29,10 @@ Widget _drawerHeader(Profile vessel) {
           children: <Widget>[
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[_vesselName, _skipperName],
+          children: <Widget>[
+            _vesselName,
+            _skipperNameText,
+          ],
         ),
 //        LocationCoords()
       ]));
@@ -30,7 +40,7 @@ Widget _drawerHeader(Profile vessel) {
   return DrawerHeader(
     child: _headerChild,
     decoration: BoxDecoration(
-      color: Colors.blueGrey,
+      color: _drawerHeaderColor,
     ),
   );
 }
@@ -54,7 +64,9 @@ class OlTraceDrawer extends StatelessWidget {
 
           // Trip history
           ListTile(
-            leading: Icon(Icons.history),
+            leading: Icon(
+              Icons.history,
+            ),
             title: Text(
               'Trip History',
               style: TextStyle(fontSize: _drawerItemFontSize),
@@ -64,7 +76,9 @@ class OlTraceDrawer extends StatelessWidget {
 
           // Settings
           ListTile(
-            leading: Icon(Icons.settings),
+            leading: Icon(
+              Icons.settings,
+            ),
             title: Text(
               'Settings',
               style: TextStyle(fontSize: _drawerItemFontSize),
@@ -76,7 +90,9 @@ class OlTraceDrawer extends StatelessWidget {
 
           // About
           ListTile(
-            leading: Icon(Icons.info),
+            leading: Icon(
+              Icons.info,
+            ),
             title: Text(
               'About',
               style: TextStyle(fontSize: _drawerItemFontSize),

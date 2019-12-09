@@ -11,8 +11,8 @@ class ProductType extends Model {
       : name = data['name'],
         super.fromMap(data);
 
-  ProductType copyWith({String name}) {
-    return ProductType(name: name ?? this.name);
+  ProductType copyWith({String firstName}) {
+    return ProductType(name: firstName ?? this.name);
   }
 
   Map<String, dynamic> toMap() {

@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_migrations.dart';
 
+/// Global flags.
+/// These values are checked by
+/// git before you commit to avoid bad
+/// production values.
+///
+/// Enables / disables development features
+/// like buttons to fake data etc.
+const DEV_MODE = false;
+
+/// Drop and recreate the database if true
+const RESET_DATABASE = false;
+
 class AppConfig {
   /// Drop and recreate the database if true
-  static const resetDatabaseOnRestart = true;
+  static const resetDatabaseOnRestart = RESET_DATABASE;
+
+  /// Emulators cannot fake RFID/NFC scan
+  /// so we need a button to do this manually.
+  static const fakeRfidButton = DEV_MODE;
 
   /// The title of the app
   static const appTitle = 'OlTrace';
@@ -11,26 +27,42 @@ class AppConfig {
   /// The sqlite database filename
   static const databaseFilename = 'oltrace.db';
 
-  static final backgroundColor = Colors.blueGrey[900];
+  static final backgroundColor = Colors.grey[900];
 
-  static final primarySwatch = Colors.blueGrey;
-  static final primarySwatchDark = Colors.blueGrey[700];
+  static final primarySwatch = Colors.grey;
 
-  static final accentColor = Colors.deepOrange;
+  static final primarySwatchDark = Colors.grey[750];
+
+  static final accentColor = Colors.deepOrangeAccent;
 
   static final textColor1 = Colors.white;
-  static final textColor2 = Colors.blueGrey[200];
+
+  static final textColor2 = Colors.grey[500];
 
   static final _dividerThemeData = DividerThemeData(
-    thickness: 2,
-    space: 2,
+    thickness: 4,
+    space: 3,
     indent: 10,
     endIndent: 10,
-    color: primarySwatch,
+    color: accentColor,
   );
 
   /// Material app global theme data
   static final materialAppTheme = ThemeData(
+    snackBarTheme: SnackBarThemeData(
+      actionTextColor: accentColor,
+      contentTextStyle: TextStyle(color: Colors.white, fontSize: 18),
+      backgroundColor: Colors.black,
+    ),
+    scaffoldBackgroundColor: AppConfig.backgroundColor,
+    cardTheme: CardTheme(
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    ),
+    dialogTheme: DialogTheme(
+      backgroundColor: AppConfig.primarySwatchDark,
+      titleTextStyle: TextStyle(fontSize: 32),
+      contentTextStyle: TextStyle(fontSize: 20),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       errorBorder: OutlineInputBorder(
         borderSide: BorderSide(
@@ -56,7 +88,6 @@ class AppConfig {
           width: 2,
         ),
       ),
-
       contentPadding: EdgeInsets.symmetric(
         vertical: 22,
         horizontal: 30,
@@ -69,29 +100,18 @@ class AppConfig {
         fontSize: 16,
         color: AppConfig.textColor1,
       ),
-
-//      prefixStyle: TextStyle(
-//        fontSize: 35,
-//        color: Colors.pink,
-//      ),
-//      suffixStyle: TextStyle(
-//        fontSize: 35,
-//        color: Colors.pink,
-//      ),
-
-//      counterStyle: TextStyle(
-//        fontSize: 35,
-//        color: Colors.pink,
-//      ),
       focusColor: Colors.pink,
       fillColor: Colors.pink,
       hoverColor: Colors.pink,
     ),
-    canvasColor: AppConfig.primarySwatch,
-    buttonColor: primarySwatch,
+    canvasColor: primarySwatchDark,
+    buttonTheme: ButtonThemeData(
+      buttonColor: primarySwatch,
+      textTheme: ButtonTextTheme.primary,
+    ),
     textTheme: TextTheme(
       body1: TextStyle(color: textColor1),
-      body2: TextStyle(color: Colors.white), // Drawer menu items
+      body2: TextStyle(color: textColor1), // Drawer menu items
       button: TextStyle(color: Colors.pink),
       display1: TextStyle(color: Colors.pink),
       display2: TextStyle(color: Colors.pink),
@@ -100,10 +120,11 @@ class AppConfig {
       title: TextStyle(color: Colors.pink),
       subtitle: TextStyle(color: Colors.pink),
       headline: TextStyle(color: Colors.pink),
-      subhead: TextStyle(color: textColor1), // List item heading
+      subhead: TextStyle(color: textColor1), // List item heading / Car items
       display4: TextStyle(color: Colors.pink),
       overline: TextStyle(color: Colors.pink),
     ),
+    // Appears to do nothing
     accentTextTheme: TextTheme(
       body1: TextStyle(color: Colors.pink),
       body2: TextStyle(color: Colors.pink), // Drawer menu items
@@ -123,6 +144,7 @@ class AppConfig {
     primarySwatch: primarySwatch,
     accentColor: accentColor,
     dividerTheme: _dividerThemeData,
+    brightness: Brightness.dark,
   );
 
   static final migrations = appMigrations;

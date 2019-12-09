@@ -13,6 +13,10 @@ final List<Map<String, String>> appMigrations = const [
     'up': 'CREATE TABLE trips ( '
         'id INTEGER PRIMARY KEY, '
         'started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, '
+        'start_latitude REAL NOT NULL, '
+        'start_longitude REAL NOT NULL, '
+        'end_latitude REAL, '
+        'end_longitude REAL, '
         'ended_at TIMESTAMP'
         ')',
     'down': 'DROP TABLE trips'
@@ -23,6 +27,10 @@ final List<Map<String, String>> appMigrations = const [
         'id INTEGER PRIMARY KEY, '
         'started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, '
         'ended_at TIMESTAMP, '
+        'start_latitude REAL NOT NULL, '
+        'start_longitude REAL NOT NULL, '
+        'end_latitude REAL, '
+        'end_longitude REAL, '
         'trip_id INTEGER NOT NULL, '
         'fishing_method_id INTEGER NOT NULL, '
         'FOREIGN KEY (trip_id) REFERENCES trips (id), '
@@ -42,6 +50,8 @@ final List<Map<String, String>> appMigrations = const [
         'length_unit TEXT NOT NULL, ' // cm / inches
         'weight INTEGER NOT NULL, '
         'length INTEGER NOT NULL, '
+        'latitude REAL NOT NULL, '
+        'longitude REAL NOT NULL, '
         'FOREIGN KEY (haul_id) REFERENCES hauls (id)'
         ')',
     'down': 'DROP TABLE tags'

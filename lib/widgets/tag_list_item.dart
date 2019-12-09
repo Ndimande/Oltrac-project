@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/tag.dart';
 
 class TagListItem extends StatelessWidget {
@@ -10,19 +9,22 @@ class TagListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String weight = (_tag.weight / 1000).toString() + ' kg';
+    final String length = (_tag.length / 1000).toString() + ' cm';
+
     return Card(
-      color: Colors.blueGrey,
       elevation: 2,
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: FlatButton(
-          onPressed: onPressed,
-          child: ListTile(
-            title: Text(_tag.tagCode),
-            subtitle: Text(_tag.species.englishName),
-            trailing: Icon(
-              Icons.keyboard_arrow_right,
-            ),
-          )),
+        onPressed: onPressed,
+        child: ListTile(
+          title: Text(_tag.species.englishName),
+          subtitle: Text(weight + ' - ' + length),
+          trailing: Icon(
+            Icons.keyboard_arrow_right,
+          ),
+        ),
+      ),
     );
   }
 }

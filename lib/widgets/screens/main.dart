@@ -1,65 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/oltrace_drawer.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
+import 'package:oltrace/widgets/screens/main/haul_section.dart';
+import 'package:oltrace/widgets/screens/main/no_active_trip.dart';
+import 'package:oltrace/widgets/screens/main/trip_section.dart';
 import 'package:oltrace/widgets/time_ago.dart';
-import 'package:oltrace/widgets/views/tag_primary.dart';
-import 'package:oltrace/widgets/views/tag_secondary.dart';
-import 'package:oltrace/widgets/views/trip.dart';
-import 'package:oltrace/widgets/views/tag.dart';
-import 'package:oltrace/widgets/views/haul.dart';
 
 class MainScreen extends StatefulWidget {
-  final AppStore _appStore;
+  final AppStore _appStore = StoreProvider().appStore;
 
-  MainScreen(this._appStore);
+  MainScreen();
 
   @override
   MainScreenState createState() => MainScreenState();
 }
 
 class MainScreenState extends State<MainScreen> {
-  final PageController _haulPageController = PageController(initialPage: 0);
+  Widget _buildAppBar() {
+    Widget title = Text('In Port');
+    if (widget._appStore.hasActiveTrip) {
+      if (widget._appStore.hasActiveHaul) {
+        title = Text(widget._appStore.activeHaul.fishingMethod.name);
+      } else {
+        title = TimeAgo(
+          prefix: 'Trip started ',
+          startedAt: widget._appStore.activeTrip.startedAt,
+        );
+      }
+    }
+
+    return AppBar(title: title);
+  }
 
   Future<FishingMethod> _selectFishingMethod() async {
-    return await Navigator.push<FishingMethod>(context,
-        MaterialPageRoute(builder: (context) => FishingMethodScreen()));
+    return await Navigator.push<FishingMethod>(
+        context, MaterialPageRoute(builder: (context) => FishingMethodScreen()));
+  }
+
+  _onPressStartHaul() async {
+    final method = await _selectFishingMethod();
+    if (method != null) {
+      await widget._appStore.startHaul(method);
+    }
+  }
+
+  _onPressEndHaul() async {
+    bool confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ConfirmDialog(
+        'End haul',
+        'Are you sure you want to end the haul?',
+      ),
+    );
+
+    if (confirmed) {
+      await widget._appStore.endHaul();
+    }
   }
 
   _onPressHaulFloatingActionButton() async {
-    bool started = widget._appStore.haulHasStarted;
-
-    if (started) {
-      bool confirmed = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => ConfirmDialog(
-          'End haul',
-          'Are you sure you want to end the haul?',
-        ),
-      );
-
-      if (confirmed) {
-        await widget._appStore.endHaul();
-        await _haulPageController.animateToPage(0,
-            duration: Duration(milliseconds: 400), curve: Curves.easeInOutQuad);
-      }
+    if (widget._appStore.hasActiveHaul) {
+      await _onPressEndHaul();
     } else {
-      final method = await _selectFishingMethod();
-      if (method != null) {
-        await widget._appStore.startHaul(method);
-        await _haulPageController.animateToPage(1,
-            duration: Duration(milliseconds: 400), curve: Curves.easeInOutQuad);
-      }
+      await _onPressStartHaul();
     }
   }
 
   Widget _floatingActionButton() {
-    bool started = widget._appStore.haulHasStarted;
+    bool started = widget._appStore.hasActiveHaul;
 
     final Icon icon = Icon(started ? Icons.stop : Icons.play_arrow);
     final color = started ? Colors.red : Colors.green;
@@ -79,21 +93,6 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _buildAppBar() {
-    Widget title = Text('In Port');
-    if (widget._appStore.activeTrip != null) {
-      if (widget._appStore.activeHaul != null) {
-        title = Text(widget._appStore.activeHaul.fishingMethod.name);
-      } else {
-        title = TimeAgo(
-          prefix: 'Trip started ',
-          startedAt: widget._appStore.activeTrip.startedAt,
-        );
-      }
-    }
-    return AppBar(title: title);
-  }
-
   Future<bool> _onWillPop() async {
     return false;
   }
@@ -101,32 +100,31 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
+      final floatingActionButton = widget._appStore.hasActiveTrip ? _floatingActionButton() : null;
+      // return Text('Hello World');
+
       return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
-          backgroundColor: AppConfig.backgroundColor,
-          floatingActionButton:
-              widget._appStore.tripHasStarted ? _floatingActionButton() : null,
-          floatingActionButtonLocation: widget._appStore.activeHaul == null
-              ? FloatingActionButtonLocation.centerFloat
-              : FloatingActionButtonLocation.endTop,
+          floatingActionButton: floatingActionButton,
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           appBar: _buildAppBar(),
           drawer: OlTraceDrawer(widget._appStore),
-          body: Builder(builder: (_) {
-            switch (widget._appStore.mainNavIndex) {
-              case NavIndex.trip:
-                return TripView(widget._appStore, _haulPageController);
-              case NavIndex.haul:
-                return HaulView(widget._appStore);
-              case NavIndex.tag:
-                return TagView(widget._appStore);
-              case NavIndex.tagPrimary:
-                return TagPrimaryView(widget._appStore);
-              case NavIndex.tagSecondary:
-                return TagSecondaryView(widget._appStore);
-            }
-            return null;
-          }),
+          body: Builder(
+            builder: (_) {
+              if (!widget._appStore.hasActiveTrip) {
+                return NoActiveTrip();
+              }
+
+              return Column(
+                children: <Widget>[
+                  TripSection(),
+                  Divider(),
+                  Expanded(child: HaulSection()),
+                ],
+              );
+            },
+          ),
         ),
       );
     });

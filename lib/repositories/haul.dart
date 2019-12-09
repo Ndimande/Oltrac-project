@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/fishing_method.dart';
@@ -6,9 +7,9 @@ import 'package:oltrace/models/haul.dart';
 /// The base select statement for hauls always
 /// includes fishing_methods.
 const String _sqlBasicSelect = '''
-SELECT 
+SELECT
 *
-FROM 
+FROM
   hauls
 ''';
 
@@ -16,7 +17,7 @@ FROM
 /// to get all associated tags
 /// nested inside the hauls.
 const String _sqlJoinTags = '''
-JOIN tags 
+JOIN tags
 ON tags.id = hauls.haul_id''';
 
 class HaulRepository extends DatabaseRepository<Haul> {
@@ -75,12 +76,24 @@ class HaulRepository extends DatabaseRepository<Haul> {
       orElse: () => throw Exception('Fishing method does not exist.'),
     );
 
+    final Position endPosition = result['end_latitude'] == null || result['end_longitude'] == null
+        ? null
+        : Position(
+            latitude: result['end_latitude'],
+            longitude: result['end_longitude'],
+          );
+
     return Haul(
       id: result['id'],
       tripId: result['trip_id'],
       startedAt: startedAt,
       endedAt: endedAt,
       fishingMethod: fishingMethod,
+      startPosition: Position(
+        latitude: result['start_latitude'],
+        longitude: result['start_longitude'],
+      ),
+      endPosition: endPosition,
     );
   }
 
@@ -88,10 +101,13 @@ class HaulRepository extends DatabaseRepository<Haul> {
     return {
       'id': haul.id,
       'trip_id': haul.tripId,
-      'started_at':
-          haul.startedAt == null ? null : haul.startedAt.toIso8601String(),
+      'started_at': haul.startedAt == null ? null : haul.startedAt.toIso8601String(),
       'ended_at': haul.endedAt == null ? null : haul.endedAt.toIso8601String(),
-      'fishing_method_id': haul.fishingMethod.id
+      'fishing_method_id': haul.fishingMethod.id,
+      'start_latitude': haul.startPosition.latitude,
+      'start_longitude': haul.startPosition.longitude,
+      'end_latitude': haul.endPosition?.latitude,
+      'end_longitude': haul.endPosition?.longitude,
     };
   }
 }
