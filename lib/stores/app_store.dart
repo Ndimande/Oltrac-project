@@ -25,6 +25,9 @@ abstract class _AppStore with Store {
   final jsonRepo = JsonRepository();
   final Geolocator geoLocator = Geolocator();
 
+  @observable
+  Map<String, dynamic> settings;
+
   /// Trips that have been completed / ended.
   @observable
   List<Trip> completedTrips = [];

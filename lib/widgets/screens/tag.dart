@@ -2,25 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
 
-final _fontStyle = TextStyle(fontSize: 16);
+final _rowFontStyle = TextStyle(fontSize: 18);
 
 class TagScreen extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   _buildRow(String key, String val) => Container(
-        margin: EdgeInsets.symmetric(vertical: 3),
+        margin: EdgeInsets.symmetric(vertical: 5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
+              flex: 3,
               child: Text(
                 key,
-                style: _fontStyle,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(
-              child: Text(val, style: _fontStyle),
+              flex: 5,
+              child: Text(
+                val,
+                style: _rowFontStyle,
+                textAlign: TextAlign.right,
+              ),
             ),
           ],
         ),
@@ -61,7 +67,7 @@ class TagScreen extends StatelessWidget {
 
     return Scaffold(
       key: _scaffoldKey,
-      floatingActionButton: _floatingActionButton(() async => _onPressFloatingActionButton(tagArg)),
+//      floatingActionButton: _floatingActionButton(() async => _onPressFloatingActionButton(tagArg)),
       appBar: AppBar(
         title: Text('Tag - ${tagArg.tagCode}'),
       ),
@@ -69,7 +75,7 @@ class TagScreen extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(15),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+//            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildRow('Tag code', tagArg.tagCode),
               _buildRow('Weight', (tagArg.weight / 1000).toString() + ' kg'),
@@ -82,7 +88,7 @@ class TagScreen extends StatelessWidget {
                 margin: EdgeInsets.only(bottom: 10),
                 child: Text(
                   'Species',
-                  style: TextStyle(fontSize: 20),
+                  style: TextStyle(fontSize: 30),
                 ),
               ),
               _buildRow('English name', tagArg.species.englishName),

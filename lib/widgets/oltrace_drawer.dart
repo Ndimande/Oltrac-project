@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/location.dart';
 
 final Color _drawerHeaderColor = AppConfig.backgroundColor;
 final Color _drawerHeaderTextColor = AppConfig.textColor1;

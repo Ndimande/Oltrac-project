@@ -12,7 +12,13 @@ class TripHistoryScreen extends StatelessWidget {
         _appStore.completedTrips.where((Trip trip) => trip.endedAt != null).toList();
 
     if (trips.length == 0) {
-      return Text('No completed trips.');
+      return Container(
+        child: Text(
+          'No completed trips',
+          style: TextStyle(fontSize: 18),
+        ),
+        alignment: Alignment.center,
+      );
     }
 
     return ListView.builder(
@@ -41,7 +47,6 @@ class TripHistoryScreen extends StatelessWidget {
           title: Text('Trip History'),
         ),
         body: Container(
-          padding: EdgeInsets.all(10),
           child: _buildBottomSection(),
         ));
   }

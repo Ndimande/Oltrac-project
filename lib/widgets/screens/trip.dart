@@ -9,36 +9,47 @@ import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 
+final _rowFontStyle = TextStyle(fontSize: 18);
+
 class TripScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Widget _buildInfoItem(String label, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(label),
-        Text(
-          text,
-          style: TextStyle(fontSize: 16),
-        ),
-      ],
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            label,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            text,
+            style: TextStyle(fontSize: 18),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildTripInfo(Trip trip) {
     final Position startPosition = _appStore.activeTrip.startPosition;
-
+    final String endLocation =
+        trip.endPosition != null ? Location.fromPosition(trip.endPosition).toString() : '-';
     return Container(
       padding: EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _buildInfoItem('Total hauls: ', trip.hauls.length.toString()),
-          _buildInfoItem('Started: ', friendlyTimestamp(trip.startedAt)),
-          _buildInfoItem('Ended: ', trip.endedAt != null ? friendlyTimestamp(trip.endedAt) : '-'),
+          _buildInfoItem('Total hauls ', trip.hauls.length.toString()),
+          _buildInfoItem('Started ', friendlyTimestamp(trip.startedAt)),
+          _buildInfoItem('Ended ', trip.endedAt != null ? friendlyTimestamp(trip.endedAt) : '-'),
+          _buildInfoItem('Start Coords. ', Location.fromPosition(startPosition).toString()),
+          _buildInfoItem('End Coords. ', endLocation),
         ],
       ),
     );
@@ -70,7 +81,7 @@ class TripScreen extends StatelessWidget {
     return Container(
       child: Text(
         text,
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 30),
       ),
       padding: EdgeInsets.only(top: 10, left: 10),
     );
@@ -86,11 +97,12 @@ class TripScreen extends StatelessWidget {
           title: Text('Trip ${trip.id}'),
         ),
         body: Container(
-          padding: EdgeInsets.all(10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _buildTripInfo(trip),
+              Container(
+                child: _buildTripInfo(trip),
+                padding: EdgeInsets.all(5),
+              ),
               Divider(),
               _buildHaulsLabel(trip),
               _buildHaulsList(trip.hauls.reversed.toList())

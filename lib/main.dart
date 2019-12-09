@@ -53,7 +53,7 @@ Future<AppStore> _initApp(AppStore appStore, Database database) async {
   appStore.packageInfo = await PackageInfo.fromPlatform();
 
   // Restore persisted data into app state
-  return await _restoreState(database, appStore);
+  return await _restoreState(appStore, database);
 }
 
 /// Run the database migrator which will create
@@ -65,7 +65,7 @@ Future<void> _migrateDatabase(Database database, bool resetDatabase) async {
 }
 
 /// Restore the saved state from the database and elsewhere.
-Future<AppStore> _restoreState(Database database, AppStore appStore) async {
+Future<AppStore> _restoreState(AppStore appStore, Database database) async {
   final tripRepo = TripRepository();
   final haulRepo = HaulRepository();
   final jsonRepo = JsonRepository();
@@ -75,6 +75,14 @@ Future<AppStore> _restoreState(Database database, AppStore appStore) async {
   final Map profile = await jsonRepo.get('profile');
   if (profile != null) {
     appStore.profile = Profile.fromMap(profile);
+  }
+
+  // Settings
+  final Map settings = await jsonRepo.get('settings');
+  if (settings != null) {
+    appStore.settings = settings;
+  } else {
+    appStore.settings = AppConfig.defaultAppSettings;
   }
 
   // Active trip
@@ -132,11 +140,16 @@ class OlTraceApp extends StatefulWidget {
   OlTraceApp(this._appStore, this.database);
 
   @override
-  State<StatefulWidget> createState() => OlTraceAppState();
+  State<StatefulWidget> createState() {
+    return OlTraceAppState();
+  }
 }
 
 class OlTraceAppState extends State<OlTraceApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
+  ThemeData theme = AppConfig.darkTheme;
+
+  OlTraceAppState();
 
   @override
   void initState() {
@@ -162,7 +175,7 @@ class OlTraceAppState extends State<OlTraceApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: AppConfig.appTitle,
-      theme: AppConfig.materialAppTheme,
+      theme: theme,
       initialRoute: 'splash',
       routes: {
         'splash': (context) => SplashScreen(),
@@ -172,7 +185,12 @@ class OlTraceAppState extends State<OlTraceApp> {
         '/fishing_methods': (context) => FishingMethodScreen(),
         '/welcome': (context) => WelcomeScreen(),
         '/trip_history': (context) => TripHistoryScreen(),
-        '/settings': (context) => SettingsScreen(),
+        '/settings': (context) => SettingsScreen(
+              theme,
+              (t) => setState(() {
+                theme = t;
+              }),
+            ),
         '/tag': (context) => TagScreen(),
         '/create_product': (context) => CreateProductScreen(),
       },

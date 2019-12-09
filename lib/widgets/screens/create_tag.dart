@@ -90,10 +90,10 @@ class CreateTagScreenState extends State<CreateTagScreen> {
     );
 
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-      action: SnackBarAction(
-        label: 'Create Product Tag',
-        onPressed: () async {
-//          await Navigator.pushReplacement(
+//      action: SnackBarAction(
+//        label: 'Create Product Tag',
+//        onPressed: () async {
+//          await Navigator.push(
 //            context,
 //            MaterialPageRoute(
 //              builder: (context) => CreateProductScreen(),
@@ -102,17 +102,8 @@ class CreateTagScreenState extends State<CreateTagScreen> {
 //              ),
 //            ),
 //          );
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CreateProductScreen(),
-              settings: RouteSettings(
-                arguments: tag,
-              ),
-            ),
-          );
-        },
-      ),
+//        },
+//      ),
       behavior: SnackBarBehavior.fixed,
       content: Text(
         'Tag ${tag.tagCode} saved',
@@ -213,6 +204,7 @@ class CreateTagScreenState extends State<CreateTagScreen> {
                         ),
                       ),
                       TextFormField(
+                        style: TextStyle(fontSize: 30),
                         keyboardType: TextInputType.number,
                         controller: _weightController,
                         validator: (value) {
@@ -245,6 +237,7 @@ class CreateTagScreenState extends State<CreateTagScreen> {
                         ),
                       ),
                       TextFormField(
+                        style: TextStyle(fontSize: 30),
                         keyboardType: TextInputType.number,
                         controller: _lengthController,
                         validator: (value) {

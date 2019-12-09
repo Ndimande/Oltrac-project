@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
@@ -21,15 +22,18 @@ class HaulScreen extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Expanded(
+            flex: 3,
             child: Text(
               label,
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
+            flex: 5,
             child: Text(
               value,
               style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.right,
             ),
           ),
         ],
@@ -38,6 +42,9 @@ class HaulScreen extends StatelessWidget {
   }
 
   Widget _buildHaulDetails(Haul haul) {
+    final startLocation = Location.fromPosition(haul.startPosition);
+    final String endLocation =
+        haul.endPosition != null ? Location.fromPosition(haul.endPosition).toString() : '-';
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,6 +52,8 @@ class HaulScreen extends StatelessWidget {
           _buildDetailRow('Fishing method', haul.fishingMethod.name),
           _buildDetailRow('Started', friendlyTimestamp(haul.startedAt)),
           _buildDetailRow('Ended', friendlyTimestamp(haul.endedAt) ?? '-'),
+          _buildDetailRow('Start Coords.', startLocation.toString()),
+          _buildDetailRow('End Coords.', endLocation),
         ],
       ),
     );
@@ -100,7 +109,7 @@ class HaulScreen extends StatelessWidget {
     return Container(
       child: Text(
         text,
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 30),
       ),
     );
   }
@@ -141,7 +150,7 @@ class HaulScreen extends StatelessWidget {
       ),
       body: Container(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+//          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(15),
@@ -152,7 +161,6 @@ class HaulScreen extends StatelessWidget {
               child: Divider(),
             ),
             Container(
-              margin: EdgeInsets.only(left: 15, bottom: 5),
               child: _buildTagsLabel(haul.tags),
             ),
             _buildTagsList(haul.tags)

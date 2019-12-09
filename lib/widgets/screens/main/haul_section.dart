@@ -31,16 +31,14 @@ class HaulSection extends StatelessWidget {
       final hauls = _appStore.activeTrip.hauls.reversed.toList();
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             height: 50,
             child: Container(
-              alignment: Alignment.centerLeft,
-              margin: EdgeInsets.only(left: 20),
+              alignment: Alignment.center,
               child: Text(
                 'Hauls',
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 30),
               ),
             ),
           ),

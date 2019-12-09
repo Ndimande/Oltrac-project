@@ -19,7 +19,7 @@ class HaulListItem extends StatelessWidget {
     final String endedAt = friendlyTimestamp(_haul.endedAt);
 
     final timePeriodText = endedAt == null ? 'Started: $startedAt' : '$startedAt - $endedAt';
-    final timePeriod = Text(timePeriodText, style: TextStyle(fontWeight: FontWeight.bold));
+    final timePeriod = Text(timePeriodText, style: TextStyle(fontSize: 16));
 
     final bool isActiveHaul = _appStore.activeHaul?.id == _haul.id;
 
@@ -30,21 +30,23 @@ class HaulListItem extends StatelessWidget {
           isActiveHaul
               ? 'Haul ${_haul.id} (Active) - ${_haul.fishingMethod.name}'
               : 'Haul ${_haul.id} - ${_haul.fishingMethod.name}',
+          style: TextStyle(fontSize: 18),
         ),
       ],
     );
     return Card(
-      color: isActiveHaul ? AppConfig.accentColor : null,
+      color: isActiveHaul ? Colors.grey[600] : null,
       elevation: 2,
       child: FlatButton(
-          onPressed: onPressed,
-          child: ListTile(
-            title: title,
-            subtitle: timePeriod,
-            trailing: Icon(
-              Icons.keyboard_arrow_right,
-            ),
-          )),
+        onPressed: onPressed,
+        child: ListTile(
+          title: title,
+          subtitle: timePeriod,
+          trailing: Icon(
+            Icons.keyboard_arrow_right,
+          ),
+        ),
+      ),
     );
   }
 }

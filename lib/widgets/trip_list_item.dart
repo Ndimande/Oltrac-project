@@ -22,16 +22,19 @@ class TripListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final String startedAt = friendlyTimestamp(_trip.startedAt);
     final String endedAt = friendlyTimestamp(_trip.endedAt);
-    final timePeriod = Text('$startedAt - $endedAt');
+    final timePeriod = Text(
+      '$startedAt - $endedAt',
+      style: TextStyle(fontSize: 16),
+    );
 
     final title = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           'Trip ${_trip.id}',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        Text(' (' + _haulsText(_trip.hauls.length) + ')')
+        Text(' (' + _haulsText(_trip.hauls.length) + ')', style: TextStyle(fontSize: 18))
       ],
     );
 

@@ -6,6 +6,10 @@ import 'package:oltrace/widgets/confirm_dialog.dart';
 class NoActiveTrip extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
+  _onPressStartTrip() async {
+    await _appStore.startTrip();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,19 +42,7 @@ class NoActiveTrip extends StatelessWidget {
                 height: 80,
                 width: 200,
               ),
-              onPressed: () async {
-                bool confirmed = await showDialog<bool>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => ConfirmDialog(
-                    'Start Trip',
-                    'Are you sure you want to start a new trip?',
-                  ),
-                );
-                if (confirmed) {
-                  await _appStore.startTrip();
-                }
-              },
+              onPressed: _onPressStartTrip,
             ),
           ],
         ),

@@ -18,8 +18,14 @@ class TagListItem extends StatelessWidget {
       child: FlatButton(
         onPressed: onPressed,
         child: ListTile(
-          title: Text(_tag.species.englishName),
-          subtitle: Text(weight + ' - ' + length),
+          title: Text(
+            _tag.species.englishName,
+            style: TextStyle(fontSize: 18),
+          ),
+          subtitle: Text(
+            weight + ' / ' + length,
+            style: TextStyle(fontSize: 16),
+          ),
           trailing: Icon(
             Icons.keyboard_arrow_right,
           ),

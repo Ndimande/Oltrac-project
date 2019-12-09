@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
+import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/repositories/json.dart';
+import 'package:oltrace/stores/app_store.dart';
 
 final double _fontSize = 20;
 
 class SettingsScreen extends StatefulWidget {
-  SettingsScreen();
+  final ThemeData theme;
+  final Function setTheme;
+
+  SettingsScreen(this.theme, this.setTheme);
 
   @override
   State<StatefulWidget> createState() => SettingsScreenState();
@@ -12,6 +19,9 @@ class SettingsScreen extends StatefulWidget {
 class SettingsScreenState extends State<SettingsScreen> {
   bool _allowMobileData = false;
   bool _uploadAutomatically = false;
+  bool _darkTheme = true;
+
+  SettingsScreenState();
 
   Widget _buildAllowMobile() {
     final title = 'Use Mobile Data';
@@ -51,6 +61,31 @@ class SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildEnableDarkTheme() {
+    final title = 'Dark Theme';
+    final subtitle = 'Use a theme that is nicer for viewing in the dark';
+
+    return SwitchListTile(
+      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: _fontSize),
+      ),
+      value: _darkTheme,
+      onChanged: (state) {
+        return; // todo Disabled for now
+        if (state)
+          widget.setTheme(AppConfig.darkTheme);
+        else
+          widget.setTheme(AppConfig.olspsTheme);
+
+        setState(() {
+          _darkTheme = !_darkTheme;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +95,11 @@ class SettingsScreenState extends State<SettingsScreen> {
         body: Container(
           margin: EdgeInsets.only(left: 10),
           child: Column(
-            children: <Widget>[_buildAllowMobile(), _buildAutoUpload()],
+            children: <Widget>[
+              _buildAllowMobile(),
+              _buildAutoUpload(),
+              _buildEnableDarkTheme(),
+            ],
           ),
         ));
   }
