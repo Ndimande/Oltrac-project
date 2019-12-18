@@ -18,7 +18,7 @@ class FishingMethodScreen extends StatelessWidget {
   }
 
   Widget _buildFishingMethodCard(FishingMethod method) {
-    final child = Column(
+    final child = new Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

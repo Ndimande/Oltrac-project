@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/repositories/json.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/framework/user_settings.dart';
 
 final double _fontSize = 20;
 
 class SettingsScreen extends StatefulWidget {
-  final ThemeData theme;
-  final Function setTheme;
+  final UserSettings userSettings;
+  final Function updateSettings;
 
-  SettingsScreen(this.theme, this.setTheme);
+  SettingsScreen(this.userSettings, this.updateSettings);
 
   @override
-  State<StatefulWidget> createState() => SettingsScreenState();
+  State<StatefulWidget> createState() => SettingsScreenState(userSettings);
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  bool _allowMobileData = false;
-  bool _uploadAutomatically = false;
-  bool _darkTheme = true;
 
-  SettingsScreenState();
+  SettingsScreenState(UserSettings userSettings);
 
   Widget _buildAllowMobile() {
     final title = 'Use Mobile Data';
@@ -33,11 +27,9 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: _allowMobileData,
+      value: widget.userSettings.allowMobileData,
       onChanged: (state) {
-        setState(() {
-          _allowMobileData = state;
-        });
+        widget.updateSettings(widget.userSettings.copyWith(allowMobileData: state));
       },
     );
   }
@@ -52,18 +44,16 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: _uploadAutomatically,
+      value: widget.userSettings.uploadAutomatically,
       onChanged: (state) {
-        setState(() {
-          _uploadAutomatically = !_uploadAutomatically;
-        });
+        widget.updateSettings(widget.userSettings.copyWith(uploadAutomatically: state));
       },
     );
   }
 
   Widget _buildEnableDarkTheme() {
     final title = 'Dark Theme';
-    final subtitle = 'Use a theme that is nicer for viewing in the dark';
+    final subtitle = 'Use a theme that is better for viewing in the dark';
 
     return SwitchListTile(
       subtitle: Text(subtitle),
@@ -71,17 +61,9 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: _darkTheme,
+      value: widget.userSettings.darkMode,
       onChanged: (state) {
-        return; // todo Disabled for now
-        if (state)
-          widget.setTheme(AppConfig.darkTheme);
-        else
-          widget.setTheme(AppConfig.olspsTheme);
-
-        setState(() {
-          _darkTheme = !_darkTheme;
-        });
+        widget.updateSettings(widget.userSettings.copyWith(darkMode: state));
       },
     );
   }

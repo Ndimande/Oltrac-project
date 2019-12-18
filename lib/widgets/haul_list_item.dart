@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/time_ago.dart';
 
 class HaulListItem extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -15,11 +15,17 @@ class HaulListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String startedAt = friendlyTimestamp(_haul.startedAt);
-    final String endedAt = friendlyTimestamp(_haul.endedAt);
+    final String startedAt = friendlyDateTimestamp(_haul.startedAt);
+    final String endedAt = friendlyDateTimestamp(_haul.endedAt);
 
-    final timePeriodText = endedAt == null ? 'Started: $startedAt' : '$startedAt - $endedAt';
-    final timePeriod = Text(timePeriodText, style: TextStyle(fontSize: 16));
+    final ago = TimeAgo(
+      prefix: 'Started ',
+      startedAt: _haul.startedAt,
+      textStyle: TextStyle(fontSize: 16),
+    );
+
+    final timePeriod =
+        endedAt == null ? ago : Text('$startedAt - $endedAt', style: TextStyle(fontSize: 16));
 
     final bool isActiveHaul = _appStore.activeHaul?.id == _haul.id;
 
@@ -34,16 +40,21 @@ class HaulListItem extends StatelessWidget {
         ),
       ],
     );
+
     return Card(
-      color: isActiveHaul ? Colors.grey[600] : null,
       elevation: 2,
-      child: FlatButton(
-        onPressed: onPressed,
-        child: ListTile(
-          title: title,
-          subtitle: timePeriod,
-          trailing: Icon(
-            Icons.keyboard_arrow_right,
+      child: Container(
+        decoration: isActiveHaul
+            ? BoxDecoration(border: Border(left: BorderSide(width: 10, color: Colors.green)))
+            : null,
+        child: FlatButton(
+          onPressed: onPressed,
+          child: ListTile(
+            title: title,
+            subtitle: timePeriod,
+            trailing: Icon(
+              Icons.keyboard_arrow_right,
+            ),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
@@ -6,15 +7,14 @@ import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/screens/create_tag.dart';
-import 'package:oltrace/widgets/screens/tag.dart';
+import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/tag_list_item.dart';
 
 class HaulScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  HaulScreen();
+  final Haul _haul;
+  HaulScreen(this._haul);
 
   Widget _buildDetailRow(String label, String value) {
     return Container(
@@ -50,55 +50,70 @@ class HaulScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _buildDetailRow('Fishing method', haul.fishingMethod.name),
-          _buildDetailRow('Started', friendlyTimestamp(haul.startedAt)),
-          _buildDetailRow('Ended', friendlyTimestamp(haul.endedAt) ?? '-'),
-          _buildDetailRow('Start Coords.', startLocation.toString()),
-          _buildDetailRow('End Coords.', endLocation),
+          _buildDetailRow('Started', friendlyDateTimestamp(haul.startedAt)),
+          _buildDetailRow('Ended', friendlyDateTimestamp(haul.endedAt) ?? '-'),
+          _buildDetailRow('Start Location', startLocation.toString()),
+          _buildDetailRow('End Location', endLocation),
         ],
       ),
     );
   }
 
+  Widget _buildTagsSection(List<Tag> tags) {
+    if (tags.length == 0) {
+      return Expanded(
+        child: Container(
+          alignment: Alignment.center,
+          child: Text('No carcass tags'),
+        ),
+      );
+    }
+
+    return Expanded(
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            _buildTagsLabel(tags),
+            _buildTagsList(tags),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTagsList(List<Tag> tags) {
+    final List<TagListItem> listTags = tags
+        .map(
+          (Tag tag) => TagListItem(
+            tag,
+            () async =>
+                await Navigator.pushNamed(_scaffoldKey.currentContext, '/tag', arguments: tag),
+          ),
+        )
+        .toList();
+
     return Expanded(
       child: ListView(
-        children: tags
-            .map((tag) => TagListItem(tag, () async {
-                  final pageRoute = MaterialPageRoute(
-                    builder: (context) => TagScreen(),
-                    settings: RouteSettings(arguments: tag),
-                  );
-
-                  await Navigator.push(_scaffoldKey.currentContext, pageRoute);
-                }))
-            .toList(),
+        children: listTags,
       ),
     );
   }
 
   _onPressTagButton(Haul haul, context) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateTagScreen(_appStore),
-        settings: RouteSettings(
-          arguments: haul,
-        ),
-      ),
-    );
+    await Navigator.pushNamed(context, '/create_tag', arguments: haul);
   }
 
   _floatingActionButton({onPressed}) {
     return Container(
       height: 65,
-      width: 180,
+      width: 200,
       child: FloatingActionButton.extended(
         backgroundColor: Colors.green,
         label: Text(
-          'Tag',
+          'Add Catch',
           style: TextStyle(fontSize: 22),
         ),
-        icon: Icon(Icons.add_circle_outline),
+        icon: Icon(Icons.local_offer),
         onPressed: onPressed,
       ),
     );
@@ -107,6 +122,7 @@ class HaulScreen extends StatelessWidget {
   Widget _buildTagsLabel(List<Tag> tags) {
     final text = tags.length > 0 ? 'Tags ' : 'No tags for this haul';
     return Container(
+      alignment: Alignment.center,
       child: Text(
         text,
         style: TextStyle(fontSize: 30),
@@ -116,57 +132,120 @@ class HaulScreen extends StatelessWidget {
 
   bool _isHaulOfActiveTrip(Haul haul) => haul.tripId == _appStore.activeTrip?.id;
 
+  bool _isActiveHaul(Haul haul) => _appStore.activeHaul?.id == haul.id;
+
+  _cancelHaulAction() {
+    return FlatButton.icon(
+      textColor: Colors.white,
+      label: Text('Cancel'),
+      icon: Icon(
+        Icons.cancel,
+      ),
+      onPressed: () async {
+        bool confirmed = await showDialog<bool>(
+          context: _scaffoldKey.currentContext,
+          builder: (_) => ConfirmDialog('Cancel Haul',
+              'Are you sure you want to cancel the haul? The haul will be removed. This action cannot be undone.'),
+        );
+
+        if (confirmed != null && confirmed) {
+          Navigator.pop(_scaffoldKey.currentContext);
+          await Future.delayed(Duration(seconds: 1));
+          await _appStore.cancelHaul();
+        }
+      },
+    );
+  }
+
+  _endHaulAction() {
+    return FlatButton.icon(
+      textColor: Colors.white,
+      label: Text('End'),
+      icon: Icon(
+        Icons.check_circle,
+      ),
+      onPressed: () async {
+        bool confirmed = await showDialog<bool>(
+          context: _scaffoldKey.currentContext,
+          builder: (_) => ConfirmDialog('End Haul',
+              'Are you sure you want to end the haul? You will not be able to continue later.'),
+        );
+
+        if (confirmed) {
+          await _appStore.endHaul();
+        }
+      },
+    );
+  }
+
+  _deleteHaulAction() {
+    return IconButton(
+      icon: Icon(
+        Icons.delete,
+      ),
+      onPressed: () async {
+        // TODO implement
+      },
+    );
+  }
+
+  List<Widget> _actions(Haul haul) {
+    final List actions = <Widget>[];
+    if (_isActiveHaul(haul)) {
+      actions.add(_endHaulAction());
+      actions.add(_cancelHaulAction());
+    } else {
+      actions.add(_deleteHaulAction());
+    }
+    return actions;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Haul haulArg = ModalRoute.of(context).settings.arguments;
+    return Observer(builder: (_) {
+      // is the haul arg in the current trip
+      final bool isActiveTrip =
+          _appStore.hasActiveTrip ? _appStore.activeTrip.id == _haul.tripId : false;
 
-    // is the haul arg in the current trip
-    final bool isActiveTrip =
-        _appStore.hasActiveTrip ? _appStore.activeTrip.id == haulArg.tripId : false;
+      // either the active trip or a completed trip
+      final Trip trip = isActiveTrip
+          ? _appStore.activeTrip
+          : _appStore.completedTrips.firstWhere((trip) => trip.id == _haul.tripId);
 
-    // either the active trip or a completed trip
-    final Trip trip = isActiveTrip
-        ? _appStore.activeTrip
-        : _appStore.completedTrips.firstWhere((trip) => trip.id == haulArg.tripId);
+      // look through all hauls including hauls in the active trip
+      final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
+print(haul.toString());
+      final floatingActionButton = _isHaulOfActiveTrip(haul)
+          ? _floatingActionButton(
+              onPressed: () async => await _onPressTagButton(haul, context),
+            )
+          : null;
 
-    // look through all hauls including hauls in the active trip
-    final haul = trip.hauls.firstWhere((h) => haulArg.id == h.id);
+      final titleText = _isActiveHaul(haul) ? 'Haul ${haul.id} (Active)' : 'Haul ${haul.id}';
 
-    final floatingActionButton = _isHaulOfActiveTrip(haul)
-        ? _floatingActionButton(
-            onPressed: () async => await _onPressTagButton(haul, context),
-          )
-        : null;
-
-    final isActiveHaul = _appStore.activeHaul?.id == haul.id;
-
-    final titleText = isActiveHaul ? 'Haul ${haul.id} (Active)' : 'Haul ${haul.id}';
-
-    return Scaffold(
-      key: _scaffoldKey,
-      floatingActionButton: floatingActionButton,
-      appBar: AppBar(
-        title: Text(titleText),
-      ),
-      body: Container(
-        child: Column(
-//          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(15),
-              child: _buildHaulDetails(haul),
-            ),
-            Container(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Divider(),
-            ),
-            Container(
-              child: _buildTagsLabel(haul.tags),
-            ),
-            _buildTagsList(haul.tags)
-          ],
+      return Scaffold(
+        key: _scaffoldKey,
+        floatingActionButton: floatingActionButton,
+        appBar: AppBar(
+          title: Text(titleText),
+          actions: _actions(haul),
         ),
-      ),
-    );
+        body: Container(
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(15),
+                child: _buildHaulDetails(haul),
+              ),
+              Container(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Divider(),
+              ),
+              _buildTagsSection(haul.tags)
+            ],
+          ),
+        ),
+      );
+    });
   }
 }

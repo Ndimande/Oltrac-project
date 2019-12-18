@@ -4,12 +4,19 @@ import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/oltrace_drawer.dart';
+import 'package:oltrace/widgets/screens/main/drawer.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/main/haul_section.dart';
 import 'package:oltrace/widgets/screens/main/no_active_trip.dart';
 import 'package:oltrace/widgets/screens/main/trip_section.dart';
 import 'package:oltrace/widgets/time_ago.dart';
+
+class _AppBarActions {
+  static const endTrip = 'End Trip';
+  static const cancelTrip = 'Cancel Trip';
+  static const endHaul = 'End Haul';
+  static const cancelHaul = 'Cancel Haul';
+}
 
 class MainScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -21,6 +28,70 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  _onPressAction(String action) async {
+    print(action);
+    switch (action) {
+      case _AppBarActions.endTrip:
+        bool confirmed = await showDialog<bool>(
+          context: _scaffoldKey.currentContext,
+          builder: (_) => ConfirmDialog('End Trip', 'Are you sure you want to end the trip?'),
+        );
+        if (confirmed) {
+          await widget._appStore.endTrip();
+        }
+        break;
+      case _AppBarActions.cancelTrip:
+        bool confirmed = await showDialog<bool>(
+          context: _scaffoldKey.currentContext,
+          builder: (_) => ConfirmDialog('Cancel Trip', 'Are you sure you want to cancel the trip?'),
+        );
+        if (confirmed) {
+          await widget._appStore.cancelTrip();
+        }
+        break;
+      case _AppBarActions.endHaul:
+        await _onPressEndHaul();
+        break;
+      case _AppBarActions.cancelHaul:
+        bool confirmed = await showDialog<bool>(
+          context: _scaffoldKey.currentContext,
+          builder: (_) => ConfirmDialog('Cancel Haul', 'Are you sure you want to cancel the haul?'),
+        );
+        if (confirmed) {
+          await widget._appStore.cancelHaul();
+        }
+        break;
+    }
+  }
+
+  List<Widget> _appBarActions() {
+    final actions = <String>[];
+    if (widget._appStore.hasActiveHaul) {
+      actions.add(_AppBarActions.endHaul);
+      actions.add(_AppBarActions.cancelHaul);
+    } else if (widget._appStore.hasActiveTrip) {
+      actions.add(_AppBarActions.endTrip);
+      actions.add(_AppBarActions.cancelTrip);
+    }
+
+    return [
+      PopupMenuButton(
+        icon: Icon(Icons.more_vert),
+        onSelected: _onPressAction,
+        itemBuilder: (context) {
+          return actions.map((String item) {
+            return PopupMenuItem(
+              value: item,
+              child: Text(item),
+            );
+          }).toList();
+        },
+      ),
+    ];
+  }
+
   Widget _buildAppBar() {
     Widget title = Text('In Port');
     if (widget._appStore.hasActiveTrip) {
@@ -34,7 +105,10 @@ class MainScreenState extends State<MainScreen> {
       }
     }
 
-    return AppBar(title: title);
+    return AppBar(
+      title: title,
+      // actions: widget._appStore.hasActiveTrip ? _appBarActions() : null,
+    );
   }
 
   Future<FishingMethod> _selectFishingMethod() async {
@@ -101,15 +175,15 @@ class MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
       final floatingActionButton = widget._appStore.hasActiveTrip ? _floatingActionButton() : null;
-      // return Text('Hello World');
 
       return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
+          key: _scaffoldKey,
           floatingActionButton: floatingActionButton,
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           appBar: _buildAppBar(),
-          drawer: OlTraceDrawer(widget._appStore),
+          drawer: MainDrawer(),
           body: Builder(
             builder: (_) {
               if (!widget._appStore.hasActiveTrip) {

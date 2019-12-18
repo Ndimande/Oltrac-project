@@ -12,10 +12,6 @@ class StoreProvider {
   }
 
   AppStore get appStore {
-    if (_appStore == null) {
-      throw Exception('Store provider not initialised');
-    }
-
     return _appStore;
   }
 }

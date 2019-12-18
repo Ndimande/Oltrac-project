@@ -33,6 +33,10 @@ abstract class DatabaseRepository<T extends Model> {
     return await database.update(tableName, withoutId, where: 'id = ${model.id}');
   }
 
+  Future<void> delete(int id) async {
+    await database.delete(tableName, where: 'id = $id');
+  }
+
   /// Parse the map returned by sqflite into
   /// the model.
   T fromDatabaseMap(Map<String, dynamic> result);

@@ -20,8 +20,8 @@ class TripListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String startedAt = friendlyTimestamp(_trip.startedAt);
-    final String endedAt = friendlyTimestamp(_trip.endedAt);
+    final String startedAt = friendlyDateTimestamp(_trip.startedAt);
+    final String endedAt = friendlyDateTimestamp(_trip.endedAt);
     final timePeriod = Text(
       '$startedAt - $endedAt',
       style: TextStyle(fontSize: 16),

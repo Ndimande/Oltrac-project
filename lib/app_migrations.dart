@@ -56,4 +56,30 @@ final List<Map<String, String>> appMigrations = const [
         ')',
     'down': 'DROP TABLE tags'
   },
+  {
+    'name': 'create_products_table',
+    'up': 'CREATE TABLE products( '
+        'id INTEGER PRIMARY KEY, '
+        'tag_code TEXT NOT NULL, '
+        'product_type_id NOT NULL, '
+        'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
+        'latitude REAL NOT NULL, '
+        'longitude REAL NOT NULL, '
+        'weight INTEGER, '
+        'haul_id INTEGER, '
+        'FOREIGN KEY (haul_id) REFERENCES hauls (id)'
+        ')',
+    'down': 'DROP TABLE products'
+  },
+  {
+    'name': 'create_product_tags_table',
+    'up': 'CREATE TABLE product_tags( '
+        'id INTEGER PRIMARY KEY, '
+        'product_id INTEGER NOT NULL, '
+        'tag_id INTEGER NOT NULL, '
+        'FOREIGN KEY (product_id) REFERENCES products (id), '
+        'FOREIGN KEY (tag_id) REFERENCES tags (id)'
+        ')',
+    'down': 'DROP TABLE product_tags'
+  }
 ];

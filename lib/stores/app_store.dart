@@ -1,12 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/tag.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:package_info/package_info.dart';
@@ -23,10 +26,9 @@ abstract class _AppStore with Store {
   final haulRepo = HaulRepository();
   final tagRepo = TagRepository();
   final jsonRepo = JsonRepository();
-  final Geolocator geoLocator = Geolocator();
+  final productRepo = ProductRepository();
 
-  @observable
-  Map<String, dynamic> settings;
+  final Geolocator geoLocator = Geolocator();
 
   /// Trips that have been completed / ended.
   @observable
@@ -55,6 +57,18 @@ abstract class _AppStore with Store {
   /// to complete the profile form.
   @observable
   Profile profile;
+
+  @observable
+  ObservableList<Product> products = ObservableList();
+
+  @action
+  Future<Product> saveProduct(Product product) async {
+    final productId = await productRepo.store(product);
+    final storedProduct = product.copyWith(id: productId);
+
+    products.add(storedProduct);
+    return storedProduct;
+  }
 
   @action
   Future<Tag> saveTag(Tag tag) async {
@@ -141,6 +155,24 @@ abstract class _AppStore with Store {
   }
 
   @action
+  Future<void> cancelHaul() async {
+    // Make sure we don't get a funny state
+    assert(activeHaul != null);
+    // we will need to delete from db first
+    await haulRepo.delete(activeHaul.id);
+    // remove from trip hauls
+    final updatedHauls = activeTrip.hauls;
+    updatedHauls.remove(activeHaul);
+
+    activeTrip = activeTrip.copyWith(hauls: updatedHauls);
+  }
+
+  @action
+  Future<void> deleteHaul() async {
+    // TODO implement
+  }
+
+  @action
   Future<Trip> startTrip() async {
     Position position = await geoLocator.getLastKnownPosition();
 
@@ -184,6 +216,16 @@ abstract class _AppStore with Store {
 
     activeTrip = null;
     return endedTrip;
+  }
+
+  @action
+  Future<Trip> cancelTrip() async {
+    assert(hasActiveTrip != null);
+    final trip = activeTrip;
+
+    await tripRepo.delete(trip.id);
+    activeTrip = null;
+    return trip;
   }
 
   @action

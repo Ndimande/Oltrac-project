@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/util.dart';
-
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/time_ago.dart';
+
+final double _detailRowFontSize = 16;
 
 class TripSection extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -24,28 +26,28 @@ class TripSection extends StatelessWidget {
     }
   }
 
-  Widget _buildStartedAt() {
-    return Container(
-      margin: EdgeInsets.only(top: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            'Started: ' + friendlyTimestamp(_appStore.activeTrip.startedAt),
-            style: TextStyle(fontSize: 18),
-          ),
-          TimeAgo(
-            startedAt: _appStore.activeTrip.startedAt,
-            textStyle: TextStyle(fontSize: 18),
-            prefix: ' (',
-            suffix: ')',
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildStartedAt() {
+  //   return Container(
+  //     margin: EdgeInsets.only(top: 10),
+  //     child: Row(
+  //       crossAxisAlignment: CrossAxisAlignment.center,
+  //       children: <Widget>[
+  //         Text(
+  //           'Started: ' + friendlyDateTimestamp(_appStore.activeTrip.startedAt),
+  //           style: TextStyle(fontSize: 18),
+  //         ),
+  //         TimeAgo(
+  //           startedAt: _appStore.activeTrip.startedAt,
+  //           textStyle: TextStyle(fontSize: 18),
+  //           prefix: ' (',
+  //           suffix: ')',
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _buildEndHaulButton(context) {
+  Widget _buildEndTripButton(context) {
     return RaisedButton.icon(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
       color: Colors.red,
@@ -65,6 +67,22 @@ class TripSection extends StatelessWidget {
     );
   }
 
+  Widget _detailRow(String lhs, String rhs) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            lhs,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          Text(rhs,style: TextStyle(fontSize: 16),),
+        ],
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
     return FlatButton(
       padding: EdgeInsets.all(0),
@@ -73,7 +91,6 @@ class TripSection extends StatelessWidget {
         child: Column(
           children: <Widget>[
             // First row
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -84,23 +101,17 @@ class TripSection extends StatelessWidget {
                 ),
 
                 // End Haul
-                _buildEndHaulButton(context),
+                _buildEndTripButton(context),
               ],
             ),
-            // 2nd row
-            _buildStartedAt()
+            _detailRow('Started', friendlyDateTimestamp(_appStore.activeTrip.startedAt)),
+            _detailRow('Start Location',
+                Location.fromPosition(_appStore.activeTrip.startPosition).toString()),
           ],
         ),
       ),
       onPressed: () async {
-        final pageRoute = MaterialPageRoute(
-          builder: (context) => TripScreen(),
-          settings: RouteSettings(
-            arguments: _appStore.activeTrip,
-          ),
-        );
-
-        await Navigator.push(context, pageRoute);
+        await Navigator.pushNamed(context, '/trip', arguments: _appStore.activeTrip);
       },
     );
   }

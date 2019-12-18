@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-String friendlyTimestamp(DateTime dateTime) {
+String friendlyDateTimestamp(DateTime dateTime) {
   return dateTime == null ? null : DateFormat('d MMM y HH:mm').format(dateTime);
 }
 

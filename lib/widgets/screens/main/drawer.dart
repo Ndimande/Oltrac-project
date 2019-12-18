@@ -1,53 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/models/profile.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 
-final Color _drawerHeaderColor = AppConfig.backgroundColor;
-final Color _drawerHeaderTextColor = AppConfig.textColor1;
+// final Color _drawerHeaderColor = AppConfig.backgroundColor;
+// final Color _drawerHeaderTextColor = AppConfig.textColor1;
 final double _drawerItemFontSize = 22;
 
 Widget _drawerHeader(Profile profile) {
   final _vesselName = Text(
     profile.vesselName,
-    style: TextStyle(color: _drawerHeaderTextColor, fontSize: 30),
+    style: TextStyle(fontSize: 30),
   );
   final _skipperNameText = Text(
     profile.skipper.firstName + ' ' + profile.skipper.lastName,
     style: TextStyle(
-      color: _drawerHeaderTextColor,
       fontSize: 22,
       fontWeight: FontWeight.bold,
     ),
   );
 
-  final _headerChild = Container(
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _vesselName,
-            _skipperNameText,
-          ],
-        ),
-//        LocationCoords()
-      ]));
-
   return DrawerHeader(
-    child: _headerChild,
-    decoration: BoxDecoration(
-      color: _drawerHeaderColor,
+    child: Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _vesselName,
+              _skipperNameText,
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }
 
-class OlTraceDrawer extends StatelessWidget {
-  final AppStore _appStore;
-
-  OlTraceDrawer(this._appStore);
+class MainDrawer extends StatelessWidget {
+  final AppStore _appStore = StoreProvider().appStore;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +64,21 @@ class OlTraceDrawer extends StatelessWidget {
               style: TextStyle(fontSize: _drawerItemFontSize),
             ),
             onTap: () => Navigator.pushNamed(context, '/trip_history'),
+          ),
+
+
+          // Products
+          ListTile(
+            leading: Icon(
+              Icons.local_offer,
+            ),
+            title: Text(
+              'Product Tags',
+              style: TextStyle(fontSize: _drawerItemFontSize),
+            ),
+            onTap: () {
+              Navigator.pushNamed(context, '/products');
+            },
           ),
 
           // Settings

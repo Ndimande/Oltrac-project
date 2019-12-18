@@ -18,7 +18,6 @@ Widget _spinnerStack() {
             'OlTrace',
             textAlign: TextAlign.center,
             textScaleFactor: 2.8,
-            style: TextStyle(color: Colors.white),
           ),
         ),
       ),

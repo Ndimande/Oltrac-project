@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 
@@ -24,20 +23,18 @@ class AboutScreen extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 30, color: AppConfig.textColor1),
+                style: TextStyle(fontSize: 30 ),
               ),
               Text(
                 version,
-                style: TextStyle(color: AppConfig.textColor1),
               ),
               Text(
                 copyright,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppConfig.textColor1),
               ),
               Container(
                 padding: EdgeInsets.all(20),
-                child: BackButton(color: AppConfig.primarySwatch),
+                child: BackButton(),
               )
             ],
           ),

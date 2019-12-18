@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_config.dart';
 
 class RFID extends StatelessWidget {
   final tagCode;
@@ -17,7 +16,7 @@ class RFID extends StatelessWidget {
           Container(
             margin: EdgeInsets.only(bottom: 10),
             child: Text(
-              'Tag code:',
+              'Tag code',
               style: TextStyle(fontSize: 20),
             ),
           ),
@@ -27,7 +26,7 @@ class RFID extends StatelessWidget {
           ),
           Text(
             'Hold tag infront of reader to scan.',
-            style: TextStyle(color: AppConfig.textColor2),
+            style: TextStyle(color: Colors.grey[500]),
           )
         ],
       ),

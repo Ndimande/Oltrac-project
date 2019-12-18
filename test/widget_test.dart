@@ -7,17 +7,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:oltrace/framework/user_settings.dart';
 
 import 'package:oltrace/main.dart';
-import 'package:oltrace/providers/database.dart';
-import 'package:oltrace/stores/app_store.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    final AppStore _appStore = AppStore();
-    final _database = DatabaseProvider().database;
+
+    final userSettings = UserSettings();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(OlTraceApp(_appStore, _database));
+    await tester.pumpWidget(OlTraceApp(userSettings));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

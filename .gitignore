@@ -75,3 +75,4 @@
 **/*.g.dart
 bash.exe.stackdump
 gradle.properties
+.flutter-plugins-dependencies

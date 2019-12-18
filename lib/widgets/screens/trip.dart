@@ -7,14 +7,14 @@ import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
-import 'package:oltrace/widgets/screens/haul.dart';
-
-final _rowFontStyle = TextStyle(fontSize: 18);
 
 class TripScreen extends StatelessWidget {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final AppStore _appStore = StoreProvider().appStore;
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final Trip _trip;
+
+  TripScreen(this._trip);
 
   Widget _buildInfoItem(String label, String text) {
     return Container(
@@ -37,7 +37,7 @@ class TripScreen extends StatelessWidget {
   }
 
   Widget _buildTripInfo(Trip trip) {
-    final Position startPosition = _appStore.activeTrip.startPosition;
+    final Position startPosition = trip.startPosition;
     final String endLocation =
         trip.endPosition != null ? Location.fromPosition(trip.endPosition).toString() : '-';
     return Container(
@@ -45,34 +45,31 @@ class TripScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _buildInfoItem('Total hauls ', trip.hauls.length.toString()),
-          _buildInfoItem('Started ', friendlyTimestamp(trip.startedAt)),
-          _buildInfoItem('Ended ', trip.endedAt != null ? friendlyTimestamp(trip.endedAt) : '-'),
+          _buildInfoItem('Started ', friendlyDateTimestamp(trip.startedAt)),
+          _buildInfoItem(
+              'Ended ', trip.endedAt != null ? friendlyDateTimestamp(trip.endedAt) : '-'),
           _buildInfoItem('Start Coords. ', Location.fromPosition(startPosition).toString()),
           _buildInfoItem('End Coords. ', endLocation),
+          _buildInfoItem('Total hauls ', trip.hauls.length.toString()),
         ],
       ),
     );
   }
 
   Widget _buildHaulsList(List<Haul> hauls) {
+    final List<HaulListItem> haulListItems = hauls
+        .map((Haul haul) => HaulListItem(
+              haul,
+              () async => await Navigator.pushNamed(
+                _scaffoldKey.currentContext,
+                '/haul',
+                arguments: haul,
+              ),
+            ))
+        .toList();
+
     return Expanded(
-      child: ListView(
-        children: hauls
-            .map((haul) => HaulListItem(haul, () async {
-                  final pageRoute = MaterialPageRoute(
-                    builder: (context) => HaulScreen(),
-                    settings: RouteSettings(
-                      arguments: haul,
-                    ),
-                  );
-                  await Navigator.push(
-                    _scaffoldKey.currentContext,
-                    pageRoute,
-                  );
-                }))
-            .toList(),
-      ),
+      child: ListView(children: haulListItems),
     );
   }
 
@@ -89,25 +86,28 @@ class TripScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Trip trip = ModalRoute.of(context).settings.arguments;
-
+    var title = 'Trip ${_trip.id}';
+    if (_appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id) {
+      title += ' (Active)';
+    }
     return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text('Trip ${trip.id}'),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            Container(
+              child: _buildTripInfo(_trip),
+              padding: EdgeInsets.all(5),
+            ),
+            Divider(),
+            _buildHaulsLabel(_trip),
+            _buildHaulsList(_trip.hauls.reversed.toList())
+          ],
         ),
-        body: Container(
-          child: Column(
-            children: <Widget>[
-              Container(
-                child: _buildTripInfo(trip),
-                padding: EdgeInsets.all(5),
-              ),
-              Divider(),
-              _buildHaulsLabel(trip),
-              _buildHaulsList(trip.hauls.reversed.toList())
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }

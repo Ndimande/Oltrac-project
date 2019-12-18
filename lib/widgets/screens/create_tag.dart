@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/data/species.dart';
-import 'package:oltrace/framework/model_dropdown.dart';
+import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/screens/create_product.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
+import 'package:oltrace/widgets/tag_scanner.dart';
 
 class CreateTagScreen extends StatefulWidget {
-  final AppStore _appStore;
+  final AppStore _appStore = StoreProvider().appStore;
+  final Haul _haulArg;
 
-  CreateTagScreen(this._appStore);
+  CreateTagScreen(this._haulArg);
 
   @override
-  State<StatefulWidget> createState() => CreateTagScreenState();
+  State<StatefulWidget> createState() => CreateTagScreenState(_haulArg);
 }
 
 class CreateTagScreenState extends State<CreateTagScreen> {
@@ -37,12 +38,14 @@ class CreateTagScreenState extends State<CreateTagScreen> {
 
   final TextEditingController _lengthController = TextEditingController();
 
-  CreateTagScreenState();
+  final Haul _haul;
+
+  CreateTagScreenState(this._haul);
 
   @override
   void initState() {
     super.initState();
-    // When a tag is held to the device
+    // When a tag is held to the device, read the tag
     FlutterNfcReader.onTagDiscovered().listen((NfcData onData) {
       setState(() {
         _tagCode = onData.id;
@@ -59,6 +62,7 @@ class CreateTagScreenState extends State<CreateTagScreen> {
       );
       return;
     }
+
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -76,6 +80,7 @@ class CreateTagScreenState extends State<CreateTagScreen> {
     if (position == null) {
       position = await geolocator.getCurrentPosition();
     }
+
     final tag = await widget._appStore.saveTag(
       Tag(
         tagCode: _tagCode,
@@ -89,32 +94,71 @@ class CreateTagScreenState extends State<CreateTagScreen> {
       ),
     );
 
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-//      action: SnackBarAction(
-//        label: 'Create Product Tag',
-//        onPressed: () async {
-//          await Navigator.push(
-//            context,
-//            MaterialPageRoute(
-//              builder: (context) => CreateProductScreen(),
-//              settings: RouteSettings(
-//                arguments: tag,
-//              ),
-//            ),
-//          );
-//        },
-//      ),
-      behavior: SnackBarBehavior.fixed,
-      content: Text(
-        'Tag ${tag.tagCode} saved',
-      ),
-    ));
+    bool createProductTag = await _showTagSavedDialog(tag);
 
     setState(() {
       _tagCode = null;
       _weightController.clear();
       _lengthController.clear();
     });
+
+    if (createProductTag) {
+      await Navigator.pushNamed(context, '/create_product', arguments: tag);
+    }
+  }
+
+  Future<bool> _showTagSavedDialog(Tag tag) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        contentPadding: EdgeInsets.all(15),
+        actions: <Widget>[
+          Container(
+            margin: EdgeInsets.only(right: 60),
+            child: FlatButton(
+              child: Text(
+                'Yes',
+                style: TextStyle(fontSize: 26),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ),
+          Container(
+            child: FlatButton(
+              child: Text(
+                'No',
+                style: TextStyle(fontSize: 26),
+              ),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+          ),
+        ],
+        content: Container(
+          height: 250,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                Icons.check_circle_outline,
+                size: 50,
+              ),
+              Text(
+                'Carcass Tag for ${tag.species.englishName} (ID ${tag.tagCode}) saved!',
+                style: TextStyle(fontSize: 26),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Do you want to create a Product Tag from this Carcass Tag?',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   _floatingActionButton(Haul haul, context) {
@@ -136,15 +180,14 @@ class CreateTagScreenState extends State<CreateTagScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Haul haulArg = ModalRoute.of(context).settings.arguments;
     final sortedSpecies = species;
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
 
     return Scaffold(
       key: _scaffoldKey,
-      floatingActionButton: _floatingActionButton(haulArg, context),
+      floatingActionButton: _floatingActionButton(_haul, context),
       appBar: AppBar(
-        title: Text('Haul ${haulArg.id} - Create Tag'),
+        title: Text('Haul ${_haul.id} - Create Carcass Tag'),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -156,31 +199,18 @@ class CreateTagScreenState extends State<CreateTagScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 // Tag code
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    RFID(tagCode: _tagCode),
-                    RaisedButton(
-                      child: Text('Fake RFID scan'),
-                      onPressed: () => setState(() => _tagCode = '0xFA7E5C46'),
-                    )
-                  ],
-                ),
-
+                TagScanner(onScan: (String tagCode) => setState(() => _tagCode = tagCode)),
                 // Select species
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15),
                   child: ModelDropdown<Species>(
-                    label: 'Species:',
+                    label: 'Species',
                     selected: _selectedSpecies,
                     items: sortedSpecies.map<DropdownMenuItem<Species>>(
                       (Species species) {
                         return DropdownMenuItem<Species>(
                           value: species,
-                          child: Text(
-                            species.englishName,
-                            style: TextStyle(color: AppConfig.textColor1),
-                          ),
+                          child: Text(species.englishName),
                         );
                       },
                     ).toList(),

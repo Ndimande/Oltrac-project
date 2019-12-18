@@ -5,12 +5,6 @@ import 'dart:math' as math;
 
 import 'package:oltrace/framework/model.dart';
 
-/// Create sexagesimal position from radian position.
-///
-///     final pos = SexagesimalPosition(-12.4343,23.223);
-///     final sexagesimalLat = pos.latitude;
-///     final sexagesimalLon = pos.longitude;
-///
 @immutable
 class Location extends Model {
   /// Latitude in radians
@@ -47,14 +41,14 @@ class Location extends Model {
   }
 
   Location.fromMap(Map data)
-      : latitude = data['latitudeRadians'],
-        longitude = data['longitudeRadians'];
+      : latitude = data['latitude'],
+        longitude = data['longitude'];
 
   @override
   Map<String, double> toMap() {
     return {
-      'latitudeRadians': latitude,
-      'longitudeRadians': longitude,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 }

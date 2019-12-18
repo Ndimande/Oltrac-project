@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 class TripHistoryScreen extends StatelessWidget {
@@ -27,15 +26,7 @@ class TripHistoryScreen extends StatelessWidget {
           final Trip trip = trips[index];
 
           return TripListItem(trip, () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TripScreen(),
-                settings: RouteSettings(
-                  arguments: trip,
-                ),
-              ),
-            );
+            await Navigator.pushNamed(context, '/trip',arguments: trip);
           });
         });
   }

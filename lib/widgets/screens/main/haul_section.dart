@@ -1,27 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/elapsed_counter.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
-import 'package:oltrace/widgets/screens/haul.dart';
 
 class HaulSection extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
-  HaulSection();
-
   _onPressHaulListItem(context, Haul haul) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HaulScreen(),
-        settings: RouteSettings(
-          arguments: haul,
-        ),
+    await Navigator.pushNamed(context, '/haul', arguments: haul);
+  }
+
+  Widget _buildNoHauls() {
+    return Container(
+      alignment: Alignment.center,
+      child: Text(
+        'No hauls on this trip so far',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 16),
       ),
+    );
+  }
+
+  Widget _buildHaulsList(List<Haul> hauls) {
+    return ListView.builder(
+      itemCount: hauls.length,
+      itemBuilder: (context, index) {
+        final Haul haul = hauls[index];
+
+        return HaulListItem(
+          haul,
+          () async => await _onPressHaulListItem(context, haul),
+        );
+      },
     );
   }
 
@@ -44,26 +56,7 @@ class HaulSection extends StatelessWidget {
           ),
           Expanded(
             child: Container(
-              child: hauls.length == 0
-                  ? Container(
-                      alignment: Alignment.topCenter,
-                      child: Text(
-                        'No hauls on this trip so far',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: hauls.length,
-                      itemBuilder: (context, index) {
-                        final Haul haul = hauls[index];
-
-                        return HaulListItem(
-                          haul,
-                          () async => await _onPressHaulListItem(context, haul),
-                        );
-                      },
-                    ),
+              child: hauls.length == 0 ? _buildNoHauls() : _buildHaulsList(hauls),
             ),
           )
         ],
