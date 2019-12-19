@@ -8,7 +8,7 @@ class TripHistoryScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
   Widget _buildBottomSection() {
     final List<Trip> trips =
-        _appStore.completedTrips.where((Trip trip) => trip.endedAt != null).toList();
+        _appStore.completedTrips.reversed.where((Trip trip) => trip.endedAt != null).toList();
 
     if (trips.length == 0) {
       return Container(

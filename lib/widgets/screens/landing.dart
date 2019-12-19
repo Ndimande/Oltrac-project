@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/tag.dart';
+import 'package:oltrace/models/landing.dart';
 
 final _rowFontStyle = TextStyle(fontSize: 18);
 
-class TagScreen extends StatelessWidget {
+class LandingScreen extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final Tag _tag;
+  final Landing _landing;
 
-  TagScreen(this._tag);
+  LandingScreen(this._landing);
 
   _buildRow(String key, String val) => Container(
         margin: EdgeInsets.symmetric(vertical: 5),
@@ -36,16 +36,12 @@ class TagScreen extends StatelessWidget {
         ),
       );
 
-  _onPressFloatingActionButton(Tag tag) async {
-    var created =
-        await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: tag);
-    if (created == true) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Product Tag saved.'),
-        ),
-      );
-    }
+  _onPressFloatingActionButton(Landing landing) async {
+    // We will pop true if a product was created
+    await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product',
+        arguments: landing);
+
+
   }
 
   _floatingActionButton(onPressed) {
@@ -65,24 +61,29 @@ class TagScreen extends StatelessWidget {
     );
   }
 
+  String _lengthLabel() => _landing.individuals > 1 ? 'Length (Average)' : 'Length';
+
+  String _weightLabel() => _landing.individuals > 1 ? 'Weight (Total)' : 'Weight';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      floatingActionButton: _floatingActionButton(() async => _onPressFloatingActionButton(_tag)),
+      floatingActionButton:
+          _floatingActionButton(() async => _onPressFloatingActionButton(_landing)),
       appBar: AppBar(
-        title: Text('Tag - ${_tag.tagCode}'),
+        title: Text('Catch - ${_landing.id}'),
       ),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(15),
           child: Column(
             children: [
-              _buildRow('Tag code', _tag.tagCode),
-              _buildRow('Weight', (_tag.weight / 1000).toString() + ' kg'),
-              _buildRow('Length', _tag.length.toString() + ' cm'),
-              _buildRow('Timestamp', friendlyDateTimestamp(_tag.createdAt)),
-              _buildRow('Location', _tag.location.toString()),
+              _buildRow('ID', _landing.id.toString()),
+              _buildRow(_weightLabel(), (_landing.weight / 1000).toString() + ' kg'),
+              _buildRow(_lengthLabel(), _landing.length.toString() + ' cm'),
+              _buildRow('Timestamp', friendlyDateTimestamp(_landing.createdAt)),
+              _buildRow('Location', _landing.location.toString()),
+              _buildRow('Individuals', _landing.individuals.toString()),
               Container(
                 margin: EdgeInsets.symmetric(vertical: 10),
                 child: Divider(),
@@ -94,17 +95,17 @@ class TagScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 30),
                 ),
               ),
-              _buildRow('English name', _tag.species.englishName),
-              _buildRow('Australian name', _tag.species.australianName),
-              _buildRow('Scientific name', _tag.species.scientificName),
-              _buildRow('Alpha3 Code', _tag.species.alpha3Code),
-              _buildRow('Family', _tag.species.family),
-              _buildRow('CPC class', _tag.species.cpcClass),
-              _buildRow('CPC Group', _tag.species.cpcGroup),
-              _buildRow('Major group', _tag.species.majorGroup),
-              _buildRow('ISSCAAP group', _tag.species.isscaapGroup),
-              _buildRow('Yearbook group', _tag.species.yearbookGroup),
-              _buildRow('Caab Code', _tag.species.caabCode),
+              _buildRow('English name', _landing.species.englishName),
+              _buildRow('Australian name', _landing.species.australianName),
+              _buildRow('Scientific name', _landing.species.scientificName),
+              _buildRow('Alpha3 Code', _landing.species.alpha3Code),
+              _buildRow('Family', _landing.species.family),
+              _buildRow('CPC class', _landing.species.cpcClass),
+              _buildRow('CPC Group', _landing.species.cpcGroup),
+              _buildRow('Major group', _landing.species.majorGroup),
+              _buildRow('ISSCAAP group', _landing.species.isscaapGroup),
+              _buildRow('Yearbook group', _landing.species.yearbookGroup),
+              _buildRow('Caab Code', _landing.species.caabCode),
             ],
           ),
         ),

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 
-final double _detailRowFontSize = 16;
+final double _detailRowFontSize = 18;
 
 class TripSection extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -21,47 +19,29 @@ class TripSection extends StatelessWidget {
         'Are you sure you want to end the trip?',
       ),
     );
-    if (confirmed) {
+    if (confirmed == true) {
       await _appStore.endTrip();
     }
   }
 
-  // Widget _buildStartedAt() {
-  //   return Container(
-  //     margin: EdgeInsets.only(top: 10),
-  //     child: Row(
-  //       crossAxisAlignment: CrossAxisAlignment.center,
-  //       children: <Widget>[
-  //         Text(
-  //           'Started: ' + friendlyDateTimestamp(_appStore.activeTrip.startedAt),
-  //           style: TextStyle(fontSize: 18),
-  //         ),
-  //         TimeAgo(
-  //           startedAt: _appStore.activeTrip.startedAt,
-  //           textStyle: TextStyle(fontSize: 18),
-  //           prefix: ' (',
-  //           suffix: ')',
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget _buildEndTripButton(context) {
-    return RaisedButton.icon(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-      color: Colors.red,
-      onPressed: _appStore.hasActiveHaul ? null : () async => await _onPressEndTrip(context),
-      icon: Icon(
-        Icons.stop,
-        color: Colors.white,
-      ),
-      label: Container(
-        alignment: Alignment.center,
-        height: 50,
-        child: Text(
-          'End Trip',
-          style: TextStyle(fontSize: 22, color: Colors.white),
+  Widget _endTripButton(context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5),
+      child: RaisedButton.icon(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        color: Colors.red,
+        onPressed: _appStore.hasActiveHaul ? null : () async => await _onPressEndTrip(context),
+        icon: Icon(
+          Icons.stop,
+          color: Colors.white,
+        ),
+        label: Container(
+          alignment: Alignment.center,
+          height: 55,
+          child: Text(
+            'End Trip',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
         ),
       ),
     );
@@ -75,9 +55,17 @@ class TripSection extends StatelessWidget {
         children: <Widget>[
           Text(
             lhs,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: _detailRowFontSize,
+            ),
           ),
-          Text(rhs,style: TextStyle(fontSize: 16),),
+          Text(
+            rhs,
+            style: TextStyle(
+              fontSize: _detailRowFontSize,
+            ),
+          ),
         ],
       ),
     );
@@ -101,10 +89,29 @@ class TripSection extends StatelessWidget {
                 ),
 
                 // End Haul
-                _buildEndTripButton(context),
+                _endTripButton(context),
               ],
             ),
-            _detailRow('Started', friendlyDateTimestamp(_appStore.activeTrip.startedAt)),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    'Started',
+                    style: TextStyle(
+                      fontSize: _detailRowFontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TimeAgo(
+                    dateTime: _appStore.activeTrip.startedAt,
+                    textStyle: TextStyle(fontSize: _detailRowFontSize),
+                  ),
+                ],
+              ),
+            ),
+            // _detailRow('Started', friendlyDateTimestamp(_appStore.activeTrip.startedAt)),
             _detailRow('Start Location',
                 Location.fromPosition(_appStore.activeTrip.startPosition).toString()),
           ],

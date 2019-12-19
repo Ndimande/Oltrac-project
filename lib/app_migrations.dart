@@ -33,16 +33,14 @@ final List<Map<String, String>> appMigrations = const [
         'end_longitude REAL, '
         'trip_id INTEGER NOT NULL, '
         'fishing_method_id INTEGER NOT NULL, '
-        'FOREIGN KEY (trip_id) REFERENCES trips (id), '
-        'FOREIGN KEY (fishing_method_id) REFERENCES fishing_methods (id)'
+        'FOREIGN KEY (trip_id) REFERENCES trips (id) '
         ')',
     'down': 'DROP TABLE hauls'
   },
   {
-    'name': 'create_tags_table',
-    'up': 'CREATE TABLE tags ( '
+    'name': 'create_landings_table',
+    'up': 'CREATE TABLE landings ( '
         'id INTEGER PRIMARY KEY, '
-        'tag_code TEXT NOT NULL, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'haul_id INTEGER NOT NULL, '
         'species_code TEXT NOT NULL, '
@@ -50,11 +48,12 @@ final List<Map<String, String>> appMigrations = const [
         'length_unit TEXT NOT NULL, ' // cm / inches
         'weight INTEGER NOT NULL, '
         'length INTEGER NOT NULL, '
+        'individuals INTEGER NOT NULL DEFAULT 1, '
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '
         'FOREIGN KEY (haul_id) REFERENCES hauls (id)'
         ')',
-    'down': 'DROP TABLE tags'
+    'down': 'DROP TABLE landings'
   },
   {
     'name': 'create_products_table',
@@ -72,14 +71,14 @@ final List<Map<String, String>> appMigrations = const [
     'down': 'DROP TABLE products'
   },
   {
-    'name': 'create_product_tags_table',
-    'up': 'CREATE TABLE product_tags( '
+    'name': 'create_product_landings_table',
+    'up': 'CREATE TABLE product_landings( '
         'id INTEGER PRIMARY KEY, '
         'product_id INTEGER NOT NULL, '
-        'tag_id INTEGER NOT NULL, '
+        'landing_id INTEGER NOT NULL, '
         'FOREIGN KEY (product_id) REFERENCES products (id), '
-        'FOREIGN KEY (tag_id) REFERENCES tags (id)'
+        'FOREIGN KEY (landing_id) REFERENCES landings (id)'
         ')',
-    'down': 'DROP TABLE product_tags'
+    'down': 'DROP TABLE product_landings'
   }
 ];

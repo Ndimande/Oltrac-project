@@ -3,37 +3,37 @@ import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/data/product_types.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
-import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
-import 'package:oltrace/widgets/tag_list_item.dart';
+import 'package:oltrace/widgets/time_ago.dart';
 
 class CreateProductScreen extends StatefulWidget {
-  final Tag initialSourceTag;
+  final Landing initialSourceLanding;
   final AppStore _appStore = StoreProvider().appStore;
   final Geolocator geoLocator = Geolocator();
 
-  CreateProductScreen(this.initialSourceTag);
+  CreateProductScreen(this.initialSourceLanding);
 
   @override
-  State<StatefulWidget> createState() => CreateProductScreenState(initialSourceTag);
+  State<StatefulWidget> createState() => CreateProductScreenState(initialSourceLanding);
 }
 
 class CreateProductScreenState extends State<CreateProductScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Tag> _sourceTags;
+  final List<Landing> _sourceLandings;
   ProductType _productType;
   String _tagCode = AppConfig.DEV_MODE ? '0xAA7E5C41' : null;
 
-  CreateProductScreenState(initialSourceTag)
-      : this._sourceTags = initialSourceTag != null ? [initialSourceTag] : [];
+  CreateProductScreenState(initialSourceLanding)
+      : this._sourceLandings = initialSourceLanding != null ? [initialSourceLanding] : [];
 
   @override
   void initState() {
@@ -46,34 +46,46 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     });
   }
 
-  Widget _buildSourceTag(Tag tag) {
+  Widget _buildSourceLandingListTile(Landing landing) {
+    final weight = (landing.weight / 1000).toString() + ' kg';
+    final length = landing.length.toString() + ' cm';
     return Card(
       child: ListTile(
+        isThreeLine: true,
         leading: Icon(Icons.local_offer),
-        title: Text(tag.tagCode),
-        subtitle: Text(tag.species.englishName),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              landing.species.englishName,
+              style: TextStyle(fontSize: 18),
+            ),
+            Text('$weight | $length'),
+          ],
+        ),
+        subtitle: TimeAgo(prefix: 'Caught ', dateTime: landing.createdAt),
         trailing: IconButton(
           icon: Icon(
             Icons.remove_circle_outline,
             color: Colors.red,
           ),
-          onPressed: () => _onPressRemoveSourceTag(tag),
+          onPressed: () => _onPressRemoveSourceTag(landing),
         ),
       ),
     );
   }
 
-  Widget _buildSourceTags(List<Tag> tags) {
+  Widget _buildSourceLandings(List<Landing> landings) {
     final addButton = RaisedButton.icon(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50),
       ),
       label: Text(
-        'Add Carcass',
+        'Add Catch',
         style: TextStyle(fontSize: 20),
       ),
       icon: Icon(Icons.add),
-      onPressed: () async => await _onPressAddSourceTag(),
+      onPressed: () async => await _onPressAddSourceLanding(),
     );
 
     return Column(
@@ -83,7 +95,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              'Source Tags',
+              'Source Catches',
               style: TextStyle(fontSize: 20),
             ),
             Container(
@@ -94,7 +106,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         ),
         Container(
           margin: EdgeInsets.symmetric(vertical: 10),
-          child: Column(children: tags.map((Tag t) => _buildSourceTag(t)).toList()),
+          child: Column(
+              children: landings.map((Landing t) => _buildSourceLandingListTile(t)).toList()),
         ),
       ],
     );
@@ -131,26 +144,24 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  Future<void> _onPressAddSourceTag() async {
-    var tag = await Navigator.pushNamed(_scaffoldKey.currentContext, '/add_source_tag',
-        arguments: _sourceTags);
+  Future<void> _onPressAddSourceLanding() async {
+    var tag = await Navigator.pushNamed(_scaffoldKey.currentContext, '/add_source_landing',
+        arguments: _sourceLandings);
 
     if (tag != null) {
       setState(() {
-        _sourceTags.add(tag);
+        _sourceLandings.add(tag);
       });
     }
   }
 
-  void _onPressRemoveSourceTag(Tag tag) {
+  void _onPressRemoveSourceTag(Landing landing) {
     setState(() {
-      _sourceTags.removeWhere((t) => t.id == tag.id);
+      _sourceLandings.removeWhere((l) => l.id == landing.id);
     });
   }
 
   _onPressSaveButton() async {
-    // TODO validate
-
     if (_tagCode == null) {
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -160,7 +171,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       return;
     }
 
-    if (_sourceTags.length == 0) {
+    if (_sourceLandings.length == 0) {
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           content: Text('You must select at least one source tag.'),
@@ -190,14 +201,72 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         location: Location.fromPosition(position),
         productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id));
     // Create a product
-    await widget._appStore.saveProduct(product);
-    Navigator.pop<bool>(context, true);
+    Product savedProduct = await widget._appStore.saveProduct(product);
+
+    bool createAnother = await _showProductSavedDialog(savedProduct);
+    if (createAnother) {
+      return;
+    }
+    Navigator.pop(context);
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(
         content: Text('Product Tag saved.'),
       ),
     );
-    // Future.delayed(Duration(seconds: 1));
+  }
+
+  Future<bool> _showProductSavedDialog(Product product) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        contentPadding: EdgeInsets.all(15),
+        actions: <Widget>[
+          Container(
+            margin: EdgeInsets.only(right: 60),
+            child: FlatButton(
+              child: Text(
+                'Yes',
+                style: TextStyle(fontSize: 26),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ),
+          Container(
+            child: FlatButton(
+              child: Text(
+                'No',
+                style: TextStyle(fontSize: 26),
+              ),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+          ),
+        ],
+        content: Container(
+          height: 250,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                Icons.check_circle_outline,
+                size: 50,
+              ),
+              Text(
+                '${product.productType.name} Product (ID ${product.id.toString()}) saved!',
+                style: TextStyle(fontSize: 26),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Do you want to create another product from this catch?',
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -205,11 +274,11 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     return WillPopScope(
       onWillPop: () async {
         // Have things changed since the initial state?
-        final bool changed =
-            _sourceTags.length > 1 || // There are at least two tags so things must have changed
-                (_sourceTags.length == 1 &&
-                    _sourceTags[0] != widget.initialSourceTag) || // There is one but it's different
-                _tagCode != null; // They have scanned in a tag
+        final bool changed = _sourceLandings.length > 1 || // There are at least two landings
+            (_sourceLandings.length == 1 &&
+                _sourceLandings[0] !=
+                    widget.initialSourceLanding) || // There is one but it's different
+            _tagCode != null; // They have scanned in a tag
 
         // If there are changes warn the user before navigating away
         if (changed) {
@@ -242,10 +311,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 child: RFID(tagCode: _tagCode), // Hardcode in dev mode
               ),
 
-              // Source tags
+              // Source landings
               Container(
                 padding: EdgeInsets.all(15),
-                child: _buildSourceTags(_sourceTags),
+                child: _buildSourceLandings(_sourceLandings),
               ),
 
               //Product Type

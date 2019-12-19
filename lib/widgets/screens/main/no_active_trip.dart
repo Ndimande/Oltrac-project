@@ -69,7 +69,7 @@ class NoActiveTrip extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Expanded(child: _completedTripList()),
-            Container(padding: EdgeInsets.all(15), child: _startTripButton()),
+            // Container(padding: EdgeInsets.all(15), child: _startTripButton()),
           ],
         ),
       ),

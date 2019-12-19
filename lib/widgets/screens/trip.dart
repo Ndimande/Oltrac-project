@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
@@ -6,6 +7,7 @@ import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
 
 class TripScreen extends StatelessWidget {
@@ -73,41 +75,106 @@ class TripScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHaulsLabel(Trip trip) {
-    final text = trip.hauls.length > 0 ? 'Hauls ' : 'No hauls on this trip';
+  Widget _buildHaulsLabel() {
     return Container(
       child: Text(
-        text,
+        'Hauls',
         style: TextStyle(fontSize: 30),
       ),
-      padding: EdgeInsets.only(top: 10, left: 10),
+      padding: EdgeInsets.only(top: 15),
     );
+  }
+
+  Widget _endTripActionButton() => FlatButton.icon(
+        icon: Icon(Icons.check_circle),
+        label: Text('End'),
+        onPressed: () async {
+          bool confirmed = await showDialog<bool>(
+            context: _scaffoldKey.currentContext,
+            builder: (_) => ConfirmDialog('End Trip', 'Are you sure you want to end the trip?'),
+          );
+          if (confirmed == true) {
+            await _appStore.endTrip();
+          }
+        },
+      );
+
+  Widget _cancelTripActionButton() => FlatButton.icon(
+        icon: Icon(Icons.cancel),
+        label: Text('Cancel'),
+        onPressed: () async {
+          bool confirmed = await showDialog<bool>(
+            context: _scaffoldKey.currentContext,
+            builder: (_) =>
+                ConfirmDialog('Cancel Trip', 'Are you sure you want to cancel the trip?'),
+          );
+          if (confirmed == true) {
+            await _appStore.cancelTrip();
+          }
+        },
+      );
+
+  /// Allows the user to cancel or end a [Trip].
+  ///
+  /// The action buttons will be hidden if there is
+  /// an active [Haul] because the user may not end
+  /// the [Trip] if a [Haul] is active.
+  List<Widget> _appBarActions() {
+    var actions = <Widget>[];
+
+    // Is there an active trip? Is this the active trip?
+    if (_appStore.hasActiveTrip && _trip.id == _appStore.activeTrip.id) {
+      // Is there no active haul?
+      if (!_appStore.hasActiveHaul) {
+        // Show the actions
+        actions.add(_endTripActionButton());
+        actions.add(_cancelTripActionButton());
+      }
+    }
+    // You may not delete a trip that has been completed
+    // so there is no delete button.
+    return actions;
   }
 
   @override
   Widget build(BuildContext context) {
-    var title = 'Trip ${_trip.id}';
-    if (_appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id) {
-      title += ' (Active)';
-    }
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            Container(
-              child: _buildTripInfo(_trip),
-              padding: EdgeInsets.all(5),
+    return Observer(
+      builder: (_) {
+        var title = 'Trip ${_trip.id}';
+        if (_appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id) {
+          title += ' (Active)';
+        }
+        return Scaffold(
+          key: _scaffoldKey,
+          appBar: AppBar(
+            actions: _appBarActions(),
+            title: Text(title),
+          ),
+          body: Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  child: _buildTripInfo(_trip),
+                  padding: EdgeInsets.all(5),
+                ),
+                Divider(),
+                _buildHaulsLabel(),
+                _trip.hauls.length > 0
+                    ? _buildHaulsList(_trip.hauls.reversed.toList())
+                    : Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'No hauls on this trip',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ),
+              ],
             ),
-            Divider(),
-            _buildHaulsLabel(_trip),
-            _buildHaulsList(_trip.hauls.reversed.toList())
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

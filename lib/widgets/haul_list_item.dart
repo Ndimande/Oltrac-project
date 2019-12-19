@@ -18,39 +18,47 @@ class HaulListItem extends StatelessWidget {
     final String startedAt = friendlyDateTimestamp(_haul.startedAt);
     final String endedAt = friendlyDateTimestamp(_haul.endedAt);
 
-    final ago = TimeAgo(
+    final startedAgo = TimeAgo(
       prefix: 'Started ',
-      startedAt: _haul.startedAt,
+      dateTime: _haul.startedAt,
       textStyle: TextStyle(fontSize: 16),
     );
 
-    final timePeriod =
-        endedAt == null ? ago : Text('$startedAt - $endedAt', style: TextStyle(fontSize: 16));
+    final endedAgo = TimeAgo(
+      prefix: 'Ended ',
+      dateTime: _haul.endedAt,
+    );
+
+    final timePeriod = endedAt == null ? startedAgo : endedAgo;
 
     final bool isActiveHaul = _appStore.activeHaul?.id == _haul.id;
 
-    final title = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          isActiveHaul
-              ? 'Haul ${_haul.id} (Active) - ${_haul.fishingMethod.name}'
-              : 'Haul ${_haul.id} - ${_haul.fishingMethod.name}',
-          style: TextStyle(fontSize: 18),
-        ),
-      ],
+    final titleText = RichText(
+      text: TextSpan(
+        style: TextStyle(fontSize: 18),
+        children: <TextSpan>[
+          TextSpan(
+            text: 'Haul ${_haul.id}' + (isActiveHaul ? ' (Active)' : ''),
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(text: ' - ${_haul.fishingMethod.name}'),
+        ],
+      ),
     );
+
+    // The active Haul is decorated with a green bar on the left
+    final decoration = isActiveHaul
+            ? BoxDecoration(border: Border(left: BorderSide(width: 10, color: Colors.green)))
+            : null;
 
     return Card(
       elevation: 2,
       child: Container(
-        decoration: isActiveHaul
-            ? BoxDecoration(border: Border(left: BorderSide(width: 10, color: Colors.green)))
-            : null,
+        decoration: decoration,
         child: FlatButton(
           onPressed: onPressed,
           child: ListTile(
-            title: title,
+            title: titleText,
             subtitle: timePeriod,
             trailing: Icon(
               Icons.keyboard_arrow_right,

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
-import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/tag_list_item.dart';
+import 'package:oltrace/widgets/landing_list_item.dart';
+
+final double _detailRowFontSize = 18;
 
 class HaulScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -25,14 +27,17 @@ class HaulScreen extends StatelessWidget {
             flex: 3,
             child: Text(
               label,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: _detailRowFontSize,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Expanded(
             flex: 5,
             child: Text(
               value,
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(fontSize: _detailRowFontSize),
               textAlign: TextAlign.right,
             ),
           ),
@@ -59,12 +64,15 @@ class HaulScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTagsSection(List<Tag> tags) {
-    if (tags.length == 0) {
+  Widget _buildLandingsSection(List<Landing> landings) {
+    if (landings.length == 0) {
       return Expanded(
         child: Container(
           alignment: Alignment.center,
-          child: Text('No carcass tags'),
+          child: Text(
+            'No catch',
+            style: TextStyle(fontSize: 20),
+          ),
         ),
       );
     }
@@ -73,28 +81,28 @@ class HaulScreen extends StatelessWidget {
       child: Container(
         child: Column(
           children: <Widget>[
-            _buildTagsLabel(tags),
-            _buildTagsList(tags),
+            _buildLandingsLabel(landings),
+            _buildLandingsList(landings),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTagsList(List<Tag> tags) {
-    final List<TagListItem> listTags = tags
+  Widget _buildLandingsList(List<Landing> landings) {
+    final List<LandingListItem> listLandings = landings
         .map(
-          (Tag tag) => TagListItem(
-            tag,
-            () async =>
-                await Navigator.pushNamed(_scaffoldKey.currentContext, '/tag', arguments: tag),
+          (Landing landing) => LandingListItem(
+            landing,
+            () async => await Navigator.pushNamed(_scaffoldKey.currentContext, '/landing',
+                arguments: landing),
           ),
         )
         .toList();
 
     return Expanded(
       child: ListView(
-        children: listTags,
+        children: listLandings,
       ),
     );
   }
@@ -111,16 +119,16 @@ class HaulScreen extends StatelessWidget {
         backgroundColor: Colors.green,
         label: Text(
           'Add Catch',
-          style: TextStyle(fontSize: 22),
+          style: TextStyle(fontSize: 20),
         ),
-        icon: Icon(Icons.local_offer),
+        icon: Icon(Icons.add),
         onPressed: onPressed,
       ),
     );
   }
 
-  Widget _buildTagsLabel(List<Tag> tags) {
-    final text = tags.length > 0 ? 'Tags ' : 'No tags for this haul';
+  Widget _buildLandingsLabel(List<Landing> landings) {
+    final text = landings.length > 0 ? 'Catch ' : 'No catch for this haul';
     return Container(
       alignment: Alignment.center,
       child: Text(
@@ -171,20 +179,9 @@ class HaulScreen extends StatelessWidget {
               'Are you sure you want to end the haul? You will not be able to continue later.'),
         );
 
-        if (confirmed) {
+        if (confirmed == true) {
           await _appStore.endHaul();
         }
-      },
-    );
-  }
-
-  _deleteHaulAction() {
-    return IconButton(
-      icon: Icon(
-        Icons.delete,
-      ),
-      onPressed: () async {
-        // TODO implement
       },
     );
   }
@@ -194,8 +191,6 @@ class HaulScreen extends StatelessWidget {
     if (_isActiveHaul(haul)) {
       actions.add(_endHaulAction());
       actions.add(_cancelHaulAction());
-    } else {
-      actions.add(_deleteHaulAction());
     }
     return actions;
   }
@@ -214,7 +209,7 @@ class HaulScreen extends StatelessWidget {
 
       // look through all hauls including hauls in the active trip
       final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
-print(haul.toString());
+
       final floatingActionButton = _isHaulOfActiveTrip(haul)
           ? _floatingActionButton(
               onPressed: () async => await _onPressTagButton(haul, context),
@@ -241,7 +236,7 @@ print(haul.toString());
                 padding: EdgeInsets.only(bottom: 10),
                 child: Divider(),
               ),
-              _buildTagsSection(haul.tags)
+              _buildLandingsSection(haul.landings)
             ],
           ),
         ),

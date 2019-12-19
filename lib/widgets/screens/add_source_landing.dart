@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/tag.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/widgets/tag_list_item.dart';
+import 'package:oltrace/widgets/landing_list_item.dart';
 
-class AddSourceTagScreen extends StatelessWidget {
+class AddSourceLandingsScreen extends StatelessWidget {
   final _appStore = StoreProvider().appStore;
-  final List<Tag> _alreadySelected;
+  final List<Landing> _alreadySelected;
 
-  AddSourceTagScreen(List<Tag> tagsArg) : _alreadySelected = tagsArg;
+  AddSourceLandingsScreen(List<Landing> landingsArgs) : _alreadySelected = landingsArgs;
 
-  Widget _buildTagsList(List<Tag> tags) {
-    final tagsNotAlreadySelected = tags
-        .where((Tag t) => !_alreadySelected.map((sel) => sel.id).toList().contains(t.id))
+  Widget _buildLandingsList(List<Landing> landings) {
+    final landingsNotAlreadySelected = landings
+        .where((Landing t) => !_alreadySelected.map((sel) => sel.id).toList().contains(t.id))
         .toList();
 
     return Builder(
       builder: (context) {
-        return tagsNotAlreadySelected.length == 0
+        return landingsNotAlreadySelected.length == 0
             ? Container(
-                child: Text('No unselected tags in this haul'),
+                child: Text('No unselected catches in this haul'),
               )
             : Column(
-                children: tagsNotAlreadySelected.map((Tag t) {
-                return TagListItem(t, () {
-                  Navigator.pop(context, t);
+                children: landingsNotAlreadySelected.map((Landing l) {
+                return LandingListItem(l, () {
+                  Navigator.pop(context, l);
                 });
               }).toList());
       },
@@ -52,7 +52,7 @@ class AddSourceTagScreen extends StatelessWidget {
             ],
           ),
         ),
-        _buildTagsList(haul.tags)
+        _buildLandingsList(haul.landings)
       ],
     );
   }
@@ -70,7 +70,7 @@ class AddSourceTagScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Source Tag'),
+        title: Text('Add Catch'),
       ),
       body: _buildHaulsList(),
     );

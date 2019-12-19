@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/widgets/time_ago.dart';
 
 String _haulsText(int length) {
   switch (length) {
@@ -20,12 +21,8 @@ class TripListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String startedAt = friendlyDateTimestamp(_trip.startedAt);
-    final String endedAt = friendlyDateTimestamp(_trip.endedAt);
-    final timePeriod = Text(
-      '$startedAt - $endedAt',
-      style: TextStyle(fontSize: 16),
-    );
+
+    final TimeAgo timeAgo = TimeAgo(prefix: 'Ended ', dateTime: _trip.endedAt,);
 
     final title = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +39,7 @@ class TripListItem extends StatelessWidget {
       child: FlatButton(
         child: ListTile(
           title: title,
-          subtitle: timePeriod,
+          subtitle: timeAgo,
           trailing: Icon(Icons.keyboard_arrow_right),
         ),
         onPressed: onPressed,

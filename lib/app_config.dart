@@ -21,6 +21,7 @@ class AppConfig {
     'mobile_data': false,
     'uploadAutomatically': false,
     'darkMode': false,
+    'bulkMode': false,
   };
 
   /// The sqlite database filename

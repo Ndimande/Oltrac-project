@@ -1,16 +1,15 @@
-import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/product.dart';
-import 'package:oltrace/models/tag.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/repositories/tag.dart';
+import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:package_info/package_info.dart';
 
@@ -22,11 +21,11 @@ class AppStore = _AppStore with _$AppStore;
 
 // The store-class
 abstract class _AppStore with Store {
-  final tripRepo = TripRepository();
-  final haulRepo = HaulRepository();
-  final tagRepo = TagRepository();
-  final jsonRepo = JsonRepository();
-  final productRepo = ProductRepository();
+  final _tripRepo = TripRepository();
+  final _haulRepo = HaulRepository();
+  final _landingRepo = LandingRepository();
+  final _jsonRepo = JsonRepository();
+  final _productRepo = ProductRepository();
 
   final Geolocator geoLocator = Geolocator();
 
@@ -63,7 +62,7 @@ abstract class _AppStore with Store {
 
   @action
   Future<Product> saveProduct(Product product) async {
-    final productId = await productRepo.store(product);
+    final productId = await _productRepo.store(product);
     final storedProduct = product.copyWith(id: productId);
 
     products.add(storedProduct);
@@ -71,14 +70,14 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<Tag> saveTag(Tag tag) async {
-    final tagId = await tagRepo.store(tag);
-    tag = tag.copyWith(id: tagId);
+  Future<Landing> saveLanding(Landing landing) async {
+    final landingId = await _landingRepo.store(landing);
+    landing = landing.copyWith(id: landingId);
 
     // update trip
     final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
-      if (haul.id == tag.haulId) {
-        return haul.copyWith(tags: [...haul.tags, tag]);
+      if (haul.id == landing.haulId) {
+        return haul.copyWith(landings: [...haul.landings, landing]);
       }
       return haul;
     }).toList();
@@ -87,7 +86,7 @@ abstract class _AppStore with Store {
 
     activeTrip = updatedTrip;
 
-    return tag;
+    return landing;
   }
 
   @action
@@ -109,7 +108,7 @@ abstract class _AppStore with Store {
       startPosition: position,
     );
 
-    final haulId = await haulRepo.store(haul);
+    final haulId = await _haulRepo.store(haul);
     final newHaul = haul.copyWith(id: haulId);
 
     final updatedTrip = activeTrip.copyWith(hauls: [...activeTrip.hauls, newHaul]);
@@ -139,7 +138,7 @@ abstract class _AppStore with Store {
       endPosition: position,
     );
 
-    await haulRepo.store(endedHaul);
+    await _haulRepo.store(endedHaul);
 
     final updatedHauls = activeTrip.hauls.map((Haul haul) {
       if (haul.id == endedHaul.id) {
@@ -150,7 +149,7 @@ abstract class _AppStore with Store {
 
     // update state
     activeTrip = activeTrip.copyWith(hauls: updatedHauls);
-    print(activeTrip);
+
     return endedHaul;
   }
 
@@ -159,7 +158,7 @@ abstract class _AppStore with Store {
     // Make sure we don't get a funny state
     assert(activeHaul != null);
     // we will need to delete from db first
-    await haulRepo.delete(activeHaul.id);
+    await _haulRepo.delete(activeHaul.id);
     // remove from trip hauls
     final updatedHauls = activeTrip.hauls;
     updatedHauls.remove(activeHaul);
@@ -183,7 +182,7 @@ abstract class _AppStore with Store {
 
     final trip = Trip(startedAt: DateTime.now(), startPosition: position);
 
-    final int tripId = await tripRepo.store(trip);
+    final int tripId = await _tripRepo.store(trip);
 
     activeTrip = trip.copyWith(id: tripId);
 
@@ -205,7 +204,7 @@ abstract class _AppStore with Store {
 
     final endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endPosition: position);
 
-    await tripRepo.store(endedTrip);
+    await _tripRepo.store(endedTrip);
 
     // If the trip is being ended, Haul must be ended
     if (activeHaul != null) {
@@ -215,6 +214,7 @@ abstract class _AppStore with Store {
     completedTrips = [...completedTrips, endedTrip];
 
     activeTrip = null;
+
     return endedTrip;
   }
 
@@ -223,14 +223,14 @@ abstract class _AppStore with Store {
     assert(hasActiveTrip != null);
     final trip = activeTrip;
 
-    await tripRepo.delete(trip.id);
+    await _tripRepo.delete(trip.id);
     activeTrip = null;
     return trip;
   }
 
   @action
   Future<void> saveProfile(Profile updatedProfile) async {
-    await jsonRepo.set('profile', updatedProfile);
+    await _jsonRepo.set('profile', updatedProfile);
     profile = updatedProfile;
   }
 
@@ -257,14 +257,14 @@ abstract class _AppStore with Store {
   bool get hasActiveTrip => activeTrip != null;
 
   @computed
-  int get activeTripTagsCount {
+  int get activeTripLandingsCount {
     if (activeTrip == null) {
       throw new Exception('No active trip');
     }
     if (activeTrip.hauls.length == 0 && activeHaul == null) {
       return 0;
     }
-    return activeTrip.hauls.fold(0, (int total, Haul elem) => total + elem.tags.length);
+    return activeTrip.hauls.fold(0, (int total, Haul elem) => total + elem.landings.length);
   }
 
   PackageInfo packageInfo;

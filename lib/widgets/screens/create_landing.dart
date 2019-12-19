@@ -1,68 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/data/species.dart';
+import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
-import 'package:oltrace/models/tag.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/screens/tag/rfid.dart';
-import 'package:oltrace/widgets/tag_scanner.dart';
 
-class CreateTagScreen extends StatefulWidget {
+class CreateLandingScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
   final Haul _haulArg;
 
-  CreateTagScreen(this._haulArg);
+  CreateLandingScreen(this._haulArg);
 
   @override
-  State<StatefulWidget> createState() => CreateTagScreenState(_haulArg);
+  State<StatefulWidget> createState() => CreateLandingScreenState(_haulArg);
 }
 
-class CreateTagScreenState extends State<CreateTagScreen> {
-  /// The unique code of the RFID tag
-  String _tagCode;
-
+class CreateLandingScreenState extends State<CreateLandingScreen> {
   /// Animal species to be associated with the tag.
   Species _selectedSpecies;
+  static final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
-
   final geolocator = Geolocator();
 
   final TextEditingController _weightController = TextEditingController();
 
   final TextEditingController _lengthController = TextEditingController();
+  final TextEditingController _individualsController = TextEditingController();
 
   final Haul _haul;
 
-  CreateTagScreenState(this._haul);
+  // Local state
+  bool _bulkMode = sharedPrefs.getBool('bulkMode');
 
-  @override
-  void initState() {
-    super.initState();
-    // When a tag is held to the device, read the tag
-    FlutterNfcReader.onTagDiscovered().listen((NfcData onData) {
-      setState(() {
-        _tagCode = onData.id;
-      });
-    });
-  }
+  CreateLandingScreenState(this._haul);
 
   _onPressSaveButton(haul, context) async {
-    if (_tagCode == null) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('No RFID has been scanned.'),
-        ),
-      );
-      return;
-    }
-
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -81,9 +60,8 @@ class CreateTagScreenState extends State<CreateTagScreen> {
       position = await geolocator.getCurrentPosition();
     }
 
-    final tag = await widget._appStore.saveTag(
-      Tag(
-        tagCode: _tagCode,
+    final landing = await widget._appStore.saveLanding(
+      Landing(
         species: _selectedSpecies,
         createdAt: DateTime.now(),
         location: Location.fromPosition(position),
@@ -91,23 +69,23 @@ class CreateTagScreenState extends State<CreateTagScreen> {
         weight: int.parse(_weightController.value.text) * 1000,
         length: int.parse(_lengthController.value.text),
         haulId: haul.id,
+        individuals: _bulkMode ? int.parse(_individualsController.value.text) : 1,
       ),
     );
 
-    bool createProductTag = await _showTagSavedDialog(tag);
+    bool createProduct = await _showLandingSavedDialog(landing);
 
     setState(() {
-      _tagCode = null;
       _weightController.clear();
       _lengthController.clear();
     });
 
-    if (createProductTag) {
-      await Navigator.pushNamed(context, '/create_product', arguments: tag);
+    if (createProduct) {
+      await Navigator.pushNamed(context, '/create_product', arguments: landing);
     }
   }
 
-  Future<bool> _showTagSavedDialog(Tag tag) {
+  Future<bool> _showLandingSavedDialog(Landing landing) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -145,12 +123,12 @@ class CreateTagScreenState extends State<CreateTagScreen> {
                 size: 50,
               ),
               Text(
-                'Carcass Tag for ${tag.species.englishName} (ID ${tag.tagCode}) saved!',
+                'Catch for ${landing.species.englishName} (ID ${landing.id.toString()}) saved!',
                 style: TextStyle(fontSize: 26),
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Do you want to create a Product Tag from this Carcass Tag?',
+                'Do you want to create a product from this catch?',
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
@@ -178,6 +156,72 @@ class CreateTagScreenState extends State<CreateTagScreen> {
     );
   }
 
+  Widget _individualsTextInput() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(bottom: 15),
+            child: Text(
+              'Number of Individuals',
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+          TextFormField(
+            style: TextStyle(fontSize: 30),
+            keyboardType: TextInputType.number,
+            controller: _individualsController,
+            validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter number of individuals';
+              }
+
+              // check if valid float
+              if (int.tryParse(value) == null) {
+                return 'Please enter a valid number of individuals';
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bulkModeButtonSwitch() {
+    return FlatButton(
+      onPressed: () {
+        setState(() {
+          _bulkMode = !_bulkMode;
+        });
+        sharedPrefs.setBool('bulkMode', _bulkMode);
+      },
+      child: Row(
+        children: <Widget>[
+          Text(
+            'Bulk Mode',
+            style: TextStyle(color: Colors.white),
+          ),
+          Switch(
+            activeColor: Colors.white,
+            onChanged: (bool value) {
+              setState(() {
+                if (value = false) {
+                  _individualsController.clear();
+                }
+                _bulkMode = value;
+                sharedPrefs.setBool('bulkMode', value);
+              });
+            },
+            value: _bulkMode,
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final sortedSpecies = species;
@@ -187,7 +231,10 @@ class CreateTagScreenState extends State<CreateTagScreen> {
       key: _scaffoldKey,
       floatingActionButton: _floatingActionButton(_haul, context),
       appBar: AppBar(
-        title: Text('Haul ${_haul.id} - Create Carcass Tag'),
+        title: Text('Haul ${_haul.id} - Add Catch'),
+        actions: <Widget>[
+          _bulkModeButtonSwitch()
+        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -198,8 +245,6 @@ class CreateTagScreenState extends State<CreateTagScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                // Tag code
-                TagScanner(onScan: (String tagCode) => setState(() => _tagCode = tagCode)),
                 // Select species
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 15),
@@ -262,7 +307,7 @@ class CreateTagScreenState extends State<CreateTagScreen> {
                       Container(
                         margin: EdgeInsets.only(bottom: 15),
                         child: Text(
-                          'Length (cm)',
+                          _bulkMode ? 'Average Length (cm)' : 'Length (cm)',
                           style: TextStyle(fontSize: 20),
                         ),
                       ),
@@ -285,6 +330,7 @@ class CreateTagScreenState extends State<CreateTagScreen> {
                     ],
                   ),
                 ),
+                _bulkMode ? _individualsTextInput() : Container()
               ],
             ),
           ),

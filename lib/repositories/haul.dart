@@ -13,26 +13,26 @@ FROM
   hauls
 ''';
 
-/// Join the tags table
-/// to get all associated tags
+/// Join the landings table
+/// to get all associated landings
 /// nested inside the hauls.
-const String _sqlJoinTags = '''
-JOIN tags
-ON tags.id = hauls.haul_id''';
+const String _sqlJoinLandings = '''
+JOIN landings
+ON landings.id = hauls.haul_id''';
 
 class HaulRepository extends DatabaseRepository<Haul> {
   var tableName = 'hauls';
 
   /// Find a single [Haul] by [id]
   /// and optionally include related data
-  /// by setting [withTags] to true.
+  /// by setting [withLandings] to true.
   ///
-  /// Returns null if none found.
-  Future<Haul> find(int id, {bool withTags = false}) async {
+  /// Returns [null] if none found.
+  Future<Haul> find(int id, {bool withLandings = false}) async {
     var sql = _sqlBasicSelect;
 
-    if (withTags) {
-      sql += _sqlJoinTags;
+    if (withLandings) {
+      sql += _sqlJoinLandings;
     }
 
     sql += ' WHERE id = $id';

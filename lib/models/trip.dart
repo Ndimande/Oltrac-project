@@ -58,7 +58,6 @@ class Trip extends Model {
   }
 
   Map<String, dynamic> toMap() {
-    print(startPosition);
     return {
       'id': id,
       'startedAt': startedAt == null ? null : startedAt.toIso8601String(),

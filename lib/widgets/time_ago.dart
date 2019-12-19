@@ -9,13 +9,13 @@ class TimeAgo extends StatefulWidget {
   @override
   TimeAgoState createState() => TimeAgoState();
 
-  final DateTime startedAt;
+  final DateTime dateTime;
   final String prefix;
   final String suffix;
   final TextStyle textStyle;
 
   TimeAgo({
-    @required this.startedAt,
+    @required this.dateTime,
     this.prefix = '',
     this.suffix = '',
     this.textStyle,
@@ -33,7 +33,7 @@ class TimeAgoState extends State<TimeAgo> {
 
   @override
   Widget build(BuildContext context) {
-    final Duration difference = DateTime.now().difference(widget.startedAt);
+    final Duration difference = DateTime.now().difference(widget.dateTime);
     final humanDiff = DateTime.now().subtract(difference);
     return Text(
       widget.prefix + timeAgo.format(humanDiff) + widget.suffix,

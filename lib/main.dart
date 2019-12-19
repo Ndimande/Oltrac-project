@@ -5,27 +5,27 @@ import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/user_settings.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/profile.dart';
-import 'package:oltrace/models/tag.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
-import 'package:oltrace/repositories/tag.dart';
+import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
-import 'package:oltrace/widgets/screens/add_source_tag.dart';
+import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
-import 'package:oltrace/widgets/screens/create_tag.dart';
+import 'package:oltrace/widgets/screens/create_landing.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 import 'package:oltrace/widgets/screens/main.dart';
 import 'package:oltrace/widgets/screens/products.dart';
 import 'package:oltrace/widgets/screens/settings.dart';
 import 'package:oltrace/widgets/screens/splash.dart';
-import 'package:oltrace/widgets/screens/tag.dart';
+import 'package:oltrace/widgets/screens/landing.dart';
 import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/screens/trip_history.dart';
 import 'package:oltrace/widgets/screens/welcome.dart';
@@ -45,7 +45,7 @@ SharedPreferences _sharedPreferences;
 final TripRepository _tripRepo = TripRepository();
 final HaulRepository _haulRepo = HaulRepository();
 final JsonRepository _jsonRepo = JsonRepository();
-final TagRepository _tagRepo = TagRepository();
+final LandingRepository _landingRepo = LandingRepository();
 
 /// The app entry point. Execution starts here.
 void main() {
@@ -130,9 +130,9 @@ Future<AppStore> _restoreState() async {
 
     var newHauls = <Haul>[];
     for (Haul haul in activeTripHauls) {
-      final List<Tag> haulTags = await _tagRepo.all(where: 'haul_id = ${haul.id}');
+      final List<Landing> haulLandings = await _landingRepo.all(where: 'haul_id = ${haul.id}');
 
-      final newHaul = haul.copyWith(tags: haulTags);
+      final newHaul = haul.copyWith(landings: haulLandings);
       newHauls.add(newHaul);
     }
 
@@ -155,9 +155,9 @@ Future<void> _restoreCompletedTrips(appStore) async {
     final updatedHauls = <Haul>[];
 
     for (Haul currentHaul in tripHauls) {
-      // Get tags for this haul
-      final haulTags = await _tagRepo.all(where: 'haul_id = ${currentHaul.id}');
-      updatedHauls.add(currentHaul.copyWith(tags: haulTags));
+      // Get catches for this haul
+      final haulCatches = await _landingRepo.all(where: 'haul_id = ${currentHaul.id}');
+      updatedHauls.add(currentHaul.copyWith(landings: haulCatches));
     }
     updatedTrips.add(trip.copyWith(hauls: updatedHauls));
   }
@@ -260,21 +260,21 @@ class OlTraceAppState extends State<OlTraceApp> {
                   SettingsScreen(_userSettings, (UserSettings us) => _updateUserSettings(us)),
             );
 
-          case '/tag':
-            final Tag tag = settings.arguments;
-            return MaterialPageRoute(builder: (_) => TagScreen(tag));
+          case '/landing':
+            final Landing landing = settings.arguments;
+            return MaterialPageRoute(builder: (_) => LandingScreen(landing));
 
           case '/create_tag':
             final Haul haul = settings.arguments;
-            return MaterialPageRoute(builder: (_) => CreateTagScreen(haul));
+            return MaterialPageRoute(builder: (_) => CreateLandingScreen(haul));
 
           case '/create_product':
-            final Tag tag = settings.arguments;
-            return MaterialPageRoute(builder: (_) => CreateProductScreen(tag));
+            final Landing landing = settings.arguments;
+            return MaterialPageRoute(builder: (_) => CreateProductScreen(landing));
 
-          case '/add_source_tag':
-            final List<Tag> tagsArg = settings.arguments;
-            return MaterialPageRoute(builder: (_) => AddSourceTagScreen(tagsArg));
+          case '/add_source_landing':
+            final List<Landing> landings = settings.arguments;
+            return MaterialPageRoute(builder: (_) => AddSourceLandingsScreen(landings));
 
           case '/products':
             return MaterialPageRoute(builder: (_) => ProductsScreen());

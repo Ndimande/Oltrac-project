@@ -5,9 +5,7 @@ import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 
 @immutable
-class Tag extends Model {
-  final String tagCode;
-
+class Landing extends Model {
   final int haulId;
 
   final Species species;
@@ -24,24 +22,27 @@ class Tag extends Model {
 
   final Location location;
 
-  Tag({
+  // The number of fish
+  final int individuals;
+
+  Landing({
     id,
-    @required this.tagCode,
     @required this.haulId,
     @required this.species,
     @required this.createdAt,
     @required this.location,
     @required this.weight,
     @required this.length,
+    individuals,
     weightUnit,
     lengthUnit,
   })  : this.weightUnit = weightUnit ?? WeightUnit.GRAMS,
         this.lengthUnit = lengthUnit ?? LengthUnit.CENTIMETERS,
+        this.individuals = individuals ?? 1,
         super(id: id);
 
-  Tag.fromMap(Map data)
-      : tagCode = data['tagCode'],
-        haulId = data['haulId'],
+  Landing.fromMap(Map data)
+      : haulId = data['haulId'],
         species = Species.fromMap(data['species']),
         createdAt = data['createdAt'],
         location = Location.fromMap(data['location']),
@@ -49,9 +50,10 @@ class Tag extends Model {
         length = data['length'],
         weightUnit = data['weightUnit'],
         lengthUnit = data['lengthUnit'],
+        individuals = data['inidividuals'],
         super.fromMap(data);
 
-  Tag copyWith({
+  Landing copyWith({
     int id,
     String tagId,
     int haulId,
@@ -62,10 +64,10 @@ class Tag extends Model {
     int length,
     WeightUnit weightUnit,
     LengthUnit lengthUnit,
+    int individuals,
   }) {
-    return Tag(
+    return Landing(
       id: id ?? this.id,
-      tagCode: tagId ?? this.tagCode,
       haulId: haulId ?? this.haulId,
       species: species ?? this.species,
       createdAt: createdAt ?? this.createdAt,
@@ -74,13 +76,13 @@ class Tag extends Model {
       length: length ?? this.length,
       weightUnit: weightUnit ?? this.weightUnit,
       lengthUnit: lengthUnit ?? this.lengthUnit,
+      individuals: individuals ?? this.individuals,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'tagCode': tagCode,
       'haulId': haulId,
       'species': species.toMap(),
       'createdAt': createdAt,
@@ -89,6 +91,7 @@ class Tag extends Model {
       'length': length,
       'weightUnit': weightUnit,
       'lengthUnit': lengthUnit,
+      'individuals': individuals,
     };
   }
 }
