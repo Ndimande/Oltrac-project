@@ -20,7 +20,7 @@ class HaulScreen extends StatelessWidget {
 
   Widget _buildDetailRow(String label, String value) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 2),
+      padding: EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: <Widget>[
           Expanded(

@@ -182,11 +182,7 @@ Future<void> _restoreProducts() async {
   //     'SELECT * FROM landings JOIN product_landings ON landings.id = product_landings.landing_id');
   // results.add({'landings': lr});
   final List<Product> products = results.map((result) => _productRepository.fromDatabaseMap(result)).toList();
-       print('REST2311ORE PRODUCTS');
-  print( products);
   _appStore.products = ObservableList.of(products);
-     print('RESTORE PRODUCTS');
-  print( _appStore.products);
 }
 
 /// The main widget of the app

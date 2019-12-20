@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/time_ago.dart';
@@ -11,10 +13,14 @@ class HaulListItem extends StatelessWidget {
   final Haul _haul;
   final Function onPressed;
 
+  final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
+
   HaulListItem(this._haul, this.onPressed);
 
   @override
   Widget build(BuildContext context) {
+    final bool darkMode = sharedPrefs.getBool('darkMode') ?? AppConfig.defaultUserSettings['darkMode'];
+
     final String startedAt = friendlyDateTimestamp(_haul.startedAt);
     final String endedAt = friendlyDateTimestamp(_haul.endedAt);
 
@@ -35,7 +41,7 @@ class HaulListItem extends StatelessWidget {
 
     final titleText = RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: 18),
+        style: TextStyle(fontSize: 18,color: darkMode ? Colors.white : Colors.black),
         children: <TextSpan>[
           TextSpan(
             text: 'Haul ${_haul.id}' + (isActiveHaul ? ' (Active)' : ''),
