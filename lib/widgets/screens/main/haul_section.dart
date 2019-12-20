@@ -16,9 +16,8 @@ class HaulSection extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       child: Text(
-        'No hauls on this trip so far',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 16),
+        'No hauls on this trip yet',
+        style: TextStyle(fontSize: 20),
       ),
     );
   }

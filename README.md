@@ -6,6 +6,10 @@ A mobile app built on Flutter for tracking shark fins and other products.
 
 You must run build_runner to generate MobX code.
 ```
+flutter packages pub run build_runner build
+```
+To run in watch mode:
+```
 flutter packages pub run build_runner watch
 ```
 

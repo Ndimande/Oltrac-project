@@ -8,12 +8,18 @@ class ProductsScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
   Widget _productList(List<Product> items) {
-
     return ListView.builder(
       itemCount: items.length,
-      itemBuilder: (_, index) {
+      itemBuilder: (context, index) {
         final Product product = items[index];
-        return ProductListItem(product, () {});
+
+        return ProductListItem(product, () async {
+          await Navigator.pushNamed(
+            context,
+            '/product',
+            arguments: product,
+          );
+        });
       },
     );
   }
@@ -21,7 +27,10 @@ class ProductsScreen extends StatelessWidget {
   Widget _empty() {
     return Container(
       alignment: Alignment.center,
-      child: Text('No Product Tags yet'),
+      child: Text(
+        'No product tags yet',
+        style: TextStyle(fontSize: 20),
+      ),
     );
   }
 

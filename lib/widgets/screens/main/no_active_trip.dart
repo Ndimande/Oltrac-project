@@ -18,6 +18,7 @@ class NoActiveTrip extends StatelessWidget {
           child: Text(
             'No completed trips.\nYour trip history will be shown here.',
             textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20),
           ));
     }
     return ListView.builder(
@@ -31,35 +32,6 @@ class NoActiveTrip extends StatelessWidget {
     );
   }
 
-  Widget _startTripButton() {
-    return RaisedButton(
-      color: Colors.green,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.play_arrow,
-              color: Colors.white,
-              size: 36,
-            ),
-            Text(
-              'Start Trip',
-              style: TextStyle(color: Colors.white, fontSize: 28),
-            ),
-          ],
-        ),
-        height: 80,
-        width: 200,
-      ),
-      onPressed: _onPressStartTrip,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -69,7 +41,6 @@ class NoActiveTrip extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Expanded(child: _completedTripList()),
-            // Container(padding: EdgeInsets.all(15), child: _startTripButton()),
           ],
         ),
       ),

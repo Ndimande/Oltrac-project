@@ -77,7 +77,8 @@ final List<Map<String, String>> appMigrations = const [
         'product_id INTEGER NOT NULL, '
         'landing_id INTEGER NOT NULL, '
         'FOREIGN KEY (product_id) REFERENCES products (id), '
-        'FOREIGN KEY (landing_id) REFERENCES landings (id)'
+        'FOREIGN KEY (landing_id) REFERENCES landings (id), '
+        'UNIQUE(product_id, landing_id)'
         ')',
     'down': 'DROP TABLE product_landings'
   }

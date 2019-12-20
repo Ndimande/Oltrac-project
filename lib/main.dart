@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mobx/mobx.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/user_settings.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
@@ -13,6 +15,7 @@ import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
@@ -22,6 +25,7 @@ import 'package:oltrace/widgets/screens/create_landing.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 import 'package:oltrace/widgets/screens/main.dart';
+import 'package:oltrace/widgets/screens/product.dart';
 import 'package:oltrace/widgets/screens/products.dart';
 import 'package:oltrace/widgets/screens/settings.dart';
 import 'package:oltrace/widgets/screens/splash.dart';
@@ -46,6 +50,7 @@ final TripRepository _tripRepo = TripRepository();
 final HaulRepository _haulRepo = HaulRepository();
 final JsonRepository _jsonRepo = JsonRepository();
 final LandingRepository _landingRepo = LandingRepository();
+final ProductRepository _productRepository = ProductRepository();
 
 /// The app entry point. Execution starts here.
 void main() {
@@ -163,6 +168,25 @@ Future<void> _restoreCompletedTrips(appStore) async {
   }
 
   appStore.completedTrips = updatedTrips;
+
+  await _restoreProducts();
+}
+
+Future<void> _restoreProducts() async {
+// _appStore
+  final sql = 'SELECT * FROM products JOIN product_landings '
+      'ON product_landings.product_id = products.id';
+   List<Map<String,dynamic>> results = await _database.rawQuery(sql);
+
+  // final lr = await _database.rawQuery(
+  //     'SELECT * FROM landings JOIN product_landings ON landings.id = product_landings.landing_id');
+  // results.add({'landings': lr});
+  final List<Product> products = results.map((result) => _productRepository.fromDatabaseMap(result)).toList();
+       print('REST2311ORE PRODUCTS');
+  print( products);
+  _appStore.products = ObservableList.of(products);
+     print('RESTORE PRODUCTS');
+  print( _appStore.products);
 }
 
 /// The main widget of the app
@@ -279,6 +303,9 @@ class OlTraceAppState extends State<OlTraceApp> {
           case '/products':
             return MaterialPageRoute(builder: (_) => ProductsScreen());
 
+          case '/product':
+            final Product product = settings.arguments;
+            return MaterialPageRoute(builder: (_) => ProductScreen(product));
 
           default:
             throw ('No such route: ${settings.name}');

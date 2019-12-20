@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product_type.dart';
 
@@ -18,23 +20,29 @@ class Product extends Model {
 
   final ProductType productType;
 
+  final List<Landing> landings;
+
   Product({
     id,
     @required this.tagCode,
     @required this.createdAt,
     @required this.location,
     @required this.productType,
+    @required landings,
     this.weight,
     weightUnit,
     lengthUnit,
   })  : this.weightUnit = weightUnit ?? WeightUnit.GRAMS,
+        this.landings = landings ?? [],
         super(id: id);
 
   Product.fromMap(Map data)
       : tagCode = data['tagCode'],
         createdAt = data['createdAt'],
-        location = Location.fromMap(data['location']),
-        productType = ProductType.fromMap(data['productType']),
+        location = Location.fromMap({'latitude': data['latitude'], 'longitude': data['longitude']}),
+        productType = productTypes.firstWhere((p) => p.id == data['id']),
+        landings =
+            [], // TODO oy vey // (data['landings'] as List).map((landing) => Landing.fromMap(landing)).toList(),
         weight = data['weight'],
         weightUnit = data['weightUnit'],
         super.fromMap(data);
@@ -45,6 +53,7 @@ class Product extends Model {
     DateTime createdAt,
     Location location,
     ProductType productType,
+    List<Landing> landings,
     int weight,
     WeightUnit weightUnit,
   }) {
@@ -54,6 +63,7 @@ class Product extends Model {
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
       productType: productType ?? this.productType,
+      landings: landings ?? this.landings,
       weight: weight ?? this.weight,
       weightUnit: weightUnit ?? this.weightUnit,
     );
@@ -66,6 +76,7 @@ class Product extends Model {
       'createdAt': createdAt,
       'location': location.toMap(),
       'productType': productType.toMap(),
+      'landings': landings.map((Landing landing) => landing.toMap()).toList(),
       'weight': weight,
       'weightUnit': weightUnit,
     };

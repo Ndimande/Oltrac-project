@@ -37,7 +37,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
   final Haul _haul;
 
   // Local state
-  bool _bulkMode = sharedPrefs.getBool('bulkMode');
+  bool _bulkMode = sharedPrefs.getBool('bulkMode') ?? false;
 
   CreateLandingScreenState(this._haul);
 
@@ -190,13 +190,18 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
     );
   }
 
+  _changeBulkMode() {
+    setState(() {
+      _bulkMode = !_bulkMode;
+    });
+    sharedPrefs.setBool('bulkMode', _bulkMode);
+    _individualsController.clear();
+  }
+
   Widget _bulkModeButtonSwitch() {
     return FlatButton(
       onPressed: () {
-        setState(() {
-          _bulkMode = !_bulkMode;
-        });
-        sharedPrefs.setBool('bulkMode', _bulkMode);
+        _changeBulkMode();
       },
       child: Row(
         children: <Widget>[
@@ -207,13 +212,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
           Switch(
             activeColor: Colors.white,
             onChanged: (bool value) {
-              setState(() {
-                if (value = false) {
-                  _individualsController.clear();
-                }
-                _bulkMode = value;
-                sharedPrefs.setBool('bulkMode', value);
-              });
+              _changeBulkMode();
             },
             value: _bulkMode,
           )
@@ -232,9 +231,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
       floatingActionButton: _floatingActionButton(_haul, context),
       appBar: AppBar(
         title: Text('Haul ${_haul.id} - Add Catch'),
-        actions: <Widget>[
-          _bulkModeButtonSwitch()
-        ],
+        actions: <Widget>[_bulkModeButtonSwitch()],
       ),
       body: SingleChildScrollView(
         child: Container(

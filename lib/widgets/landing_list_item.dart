@@ -10,8 +10,12 @@ class LandingListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String weight = (_landing.weight / 1000).toString() + ' kg';
-    final String length = (_landing.length).toString() + ' cm';
+    final bool bulkCatch = _landing.individuals > 1;
+
+    final String weight = (_landing.weight / 1000).toString() + ' kg' + (bulkCatch ? ' total' : '');
+    final String length = (_landing.length).toString() + ' cm' + (bulkCatch ? ' average' : '');
+    final String species =
+        !bulkCatch ? _landing.species.englishName : _landing.species.englishName + ' (${_landing.individuals} individuals)';
 
     return Card(
       elevation: 2,
@@ -24,13 +28,13 @@ class LandingListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                _landing.species.englishName,
+                species,
                 style: TextStyle(fontSize: 18),
               ),
               Text('$weight | $length'),
             ],
           ),
-          subtitle: TimeAgo(prefix: 'Caught ', dateTime: _landing.createdAt),
+          subtitle: TimeAgo(prefix: 'Added ', dateTime: _landing.createdAt),
           trailing: Icon(
             Icons.keyboard_arrow_right,
           ),

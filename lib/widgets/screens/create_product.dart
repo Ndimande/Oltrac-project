@@ -190,16 +190,21 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     }
 
     Position position = await widget.geoLocator.getLastKnownPosition();
+
     if (position == null) {
       // This can take a few seconds
       position = await widget.geoLocator.getCurrentPosition();
     }
+
     final product = Product(
-        tagCode: _tagCode,
-        weight: 100, // TODO weight input field
-        createdAt: DateTime.now(),
-        location: Location.fromPosition(position),
-        productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id));
+      tagCode: _tagCode,
+      weight: 100, // TODO weight input field
+      createdAt: DateTime.now(),
+      location: Location.fromPosition(position),
+      productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id),
+      landings: _sourceLandings,
+    );
+
     // Create a product
     Product savedProduct = await widget._appStore.saveProduct(product);
 
