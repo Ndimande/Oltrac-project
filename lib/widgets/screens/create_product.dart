@@ -46,30 +46,36 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     });
   }
 
-  Widget _buildSourceLandingListTile(Landing landing) {
+  Widget _sourceLandingListTile(Landing landing) {
     final weight = (landing.weight / 1000).toString() + ' kg';
     final length = landing.length.toString() + ' cm';
     return Card(
-      child: ListTile(
-        isThreeLine: true,
-        leading: Icon(Icons.local_offer),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              landing.species.englishName,
-              style: TextStyle(fontSize: 18),
-            ),
-            Text('$weight | $length'),
-          ],
-        ),
-        subtitle: TimeAgo(prefix: 'Caught ', dateTime: landing.createdAt),
-        trailing: IconButton(
-          icon: Icon(
-            Icons.remove_circle_outline,
-            color: Colors.red,
+      child: FlatButton(
+        onPressed: () async {
+          await Navigator.pushNamed(context, '/landing', arguments: landing);
+        },
+        child: ListTile(
+          isThreeLine: true,
+          leading: Icon(Icons.local_offer),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                landing.species.englishName,
+                style: TextStyle(fontSize: 18),
+              ),
+              Text('$weight | $length'),
+            ],
           ),
-          onPressed: () => _onPressRemoveSourceTag(landing),
+          subtitle: TimeAgo(prefix: 'Caught ', dateTime: landing.createdAt),
+          trailing: IconButton(
+            icon: Icon(
+              Icons.remove_circle_outline,
+              color: Colors.red,
+              size: 30,
+            ),
+            onPressed: () => _onPressRemoveSourceTag(landing),
+          ),
         ),
       ),
     );
@@ -106,8 +112,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         ),
         Container(
           margin: EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-              children: landings.map((Landing t) => _buildSourceLandingListTile(t)).toList()),
+          child: Column(children: landings.map((Landing t) => _sourceLandingListTile(t)).toList()),
         ),
       ],
     );
@@ -198,7 +203,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
     final product = Product(
       tagCode: _tagCode,
-      weight: 100, // TODO weight input field
+      //weight: 100, // TODO weight input field
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
       productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id),
@@ -313,7 +318,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
               Container(
                 padding: EdgeInsets.all(15),
                 alignment: Alignment.centerLeft,
-                child: RFID(tagCode: _tagCode), // Hardcode in dev mode
+                child: RFID(
+                  tagCode: _tagCode,
+                  onLongPress: () => setState(() {
+                    _tagCode = '0xAA7E5C41';
+                  }),
+                ), // Hardcode in dev mode
               ),
 
               // Source landings

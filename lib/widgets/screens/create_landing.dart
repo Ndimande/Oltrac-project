@@ -66,7 +66,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
         createdAt: DateTime.now(),
         location: Location.fromPosition(position),
         // kg -> g
-        weight: int.parse(_weightController.value.text) * 1000,
+        weight: (double.parse(_weightController.value.text) * 1000).round(),
         length: int.parse(_lengthController.value.text),
         haulId: haul.id,
         individuals: _bulkMode ? int.parse(_individualsController.value.text) : 1,

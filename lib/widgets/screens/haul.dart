@@ -158,7 +158,13 @@ class HaulScreen extends StatelessWidget {
 
         if (confirmed != null && confirmed) {
           Navigator.pop(_scaffoldKey.currentContext);
-          await Future.delayed(Duration(seconds: 1));
+          // We must make sure to be back to the previous screen
+          // before removing the haul or the widget will crash.
+          // Ideally the widget should have a 'canceled' state
+          // just for the purpose of prevening the page from
+          // crashing due to rendering before navigation has
+          // completed.
+          await Future.delayed(Duration(milliseconds: 500));
           await _appStore.cancelHaul();
         }
       },
@@ -198,16 +204,16 @@ class HaulScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
-      // is the haul arg in the current trip
+      // Is the haul arg in the current trip?
       final bool isActiveTrip =
           _appStore.hasActiveTrip ? _appStore.activeTrip.id == _haul.tripId : false;
 
-      // either the active trip or a completed trip
+      // Either the active trip or a completed trip
       final Trip trip = isActiveTrip
           ? _appStore.activeTrip
           : _appStore.completedTrips.firstWhere((trip) => trip.id == _haul.tripId);
 
-      // look through all hauls including hauls in the active trip
+      // Look through all hauls including hauls in the active trip
       final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
 
       final floatingActionButton = _isHaulOfActiveTrip(haul)

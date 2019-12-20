@@ -62,6 +62,7 @@ class LandingScreen extends StatelessWidget {
 
   String _weightLabel() => _landing.individuals > 1 ? 'Weight (Total)' : 'Weight';
 
+  // (Catch section)
   Widget _landingSection() {
     return Column(
       children: [
@@ -126,7 +127,6 @@ class LandingScreen extends StatelessWidget {
                 padding: EdgeInsets.all(15),
                 child: _speciesSection(),
               ),
-
             ],
           ),
         ),

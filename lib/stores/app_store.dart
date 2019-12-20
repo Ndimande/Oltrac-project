@@ -167,11 +167,6 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<void> deleteHaul() async {
-    // TODO implement
-  }
-
-  @action
   Future<Trip> startTrip() async {
     Position position = await geoLocator.getLastKnownPosition();
 
@@ -211,7 +206,14 @@ abstract class _AppStore with Store {
       await endHaul();
     }
 
-    completedTrips = [...completedTrips, endedTrip];
+    assert(activeHaul == null);
+
+    // avert your eyes
+    if (completedTrips.length == 0) {
+      completedTrips = [endedTrip];
+    } else {
+      completedTrips = [...completedTrips, endedTrip];
+    }
 
     activeTrip = null;
 

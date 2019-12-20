@@ -14,7 +14,7 @@ class LandingListItem extends StatelessWidget {
 
     final String weight = (_landing.weight / 1000).toString() + ' kg' + (bulkCatch ? ' total' : '');
     final String length = (_landing.length).toString() + ' cm' + (bulkCatch ? ' average' : '');
-    final String species =
+    final String speciesName =
         !bulkCatch ? _landing.species.englishName : _landing.species.englishName + ' (${_landing.individuals} individuals)';
 
     return Card(
@@ -28,8 +28,8 @@ class LandingListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                species,
-                style: TextStyle(fontSize: 18),
+                speciesName,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text('$weight | $length'),
             ],
