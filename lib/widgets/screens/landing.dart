@@ -12,7 +12,7 @@ class LandingScreen extends StatelessWidget {
   LandingScreen(this._landing);
 
   _buildRow(String key, String val) => Container(
-        margin: EdgeInsets.symmetric(vertical: 5),
+        margin: EdgeInsets.symmetric(vertical: 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,11 +45,11 @@ class LandingScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(top: 100),
       height: 65,
-      width: 220,
+      width: 165,
       child: FloatingActionButton.extended(
         backgroundColor: Colors.green,
         label: Text(
-          'Tag Product',
+          'Tag',
           style: TextStyle(fontSize: 22),
         ),
         icon: Icon(Icons.add_circle_outline),
@@ -58,7 +58,7 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
-  String _lengthLabel() => _landing.individuals > 1 ? 'Length (Average)' : 'Length';
+  String _lengthLabel() => _landing.individuals > 1 ? 'Length (Avg)' : 'Length';
 
   String _weightLabel() => _landing.individuals > 1 ? 'Weight (Total)' : 'Weight';
 
@@ -70,7 +70,7 @@ class LandingScreen extends StatelessWidget {
         _buildRow(_weightLabel(), (_landing.weight / 1000).toString() + ' kg'),
         _buildRow(_lengthLabel(), _landing.length.toString() + ' cm'),
         _buildRow('Timestamp', friendlyDateTimestamp(_landing.createdAt)),
-        _buildRow('Location', _landing.location.toString()),
+        _buildRow('Location', _landing.location.toMultilineString()),
         _buildRow('Individuals', _landing.individuals.toString()),
       ],
     );
@@ -97,6 +97,7 @@ class LandingScreen extends StatelessWidget {
         _buildRow('ISSCAAP group', _landing.species.isscaapGroup),
         _buildRow('Yearbook group', _landing.species.yearbookGroup),
         _buildRow('Caab Code', _landing.species.caabCode),
+        Container(height: 100) // So you can scroll past FAB
       ],
     );
   }
@@ -108,7 +109,7 @@ class LandingScreen extends StatelessWidget {
       floatingActionButton:
           _floatingActionButton(() async => _onPressFloatingActionButton(_landing)),
       appBar: AppBar(
-        title: Text('Catch - ${_landing.id}'),
+        title: Text('Shark - ${_landing.id}'),
       ),
       body: SingleChildScrollView(
         child: Container(

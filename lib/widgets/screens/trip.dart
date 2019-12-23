@@ -22,16 +22,22 @@ class TripScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 2),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Text(
-            label,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
-          Text(
-            text,
-            style: TextStyle(fontSize: 18),
+          Expanded(
+            flex: 5,
+            child: Text(
+              text,
+              textAlign: TextAlign.right,
+              style: TextStyle(fontSize: 18),
+            ),
           ),
         ],
       ),
@@ -39,20 +45,18 @@ class TripScreen extends StatelessWidget {
   }
 
   Widget _buildTripInfo(Trip trip) {
-    final Position startPosition = trip.startPosition;
-    final String endLocation =
-        trip.endPosition != null ? Location.fromPosition(trip.endPosition).toString() : '-';
+    final String startCoords = Location.fromPosition(trip.startPosition).toMultilineString();
+    final String endCoords =
+        trip.endPosition != null ? Location.fromPosition(trip.endPosition).toMultilineString() : '-';
     return Container(
       padding: EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _buildInfoItem('Started ', friendlyDateTimestamp(trip.startedAt)),
-          _buildInfoItem(
-              'Ended ', trip.endedAt != null ? friendlyDateTimestamp(trip.endedAt) : '-'),
-          _buildInfoItem('Start Coords. ', Location.fromPosition(startPosition).toString()),
-          _buildInfoItem('End Coords. ', endLocation),
           _buildInfoItem('Total hauls ', trip.hauls.length.toString()),
+
+             _buildInfoItem('Started', friendlyDateTimestamp(trip.startedAt) + '\n' + startCoords),
+          _buildInfoItem('Ended', (friendlyDateTimestamp(trip.endedAt) ?? '-') + '\n' + endCoords),
         ],
       ),
     );

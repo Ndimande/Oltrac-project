@@ -20,8 +20,9 @@ class HaulScreen extends StatelessWidget {
 
   Widget _buildDetailRow(String label, String value) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: 2),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             flex: 3,
@@ -47,34 +48,38 @@ class HaulScreen extends StatelessWidget {
   }
 
   Widget _buildHaulDetails(Haul haul) {
-    final startLocation = Location.fromPosition(haul.startPosition);
-    final String endLocation =
-        haul.endPosition != null ? Location.fromPosition(haul.endPosition).toString() : '-';
+    final String startLocation = Location.fromPosition(haul.startPosition).toMultilineString();
+    final String endLocation = haul.endPosition != null
+        ? Location.fromPosition(haul.endPosition).toMultilineString()
+        : '-';
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _buildDetailRow('Fishing method', haul.fishingMethod.name),
-          _buildDetailRow('Started', friendlyDateTimestamp(haul.startedAt)),
-          _buildDetailRow('Ended', friendlyDateTimestamp(haul.endedAt) ?? '-'),
-          _buildDetailRow('Start Location', startLocation.toString()),
-          _buildDetailRow('End Location', endLocation),
+          _buildDetailRow('Started', friendlyDateTimestamp(haul.startedAt) + '\n' + startLocation),
+          _buildDetailRow('Ended', (friendlyDateTimestamp(haul.endedAt) ?? '-') + '\n' + endLocation),
         ],
+      ),
+    );
+  }
+
+  Widget _noLandings() {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          'No sharks',
+          style: TextStyle(fontSize: 20),
+        ),
       ),
     );
   }
 
   Widget _buildLandingsSection(List<Landing> landings) {
     if (landings.length == 0) {
-      return Expanded(
-        child: Container(
-          alignment: Alignment.center,
-          child: Text(
-            'No catch',
-            style: TextStyle(fontSize: 20),
-          ),
-        ),
-      );
+      return _noLandings();
     }
 
     return Expanded(
@@ -118,7 +123,7 @@ class HaulScreen extends StatelessWidget {
       child: FloatingActionButton.extended(
         backgroundColor: Colors.green,
         label: Text(
-          'Add Catch',
+          'Add Shark',
           style: TextStyle(fontSize: 20),
         ),
         icon: Icon(Icons.add),
@@ -128,7 +133,7 @@ class HaulScreen extends StatelessWidget {
   }
 
   Widget _buildLandingsLabel(List<Landing> landings) {
-    final text = landings.length > 0 ? 'Catch ' : 'No catch for this haul';
+    final text = landings.length > 0 ? 'Sharks ' : 'No sharks for this haul';
     return Container(
       alignment: Alignment.center,
       child: Text(
@@ -242,7 +247,7 @@ class HaulScreen extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 10),
                 child: Divider(),
               ),
-              _buildLandingsSection(haul.landings)
+              _buildLandingsSection(haul.landings),
             ],
           ),
         ),

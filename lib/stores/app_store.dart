@@ -27,7 +27,7 @@ abstract class _AppStore with Store {
   final _jsonRepo = JsonRepository();
   final _productRepo = ProductRepository();
 
-  final Geolocator geoLocator = Geolocator();
+  final Geolocator geoLocator = Geolocator()..forceAndroidLocationManager = true;
 
   /// Trips that have been completed / ended.
   @observable
@@ -125,8 +125,11 @@ abstract class _AppStore with Store {
       throw Exception("No active haul");
     }
 
-    Position position = await geoLocator.getLastKnownPosition();
+    if (await geoLocator.isLocationServiceEnabled() == false) {
+      throw Exception('Location service is not enabled');
+    }
 
+    Position position = await geoLocator.getLastKnownPosition();
     if (position == null) {
       // This can take a few seconds
       position = await geoLocator.getCurrentPosition();

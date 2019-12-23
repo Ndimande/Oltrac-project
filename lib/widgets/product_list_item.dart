@@ -16,7 +16,6 @@ class ProductListItem extends StatelessWidget {
         onPressed: _onPressed,
         child: ListTile(
           isThreeLine: true,
-          leading: Icon(Icons.local_offer),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

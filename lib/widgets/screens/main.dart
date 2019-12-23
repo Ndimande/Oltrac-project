@@ -10,7 +10,6 @@ import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/main/haul_section.dart';
 import 'package:oltrace/widgets/screens/main/no_active_trip.dart';
 import 'package:oltrace/widgets/screens/main/trip_section.dart';
-import 'package:oltrace/widgets/time_ago.dart';
 
 class MainScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -53,7 +52,16 @@ class MainScreenState extends State<MainScreen> {
     );
 
     if (confirmed) {
-      await widget._appStore.endHaul();
+      try {
+        await widget._appStore.endHaul();
+      } on Exception catch (e) {
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            content: Text('Location not available.'),
+          ),
+        );
+        return;
+      }
     }
   }
 
@@ -85,7 +93,10 @@ class MainScreenState extends State<MainScreen> {
     return AppFAB(
       backgroundColor: Colors.green,
       icon: Icon(Icons.play_arrow),
-      label: Text('Start Trip', style: TextStyle(fontSize: 20),),
+      label: Text(
+        'Start Trip',
+        style: TextStyle(fontSize: 20),
+      ),
       onPressed: () async {
         await widget._appStore.startTrip();
       },

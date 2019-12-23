@@ -9,7 +9,7 @@ class ProductScreen extends StatelessWidget {
 
   Widget _detailRow(String lhs, String rhs) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -30,7 +30,7 @@ class ProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product - ${_product.tagCode}'),
+        title: Text('Product Tag - ${_product.tagCode}'),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -40,7 +40,6 @@ class ProductScreen extends StatelessWidget {
               _detailRow('ID', _product.id.toString()),
               _detailRow('Product Type', _product.productType.name),
               _detailRow('Location', _product.location.toString()),
-              _detailRow('Weight', _product.weight.toString()),
               _detailRow('Timestamp', friendlyDateTimestamp(_product.createdAt)),
             ],
           ),

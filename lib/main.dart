@@ -161,8 +161,8 @@ Future<void> _restoreCompletedTrips(appStore) async {
 
     for (Haul currentHaul in tripHauls) {
       // Get catches for this haul
-      final haulCatches = await _landingRepo.all(where: 'haul_id = ${currentHaul.id}');
-      updatedHauls.add(currentHaul.copyWith(landings: haulCatches));
+      final haulLandings = await _landingRepo.all(where: 'haul_id = ${currentHaul.id}');
+      updatedHauls.add(currentHaul.copyWith(landings: haulLandings));
     }
     updatedTrips.add(trip.copyWith(hauls: updatedHauls));
   }
@@ -173,14 +173,11 @@ Future<void> _restoreCompletedTrips(appStore) async {
 }
 
 Future<void> _restoreProducts() async {
-// _appStore
+
   final sql = 'SELECT * FROM products JOIN product_landings '
       'ON product_landings.product_id = products.id';
    List<Map<String,dynamic>> results = await _database.rawQuery(sql);
 
-  // final lr = await _database.rawQuery(
-  //     'SELECT * FROM landings JOIN product_landings ON landings.id = product_landings.landing_id');
-  // results.add({'landings': lr});
   final List<Product> products = results.map((result) => _productRepository.fromDatabaseMap(result)).toList();
   _appStore.products = ObservableList.of(products);
 }

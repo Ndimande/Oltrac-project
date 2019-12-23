@@ -29,7 +29,7 @@ class ProductsScreen extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         'No product tags yet',
-        style: TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 18),
       ),
     );
   }

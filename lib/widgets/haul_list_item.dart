@@ -5,6 +5,7 @@ import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/elapsed_counter.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 
 class HaulListItem extends StatelessWidget {
@@ -19,15 +20,14 @@ class HaulListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool darkMode = sharedPrefs.getBool('darkMode') ?? AppConfig.defaultUserSettings['darkMode'];
+    final bool darkMode =
+        sharedPrefs.getBool('darkMode') ?? AppConfig.defaultUserSettings['darkMode'];
 
-    final String startedAt = friendlyDateTimestamp(_haul.startedAt);
     final String endedAt = friendlyDateTimestamp(_haul.endedAt);
 
-    final startedAgo = TimeAgo(
-      prefix: 'Started ',
-      dateTime: _haul.startedAt,
-      textStyle: TextStyle(fontSize: 16),
+    final startedAgo = ElapsedCounter(
+      prefix: 'Duration: ',
+      startedDateTime: _haul.startedAt,
     );
 
     final endedAgo = TimeAgo(
@@ -41,7 +41,7 @@ class HaulListItem extends StatelessWidget {
 
     final titleText = RichText(
       text: TextSpan(
-        style: TextStyle(fontSize: 18,color: darkMode ? Colors.white : Colors.black),
+        style: TextStyle(fontSize: 18, color: darkMode ? Colors.white : Colors.black),
         children: <TextSpan>[
           TextSpan(
             text: 'Haul ${_haul.id}' + (isActiveHaul ? ' (Active)' : ''),
@@ -54,8 +54,8 @@ class HaulListItem extends StatelessWidget {
 
     // The active Haul is decorated with a green bar on the left
     final decoration = isActiveHaul
-            ? BoxDecoration(border: Border(left: BorderSide(width: 10, color: Colors.green)))
-            : null;
+        ? BoxDecoration(border: Border(left: BorderSide(width: 10, color: Colors.green)))
+        : null;
 
     return Card(
       elevation: 2,

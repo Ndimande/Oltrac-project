@@ -10,6 +10,7 @@ import 'package:oltrace/models/product_type.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
+import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
 import 'package:oltrace/widgets/time_ago.dart';
@@ -87,7 +88,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         borderRadius: BorderRadius.circular(50),
       ),
       label: Text(
-        'Add Catch',
+        'Add Shark',
         style: TextStyle(fontSize: 20),
       ),
       icon: Icon(Icons.add),
@@ -213,16 +214,15 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     // Create a product
     Product savedProduct = await widget._appStore.saveProduct(product);
 
+    setState(() {
+      _tagCode = null;
+    });
+
     bool createAnother = await _showProductSavedDialog(savedProduct);
     if (createAnother) {
       return;
     }
     Navigator.pop(context);
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        content: Text('Product Tag saved.'),
-      ),
-    );
   }
 
   Future<bool> _showProductSavedDialog(Product product) {
@@ -268,7 +268,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Do you want to create another product from this catch?',
+                'Do you want to create another product from this shark?',
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
@@ -314,9 +314,25 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              // Tag code
+              // Source landing
+              Container(
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('Shark to be tagged',style: TextStyle(fontSize: 20),),
+                      LandingListItem(_sourceLandings[0], () {})
+                    ],
+                  )),
+
+              //Product Type
               Container(
                 padding: EdgeInsets.all(15),
+                child: _buildProductTypeDropdown(),
+              ),
+
+              // Tag code
+              Container(
                 alignment: Alignment.centerLeft,
                 child: RFID(
                   tagCode: _tagCode,
@@ -326,16 +342,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 ), // Hardcode in dev mode
               ),
 
-              // Source landings
+              // Space for FAB
               Container(
-                padding: EdgeInsets.all(15),
-                child: _buildSourceLandings(_sourceLandings),
-              ),
-
-              //Product Type
-              Container(
-                padding: EdgeInsets.all(15),
-                child: _buildProductTypeDropdown(),
+                height: 100,
               )
             ],
           ),

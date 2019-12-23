@@ -47,30 +47,6 @@ class TripSection extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String lhs, String rhs) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            lhs,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: _detailRowFontSize,
-            ),
-          ),
-          Text(
-            rhs,
-            style: TextStyle(
-              fontSize: _detailRowFontSize,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget build(BuildContext context) {
     return FlatButton(
       padding: EdgeInsets.all(0),
@@ -93,27 +69,17 @@ class TripSection extends StatelessWidget {
               ],
             ),
             Container(
-              margin: EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'Started',
-                    style: TextStyle(
-                      fontSize: _detailRowFontSize,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TimeAgo(
+              alignment: Alignment.centerLeft,
+              child: TimeAgo(
+                    prefix: 'Started ',
                     dateTime: _appStore.activeTrip.startedAt,
                     textStyle: TextStyle(fontSize: _detailRowFontSize),
                   ),
-                ],
-              ),
             ),
-            // _detailRow('Started', friendlyDateTimestamp(_appStore.activeTrip.startedAt)),
-            _detailRow('Start Location',
-                Location.fromPosition(_appStore.activeTrip.startPosition).toString()),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: Text(Location.fromPosition(_appStore.activeTrip.startPosition).toString(),style: TextStyle(fontSize: 16),),
+            ),
           ],
         ),
       ),

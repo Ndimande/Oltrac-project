@@ -73,15 +73,15 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
       ),
     );
 
-    bool createProduct = await _showLandingSavedDialog(landing);
+    bool createProductDialogResponse = await _showLandingSavedDialog(landing);
 
     setState(() {
       _weightController.clear();
       _lengthController.clear();
     });
 
-    if (createProduct) {
-      await Navigator.pushNamed(context, '/create_product', arguments: landing);
+    if (createProductDialogResponse == true) {
+      await Navigator.pushReplacementNamed(context, '/create_product', arguments: landing);
     }
   }
 
@@ -123,12 +123,12 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
                 size: 50,
               ),
               Text(
-                'Catch for ${landing.species.englishName} (ID ${landing.id.toString()}) saved!',
+                'Shark ${landing.species.englishName} (ID ${landing.id.toString()}) saved!',
                 style: TextStyle(fontSize: 26),
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Do you want to create a product from this catch?',
+                'Do you want to create a number of products from this shark?',
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
@@ -230,7 +230,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
       key: _scaffoldKey,
       floatingActionButton: _floatingActionButton(_haul, context),
       appBar: AppBar(
-        title: Text('Haul ${_haul.id} - Add Catch'),
+        title: Text('Haul ${_haul.id} - Add Shark'),
         actions: <Widget>[_bulkModeButtonSwitch()],
       ),
       body: SingleChildScrollView(
@@ -271,7 +271,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
                       Container(
                         margin: EdgeInsets.only(bottom: 15),
                         child: Text(
-                          'Weight (kg)',
+                          _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
                           style: TextStyle(fontSize: 20),
                         ),
                       ),
@@ -304,7 +304,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
                       Container(
                         margin: EdgeInsets.only(bottom: 15),
                         child: Text(
-                          _bulkMode ? 'Average Length (cm)' : 'Length (cm)',
+                          _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
                           style: TextStyle(fontSize: 20),
                         ),
                       ),
@@ -327,7 +327,11 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
                     ],
                   ),
                 ),
-                _bulkMode ? _individualsTextInput() : Container()
+
+                // Individualsl
+                _bulkMode ? _individualsTextInput() : Container(),
+
+                Container(height: 100)
               ],
             ),
           ),

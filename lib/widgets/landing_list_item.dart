@@ -10,12 +10,12 @@ class LandingListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool bulkCatch = _landing.individuals > 1;
+    final bool bulkLanding = _landing.individuals > 1;
 
-    final String weight = (_landing.weight / 1000).toString() + ' kg' + (bulkCatch ? ' total' : '');
-    final String length = (_landing.length).toString() + ' cm' + (bulkCatch ? ' average' : '');
+    final String weight = (_landing.weight / 1000).toString() + ' kg' + (bulkLanding ? ' total' : '');
+    final String length = (_landing.length).toString() + ' cm' + (bulkLanding ? ' avg.' : '');
     final String speciesName =
-        !bulkCatch ? _landing.species.englishName : _landing.species.englishName + ' (${_landing.individuals} individuals)';
+        !bulkLanding ? _landing.species.englishName : _landing.species.englishName + ' (${_landing.individuals} individuals)';
 
     return Card(
       elevation: 2,

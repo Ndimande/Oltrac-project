@@ -70,7 +70,7 @@ class AddSourceLandingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Catch'),
+        title: Text('Add Shark'),
       ),
       body: _buildHaulsList(),
     );

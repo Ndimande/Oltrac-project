@@ -7,8 +7,15 @@ final _updateInterval = Duration(milliseconds: 1000);
 class ElapsedCounter extends StatefulWidget {
   final DateTime startedDateTime;
   final TextStyle textStyle;
+  final String prefix;
+  final String suffix;
 
-  ElapsedCounter(this.startedDateTime, {this.textStyle});
+  ElapsedCounter({
+    this.startedDateTime,
+    this.textStyle,
+    this.prefix = '',
+    this.suffix = '',
+  });
 
   @override
   State<StatefulWidget> createState() => ElapsedCounterState();
@@ -25,14 +32,13 @@ class ElapsedCounterState extends State<ElapsedCounter> {
 
   @override
   Widget build(BuildContext context) {
-    final Duration difference =
-        DateTime.now().difference(widget.startedDateTime);
+    final Duration difference = DateTime.now().difference(widget.startedDateTime);
 
     final minutes = _getMinutes(difference);
 
     final seconds = _getSeconds(difference);
 
-    final text = "$minutes:$seconds";
+    final text = "${widget.prefix}$minutes:$seconds${widget.suffix}";
 
     return Text(
       text,
@@ -47,8 +53,7 @@ class ElapsedCounterState extends State<ElapsedCounter> {
   }
 }
 
-String _getMinutes(Duration difference) =>
-    (difference.inMinutes).round().toString();
+String _getMinutes(Duration difference) => (difference.inMinutes).round().toString();
 
 String _getSeconds(Duration difference) =>
     (difference.inSeconds % 60).round().toString().padLeft(2, '0');
