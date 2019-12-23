@@ -55,6 +55,7 @@ class MainScreenState extends State<MainScreen> {
       try {
         await widget._appStore.endHaul();
       } on Exception catch (e) {
+        print(e.toString());
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
             content: Text('Location not available.'),

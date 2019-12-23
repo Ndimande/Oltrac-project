@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 

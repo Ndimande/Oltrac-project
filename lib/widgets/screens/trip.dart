@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';

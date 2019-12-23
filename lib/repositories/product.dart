@@ -29,16 +29,16 @@ class ProductRepository extends DatabaseRepository<Product> {
     }
 
     // We need to store in the pivot table
-    for (var landing in product.landings) {
-      final List<Map<String, dynamic>> res = await database.query('product_landings',
-          where: 'product_id = $createdId AND landing_id = ${landing.id}');
-      if (res.length == 0) {
-        await database.insert(
-          'product_landings',
-          {'product_id': createdId, 'landing_id': landing.id},
-        );
-      }
-    }
+    // for (var landing in product.landings) {
+    //   final List<Map<String, dynamic>> res = await database.query('product_landings',
+    //       where: 'product_id = $createdId AND landing_id = ${landing.id}');
+    //   if (res.length == 0) {
+    //     await database.insert(
+    //       'product_landings',
+    //       {'product_id': createdId, 'landing_id': landing.id},
+    //     );
+    //   }
+    // }
 
     return createdId;
   }
@@ -57,7 +57,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       }),
       weight: result['weight'],
       productType: productTypes.firstWhere((ProductType pt) => pt.id == result['product_type_id']),
-      landings: result['landings'],
+      landing: null, // TODO oy vey iz mir
     );
   }
 

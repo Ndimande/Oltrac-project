@@ -65,7 +65,7 @@ final List<Map<String, String>> appMigrations = const [
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '
         'weight INTEGER, '
-        'haul_id INTEGER, '
+        'landing_id INTEGER NOT NULL, '
         'FOREIGN KEY (haul_id) REFERENCES hauls (id)'
         ')',
     'down': 'DROP TABLE products'

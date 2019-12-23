@@ -6,10 +6,6 @@ import 'package:oltrace/widgets/trip_list_item.dart';
 class NoActiveTrip extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
-  _onPressStartTrip() async {
-    await _appStore.startTrip();
-  }
-
   Widget _completedTripList() {
     final List completedTrips = _appStore.completedTrips.reversed.toList();
     if (completedTrips.length == 0) {

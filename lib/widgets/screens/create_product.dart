@@ -82,43 +82,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  Widget _buildSourceLandings(List<Landing> landings) {
-    final addButton = RaisedButton.icon(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50),
-      ),
-      label: Text(
-        'Add Shark',
-        style: TextStyle(fontSize: 20),
-      ),
-      icon: Icon(Icons.add),
-      onPressed: () async => await _onPressAddSourceLanding(),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              'Source Catches',
-              style: TextStyle(fontSize: 20),
-            ),
-            Container(
-              alignment: Alignment.centerRight,
-              child: addButton,
-            )
-          ],
-        ),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: 10),
-          child: Column(children: landings.map((Landing t) => _sourceLandingListTile(t)).toList()),
-        ),
-      ],
-    );
-  }
-
   Widget _buildProductTypeDropdown() {
     return ModelDropdown<ProductType>(
       selected: _productType,
@@ -208,7 +171,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
       productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id),
-      landings: _sourceLandings,
+      landing: _sourceLandings[0],
     );
 
     // Create a product
