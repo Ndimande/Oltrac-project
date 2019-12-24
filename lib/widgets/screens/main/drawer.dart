@@ -66,21 +66,6 @@ class MainDrawer extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/trip_history'),
           ),
 
-
-          // Products
-          ListTile(
-            leading: Icon(
-              Icons.local_offer,
-            ),
-            title: Text(
-              'Product Tags',
-              style: TextStyle(fontSize: _drawerItemFontSize),
-            ),
-            onTap: () {
-              Navigator.pushNamed(context, '/products');
-            },
-          ),
-
           // Settings
           ListTile(
             leading: Icon(

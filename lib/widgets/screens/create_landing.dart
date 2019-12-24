@@ -73,15 +73,15 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
       ),
     );
 
-    bool createProductDialogResponse = await _showLandingSavedDialog(landing);
+    bool createAnotherDialogResponse = await _showLandingSavedDialog(landing);
 
     setState(() {
       _weightController.clear();
       _lengthController.clear();
     });
 
-    if (createProductDialogResponse == true) {
-      await Navigator.pushReplacementNamed(context, '/create_product', arguments: landing);
+    if (createAnotherDialogResponse == false) {
+       Navigator.pop(context);
     }
   }
 
@@ -128,7 +128,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Do you want to create a number of products from this shark?',
+                'Do you want to add another?',
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
