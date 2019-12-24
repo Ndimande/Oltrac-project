@@ -65,10 +65,7 @@ abstract class _AppStore with Store {
     // update trip
     final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
       final List<Landing> updatedLandings = haul.landings.map((Landing landing) {
-        final List<Product> updatedProducts = [
-          ...landing.products,
-          storedProduct
-        ];
+        final List<Product> updatedProducts = [...landing.products, storedProduct];
         return landing.copyWith(products: updatedProducts);
       }).toList();
 

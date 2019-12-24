@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/store.dart';
@@ -15,9 +16,9 @@ class LandingScreen extends StatelessWidget {
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final Landing _landing;
+  final Landing _landingArg;
 
-  LandingScreen(this._landing);
+  LandingScreen(this._landingArg);
 
   _buildRow(String key, String val) => Container(
         margin: EdgeInsets.symmetric(vertical: 2),
@@ -66,25 +67,25 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
-  String _lengthLabel() => _landing.individuals > 1 ? 'Length (Avg)' : 'Length';
+  String _lengthLabel(landing) => landing.individuals > 1 ? 'Length (Avg)' : 'Length';
 
-  String _weightLabel() => _landing.individuals > 1 ? 'Weight (Total)' : 'Weight';
+  String _weightLabel(landing) => landing.individuals > 1 ? 'Weight (Total)' : 'Weight';
 
   // (Catch section)
-  Widget _landingSection() {
+  Widget _landingSection(landing) {
     return Column(
       children: [
-        _buildRow('ID', _landing.id.toString()),
-        _buildRow(_weightLabel(), (_landing.weight / 1000).toString() + ' kg'),
-        _buildRow(_lengthLabel(), _landing.length.toString() + ' cm'),
-        _buildRow('Timestamp', friendlyDateTimestamp(_landing.createdAt)),
-        _buildRow('Location', _landing.location.toMultilineString()),
-        _buildRow('Individuals', _landing.individuals.toString()),
+        _buildRow('ID', landing.id.toString()),
+        _buildRow(_weightLabel(landing), (landing.weight / 1000).toString() + ' kg'),
+        _buildRow(_lengthLabel(landing), landing.length.toString() + ' cm'),
+        _buildRow('Timestamp', friendlyDateTimestamp(landing.createdAt)),
+        _buildRow('Location', landing.location.toMultilineString()),
+        _buildRow('Individuals', landing.individuals.toString()),
       ],
     );
   }
 
-  Widget _speciesSection() {
+  Widget _speciesSection(landing) {
     return Column(
       children: [
         Container(
@@ -94,15 +95,15 @@ class LandingScreen extends StatelessWidget {
             style: TextStyle(fontSize: 30),
           ),
         ),
-        _buildRow('Australian name', _landing.species.australianName),
-        _buildRow('Scientific name', _landing.species.scientificName),
+        _buildRow('Australian name', landing.species.australianName),
+        _buildRow('Scientific name', landing.species.scientificName),
       ],
     );
   }
 
-  Widget _products() {
-    final List<Widget> items = _landing.products
-        .map((Product p) => ProductListItem(p, () {
+  Widget _products(landing) {
+    final List<Widget> items = landing.products
+        .map<Widget>((Product p) => ProductListItem(p, () {
               Navigator.pushNamed(_scaffoldKey.currentContext, '/product', arguments: p);
             }))
         .toList();
@@ -119,18 +120,24 @@ class LandingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool inActiveTrip = _appStore.activeTrip.hauls
-            .singleWhere((h) => h.id == _landing.haulId, orElse: () => null) !=
-        null;
 
     return Observer(builder: (_) {
+      // We need to be sure not to use the stale data from
+      // the item pushed as an argument
+      // It would be wise to push an int instead and always retrieve
+      // the item from global state.
+    Haul haul = _appStore.activeTrip.hauls
+        .singleWhere((h) => h.id == _landingArg.haulId, orElse: () => null);
+
+    final Landing landing = haul.landings.singleWhere((Landing l) => l.id == _landingArg.id);
+
       return Scaffold(
         key: _scaffoldKey,
-        floatingActionButton: inActiveTrip
-            ? _floatingActionButton(() async => _onPressFloatingActionButton(_landing))
+        floatingActionButton: haul != null
+            ? _floatingActionButton(() async => _onPressFloatingActionButton(landing))
             : null,
         appBar: AppBar(
-          title: Text('Shark - ${_landing.id}'),
+          title: Text('Shark - ${landing.id}'),
         ),
         body: SingleChildScrollView(
           child: Container(
@@ -138,7 +145,7 @@ class LandingScreen extends StatelessWidget {
               children: [
                 Container(
                   padding: EdgeInsets.all(15),
-                  child: _landingSection(),
+                  child: _landingSection(landing),
                 ),
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
@@ -146,10 +153,10 @@ class LandingScreen extends StatelessWidget {
                 ),
                 Container(
                   padding: EdgeInsets.all(15),
-                  child: _speciesSection(),
+                  child: _speciesSection(landing),
                 ),
                 Container(
-                  child: _products(),
+                  child: _products(landing),
                 ),
                 Container(height: 100) // So you can scroll past FAB
               ],
