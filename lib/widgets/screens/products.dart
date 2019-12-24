@@ -36,12 +36,12 @@ class ProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = _appStore.products.reversed.toList();
+    // final items = _appStore. products.reversed.toList();
     return Scaffold(
       appBar: AppBar(
         title: Text('Product Tags'),
       ),
-      body: items.length > 0 ? _productList(items) : _empty(),
+      body: Text('todo')//items.length > 0 ? _productList(items) : _empty(),
     );
   }
 }

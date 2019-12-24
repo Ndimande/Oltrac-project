@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/models/product.dart';
+import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/product_list_item.dart';
 
 final _rowFontStyle = TextStyle(fontSize: 18);
 
 class LandingScreen extends StatelessWidget {
+  final AppStore _appStore = StoreProvider().appStore;
+
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final Landing _landing;
@@ -86,52 +94,69 @@ class LandingScreen extends StatelessWidget {
             style: TextStyle(fontSize: 30),
           ),
         ),
-        _buildRow('English name', _landing.species.englishName),
         _buildRow('Australian name', _landing.species.australianName),
         _buildRow('Scientific name', _landing.species.scientificName),
-        _buildRow('Alpha3 Code', _landing.species.alpha3Code),
-        _buildRow('Family', _landing.species.family),
-        _buildRow('CPC class', _landing.species.cpcClass),
-        _buildRow('CPC Group', _landing.species.cpcGroup),
-        _buildRow('Major group', _landing.species.majorGroup),
-        _buildRow('ISSCAAP group', _landing.species.isscaapGroup),
-        _buildRow('Yearbook group', _landing.species.yearbookGroup),
-        _buildRow('Caab Code', _landing.species.caabCode),
-        Container(height: 100) // So you can scroll past FAB
+      ],
+    );
+  }
+
+  Widget _products() {
+    final List<Widget> items = _landing.products
+        .map((Product p) => ProductListItem(p, () {
+              Navigator.pushNamed(_scaffoldKey.currentContext, '/product', arguments: p);
+            }))
+        .toList();
+    return Column(
+      children: <Widget>[
+        Text(
+          'Product Tags',
+          style: TextStyle(fontSize: 30),
+        ),
+        Column(children: items),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      floatingActionButton:
-          _floatingActionButton(() async => _onPressFloatingActionButton(_landing)),
-      appBar: AppBar(
-        title: Text('Shark - ${_landing.id}'),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          // padding: EdgeInsets.all(15),
-          child: Column(
-            children: [
-              Container(
-                padding: EdgeInsets.all(15),
-                child: _landingSection(),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10),
-                child: Divider(),
-              ),
-              Container(
-                padding: EdgeInsets.all(15),
-                child: _speciesSection(),
-              ),
-            ],
+    bool inActiveTrip = _appStore.activeTrip.hauls
+            .singleWhere((h) => h.id == _landing.haulId, orElse: () => null) !=
+        null;
+
+    return Observer(builder: (_) {
+      return Scaffold(
+        key: _scaffoldKey,
+        floatingActionButton: inActiveTrip
+            ? _floatingActionButton(() async => _onPressFloatingActionButton(_landing))
+            : null,
+        appBar: AppBar(
+          title: Text('Shark - ${_landing.id}'),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(15),
+                  child: _landingSection(),
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  child: Divider(),
+                ),
+                Container(
+                  padding: EdgeInsets.all(15),
+                  child: _speciesSection(),
+                ),
+                Container(
+                  child: _products(),
+                ),
+                Container(height: 100) // So you can scroll past FAB
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

@@ -13,7 +13,6 @@ import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
-import 'package:oltrace/widgets/time_ago.dart';
 
 class CreateProductScreen extends StatefulWidget {
   final Landing initialSourceLanding;
@@ -47,41 +46,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     });
   }
 
-  Widget _sourceLandingListTile(Landing landing) {
-    final weight = (landing.weight / 1000).toString() + ' kg';
-    final length = landing.length.toString() + ' cm';
-    return Card(
-      child: FlatButton(
-        onPressed: () async {
-          await Navigator.pushNamed(context, '/landing', arguments: landing);
-        },
-        child: ListTile(
-          isThreeLine: true,
-          leading: Icon(Icons.local_offer),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                landing.species.englishName,
-                style: TextStyle(fontSize: 18),
-              ),
-              Text('$weight | $length'),
-            ],
-          ),
-          subtitle: TimeAgo(prefix: 'Caught ', dateTime: landing.createdAt),
-          trailing: IconButton(
-            icon: Icon(
-              Icons.remove_circle_outline,
-              color: Colors.red,
-              size: 30,
-            ),
-            onPressed: () => _onPressRemoveSourceTag(landing),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildProductTypeDropdown() {
     return ModelDropdown<ProductType>(
       selected: _productType,
@@ -111,23 +75,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         onPressed: () async => await _onPressSaveButton(),
       ),
     );
-  }
-
-  Future<void> _onPressAddSourceLanding() async {
-    var tag = await Navigator.pushNamed(_scaffoldKey.currentContext, '/add_source_landing',
-        arguments: _sourceLandings);
-
-    if (tag != null) {
-      setState(() {
-        _sourceLandings.add(tag);
-      });
-    }
-  }
-
-  void _onPressRemoveSourceTag(Landing landing) {
-    setState(() {
-      _sourceLandings.removeWhere((l) => l.id == landing.id);
-    });
   }
 
   _onPressSaveButton() async {
@@ -171,7 +118,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
       productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id),
-      landing: _sourceLandings[0],
+      landingId: _sourceLandings[0].id,
     );
 
     // Create a product

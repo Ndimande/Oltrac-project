@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/species.dart';
 
 @immutable
@@ -22,6 +23,8 @@ class Landing extends Model {
 
   final Location location;
 
+  final List<Product> products;
+
   // The number of fish
   final int individuals;
 
@@ -33,6 +36,7 @@ class Landing extends Model {
     @required this.location,
     @required this.weight,
     @required this.length,
+    this.products = const [],
     individuals,
     weightUnit,
     lengthUnit,
@@ -48,6 +52,7 @@ class Landing extends Model {
         location = Location.fromMap(data['location']),
         weight = data['weight'],
         length = data['length'],
+        products = (data['products'] as List<Map>).map((item) => Product.fromMap(item)),
         weightUnit = data['weightUnit'],
         lengthUnit = data['lengthUnit'],
         individuals = data['inidividuals'],
@@ -62,6 +67,7 @@ class Landing extends Model {
     Location location,
     int weight,
     int length,
+    List<Product> products,
     WeightUnit weightUnit,
     LengthUnit lengthUnit,
     int individuals,
@@ -74,6 +80,7 @@ class Landing extends Model {
       location: location ?? this.location,
       weight: weight ?? this.weight,
       length: length ?? this.length,
+      products: products ?? this.products,
       weightUnit: weightUnit ?? this.weightUnit,
       lengthUnit: lengthUnit ?? this.lengthUnit,
       individuals: individuals ?? this.individuals,
@@ -89,9 +96,18 @@ class Landing extends Model {
       'location': location.toMap(),
       'weight': weight,
       'length': length,
+      'products': products,
       'weightUnit': weightUnit,
       'lengthUnit': lengthUnit,
       'individuals': individuals,
     };
   }
+
+  bool get hasProducts => this.products.length != 0;
+
+  bool get isBulkLanding => this.individuals > 1;
+
+  String get weightKilograms => (this.weight / 1000).toString() + ' kg' + (this.isBulkLanding ? ' total' : '');
+
+  String get lengthCentimeters => (this.length).toString() + ' cm' + (this.isBulkLanding ? ' avg.' : '');
 }

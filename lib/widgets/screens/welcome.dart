@@ -79,7 +79,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                 .map<DropdownMenuItem<FisheryType>>(
                   (FisheryType fishery) => DropdownMenuItem<FisheryType>(
                     value: fishery,
-                    child: Text(fishery.name),
+                    child: Text(fishery.safsCode),
                   ),
                 )
                 .toList(),

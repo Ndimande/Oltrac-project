@@ -16,7 +16,57 @@ class HaulScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final Haul _haul;
+
   HaulScreen(this._haul);
+
+  @override
+  Widget build(BuildContext context) {
+    return Observer(builder: (_) {
+      // Is the haul arg in the current trip?
+      final bool isActiveTrip =
+          _appStore.hasActiveTrip ? _appStore.activeTrip.id == _haul.tripId : false;
+
+      // Either the active trip or a completed trip
+      final Trip trip = isActiveTrip
+          ? _appStore.activeTrip
+          : _appStore.completedTrips.firstWhere((trip) => trip.id == _haul.tripId);
+
+      // Look through all hauls including hauls in the active trip
+      final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
+
+      final floatingActionButton = _isHaulOfActiveTrip(haul)
+          ? _floatingActionButton(
+              onPressed: () async => await _onPressTagButton(haul, context),
+            )
+          : null;
+
+      final titleText = _isActiveHaul(haul) ? 'Haul ${haul.id} (Active)' : 'Haul ${haul.id}';
+
+      return Scaffold(
+        key: _scaffoldKey,
+        floatingActionButton: floatingActionButton,
+        appBar: AppBar(
+          title: Text(titleText),
+          actions: _actions(haul),
+        ),
+        body: Container(
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(15),
+                child: _buildHaulDetails(haul),
+              ),
+              Container(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Divider(),
+              ),
+              _buildLandingsSection(haul.landings),
+            ],
+          ),
+        ),
+      );
+    });
+  }
 
   Widget _buildDetailRow(String label, String value) {
     return Container(
@@ -204,54 +254,5 @@ class HaulScreen extends StatelessWidget {
       actions.add(_cancelHaulAction());
     }
     return actions;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      // Is the haul arg in the current trip?
-      final bool isActiveTrip =
-          _appStore.hasActiveTrip ? _appStore.activeTrip.id == _haul.tripId : false;
-
-      // Either the active trip or a completed trip
-      final Trip trip = isActiveTrip
-          ? _appStore.activeTrip
-          : _appStore.completedTrips.firstWhere((trip) => trip.id == _haul.tripId);
-
-      // Look through all hauls including hauls in the active trip
-      final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
-
-      final floatingActionButton = _isHaulOfActiveTrip(haul)
-          ? _floatingActionButton(
-              onPressed: () async => await _onPressTagButton(haul, context),
-            )
-          : null;
-
-      final titleText = _isActiveHaul(haul) ? 'Haul ${haul.id} (Active)' : 'Haul ${haul.id}';
-
-      return Scaffold(
-        key: _scaffoldKey,
-        floatingActionButton: floatingActionButton,
-        appBar: AppBar(
-          title: Text(titleText),
-          actions: _actions(haul),
-        ),
-        body: Container(
-          child: Column(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(15),
-                child: _buildHaulDetails(haul),
-              ),
-              Container(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Divider(),
-              ),
-              _buildLandingsSection(haul.landings),
-            ],
-          ),
-        ),
-      );
-    });
   }
 }

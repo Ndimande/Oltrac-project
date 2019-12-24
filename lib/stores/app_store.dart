@@ -57,15 +57,28 @@ abstract class _AppStore with Store {
   @observable
   Profile profile;
 
-  @observable
-  ObservableList<Product> products = ObservableList();
-
   @action
   Future<Product> saveProduct(Product product) async {
     final productId = await _productRepo.store(product);
     final storedProduct = product.copyWith(id: productId);
 
-    products.add(storedProduct);
+    // update trip
+    final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
+      final List<Landing> updatedLandings = haul.landings.map((Landing landing) {
+        final List<Product> updatedProducts = [
+          ...landing.products,
+          storedProduct
+        ];
+        return landing.copyWith(products: updatedProducts);
+      }).toList();
+
+      return haul.copyWith(landings: updatedLandings);
+    }).toList();
+
+    final Trip updatedTrip = activeTrip.copyWith(hauls: updatedHauls);
+
+    activeTrip = updatedTrip;
+
     return storedProduct;
   }
 

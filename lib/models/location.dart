@@ -33,9 +33,9 @@ class Location extends Model {
         longitude = position.longitude;
 
   @override
-  String toString() => "$sexagesimalLat, $sexagesimalLon";
+  String toString() => "Lat. $sexagesimalLat, Lon. $sexagesimalLon";
 
-  String toMultilineString() => "$sexagesimalLat\n$sexagesimalLon";
+  String toMultilineString() => "Lat. $sexagesimalLat\nLon. $sexagesimalLon";
 
   @override
   Model copyWith({double latitude, double longitude}) {

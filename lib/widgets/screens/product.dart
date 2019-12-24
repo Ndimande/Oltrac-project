@@ -39,7 +39,7 @@ class ProductScreen extends StatelessWidget {
             children: <Widget>[
               _detailRow('ID', _product.id.toString()),
               _detailRow('Product Type', _product.productType.name),
-              _detailRow('Location', _product.location.toString()),
+              _detailRow('Location', _product.location.toMultilineString()),
               _detailRow('Timestamp', friendlyDateTimestamp(_product.createdAt)),
             ],
           ),

@@ -57,7 +57,7 @@ class LandingRepository extends DatabaseRepository<Landing> {
       weight: result['weight'],
       lengthUnit: lengthUnit,
       weightUnit: weightUnit,
-      species: speciesData.species.firstWhere((Species s) => s.id == result['species_id']),
+      species: speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
@@ -137,7 +138,15 @@ Future<AppStore> _restoreState() async {
     for (Haul haul in activeTripHauls) {
       final List<Landing> haulLandings = await _landingRepo.all(where: 'haul_id = ${haul.id}');
 
-      final newHaul = haul.copyWith(landings: haulLandings);
+      final updatedHaulLandings = <Landing>[];
+      for (Landing currentLanding in haulLandings) {
+        // Get the products for this landing
+        final landingProducts =
+            await _productRepository.all(where: 'landing_id = ${currentLanding.id}');
+        updatedHaulLandings.add(currentLanding.copyWith(products: landingProducts));
+      }
+
+      final newHaul = haul.copyWith(landings: updatedHaulLandings);
       newHauls.add(newHaul);
     }
 
@@ -149,6 +158,8 @@ Future<AppStore> _restoreState() async {
 }
 
 Future<void> _restoreCompletedTrips(appStore) async {
+  // I should never be forgiven for the code I've written below.
+  // All I can ask for is understanding...
   final completedTrips = await _tripRepo.all(where: 'ended_at IS NOT NULL');
 
   final updatedTrips = <Trip>[];
@@ -162,24 +173,21 @@ Future<void> _restoreCompletedTrips(appStore) async {
     for (Haul currentHaul in tripHauls) {
       // Get catches for this haul
       final haulLandings = await _landingRepo.all(where: 'haul_id = ${currentHaul.id}');
-      updatedHauls.add(currentHaul.copyWith(landings: haulLandings));
+
+      final updatedHaulLandings = <Landing>[];
+      for (Landing currentLanding in haulLandings) {
+        // Get the products for this landing
+        final landingProducts =
+            await _productRepository.all(where: 'landing_id = ${currentLanding.id}');
+        updatedHaulLandings.add(currentLanding.copyWith(products: landingProducts));
+      }
+
+      updatedHauls.add(currentHaul.copyWith(landings: updatedHaulLandings));
     }
     updatedTrips.add(trip.copyWith(hauls: updatedHauls));
   }
 
   appStore.completedTrips = updatedTrips;
-
-  await _restoreProducts();
-}
-
-Future<void> _restoreProducts() async {
-
-  final sql = 'SELECT * FROM products JOIN product_landings '
-      'ON product_landings.product_id = products.id';
-   List<Map<String,dynamic>> results = await _database.rawQuery(sql);
-
-  final List<Product> products = results.map((result) => _productRepository.fromDatabaseMap(result)).toList();
-  _appStore.products = ObservableList.of(products);
 }
 
 /// The main widget of the app

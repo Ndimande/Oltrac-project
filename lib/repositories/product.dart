@@ -57,7 +57,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       }),
       weight: result['weight'],
       productType: productTypes.firstWhere((ProductType pt) => pt.id == result['product_type_id']),
-      landing: null, // TODO oy vey iz mir
+      landingId: result['landing_id'],
     );
   }
 
@@ -70,6 +70,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       'longitude': product.location.longitude,
       'weight': product.weight,
       'product_type_id': product.productType.id,
+      'landing_id': product.landingId
     };
   }
 }

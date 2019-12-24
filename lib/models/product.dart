@@ -20,8 +20,7 @@ class Product extends Model {
 
   final ProductType productType;
 
-  final Landing landing;
-
+  final int landingId;
 
   Product({
     id,
@@ -29,7 +28,7 @@ class Product extends Model {
     @required this.createdAt,
     @required this.location,
     @required this.productType,
-    @required this. landing,
+    @required this.landingId,
     this.weight,
     weightUnit,
     lengthUnit,
@@ -41,7 +40,7 @@ class Product extends Model {
         createdAt = data['createdAt'],
         location = Location.fromMap({'latitude': data['latitude'], 'longitude': data['longitude']}),
         productType = productTypes.firstWhere((p) => p.id == data['id']),
-        landing = Landing.fromMap(data['landing']),
+        landingId = data['landingId'],
         weight = data['weight'],
         weightUnit = data['weightUnit'],
         super.fromMap(data);
@@ -52,7 +51,7 @@ class Product extends Model {
     DateTime createdAt,
     Location location,
     ProductType productType,
-    Landing landing,
+    int landingId,
     int weight,
     WeightUnit weightUnit,
   }) {
@@ -62,7 +61,7 @@ class Product extends Model {
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
       productType: productType ?? this.productType,
-      landing: landing ?? this.landing,
+      landingId: landingId ?? this.landingId,
       weight: weight ?? this.weight,
       weightUnit: weightUnit ?? this.weightUnit,
     );
@@ -75,7 +74,7 @@ class Product extends Model {
       'createdAt': createdAt,
       'location': location.toMap(),
       'productType': productType.toMap(),
-      'landings': landing.toMap(),
+      'landingId': landingId,
       'weight': weight,
       'weightUnit': weightUnit,
     };
