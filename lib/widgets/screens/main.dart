@@ -37,7 +37,16 @@ class MainScreenState extends State<MainScreen> {
   _onPressStartHaul() async {
     final method = await _selectFishingMethod();
     if (method != null) {
-      await widget._appStore.startHaul(method);
+      try {
+        await widget._appStore.startHaul(method);
+      } catch (e) {
+        print(e);
+        _scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            content: Text('Could not start haul because location is not available. Please enable location services on your device and try again.'),
+          ),
+        );
+      }
     }
   }
 
@@ -54,11 +63,12 @@ class MainScreenState extends State<MainScreen> {
     if (confirmed) {
       try {
         await widget._appStore.endHaul();
-      } on Exception catch (e) {
+      }catch (e) {
         print(e.toString());
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
-            content: Text('Location not available.'),
+            content: Text('Could not end haul because location is not available. Please enable location services on your device and try again.'),
+
           ),
         );
         return;
@@ -98,12 +108,22 @@ class MainScreenState extends State<MainScreen> {
         'Start Trip',
         style: TextStyle(fontSize: 20),
       ),
-      onPressed: () async {
-        await widget._appStore.startTrip();
-      },
+      onPressed: () async => await _onPressStartTripButton(),
     );
   }
 
+  _onPressStartTripButton() async {
+    try {
+      await widget._appStore.startTrip();
+    } catch (e) {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Could not start trip because location is not available. Please enable location services on your device and try again.'),
+        ),
+      );
+    }
+
+  }
   Future<bool> _onWillPop() async {
     return false;
   }

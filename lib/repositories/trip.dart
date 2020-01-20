@@ -1,5 +1,5 @@
-import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/database_repository.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/haul.dart';
@@ -80,9 +80,9 @@ class TripRepository extends DatabaseRepository<Trip> {
 
     final endedAt = result['ended_at'] != null ? DateTime.parse(result['ended_at']) : null;
 
-    final Position endPosition = result['end_latitude'] == null || result['end_longitude'] == null
+    final Location endLocation = result['end_latitude'] == null || result['end_longitude'] == null
         ? null
-        : Position(
+        : Location(
             latitude: result['end_latitude'],
             longitude: result['end_longitude'],
           );
@@ -91,11 +91,11 @@ class TripRepository extends DatabaseRepository<Trip> {
       id: result['id'],
       startedAt: startedAt,
       endedAt: endedAt,
-      startPosition: Position(
+      startLocation: Location(
         latitude: result['start_latitude'],
         longitude: result['start_longitude'],
       ),
-      endPosition: endPosition,
+      endLocation: endLocation,
     );
   }
 
@@ -104,10 +104,10 @@ class TripRepository extends DatabaseRepository<Trip> {
       'id': trip.id,
       'started_at': trip.startedAt == null ? null : trip.startedAt.toIso8601String(),
       'ended_at': trip.endedAt == null ? null : trip.endedAt.toIso8601String(),
-      'start_latitude': trip.startPosition.latitude,
-      'start_longitude': trip.startPosition.longitude,
-      'end_latitude': trip.startPosition.latitude,
-      'end_longitude': trip.startPosition.longitude,
+      'start_latitude': trip.startLocation.latitude,
+      'start_longitude': trip.startLocation.longitude,
+      'end_latitude': trip.startLocation.latitude,
+      'end_longitude': trip.startLocation.longitude,
     };
   }
 }

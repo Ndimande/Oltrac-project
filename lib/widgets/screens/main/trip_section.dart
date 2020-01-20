@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/models/location.dart';
+import 'package:oltrace/strings.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
@@ -14,10 +14,7 @@ class TripSection extends StatelessWidget {
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog(
-        'End Trip',
-        'Are you sure you want to end the trip?',
-      ),
+      builder: (_) => ConfirmDialog('End Trip', Strings.CONFIRM_END_TRIP),
     );
     if (confirmed == true) {
       await _appStore.endTrip();
@@ -29,8 +26,8 @@ class TripSection extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 5),
       child: RaisedButton.icon(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        color: Colors.red,
-        onPressed: _appStore.hasActiveHaul ? null : () async => await _onPressEndTrip(context),
+        color: _appStore.hasActiveHaul ? Colors.grey: Colors.red,
+        onPressed: _appStore.hasActiveHaul ? () {} : () async => await _onPressEndTrip(context),
         icon: Icon(
           Icons.stop,
           color: Colors.white,
@@ -71,14 +68,17 @@ class TripSection extends StatelessWidget {
             Container(
               alignment: Alignment.centerLeft,
               child: TimeAgo(
-                    prefix: 'Started ',
-                    dateTime: _appStore.activeTrip.startedAt,
-                    textStyle: TextStyle(fontSize: _detailRowFontSize),
-                  ),
+                prefix: 'Started ',
+                dateTime: _appStore.activeTrip.startedAt,
+                textStyle: TextStyle(fontSize: _detailRowFontSize),
+              ),
             ),
             Container(
               alignment: Alignment.centerLeft,
-              child: Text(Location.fromPosition(_appStore.activeTrip.startPosition).toString(),style: TextStyle(fontSize: 16),),
+              child: Text(
+                _appStore.activeTrip.startLocation.toString(),
+                style: TextStyle(fontSize: 16),
+              ),
             ),
           ],
         ),

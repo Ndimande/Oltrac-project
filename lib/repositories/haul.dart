@@ -1,8 +1,8 @@
-import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/location.dart';
 
 /// The base select statement for hauls always
 /// includes fishing_methods.
@@ -76,9 +76,9 @@ class HaulRepository extends DatabaseRepository<Haul> {
       orElse: () => throw Exception('Fishing method does not exist.'),
     );
 
-    final Position endPosition = result['end_latitude'] == null || result['end_longitude'] == null
+    final Location endLocation = result['end_latitude'] == null || result['end_longitude'] == null
         ? null
-        : Position(
+        : Location(
             latitude: result['end_latitude'],
             longitude: result['end_longitude'],
           );
@@ -89,11 +89,11 @@ class HaulRepository extends DatabaseRepository<Haul> {
       startedAt: startedAt,
       endedAt: endedAt,
       fishingMethod: fishingMethod,
-      startPosition: Position(
+      startLocation: Location(
         latitude: result['start_latitude'],
         longitude: result['start_longitude'],
       ),
-      endPosition: endPosition,
+      endLocation: endLocation,
     );
   }
 
@@ -104,10 +104,10 @@ class HaulRepository extends DatabaseRepository<Haul> {
       'started_at': haul.startedAt == null ? null : haul.startedAt.toIso8601String(),
       'ended_at': haul.endedAt == null ? null : haul.endedAt.toIso8601String(),
       'fishing_method_id': haul.fishingMethod.id,
-      'start_latitude': haul.startPosition.latitude,
-      'start_longitude': haul.startPosition.longitude,
-      'end_latitude': haul.endPosition?.latitude,
-      'end_longitude': haul.endPosition?.longitude,
+      'start_latitude': haul.startLocation.latitude,
+      'start_longitude': haul.startLocation.longitude,
+      'end_latitude': haul.endLocation?.latitude,
+      'end_longitude': haul.endLocation?.longitude,
     };
   }
 }

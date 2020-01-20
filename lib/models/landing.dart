@@ -103,7 +103,7 @@ class Landing extends Model {
     };
   }
 
-  bool get hasProducts => this.products.length != 0;
+  bool get hasProducts => this.products.length > 0;
 
   bool get isBulkLanding => this.individuals > 1;
 

@@ -1,11 +1,12 @@
-import 'package:geolocator/geolocator.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/profile.dart';
+import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/product.dart';
@@ -27,7 +28,7 @@ abstract class _AppStore with Store {
   final _jsonRepo = JsonRepository();
   final _productRepo = ProductRepository();
 
-  final Geolocator geoLocator = Geolocator()..forceAndroidLocationManager = true;
+  final _locationProvider = LocationProvider();
 
   /// Trips that have been completed / ended.
   @observable
@@ -65,8 +66,11 @@ abstract class _AppStore with Store {
     // update trip
     final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
       final List<Landing> updatedLandings = haul.landings.map((Landing landing) {
-        final List<Product> updatedProducts = [...landing.products, storedProduct];
-        return landing.copyWith(products: updatedProducts);
+        if(landing.id == product.landingId) {
+          final List<Product> updatedProducts = [...landing.products, storedProduct];
+          return landing.copyWith(products: updatedProducts);
+        }
+        return landing;
       }).toList();
 
       return haul.copyWith(landings: updatedLandings);
@@ -80,14 +84,37 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<Landing> saveLanding(Landing landing) async {
-    final landingId = await _landingRepo.store(landing);
-    landing = landing.copyWith(id: landingId);
+  Future<void> editLanding(Landing landing) async {
+    await _landingRepo.store(landing);
 
     // update trip
     final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
       if (haul.id == landing.haulId) {
-        return haul.copyWith(landings: [...haul.landings, landing]);
+        final updatedLandings = haul.landings.map((Landing l) {
+          if (l.id == landing.id) {
+            return landing;
+          }
+          return l;
+        }).toList();
+        return haul.copyWith(landings: updatedLandings);
+      }
+      return haul;
+    }).toList();
+
+    final Trip updatedTrip = activeTrip.copyWith(hauls: updatedHauls);
+
+    activeTrip = updatedTrip;
+  }
+
+  @action
+  Future<Landing> saveLanding(Landing landing) async {
+    final landingId = await _landingRepo.store(landing);
+    final storedLanding = landing.copyWith(id: landingId);
+
+    // update trip
+    final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
+      if (haul.id == storedLanding.haulId) {
+        return haul.copyWith(landings: [...haul.landings, storedLanding]);
       }
       return haul;
     }).toList();
@@ -96,8 +123,27 @@ abstract class _AppStore with Store {
 
     activeTrip = updatedTrip;
 
-    return landing;
+    return storedLanding;
   }
+
+  @action
+  Future<void> deleteLanding(Landing landing) async {
+    await _landingRepo.delete(landing.id);
+    final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
+      if (haul.id == landing.haulId) {
+        haul.landings.remove(landing);
+        return haul.copyWith(landings: haul.landings);
+      }
+      return haul;
+    }).toList();
+
+    final Trip updatedTrip = activeTrip.copyWith(hauls: updatedHauls);
+
+    activeTrip = updatedTrip;
+
+  }
+
+
 
   @action
   Future<Haul> startHaul(FishingMethod method) async {
@@ -105,17 +151,17 @@ abstract class _AppStore with Store {
       throw Exception('No active trip');
     }
 
-    Position position = await geoLocator.getLastKnownPosition();
-    if (position == null) {
-      // This can take a few seconds
-      position = await geoLocator.getCurrentPosition();
+    final Location location = await _locationProvider.location;
+
+    if (location == null) {
+      throw Exception('Could not get location stream.');
     }
 
     final haul = Haul(
       fishingMethod: method,
       startedAt: DateTime.now(),
       tripId: activeTrip.id,
-      startPosition: position,
+      startLocation: location,
     );
 
     final haulId = await _haulRepo.store(haul);
@@ -135,20 +181,12 @@ abstract class _AppStore with Store {
       throw Exception("No active haul");
     }
 
-    if (await geoLocator.isLocationServiceEnabled() == false) {
-      throw Exception('Location service is not enabled');
-    }
-
-    Position position = await geoLocator.getLastKnownPosition();
-    if (position == null) {
-      // This can take a few seconds
-      position = await geoLocator.getCurrentPosition();
-    }
+    final Location location = await _locationProvider.location;
 
     final endedHaul = activeHaul.copyWith(
       endedAt: DateTime.now(),
       tripId: activeTrip.id,
-      endPosition: position,
+      endLocation: location,
     );
 
     await _haulRepo.store(endedHaul);
@@ -181,14 +219,9 @@ abstract class _AppStore with Store {
 
   @action
   Future<Trip> startTrip() async {
-    Position position = await geoLocator.getLastKnownPosition();
+    final Location location = await _locationProvider.location;
 
-    if (position == null) {
-      // This can take a few seconds
-      position = await geoLocator.getCurrentPosition();
-    }
-
-    final trip = Trip(startedAt: DateTime.now(), startPosition: position);
+    final trip = Trip(startedAt: DateTime.now(), startLocation: location);
 
     final int tripId = await _tripRepo.store(trip);
 
@@ -203,14 +236,9 @@ abstract class _AppStore with Store {
       throw Exception("No active trip.");
     }
 
-    Position position = await geoLocator.getLastKnownPosition();
+    final Location location = await _locationProvider.location;
 
-    if (position == null) {
-      // This can take a few seconds
-      position = await geoLocator.getCurrentPosition();
-    }
-
-    final endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endPosition: position);
+    final endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
 
     await _tripRepo.store(endedTrip);
 

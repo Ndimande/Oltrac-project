@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/models/location.dart';
 
 @immutable
 class Haul extends Model {
@@ -19,8 +19,8 @@ class Haul extends Model {
 
   final int tripId;
 
-  final Position startPosition;
-  final Position endPosition;
+  final Location startLocation;
+  final Location endLocation;
 
   Haul({
     id,
@@ -29,8 +29,8 @@ class Haul extends Model {
     this.endedAt,
     @required this.fishingMethod,
     this.landings = const [],
-    @required this.startPosition,
-    this.endPosition,
+    @required this.startLocation,
+    this.endLocation,
   }) : super(id: id);
 
   Haul copyWith({
@@ -40,8 +40,8 @@ class Haul extends Model {
     DateTime endedAt,
     FishingMethod fishingMethod,
     List<Landing> landings,
-    Position startPosition,
-    Position endPosition,
+    Location startLocation,
+    Location endLocation,
   }) {
     return Haul(
       id: id ?? this.id,
@@ -50,8 +50,8 @@ class Haul extends Model {
       endedAt: endedAt ?? this.endedAt,
       fishingMethod: fishingMethod ?? this.fishingMethod,
       landings: landings ?? this.landings,
-      startPosition: startPosition ?? this.startPosition,
-      endPosition: endPosition ?? this.endPosition,
+      startLocation: startLocation ?? this.startLocation,
+      endLocation: endLocation ?? this.endLocation,
     );
   }
 
@@ -61,8 +61,8 @@ class Haul extends Model {
         endedAt = data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
         fishingMethod = FishingMethod.fromMap(data['fishingMethod']),
         landings = data['landings'] as List<Landing>,
-        startPosition = Position.fromMap(data['startPosition']),
-        endPosition = Position.fromMap(data['endPosition']),
+        startLocation = Location.fromMap(data['startLocation']),
+        endLocation = Location.fromMap(data['endLocation']),
         super.fromMap(data);
 
   Map<String, dynamic> toMap() {
@@ -73,8 +73,8 @@ class Haul extends Model {
       'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
       'fishingMethod': fishingMethod.toMap(),
       'landings': landings.map((l) => l.toMap()).toList(),
-      'startPosition': startPosition?.toJson(),
-      'endPosition': endPosition?.toJson(),
+      'startLocation': startLocation.toJson(),
+      'endLocation': endLocation?.toJson(),
     };
   }
 }

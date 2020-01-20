@@ -12,34 +12,56 @@ import 'package:oltrace/stores/app_store.dart';
 
 class CreateLandingScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
-  final Haul _haulArg;
+  final Haul haulArg;
+  final Landing landingArg;
 
-  CreateLandingScreen(this._haulArg);
+  CreateLandingScreen({this.haulArg, this.landingArg});
 
   @override
-  State<StatefulWidget> createState() => CreateLandingScreenState(_haulArg);
+  State<StatefulWidget> createState() {
+    if (landingArg != null) {
+      return CreateLandingScreenState(haul: haulArg, landingArg: landingArg);
+    }
+    return CreateLandingScreenState(haul: haulArg);
+  }
 }
 
 class CreateLandingScreenState extends State<CreateLandingScreen> {
-  /// Animal species to be associated with the tag.
-  Species _selectedSpecies;
   static final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   final geolocator = Geolocator();
 
-  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _weightController;
 
-  final TextEditingController _lengthController = TextEditingController();
-  final TextEditingController _individualsController = TextEditingController();
+  final TextEditingController _lengthController;
+  final TextEditingController _individualsController;
 
-  final Haul _haul;
+  final Haul haul;
+
+  /// If this is null we are creating.
+  final Landing landingArg;
+
+  /// Animal species to be associated with the tag.
+  Species _selectedSpecies;
 
   // Local state
-  bool _bulkMode = sharedPrefs.getBool('bulkMode') ?? false;
+  bool _bulkMode;
 
-  CreateLandingScreenState(this._haul);
+  CreateLandingScreenState({this.haul, this.landingArg})
+      : _weightController = TextEditingController(
+            text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
+        _lengthController =
+            TextEditingController(text: landingArg != null ? landingArg.length.toString() : null),
+        _individualsController = TextEditingController(
+            text: landingArg != null ? landingArg?.individuals.toString() : null),
+        _selectedSpecies = landingArg?.species,
+        _bulkMode = landingArg != null
+            ? landingArg.individuals > 1 ? true : false
+            : sharedPrefs.getBool('bulkMode') ?? false;
+
+  bool get isEditMode => landingArg != null;
 
   _onPressSaveButton(haul, context) async {
     if (!_formKey.currentState.validate()) {
@@ -55,10 +77,33 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
       return;
     }
 
-    var position = await geolocator.getLastKnownPosition();
-    if (position == null) {
-      position = await geolocator.getCurrentPosition();
+    final int weightGrams = (double.parse(_weightController.value.text) * 1000).round();
+    final int length = int.parse(_lengthController.value.text);
+
+    // If bulk mode is disabled, default to 1
+    final int individuals = _bulkMode == true ? int.tryParse(_individualsController.value.text) : 1;
+
+    if (isEditMode) {
+      final updatedLanding = landingArg.copyWith(
+        weight: weightGrams,
+        length: length,
+        species: _selectedSpecies,
+        individuals: individuals,
+      );
+      await widget._appStore.editLanding(updatedLanding);
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Shark updated'),
+          onVisible: () async {
+            await Future.delayed(Duration(seconds: 1));
+            Navigator.pop(context);
+          },
+        ),
+      );
+      return;
     }
+
+    var position = await geolocator.getCurrentPosition();
 
     final landing = await widget._appStore.saveLanding(
       Landing(
@@ -66,8 +111,8 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
         createdAt: DateTime.now(),
         location: Location.fromPosition(position),
         // kg -> g
-        weight: (double.parse(_weightController.value.text) * 1000).round(),
-        length: int.parse(_lengthController.value.text),
+        weight: weightGrams,
+        length: length,
         haulId: haul.id,
         individuals: _bulkMode ? int.parse(_individualsController.value.text) : 1,
       ),
@@ -76,12 +121,13 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
     bool createAnotherDialogResponse = await _showLandingSavedDialog(landing);
 
     setState(() {
+      _selectedSpecies = null;
       _weightController.clear();
       _lengthController.clear();
     });
 
     if (createAnotherDialogResponse == false) {
-       Navigator.pop(context);
+      Navigator.pop(context);
     }
   }
 
@@ -226,11 +272,14 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
     final sortedSpecies = species;
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
 
+    final String titleText =
+        widget.landingArg == null ? 'Haul ${haul.id} - Add Shark' : 'Edit Shark';
+
     return Scaffold(
       key: _scaffoldKey,
-      floatingActionButton: _floatingActionButton(_haul, context),
+      floatingActionButton: _floatingActionButton(haul, context),
       appBar: AppBar(
-        title: Text('Haul ${_haul.id} - Add Shark'),
+        title: Text(titleText),
         actions: <Widget>[_bulkModeButtonSwitch()],
       ),
       body: SingleChildScrollView(

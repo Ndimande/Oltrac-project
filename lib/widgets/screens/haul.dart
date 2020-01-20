@@ -3,7 +3,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
@@ -72,7 +71,7 @@ class HaulScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 2),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
             flex: 3,
@@ -98,10 +97,9 @@ class HaulScreen extends StatelessWidget {
   }
 
   Widget _buildHaulDetails(Haul haul) {
-    final String startLocation = Location.fromPosition(haul.startPosition).toMultilineString();
-    final String endLocation = haul.endPosition != null
-        ? Location.fromPosition(haul.endPosition).toMultilineString()
-        : '-';
+    final String startLocation = haul.startLocation.toMultilineString();
+    final String endLocation =
+        haul.endLocation != null ? haul.endLocation.toMultilineString() : '-';
 
     return Container(
       child: Column(
@@ -109,7 +107,8 @@ class HaulScreen extends StatelessWidget {
         children: <Widget>[
           _buildDetailRow('Fishing method', haul.fishingMethod.name),
           _buildDetailRow('Started', friendlyDateTimestamp(haul.startedAt) + '\n' + startLocation),
-          _buildDetailRow('Ended', (friendlyDateTimestamp(haul.endedAt) ?? '-') + '\n' + endLocation),
+          _buildDetailRow(
+              'Ended', (friendlyDateTimestamp(haul.endedAt) ?? '-') + '\n' + endLocation),
         ],
       ),
     );
@@ -163,7 +162,7 @@ class HaulScreen extends StatelessWidget {
   }
 
   _onPressTagButton(Haul haul, context) async {
-    await Navigator.pushNamed(context, '/create_tag', arguments: haul);
+    await Navigator.pushNamed(context, '/create_landing', arguments: haul);
   }
 
   _floatingActionButton({onPressed}) {
@@ -216,7 +215,7 @@ class HaulScreen extends StatelessWidget {
           // We must make sure to be back to the previous screen
           // before removing the haul or the widget will crash.
           // Ideally the widget should have a 'canceled' state
-          // just for the purpose of prevening the page from
+          // just for the purpose of preventing the page from
           // crashing due to rendering before navigation has
           // completed.
           await Future.delayed(Duration(milliseconds: 500));
@@ -226,7 +225,7 @@ class HaulScreen extends StatelessWidget {
     );
   }
 
-  _endHaulAction() {
+  Widget _endHaulAction() {
     return FlatButton.icon(
       textColor: Colors.white,
       label: Text('End'),

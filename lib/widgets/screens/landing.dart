@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:mobx/mobx.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
 
 final _rowFontStyle = TextStyle(fontSize: 18);
@@ -54,14 +54,14 @@ class LandingScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(top: 100),
       height: 65,
-      width: 165,
+      width: 195,
       child: FloatingActionButton.extended(
         backgroundColor: Colors.green,
         label: Text(
-          'Tag',
+          'Tag Product',
           style: TextStyle(fontSize: 22),
         ),
-        icon: Icon(Icons.add_circle_outline),
+        icon: Icon(Icons.local_offer),
         onPressed: onPressed,
       ),
     );
@@ -118,18 +118,71 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
+  _appBarActions() {
+    return <Widget>[
+      FlatButton.icon(
+        textColor: Colors.white,
+        icon: Icon(Icons.edit),
+        label: Text('Edit'),
+        onPressed: () => _onPressEditAction(),
+      ),
+      FlatButton.icon(
+        textColor: Colors.white,
+        icon: Icon(Icons.delete),
+        label: Text('Delete'),
+        onPressed: () => _onPressDeleteAction(),
+      ),
+    ];
+  }
+
+  _onPressDeleteAction() async {
+    // TODO confirm
+    bool confirmed = await showDialog<bool>(
+      context: _scaffoldKey.currentContext,
+      builder: (_) => ConfirmDialog('Delete Shark', 'Are you sure you want to delete this shark?'),
+    );
+    if(!confirmed) {
+      return;
+    }
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        content: Text('Shark deleted'),
+        onVisible: () async {},
+      ),
+    );
+    await Future.delayed(Duration(seconds: 1));
+    Navigator.pop(_scaffoldKey.currentContext);
+    await Future.delayed(Duration(milliseconds: 500));
+    await _appStore.deleteLanding(_landingArg);
+  }
+
+  _onPressEditAction() {
+    final Landing landing = _getLandingFromState(_getHaulFromState());
+    Navigator.pushNamed(_scaffoldKey.currentContext, '/edit_landing', arguments: landing);
+  }
+
+  Haul _getHaulFromState() =>
+      _appStore.activeTrip.hauls.singleWhere((h) => h.id == _landingArg.haulId, orElse: () => null);
+
+  Landing _getLandingFromState(Haul haul) {
+    // We need to be sure not to use the stale data from
+    // the item pushed as an argument
+    // It would be wise to push an int instead and always retrieve
+    // the item from global state.
+
+    return haul.landings.singleWhere((Landing l) => l.id == _landingArg.id);
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return Observer(builder: (_) {
       // We need to be sure not to use the stale data from
       // the item pushed as an argument
       // It would be wise to push an int instead and always retrieve
       // the item from global state.
-    Haul haul = _appStore.activeTrip.hauls
-        .singleWhere((h) => h.id == _landingArg.haulId, orElse: () => null);
 
-    final Landing landing = haul.landings.singleWhere((Landing l) => l.id == _landingArg.id);
+      final Haul haul = _getHaulFromState();
+      final Landing landing = _getLandingFromState(haul);
 
       return Scaffold(
         key: _scaffoldKey,
@@ -138,6 +191,7 @@ class LandingScreen extends StatelessWidget {
             : null,
         appBar: AppBar(
           title: Text('Shark - ${landing.id}'),
+          actions: _appBarActions(),
         ),
         body: SingleChildScrollView(
           child: Container(

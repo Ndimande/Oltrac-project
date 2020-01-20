@@ -130,7 +130,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildVesselNameTextFormField() {
     return _welcomeTextFormField(
       labelText: 'Name',
-      helperText: 'The name of the vessel',
       focusNode: _vesselNameFocusNode,
       onFieldSubmitted: (value) {
         _vesselNameFocusNode.unfocus();
@@ -149,7 +148,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildVesselIdTextFormField() {
     return _welcomeTextFormField(
       labelText: 'ID',
-      helperText: 'The ID of the vessel',
       focusNode: _vesselIdFocusNode,
       onFieldSubmitted: (value) {
         _vesselIdFocusNode.unfocus();
@@ -168,7 +166,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildSkipperFirstNameTextFormField() {
     return _welcomeTextFormField(
       labelText: 'First name',
-      helperText: 'The first name of the skipper. ',
       focusNode: _skipperFirstNameFocusNode,
       onFieldSubmitted: (value) {
         _skipperFirstNameFocusNode.unfocus();
@@ -187,7 +184,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildSkipperLastNameTextFormField() {
     return _welcomeTextFormField(
       labelText: 'Last name',
-      helperText: 'The last name of the skipper. ',
       focusNode: _skipperLastNameFocusNode,
       textInputAction: TextInputAction.done,
       onFieldSubmitted: (value) async {
@@ -206,15 +202,13 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildSaveButton() {
     return Container(
-      margin: EdgeInsets.only(bottom:15, right: 15),
+      margin: EdgeInsets.only(bottom: 15, right: 15),
       child: Container(
         child: RaisedButton(
-
           color: Colors.green,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
           ),
-
           child: Text(
             'Save',
             style: TextStyle(fontSize: 22, color: Colors.white),

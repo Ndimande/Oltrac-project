@@ -1,7 +1,7 @@
-import 'package:geolocator/geolocator.dart';
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/profile.dart';
 
 @immutable
@@ -15,27 +15,27 @@ class Trip extends Model {
   /// Hauls in this trip
   final List<Haul> hauls;
 
-  /// GPS Start Position
-  final Position startPosition;
+  /// GPS Start Location
+  final Location startLocation;
 
-  /// GPS End Position
-  final Position endPosition;
+  /// GPS End Location
+  final Location endLocation;
 
   Trip({
     id,
     @required this.startedAt,
     this.endedAt,
     this.hauls = const [],
-    @required this.startPosition,
-    this.endPosition,
+    @required this.startLocation,
+    this.endLocation,
   }) : super(id: id);
 
   Trip.fromMap(Map data)
       : startedAt = data['startedAt'] != null ? DateTime.parse(data['startedAt']) : null,
         endedAt = data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
         hauls = (data['hauls'] as List).map((haul) => Haul.fromMap(haul)).toList(),
-        startPosition = Position.fromMap(data['endPosition']),
-        endPosition = Position.fromMap(data['startPosition']),
+        startLocation = Location.fromMap(data['endLocation']),
+        endLocation = Location.fromMap(data['startLocation']),
         super.fromMap(data);
 
   Trip copyWith({
@@ -44,16 +44,16 @@ class Trip extends Model {
     DateTime startedAt,
     DateTime endedAt,
     List<Haul> hauls,
-    Position startPosition,
-    Position endPosition,
+    Location startLocation,
+    Location endLocation,
   }) {
     return Trip(
       id: id ?? this.id,
       startedAt: startedAt ?? this.startedAt,
       endedAt: endedAt ?? this.endedAt,
       hauls: hauls ?? this.hauls,
-      startPosition: startPosition ?? this.startPosition,
-      endPosition: endPosition ?? this.endPosition,
+      startLocation: startLocation ?? this.startLocation,
+      endLocation: endLocation ?? this.endLocation,
     );
   }
 
@@ -63,8 +63,8 @@ class Trip extends Model {
       'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
       'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
       'hauls': hauls.map((Haul haul) => haul.toMap()).toList(),
-      'startPosition': startPosition.toJson(),
-      'endPosition': endPosition?.toJson(),
+      'startLocation': startLocation.toJson(),
+      'endLocation': endLocation?.toJson(),
     };
   }
 }

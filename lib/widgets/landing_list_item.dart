@@ -8,15 +8,31 @@ class LandingListItem extends StatelessWidget {
 
   LandingListItem(this._landing, this._onPressed);
 
-  String _speciesName() {
+  Widget _speciesName() {
     String speciesName = !_landing.isBulkLanding
         ? _landing.species.englishName
         : _landing.species.englishName + ' (${_landing.individuals} individuals)';
+    return Container(
+      margin: EdgeInsets.only(right: 2),
+      child: Text(speciesName),
+    );
+  }
 
+  Widget _titleWidget() {
+    final firstRow = <Widget>[_speciesName()];
     if (_landing.hasProducts) {
-      speciesName += '*';
+      firstRow.add(Icon(
+        Icons.local_offer,
+        size: 16,
+      ));
     }
-    return speciesName;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(children: firstRow),
+        Text('${_landing.weightKilograms} | ${_landing.lengthCentimeters}'),
+      ],
+    );
   }
 
   @override
@@ -27,17 +43,7 @@ class LandingListItem extends StatelessWidget {
       child: FlatButton(
         onPressed: _onPressed,
         child: ListTile(
-          isThreeLine: true,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                _speciesName(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text('${_landing.weightKilograms} | ${_landing.lengthCentimeters}'),
-            ],
-          ),
+          title: _titleWidget(),
           subtitle: TimeAgo(prefix: 'Added ', dateTime: _landing.createdAt),
           trailing: Icon(
             Icons.keyboard_arrow_right,

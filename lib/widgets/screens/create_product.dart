@@ -3,6 +3,7 @@ import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/data/product_types.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
@@ -30,7 +31,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
   final List<Landing> _sourceLandings;
   ProductType _productType;
-  String _tagCode = AppConfig.DEV_MODE ? '0xAA7E5C41' : null;
+  String _tagCode = AppConfig.DEV_MODE ? randomTagCode() : null;
 
   CreateProductScreenState(initialSourceLanding)
       : this._sourceLandings = initialSourceLanding != null ? [initialSourceLanding] : [];
@@ -126,6 +127,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
     setState(() {
       _tagCode = null;
+      _productType = null;
     });
 
     bool createAnother = await _showProductSavedDialog(savedProduct);
@@ -247,7 +249,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 child: RFID(
                   tagCode: _tagCode,
                   onLongPress: () => setState(() {
-                    _tagCode = '0xAA7E5C41';
+                    _tagCode = randomTagCode();
                   }),
                 ), // Hardcode in dev mode
               ),

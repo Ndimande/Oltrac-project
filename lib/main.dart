@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
@@ -11,6 +12,7 @@ import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
+import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
@@ -52,6 +54,8 @@ final HaulRepository _haulRepo = HaulRepository();
 final JsonRepository _jsonRepo = JsonRepository();
 final LandingRepository _landingRepo = LandingRepository();
 final ProductRepository _productRepository = ProductRepository();
+
+final LocationProvider _locationProvider = LocationProvider();
 
 /// The app entry point. Execution starts here.
 void main() {
@@ -116,6 +120,11 @@ Future<AppStore> _initApp() async {
   // Get the app version and some other info
   _appStore.packageInfo = await PackageInfo.fromPlatform();
 
+  // Prompt for location access until the user accepts.
+  while(await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
+    // Begin listening to location stream.
+    _locationProvider.startListening();
+  }
   // Restore persisted data into app state
   return await _restoreState();
 }
@@ -289,9 +298,14 @@ class OlTraceAppState extends State<OlTraceApp> {
             final Landing landing = settings.arguments;
             return MaterialPageRoute(builder: (_) => LandingScreen(landing));
 
-          case '/create_tag':
+          case '/create_landing':
             final Haul haul = settings.arguments;
-            return MaterialPageRoute(builder: (_) => CreateLandingScreen(haul));
+            return MaterialPageRoute(builder: (_) => CreateLandingScreen(haulArg: haul));
+
+          case '/edit_landing':
+            final Landing landing = settings.arguments;
+            return MaterialPageRoute(builder: (_) => CreateLandingScreen(landingArg: landing));
+
 
           case '/create_product':
             final Landing landing = settings.arguments;

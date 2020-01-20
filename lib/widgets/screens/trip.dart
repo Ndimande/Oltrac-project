@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/app_fab.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
 
@@ -21,7 +21,7 @@ class TripScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 2),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
             flex: 3,
@@ -44,17 +44,15 @@ class TripScreen extends StatelessWidget {
   }
 
   Widget _buildTripInfo(Trip trip) {
-    final String startCoords = Location.fromPosition(trip.startPosition).toMultilineString();
-    final String endCoords =
-        trip.endPosition != null ? Location.fromPosition(trip.endPosition).toMultilineString() : '-';
+    final String startCoords = trip.startLocation.toMultilineString();
+    final String endCoords = trip.endLocation != null ? trip.endLocation.toMultilineString() : '-';
     return Container(
       padding: EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _buildInfoItem('Total hauls ', trip.hauls.length.toString()),
-
-             _buildInfoItem('Started', friendlyDateTimestamp(trip.startedAt) + '\n' + startCoords),
+          _buildInfoItem('Started', friendlyDateTimestamp(trip.startedAt) + '\n' + startCoords),
           _buildInfoItem('Ended', (friendlyDateTimestamp(trip.endedAt) ?? '-') + '\n' + endCoords),
         ],
       ),
@@ -89,6 +87,7 @@ class TripScreen extends StatelessWidget {
   }
 
   Widget _endTripActionButton() => FlatButton.icon(
+        textColor: Colors.white,
         icon: Icon(Icons.check_circle),
         label: Text('End'),
         onPressed: () async {
@@ -103,6 +102,7 @@ class TripScreen extends StatelessWidget {
       );
 
   Widget _cancelTripActionButton() => FlatButton.icon(
+        textColor: Colors.white,
         icon: Icon(Icons.cancel),
         label: Text('Cancel'),
         onPressed: () async {
@@ -147,8 +147,23 @@ class TripScreen extends StatelessWidget {
         if (_appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id) {
           title += ' (Active)';
         }
+
+        final fAB = _appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id
+            ? null
+            : AppFAB(
+                label: Text('Upload Trip'),
+                icon: Icon(Icons.cloud_upload),
+                onPressed: () {
+                  _scaffoldKey.currentState.showSnackBar(
+                    SnackBar(
+                      content: Text('Trip upload started...'),
+                    ),
+                  );
+                },
+              );
         return Scaffold(
           key: _scaffoldKey,
+          floatingActionButton: fAB,
           appBar: AppBar(
             actions: _appBarActions(),
             title: Text(title),
