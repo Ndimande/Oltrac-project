@@ -5,7 +5,7 @@ import 'package:oltrace/framework/model.dart';
 class ProductType extends Model {
   final String name;
 
-  ProductType({id, this.name}) : super(id: id);
+  const ProductType({id, this.name}) : super(id: id);
 
   ProductType.fromMap(Map data)
       : name = data['name'],

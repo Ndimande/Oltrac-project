@@ -6,7 +6,7 @@ import 'package:oltrace/models/location.dart';
 class LocationProvider {
   final Geolocator _geoLocator = Geolocator()..forceAndroidLocationManager = true;
 
-  Position _position;
+  Position _lastPosition;
   StreamSubscription<Position> _positionStream;
 
   static final LocationProvider _locationProvider = LocationProvider._();
@@ -25,8 +25,8 @@ class LocationProvider {
     final locationOptions = LocationOptions(accuracy: accuracy, distanceFilter: distanceFilter);
     if (!listening) {
       _positionStream = _geoLocator.getPositionStream(locationOptions).listen((Position position) {
-        print('locationProvider ' + _position.toString());
-        _position = position;
+        print('locationProvider ' + _lastPosition.toString());
+        _lastPosition = position;
       }, onError: (e) => print('Could not establish location stream.'));
       listening = true;
     }
@@ -48,7 +48,7 @@ class LocationProvider {
       return null;
     }
 
-    return Location.fromPosition(_position);
+    return Location.fromPosition(_lastPosition);
   }
 
   Future<GeolocationStatus> get geolocationPermissionStatus async {

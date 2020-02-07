@@ -3,17 +3,16 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/app_fab.dart';
+import 'package:oltrace/strings.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/screens/main/drawer.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/main/haul_section.dart';
 import 'package:oltrace/widgets/screens/main/no_active_trip.dart';
 import 'package:oltrace/widgets/screens/main/trip_section.dart';
+import 'package:oltrace/widgets/strip_button.dart';
 
 class MainScreen extends StatefulWidget {
-  final AppStore _appStore = StoreProvider().appStore;
-
   MainScreen();
 
   @override
@@ -22,10 +21,14 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final AppStore _appStore = StoreProvider().appStore;
 
   Widget _appBar() {
+    final title = _appStore.hasActiveTrip
+        ? _appStore.hasActiveHaul ? 'Hauling...' : 'Active Trip'
+        : 'Completed Trips';
     return AppBar(
-      title: Text(widget._appStore.hasActiveTrip ? '' : 'In Port'),
+      title: Text(title),
     );
   }
 
@@ -38,12 +41,13 @@ class MainScreenState extends State<MainScreen> {
     final method = await _selectFishingMethod();
     if (method != null) {
       try {
-        await widget._appStore.startHaul(method);
+        await _appStore.startHaul(method);
       } catch (e) {
         print(e);
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
-            content: Text('Could not start haul because location is not available. Please enable location services on your device and try again.'),
+            content: Text(
+                'Could not start haul because location is not available. Please enable location services on your device and try again.'),
           ),
         );
       }
@@ -62,13 +66,13 @@ class MainScreenState extends State<MainScreen> {
 
     if (confirmed) {
       try {
-        await widget._appStore.endHaul();
-      }catch (e) {
+        await _appStore.endHaul();
+      } catch (e) {
         print(e.toString());
         _scaffoldKey.currentState.showSnackBar(
           SnackBar(
-            content: Text('Could not end haul because location is not available. Please enable location services on your device and try again.'),
-
+            content: Text(
+                'Could not end haul because location is not available. Please enable location services on your device and try again.'),
           ),
         );
         return;
@@ -76,54 +80,19 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  _onPressHaulFloatingActionButton() async {
-    if (widget._appStore.hasActiveHaul) {
+
+  _onPressHaulActionButton() async {
+    if (_appStore.hasActiveHaul) {
       await _onPressEndHaul();
     } else {
       await _onPressStartHaul();
     }
   }
 
-  Widget _haulFloatingActionButton() {
-    bool started = widget._appStore.hasActiveHaul;
-
-    final Icon icon = Icon(started ? Icons.stop : Icons.play_arrow);
-    final Color color = started ? Colors.red : Colors.green;
-    return AppFAB(
-      backgroundColor: color,
-      label: Text(
-        started ? 'End Haul' : 'Start Haul',
-        style: TextStyle(fontSize: 20),
-      ),
-      icon: icon,
-      onPressed: () async => await _onPressHaulFloatingActionButton(),
-    );
-  }
-
-  Widget _tripFloatingActionButton() {
-    return AppFAB(
-      backgroundColor: Colors.green,
-      icon: Icon(Icons.play_arrow),
-      label: Text(
-        'Start Trip',
-        style: TextStyle(fontSize: 20),
-      ),
-      onPressed: () async => await _onPressStartTripButton(),
-    );
-  }
-
   _onPressStartTripButton() async {
-    try {
-      await widget._appStore.startTrip();
-    } catch (e) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Could not start trip because location is not available. Please enable location services on your device and try again.'),
-        ),
-      );
-    }
-
+    await _appStore.startTrip(_scaffoldKey);
   }
+
   Future<bool> _onWillPop() async {
     return false;
   }
@@ -131,29 +100,33 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
-      final floatingActionButton = widget._appStore.hasActiveTrip
-          ? _haulFloatingActionButton()
-          : _tripFloatingActionButton();
-
+      final String labelText = _appStore.hasActiveHaul ? 'End Haul' : 'Start Haul';
       return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
           key: _scaffoldKey,
-          floatingActionButton: floatingActionButton,
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           appBar: _appBar(),
           drawer: MainDrawer(),
           body: Builder(
             builder: (_) {
-              if (!widget._appStore.hasActiveTrip) {
-                return NoActiveTrip();
+              if (!_appStore.hasActiveTrip) {
+                return NoActiveTrip(onPressStartTrip: () async => await _onPressStartTripButton());
               }
 
               return Column(
                 children: <Widget>[
                   TripSection(),
-                  Divider(),
                   Expanded(child: HaulSection()),
+                  StripButton(
+                    centered: true,
+                    labelText: labelText,
+                    icon: Icon(
+                      _appStore.hasActiveHaul ? Icons.stop : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
+                    color: _appStore.hasActiveHaul ? Colors.red : Colors.green,
+                    onPressed: () async => await _onPressHaulActionButton(),
+                  ),
                 ],
               );
             },

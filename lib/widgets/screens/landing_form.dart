@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/species.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/strings.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/strip_button.dart';
 
-class CreateLandingScreen extends StatefulWidget {
+const textFieldTextStyle = TextStyle(fontSize: 20, color: olracBlue);
+
+class LandingFormScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
   final Haul haulArg;
   final Landing landingArg;
 
-  CreateLandingScreen({this.haulArg, this.landingArg});
+  LandingFormScreen({this.haulArg, this.landingArg});
 
   @override
   State<StatefulWidget> createState() {
     if (landingArg != null) {
-      return CreateLandingScreenState(haul: haulArg, landingArg: landingArg);
+      return LandingFormScreenState(haul: haulArg, landingArg: landingArg);
     }
-    return CreateLandingScreenState(haul: haulArg);
+    return LandingFormScreenState(haul: haulArg);
   }
 }
 
-class CreateLandingScreenState extends State<CreateLandingScreen> {
+class LandingFormScreenState extends State<LandingFormScreen> {
   static final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -34,7 +39,6 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
   final geolocator = Geolocator();
 
   final TextEditingController _weightController;
-
   final TextEditingController _lengthController;
   final TextEditingController _individualsController;
 
@@ -46,10 +50,12 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
   /// Animal species to be associated with the tag.
   Species _selectedSpecies;
 
-  // Local state
+  /// Is bulk mode enabled?
+  /// Bulk mode changes the form to allow entry of no. of individuals
+  /// in the event of a bulk bin of animals.
   bool _bulkMode;
 
-  CreateLandingScreenState({this.haul, this.landingArg})
+  LandingFormScreenState({this.haul, this.landingArg})
       : _weightController = TextEditingController(
             text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
         _lengthController =
@@ -91,9 +97,10 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
         individuals: individuals,
       );
       await widget._appStore.editLanding(updatedLanding);
+
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
-          content: Text('Shark updated'),
+          content: Text('Shark updated.'),
           onVisible: () async {
             await Future.delayed(Duration(seconds: 1));
             Navigator.pop(context);
@@ -103,7 +110,10 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
       return;
     }
 
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(Strings.WAITING_FOR_GPS)));
+    // TODO get from location provider
     var position = await geolocator.getCurrentPosition();
+    _scaffoldKey.currentState.hideCurrentSnackBar();
 
     final landing = await widget._appStore.saveLanding(
       Landing(
@@ -185,23 +195,6 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
     );
   }
 
-  _floatingActionButton(Haul haul, context) {
-    return Container(
-      margin: EdgeInsets.only(top: 100),
-      height: 65,
-      width: 180,
-      child: FloatingActionButton.extended(
-        backgroundColor: Colors.green,
-        label: Text(
-          'Save',
-          style: TextStyle(fontSize: 22),
-        ),
-        icon: Icon(Icons.save),
-        onPressed: () async => await _onPressSaveButton(haul, context),
-      ),
-    );
-  }
-
   Widget _individualsTextInput() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 15),
@@ -212,7 +205,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
             margin: EdgeInsets.only(bottom: 15),
             child: Text(
               'Number of Individuals',
-              style: TextStyle(fontSize: 20),
+              style: textFieldTextStyle,
             ),
           ),
           TextFormField(
@@ -236,7 +229,7 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
     );
   }
 
-  _changeBulkMode() {
+  void _changeBulkMode() {
     setState(() {
       _bulkMode = !_bulkMode;
     });
@@ -269,122 +262,133 @@ class CreateLandingScreenState extends State<CreateLandingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sortedSpecies = species;
+    final List<Species> sortedSpecies = List.from(species);
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
 
-    final String titleText =
-        widget.landingArg == null ? 'Haul ${haul.id} - Add Shark' : 'Edit Shark';
+    final String titleText = widget.landingArg == null ? 'Add Shark' : 'Edit Shark';
 
     return Scaffold(
       key: _scaffoldKey,
-      floatingActionButton: _floatingActionButton(haul, context),
       appBar: AppBar(
         title: Text(titleText),
         actions: <Widget>[_bulkModeButtonSwitch()],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                // Select species
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 15),
-                  child: ModelDropdown<Species>(
-                    label: 'Species',
-                    selected: _selectedSpecies,
-                    items: sortedSpecies.map<DropdownMenuItem<Species>>(
-                      (Species species) {
-                        return DropdownMenuItem<Species>(
-                          value: species,
-                          child: Text(species.englishName),
-                        );
-                      },
-                    ).toList(),
-                    onChanged: (Species species) {
-                      setState(() => _selectedSpecies = species);
-                    },
-                  ),
-                ),
-
-                // Weight
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(bottom: 15),
-                        child: Text(
-                          _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ),
-                      TextFormField(
-                        style: TextStyle(fontSize: 30),
-                        keyboardType: TextInputType.number,
-                        controller: _weightController,
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Please enter a weight';
-                          }
-
-                          // check if valid float
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid weight';
-                          }
-                          return null;
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    // Select species
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 15),
+                      child: ModelDropdown<Species>(
+                        label: 'Species',
+                        selected: _selectedSpecies,
+                        items: sortedSpecies.map<DropdownMenuItem<Species>>(
+                          (Species species) {
+                            return DropdownMenuItem<Species>(
+                              value: species,
+                              child: Text(species.englishName),
+                            );
+                          },
+                        ).toList(),
+                        onChanged: (Species species) {
+                          setState(() => _selectedSpecies = species);
                         },
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                // Length
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(bottom: 15),
-                        child: Text(
-                          _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
-                          style: TextStyle(fontSize: 20),
-                        ),
+                    // Weight
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(bottom: 15),
+                            child: Text(
+                              _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
+                              style: textFieldTextStyle,
+                            ),
+                          ),
+                          TextFormField(
+                            style: TextStyle(fontSize: 30),
+                            keyboardType: TextInputType.number,
+                            controller: _weightController,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter a weight';
+                              }
+
+                              // check if valid float
+                              if (double.tryParse(value) == null) {
+                                return 'Please enter a valid weight';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
                       ),
-                      TextFormField(
-                        style: TextStyle(fontSize: 30),
-                        keyboardType: TextInputType.number,
-                        controller: _lengthController,
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Please enter a length';
-                          }
+                    ),
 
-                          // check if valid float
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid length';
-                          }
-                          return null;
-                        },
+                    // Length
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(bottom: 15),
+                            child: Text(
+                              _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
+                              style: textFieldTextStyle,
+                            ),
+                          ),
+                          TextFormField(
+                            style: TextStyle(fontSize: 30),
+                            keyboardType: TextInputType.number,
+                            controller: _lengthController,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter a length';
+                              }
+
+                              // check if valid float
+                              if (double.tryParse(value) == null) {
+                                return 'Please enter a valid length';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Individuals
+                    _bulkMode ? _individualsTextInput() : Container(),
+                  ],
                 ),
-
-                // Individualsl
-                _bulkMode ? _individualsTextInput() : Container(),
-
-                Container(height: 100)
-              ],
+              ),
             ),
           ),
-        ),
+          StripButton(
+            centered: true,
+            icon: Icon(
+              Icons.save,
+              color: Colors.white,
+            ),
+            labelText: 'Save',
+            color: Colors.green,
+            onPressed: () async => await _onPressSaveButton(haul, context),
+          ),
+        ],
       ),
     );
   }

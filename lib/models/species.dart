@@ -17,7 +17,7 @@ class Species extends Model {
   final String cpcGroup;
   final String caabCode;
 
-  Species(
+  const Species(
       {this.englishName,
       this.alpha3Code,
       this.scientificName,

@@ -1,6 +1,6 @@
 import 'package:oltrace/models/fishing_method.dart';
 
-final List<FishingMethod> fishingMethods = <FishingMethod>[
+const List<FishingMethod> fishingMethods = <FishingMethod>[
   FishingMethod(
     id: 1,
     name: 'Beach seine',
@@ -28,7 +28,7 @@ final List<FishingMethod> fishingMethods = <FishingMethod>[
   ),
   FishingMethod(
     id: 6,
-    name: 'Drift gilnet',
+    name: 'Drift gillnet',
     abbreviation: 'GND',
   ),
   FishingMethod(

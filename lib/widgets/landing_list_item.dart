@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/widgets/forward_arrow.dart';
+import 'package:oltrace/widgets/landing_icon.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 
 class LandingListItem extends StatelessWidget {
@@ -8,46 +10,50 @@ class LandingListItem extends StatelessWidget {
 
   LandingListItem(this._landing, this._onPressed);
 
-  Widget _speciesName() {
-    String speciesName = !_landing.isBulkLanding
-        ? _landing.species.englishName
-        : _landing.species.englishName + ' (${_landing.individuals} individuals)';
-    return Container(
-      margin: EdgeInsets.only(right: 2),
-      child: Text(speciesName),
-    );
+  Text get speciesName => Text(
+        _landing.species.englishName,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 22),
+      );
+
+  Text get individuals => Text(' (${_landing.individuals})');
+
+  Widget get cardTitle {
+    final firstRow = <Widget>[
+      Flexible(
+        child: speciesName,
+      )
+    ];
+
+    if (_landing.isBulk) {
+      firstRow.add(individuals);
+    }
+
+    return Row(children: firstRow);
   }
 
-  Widget _titleWidget() {
-    final firstRow = <Widget>[_speciesName()];
-    if (_landing.hasProducts) {
-      firstRow.add(Icon(
-        Icons.local_offer,
-        size: 16,
-      ));
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(children: firstRow),
-        Text('${_landing.weightKilograms} | ${_landing.lengthCentimeters}'),
-      ],
-    );
-  }
+  Widget get subtitle => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('${_landing.weightKilograms}, ${_landing.lengthCentimeters}'),
+          TimeAgo(prefix: 'Added ', dateTime: _landing.createdAt),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      child: FlatButton(
-        onPressed: _onPressed,
-        child: ListTile(
-          title: _titleWidget(),
-          subtitle: TimeAgo(prefix: 'Added ', dateTime: _landing.createdAt),
-          trailing: Icon(
-            Icons.keyboard_arrow_right,
-          ),
+    return FlatButton(
+      padding: EdgeInsets.all(0),
+      onPressed: _onPressed,
+      child: ListTile(
+        leading: LandingIcon(landing: _landing),
+        title: cardTitle,
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            subtitle,
+            ForwardArrow(),
+          ],
         ),
       ),
     );

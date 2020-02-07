@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/widgets/forward_arrow.dart';
+import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 
 String _haulsText(int length) {
@@ -20,29 +23,17 @@ class TripListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final TimeAgo timeAgo = TimeAgo(prefix: 'Ended ', dateTime: _trip.endedAt,);
-
-    final title = Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Trip ${_trip.id}',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+    return FlatButton(
+      child: ListTile(
+        contentPadding: EdgeInsets.all(0),
+        leading: NumberedBoat(
+          number: _trip.id,
         ),
-        Text(' (' + _haulsText(_trip.hauls.length) + ')', style: TextStyle(fontSize: 18))
-      ],
-    );
-
-    return Card(
-      child: FlatButton(
-        child: ListTile(
-          title: title,
-          subtitle: timeAgo,
-          trailing: Icon(Icons.keyboard_arrow_right),
-        ),
-        onPressed: onPressed,
+        title: Text(_haulsText(_trip.hauls.length)),
+        subtitle: Text(friendlyDateTimestamp(_trip.endedAt)),
+        trailing: ForwardArrow(),
       ),
+      onPressed: onPressed,
     );
   }
 }

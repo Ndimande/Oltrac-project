@@ -6,7 +6,7 @@ class FishingMethod extends Model {
   final String name;
   final String abbreviation;
 
-  FishingMethod({id, this.name, this.abbreviation}) : super(id: id);
+  const FishingMethod({id, this.name, this.abbreviation}) : super(id: id);
 
   FishingMethod.fromMap(Map data)
       : name = data['name'],

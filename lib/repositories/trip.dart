@@ -57,8 +57,9 @@ class TripRepository extends DatabaseRepository<Trip> {
     if (trip.id == null) {
       return await _database.insert(tableName, toDatabaseMap(trip));
     }
-    final withoutId = toDatabaseMap(trip)..remove('id');
     // remove null id
+    final withoutId = toDatabaseMap(trip)..remove('id');
+
     return await _database.update(tableName, withoutId);
   }
 

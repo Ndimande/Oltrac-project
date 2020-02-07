@@ -22,9 +22,8 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
-import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
-import 'package:oltrace/widgets/screens/create_landing.dart';
+import 'package:oltrace/widgets/screens/landing_form.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 import 'package:oltrace/widgets/screens/main.dart';
@@ -59,7 +58,7 @@ final LocationProvider _locationProvider = LocationProvider();
 
 /// The app entry point. Execution starts here.
 void main() {
-  // Being timing the boot process process
+  // Being timing the boot process
   final stopwatch = Stopwatch()..start();
   boot().then((_) {
     print('Booted in ${stopwatch.elapsed}');
@@ -82,6 +81,7 @@ Future<void> boot() async {
   // SharedPreferences is used for basic non-critical data such
   // as the user's preferences.
   _sharedPreferences = await SharedPreferencesProvider().connect();
+
   // Sqlflite database for trip data.
   _database = await DatabaseProvider().connect();
 
@@ -121,7 +121,8 @@ Future<AppStore> _initApp() async {
   _appStore.packageInfo = await PackageInfo.fromPlatform();
 
   // Prompt for location access until the user accepts.
-  while(await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
+  while (
+      await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
     // Begin listening to location stream.
     _locationProvider.startListening();
   }
@@ -137,7 +138,13 @@ Future<AppStore> _restoreState() async {
     _appStore.profile = Profile.fromMap(profile);
   }
 
-  // Active trip
+  await _restoreActiveTrip(_appStore);
+
+  await _restoreCompletedTrips(_appStore);
+  return _appStore;
+}
+
+Future<void> _restoreActiveTrip(appStore) async {
   final Trip activeTrip = await _tripRepo.getActiveTrip();
 
   if (activeTrip != null) {
@@ -160,17 +167,14 @@ Future<AppStore> _restoreState() async {
     }
 
     _appStore.activeTrip = activeTrip.copyWith(hauls: newHauls);
+    print('Restored active trip');
   }
-
-  _restoreCompletedTrips(_appStore);
-  return _appStore;
 }
 
 Future<void> _restoreCompletedTrips(appStore) async {
   // I should never be forgiven for the code I've written below.
   // All I can ask for is understanding...
   final completedTrips = await _tripRepo.all(where: 'ended_at IS NOT NULL');
-
   final updatedTrips = <Trip>[];
 
   for (Trip trip in completedTrips) {
@@ -197,12 +201,11 @@ Future<void> _restoreCompletedTrips(appStore) async {
   }
 
   appStore.completedTrips = updatedTrips;
+  print('Restored ' + updatedTrips.length.toString() + ' completed trips');
 }
 
 /// The main widget of the app
 class OlTraceApp extends StatefulWidget {
-  // MobX store holds global ephemeral state.
-  // final AppStore _appStore = StoreProvider().appStore;
   final Database database = DatabaseProvider().database;
   final UserSettings userSettings;
 
@@ -231,7 +234,7 @@ class OlTraceAppState extends State<OlTraceApp> {
 
     // Do startup logic
     _initApp().then((AppStore appStore) async {
-      print('State initialised in ${stopwatch.elapsed}');
+      print('State restored in ${stopwatch.elapsed}');
 
       // If profile is not already setup, show welcome screen
       if (appStore.profileConfigured) {
@@ -300,20 +303,15 @@ class OlTraceAppState extends State<OlTraceApp> {
 
           case '/create_landing':
             final Haul haul = settings.arguments;
-            return MaterialPageRoute(builder: (_) => CreateLandingScreen(haulArg: haul));
+            return MaterialPageRoute(builder: (_) => LandingFormScreen(haulArg: haul));
 
           case '/edit_landing':
             final Landing landing = settings.arguments;
-            return MaterialPageRoute(builder: (_) => CreateLandingScreen(landingArg: landing));
-
+            return MaterialPageRoute(builder: (_) => LandingFormScreen(landingArg: landing));
 
           case '/create_product':
             final Landing landing = settings.arguments;
             return MaterialPageRoute(builder: (_) => CreateProductScreen(landing));
-
-          case '/add_source_landing':
-            final List<Landing> landings = settings.arguments;
-            return MaterialPageRoute(builder: (_) => AddSourceLandingsScreen(landings));
 
           case '/products':
             return MaterialPageRoute(builder: (_) => ProductsScreen());

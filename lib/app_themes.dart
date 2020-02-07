@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 final Map<String, ThemeData> appThemes = {'dark': _darkTheme, 'light': _olspsTheme};
 
-MaterialColor olracBlue = MaterialColor(0xFF458196, {
+const MaterialColor olracBlue = MaterialColor(0xFF458196, {
   50: Color.fromRGBO(4, 131, 184, .1),
   100: Color.fromRGBO(4, 131, 184, .2),
   200: Color.fromRGBO(4, 131, 184, .3),
@@ -14,6 +14,20 @@ MaterialColor olracBlue = MaterialColor(0xFF458196, {
   800: Color.fromRGBO(4, 131, 184, .9),
   900: Color.fromRGBO(4, 131, 184, 1),
 });
+
+const MaterialColor olracDarkBlue = MaterialColor(0xFF242C4D, {
+  50: Color.fromRGBO(4, 131, 184, .1),
+  100: Color.fromRGBO(4, 131, 184, .2),
+  200: Color.fromRGBO(4, 131, 184, .3),
+  300: Color.fromRGBO(4, 131, 184, .4),
+  400: Color.fromRGBO(4, 131, 184, .5),
+  500: Color.fromRGBO(4, 131, 184, .6),
+  600: Color.fromRGBO(4, 131, 184, .7),
+  700: Color.fromRGBO(4, 131, 184, .8),
+  800: Color.fromRGBO(4, 131, 184, .9),
+  900: Color.fromRGBO(4, 131, 184, 1),
+});
+
 
 final _olspsTheme = ThemeData(
   primarySwatch: olracBlue,
@@ -28,13 +42,11 @@ final _olspsTheme = ThemeData(
     caption: TextStyle(color: Colors.black), // List item caption
     subhead: TextStyle(color: Colors.black), // List item heading / Car items
   ),
-  canvasColor: Colors.white,
   scaffoldBackgroundColor: Colors.white,
-  dividerTheme: DividerThemeData(
-    thickness: 4,
-    space: 3,
-    color: olracBlue,
+  cardTheme: CardTheme(
+    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   ),
+
   snackBarTheme: SnackBarThemeData(
     contentTextStyle: TextStyle(fontSize: 18),
   ),
@@ -93,9 +105,6 @@ final _darkTheme = ThemeData(
       fontSize: 16,
       color: Colors.white,
     ),
-    focusColor: Colors.pink,
-    fillColor: Colors.pink,
-    hoverColor: Colors.pink,
   ),
   canvasColor: Colors.grey[750],
   buttonTheme: ButtonThemeData(

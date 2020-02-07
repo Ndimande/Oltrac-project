@@ -13,7 +13,7 @@ class Location extends Model {
   /// Longitude in radians
   final double longitude;
 
-  Location({
+  const Location({
     @required this.latitude,
     @required this.longitude,
   });
@@ -33,9 +33,9 @@ class Location extends Model {
         longitude = position.longitude;
 
   @override
-  String toString() => "Lat. $sexagesimalLat, Lon. $sexagesimalLon";
+  String toString() => "$sexagesimalLat, $sexagesimalLon";
 
-  String toMultilineString() => "Lat. $sexagesimalLat\nLon. $sexagesimalLon";
+  String toMultilineString() => "$sexagesimalLat\n $sexagesimalLon";
 
   @override
   Model copyWith({double latitude, double longitude}) {

@@ -6,7 +6,7 @@ class Skipper extends Model {
   final String firstName;
   final String lastName;
 
-  Skipper({@required this.firstName, @required this.lastName});
+  const Skipper({@required this.firstName, @required this.lastName});
 
   Skipper copyWith({String firstName, String lastName}) {
     return Skipper(

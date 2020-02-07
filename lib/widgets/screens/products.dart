@@ -3,7 +3,7 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-
+//TODO is this class used?
 class ProductsScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 

@@ -33,8 +33,13 @@ class TimeAgoState extends State<TimeAgo> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.dateTime == null) {
+      return Text('-');
+    }
+
     final Duration difference = DateTime.now().difference(widget.dateTime);
     final humanDiff = DateTime.now().subtract(difference);
+
     return Text(
       widget.prefix + timeAgo.format(humanDiff) + widget.suffix,
       style: widget.textStyle,

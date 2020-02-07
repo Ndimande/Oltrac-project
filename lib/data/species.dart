@@ -1,6 +1,6 @@
 import 'package:oltrace/models/species.dart';
 
-final List<Species> species = <Species>[
+const List<Species> species = <Species>[
   Species(
     alpha3Code: 'HXT',
     taxonomicCode: '1050200301',

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/location.dart';
@@ -12,6 +13,7 @@ import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/strings.dart';
 import 'package:package_info/package_info.dart';
 
 // Include generated file
@@ -58,6 +60,8 @@ abstract class _AppStore with Store {
   @observable
   Profile profile;
 
+  PackageInfo packageInfo;
+
   @action
   Future<Product> saveProduct(Product product) async {
     final productId = await _productRepo.store(product);
@@ -66,7 +70,7 @@ abstract class _AppStore with Store {
     // update trip
     final List<Haul> updatedHauls = activeTrip.hauls.map((Haul haul) {
       final List<Landing> updatedLandings = haul.landings.map((Landing landing) {
-        if(landing.id == product.landingId) {
+        if (landing.id == product.landingId) {
           final List<Product> updatedProducts = [...landing.products, storedProduct];
           return landing.copyWith(products: updatedProducts);
         }
@@ -140,16 +144,13 @@ abstract class _AppStore with Store {
     final Trip updatedTrip = activeTrip.copyWith(hauls: updatedHauls);
 
     activeTrip = updatedTrip;
-
   }
-
-
 
   @action
   Future<Haul> startHaul(FishingMethod method) async {
-    if (activeTrip == null) {
-      throw Exception('No active trip');
-    }
+
+    assert(activeHaul == null);
+    assert(activeTrip != null);
 
     final Location location = await _locationProvider.location;
 
@@ -174,6 +175,12 @@ abstract class _AppStore with Store {
     return haul;
   }
 
+  void _updateHaul(Haul haul) {
+    final updatedHauls = activeTrip.hauls.map((Haul h) => haul.id == h.id ? haul : h).toList();
+
+    activeTrip = activeTrip.copyWith(hauls: updatedHauls);
+  }
+
   @action
   Future<Haul> endHaul() async {
     // Make sure we don't get a funny state
@@ -191,15 +198,7 @@ abstract class _AppStore with Store {
 
     await _haulRepo.store(endedHaul);
 
-    final updatedHauls = activeTrip.hauls.map((Haul haul) {
-      if (haul.id == endedHaul.id) {
-        return endedHaul;
-      }
-      return haul;
-    }).toList();
-
-    // update state
-    activeTrip = activeTrip.copyWith(hauls: updatedHauls);
+    _updateHaul(endedHaul);
 
     return endedHaul;
   }
@@ -208,8 +207,10 @@ abstract class _AppStore with Store {
   Future<void> cancelHaul() async {
     // Make sure we don't get a funny state
     assert(activeHaul != null);
-    // we will need to delete from db first
+
+    // Always modify db first
     await _haulRepo.delete(activeHaul.id);
+
     // remove from trip hauls
     final updatedHauls = activeTrip.hauls;
     updatedHauls.remove(activeHaul);
@@ -218,43 +219,42 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<Trip> startTrip() async {
-    final Location location = await _locationProvider.location;
+  Future<Trip> startTrip(GlobalKey<ScaffoldState> _scaffoldKey) async {
+    _showWaitingForGpsSnackBar(_scaffoldKey);
 
-    final trip = Trip(startedAt: DateTime.now(), startLocation: location);
+    try {
+      final Location location = await _locationProvider.location;
+      _scaffoldKey.currentState.hideCurrentSnackBar();
 
-    final int tripId = await _tripRepo.store(trip);
+      final trip = Trip(startedAt: DateTime.now(), startLocation: location);
 
-    activeTrip = trip.copyWith(id: tripId);
+      final int tripId = await _tripRepo.store(trip);
+
+      activeTrip = trip.copyWith(id: tripId);
+    } catch (e) {
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      _showLocationNotAvailableSnackBar(_scaffoldKey);
+    }
 
     return activeTrip;
   }
 
   @action
   Future<Trip> endTrip() async {
-    if (activeTrip == null) {
-      throw Exception("No active trip.");
-    }
+    assert(activeTrip != null);
+    assert(activeHaul == null);
 
     final Location location = await _locationProvider.location;
 
     final endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
 
-    await _tripRepo.store(endedTrip);
+    int tripId = await _tripRepo.store(endedTrip);
+    final storedEndedTrip = endedTrip.copyWith(id: tripId);
+    final updatedCompletedTrips = completedTrips;
 
-    // If the trip is being ended, Haul must be ended
-    if (activeHaul != null) {
-      await endHaul();
-    }
-
-    assert(activeHaul == null);
-
-    // avert your eyes
-    if (completedTrips.length == 0) {
-      completedTrips = [endedTrip];
-    } else {
-      completedTrips = [...completedTrips, endedTrip];
-    }
+    // Add ended trip to state
+    updatedCompletedTrips.add(storedEndedTrip);
+    completedTrips = updatedCompletedTrips;
 
     activeTrip = null;
 
@@ -310,5 +310,23 @@ abstract class _AppStore with Store {
     return activeTrip.hauls.fold(0, (int total, Haul elem) => total + elem.landings.length);
   }
 
-  PackageInfo packageInfo;
+  void _showWaitingForGpsSnackBar(GlobalKey<ScaffoldState> _scaffoldKey) {
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        content: Text(Strings.WAITING_FOR_GPS),
+        duration: Duration(minutes: 999), // Show until location is available
+      ),
+    );
+  }
+
+  void _showLocationNotAvailableSnackBar(GlobalKey<ScaffoldState> _scaffoldKey) {
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        content: Text(Strings.LOCATION_NOT_AVAILABLE),
+      ),
+    );
+  }
+
+  bool isActiveTrip(int tripId) => hasActiveTrip ? activeTrip.id == tripId : false;
+
 }

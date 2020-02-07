@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/data/olrac_icons.dart';
 import 'package:oltrace/strings.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/time_ago.dart';
-
-final double _detailRowFontSize = 18;
+import 'package:oltrace/widgets/elapsed_counter.dart';
+import 'package:oltrace/widgets/location_button.dart';
+import 'package:oltrace/widgets/numbered_boat.dart';
+import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/strip_button.dart';
 
 class TripSection extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
   _onPressEndTrip(context) async {
+    // Ending trip
+    if (_appStore.hasActiveHaul) {
+      return;
+    }
+
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -21,71 +30,107 @@ class TripSection extends StatelessWidget {
     }
   }
 
+  _onPressCancelTrip(context) async {
+    if (_appStore.hasActiveHaul) {
+      return;
+    }
+
+    final bool confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => ConfirmDialog('Cancel Trip', Strings.CONFIRM_CANCEL_TRIP),
+    );
+    if (confirmed == true) {
+      await _appStore.cancelTrip();
+    }
+  }
+
   Widget _endTripButton(context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
-      child: RaisedButton.icon(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        color: _appStore.hasActiveHaul ? Colors.grey: Colors.red,
-        onPressed: _appStore.hasActiveHaul ? () {} : () async => await _onPressEndTrip(context),
-        icon: Icon(
-          Icons.stop,
-          color: Colors.white,
-        ),
-        label: Container(
-          alignment: Alignment.center,
-          height: 55,
-          child: Text(
-            'End Trip',
-            style: TextStyle(fontSize: 20, color: Colors.white),
-          ),
-        ),
+    return StripButton(
+      centered: true,
+      labelText: 'End',
+      color: _appStore.hasActiveHaul ? Colors.grey : Colors.red,
+      onPressed: () async => await _onPressEndTrip(context),
+      icon: Icon(
+        Icons.stop,
+        color: Colors.white,
       ),
     );
   }
 
-  Widget build(BuildContext context) {
-    return FlatButton(
-      padding: EdgeInsets.all(0),
-      child: Container(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          children: <Widget>[
-            // First row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                // Trip name
-                Text(
-                  'Trip ${_appStore.activeTrip.id}',
-                  style: TextStyle(fontSize: 32),
-                ),
 
-                // End Haul
-                _endTripButton(context),
+  Widget _cancelTripButton(context) {
+    return StripButton(
+      centered: true,
+      labelText: 'Cancel',
+      color: _appStore.hasActiveHaul ? Colors.grey : olracBlue,
+      onPressed: () async => await _onPressCancelTrip(context),
+
+      icon: Icon(
+        Icons.cancel,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget tripIcon() {
+    String tripNumber = _appStore.activeTrip.id.toString();
+
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Container(
+          width: 64,
+          height: 64,
+          child: OlracIcon(
+            assetPath: OlracIcons.path('Boat'),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: 10),
+          child: Text(
+            tripNumber,
+            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return Container(
+      color: olracBlue[50],
+      child: Column(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.all(10),
+            child: Row(
+              children: <Widget>[
+                NumberedBoat(number: _appStore.activeTrip.id),
+                SizedBox(width: 5),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    LocationButton(
+                      location: _appStore.activeTrip.startLocation,
+                    ),
+                    Container(
+                      child: ElapsedCounter(
+                        textStyle: TextStyle(fontSize: 20),
+                        prefix: 'Trip duration: ',
+                        startedDateTime: _appStore.activeTrip.startedAt,
+                      ),
+                    )
+                  ],
+                ),
               ],
             ),
-            Container(
-              alignment: Alignment.centerLeft,
-              child: TimeAgo(
-                prefix: 'Started ',
-                dateTime: _appStore.activeTrip.startedAt,
-                textStyle: TextStyle(fontSize: _detailRowFontSize),
-              ),
-            ),
-            Container(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                _appStore.activeTrip.startLocation.toString(),
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
+          ),
+          Row(children: <Widget>[
+            Expanded(child: _endTripButton(context),),
+            Expanded(child: _cancelTripButton(context),)
+          ],)
+        ],
       ),
-      onPressed: () async {
-        await Navigator.pushNamed(context, '/trip', arguments: _appStore.activeTrip);
-      },
     );
   }
 }

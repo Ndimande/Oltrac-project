@@ -21,7 +21,7 @@ class Product extends Model {
 
   final int landingId;
 
-  Product({
+  const Product({
     id,
     @required this.tagCode,
     @required this.createdAt,

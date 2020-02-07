@@ -80,7 +80,7 @@ class SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               _buildAllowMobile(),
               _buildAutoUpload(),
-              _buildEnableDarkTheme(),
+//              _buildEnableDarkTheme(),
             ],
           ),
         ));

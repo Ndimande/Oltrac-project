@@ -7,12 +7,10 @@ class AppConfig {
   ///
   /// Enables / disables development features
   /// like buttons to fake data etc.
-  /// Emulators cannot fake RFID/NFC scan
-  /// so we need a button to do this manually.
   static const DEV_MODE = false;
 
   /// Drop and recreate the database if true
-  static const RESET_DATABASE = false;
+  static const RESET_DATABASE = true;
 
   /// The title of the app
   static const APP_TITLE = 'OlTrace';

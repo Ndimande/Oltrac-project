@@ -13,7 +13,7 @@ class Profile extends Model {
   final Country country;
   final int fishingLicenseNumber;
 
-  Profile({
+  const Profile({
     id,
     @required this.vesselName,
     this.vesselId,

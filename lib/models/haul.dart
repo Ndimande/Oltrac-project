@@ -22,7 +22,7 @@ class Haul extends Model {
   final Location startLocation;
   final Location endLocation;
 
-  Haul({
+  const Haul({
     id,
     @required this.tripId,
     @required this.startedAt,

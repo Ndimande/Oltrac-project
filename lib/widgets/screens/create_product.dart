@@ -14,6 +14,8 @@ import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
+import 'package:oltrace/widgets/shark_info_card.dart';
+import 'package:oltrace/widgets/strip_button.dart';
 
 class CreateProductScreen extends StatefulWidget {
   final Landing initialSourceLanding;
@@ -115,7 +117,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
     final product = Product(
       tagCode: _tagCode,
-      //weight: 100, // TODO weight input field
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
       productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id),
@@ -175,7 +176,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 size: 50,
               ),
               Text(
-                '${product.productType.name} Product (ID ${product.id.toString()}) saved!',
+                '${product.productType.name} Tag\n${product.tagCode}\nsaved!',
                 style: TextStyle(fontSize: 26),
                 textAlign: TextAlign.center,
               ),
@@ -219,47 +220,56 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-        floatingActionButton: _floatingActionButton(),
         appBar: AppBar(
-          title: Text('Create Product Tag'),
+          title: Text('Tag Product'),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              // Source landing
-              Container(
-                  padding: EdgeInsets.all(15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Shark to be tagged',style: TextStyle(fontSize: 20),),
-                      LandingListItem(_sourceLandings[0], () {})
-                    ],
-                  )),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  // Source landing
+                  Container(
+                    child: SharkInfoCard(
+                      landing: _sourceLandings[0],
+                    ),
+                  ),
 
-              //Product Type
-              Container(
-                padding: EdgeInsets.all(15),
-                child: _buildProductTypeDropdown(),
+                  //Product Type
+                  Container(
+                    padding: EdgeInsets.all(15),
+                    child: _buildProductTypeDropdown(),
+                  ),
+
+                  // Tag code
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: RFID(
+                      tagCode: _tagCode,
+                      onLongPress: () => setState(
+                        () {
+                          _tagCode = randomTagCode();
+                        },
+                      ),
+                    ), // Hardcode in dev mode
+                  ),
+
+                  // Space for FAB
+                ],
               ),
-
-              // Tag code
-              Container(
-                alignment: Alignment.centerLeft,
-                child: RFID(
-                  tagCode: _tagCode,
-                  onLongPress: () => setState(() {
-                    _tagCode = randomTagCode();
-                  }),
-                ), // Hardcode in dev mode
+            ),
+            StripButton(
+              icon: Icon(
+                Icons.save,
+                color: Colors.white,
               ),
-
-              // Space for FAB
-              Container(
-                height: 100,
-              )
-            ],
-          ),
+              labelText: 'Save',
+              centered: true,
+              color: Colors.green,
+              onPressed: _onPressSaveButton,
+            ),
+          ],
         ),
       ),
     );

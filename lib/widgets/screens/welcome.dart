@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/countries.dart';
-import 'package:oltrace/data/fisheries.dart';
+import 'package:oltrace/data/fishery_types.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/models/country.dart';
 import 'package:oltrace/models/fishery_type.dart';
@@ -8,8 +9,10 @@ import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/strip_button.dart';
 
-final TextStyle _sectionHeadingTextStyle = TextStyle(fontSize: 26, fontWeight: FontWeight.bold);
+final TextStyle _sectionHeadingTextStyle =
+    TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: olracBlue);
 
 class WelcomeScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -38,11 +41,14 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildForm() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          'General',
-          style: _sectionHeadingTextStyle,
+        Container(
+          padding: EdgeInsets.only(left: 15),
+          child: Text(
+            'General',
+            style: _sectionHeadingTextStyle,
+          ),
         ),
         // Country
         Container(
@@ -93,7 +99,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
           padding: EdgeInsets.all(15),
           margin: EdgeInsets.symmetric(vertical: 10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 'Vessel',
@@ -112,7 +118,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
           padding: EdgeInsets.all(15),
           margin: EdgeInsets.symmetric(vertical: 10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
                 'Skipper',
@@ -200,28 +206,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
-    return Container(
-      margin: EdgeInsets.only(bottom: 15, right: 15),
-      child: Container(
-        child: RaisedButton(
-          color: Colors.green,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
-          ),
-          child: Text(
-            'Save',
-            style: TextStyle(fontSize: 22, color: Colors.white),
-          ),
-          onPressed: () async => await _onPressSave(context),
-        ),
-        width: 180,
-        height: 60,
-      ),
-      alignment: Alignment.bottomRight,
-    );
-  }
-
   Future<void> _onPressSave(BuildContext context) async {
     // todo redo this flow
     // Prevent double submission
@@ -289,6 +273,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text('Sign Up'), centerTitle: true,),
       key: _scaffoldKey,
       body: Builder(
         builder: (context) => SingleChildScrollView(
@@ -298,12 +283,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                // Welcome To OlTrace
-                Container(
-                  padding: EdgeInsets.all(15),
-                  margin: EdgeInsets.only(top: 20),
-                  child: _welcomeMessage(),
-                ),
                 Container(
                   margin: EdgeInsets.only(bottom: 10),
                   child: Divider(),
@@ -311,7 +290,16 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
                 // User info form
                 _buildForm(),
-                _buildSaveButton()
+                StripButton(
+                  centered: true,
+                  labelText: 'Save',
+                  color: Colors.green,
+                  icon: Icon(
+                    Icons.save,
+                    color: Colors.white,
+                  ),
+                  onPressed: () async => _onPressSave(context),
+                ),
               ],
             ),
           ),

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 class NoActiveTrip extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
+  final Function onPressStartTrip;
+
+  NoActiveTrip({this.onPressStartTrip});
 
   Widget _completedTripList() {
     final List completedTrips = _appStore.completedTrips.reversed.toList();
@@ -21,8 +25,7 @@ class NoActiveTrip extends StatelessWidget {
       itemCount: completedTrips.length,
       itemBuilder: (context, index) {
         return TripListItem(completedTrips[index], () async {
-            await Navigator.pushNamed(context, '/trip',arguments: completedTrips[index]);
-
+          await Navigator.pushNamed(context, '/trip', arguments: completedTrips[index]);
         });
       },
     );
@@ -31,14 +34,20 @@ class NoActiveTrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: Alignment.center,
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(child: _completedTripList()),
-          ],
-        ),
+      child: Column(
+        children: <Widget>[
+          Expanded(child: _completedTripList()),
+          StripButton(
+            centered: true,
+            labelText: 'Start Trip',
+            color: Colors.green,
+            icon: Icon(
+              Icons.play_arrow,
+              color: Colors.white,
+            ),
+            onPressed: onPressStartTrip,
+          )
+        ],
       ),
     );
   }

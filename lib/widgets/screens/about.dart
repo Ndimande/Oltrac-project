@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 
 class AboutScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
+  String get copyright {
+    final year = DateTime.now().year;
+    return '© $year OlSPS Marine';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final title = 'Olrac OlTrace';
+    const title = 'OlTrace';
 
     final version = _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber;
 
-    final copyright = '© 2019 OlSPS Marine';
 
     return Scaffold(
       body: Container(
@@ -34,7 +38,7 @@ class AboutScreen extends StatelessWidget {
               ),
               Container(
                 padding: EdgeInsets.all(20),
-                child: BackButton(),
+                child: BackButton(color: olracBlue),
               )
             ],
           ),

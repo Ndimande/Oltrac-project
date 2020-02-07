@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/product.dart';
+import 'package:oltrace/widgets/location_button.dart';
 
 class ProductScreen extends StatelessWidget {
   final Product _product;
@@ -30,7 +31,7 @@ class ProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Tag - ${_product.tagCode}'),
+        title: Text('Product Tag ${_product.tagCode}'),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -39,7 +40,16 @@ class ProductScreen extends StatelessWidget {
             children: <Widget>[
               _detailRow('ID', _product.id.toString()),
               _detailRow('Product Type', _product.productType.name),
-              _detailRow('Location', _product.location.toMultilineString()),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    'Location',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  LocationButton(location: _product.location),
+                ],
+              ),
               _detailRow('Timestamp', friendlyDateTimestamp(_product.createdAt)),
             ],
           ),

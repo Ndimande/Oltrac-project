@@ -28,7 +28,7 @@ class Landing extends Model {
   // The number of fish
   final int individuals;
 
-  Landing({
+  const Landing({
     id,
     @required this.haulId,
     @required this.species,
@@ -105,9 +105,9 @@ class Landing extends Model {
 
   bool get hasProducts => this.products.length > 0;
 
-  bool get isBulkLanding => this.individuals > 1;
+  bool get isBulk => this.individuals > 1;
 
-  String get weightKilograms => (this.weight / 1000).toString() + ' kg' + (this.isBulkLanding ? ' total' : '');
+  String get weightKilograms => (this.weight / 1000).toString() + ' kg' + (this.isBulk ? ' total' : '');
 
-  String get lengthCentimeters => (this.length).toString() + ' cm' + (this.isBulkLanding ? ' avg.' : '');
+  String get lengthCentimeters => (this.length).toString() + ' cm' + (this.isBulk ? ' avg.' : '');
 }

@@ -7,7 +7,7 @@ class FisheryType extends Model {
   final String safsCode; // e.g ONLF
   final String jurisdiction; // e.g Commonwealth
 
-  FisheryType({id, this.name, this.safsCode, this.jurisdiction}) : super(id: id);
+  const FisheryType({id, this.name, this.safsCode, this.jurisdiction}) : super(id: id);
 
   FisheryType.fromMap(Map data)
       : name = data['name'],

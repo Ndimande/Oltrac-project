@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/haul_list_item.dart';
+import 'package:oltrace/widgets/grouped_hauls_list.dart';
 
 class HaulSection extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
-
-  _onPressHaulListItem(context, Haul haul) async {
-    await Navigator.pushNamed(context, '/haul', arguments: haul);
-  }
 
   Widget _buildNoHauls() {
     return Container(
@@ -19,20 +15,6 @@ class HaulSection extends StatelessWidget {
         'No hauls on this trip yet',
         style: TextStyle(fontSize: 20),
       ),
-    );
-  }
-
-  Widget _buildHaulsList(List<Haul> hauls) {
-    return ListView.builder(
-      itemCount: hauls.length,
-      itemBuilder: (context, index) {
-        final Haul haul = hauls[index];
-
-        return HaulListItem(
-          haul,
-          () async => await _onPressHaulListItem(context, haul),
-        );
-      },
     );
   }
 
@@ -46,16 +28,19 @@ class HaulSection extends StatelessWidget {
           Container(
             height: 50,
             child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                'Hauls',
-                style: TextStyle(fontSize: 30),
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.only(left: 5),
+                child: Text(
+                  'Hauls',
+                  style: TextStyle(fontSize: 30, color: olracBlue),
+                ),
               ),
             ),
           ),
           Expanded(
             child: Container(
-              child: hauls.length == 0 ? _buildNoHauls() : _buildHaulsList(hauls),
+              child: hauls.length == 0 ? _buildNoHauls() : GroupedHaulsList(hauls: hauls),
             ),
           )
         ],

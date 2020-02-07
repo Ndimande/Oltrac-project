@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/app_fab.dart';
+import 'package:oltrace/strings.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/haul_list_item.dart';
+import 'package:oltrace/widgets/grouped_hauls_list.dart';
+import 'package:oltrace/widgets/numbered_boat.dart';
+import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/time_space.dart';
 
 class TripScreen extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -17,72 +20,43 @@ class TripScreen extends StatelessWidget {
 
   TripScreen(this._trip);
 
-  Widget _buildInfoItem(String label, String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            flex: 3,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Text(
-              text,
-              textAlign: TextAlign.right,
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTripInfo(Trip trip) {
-    final String startCoords = trip.startLocation.toMultilineString();
-    final String endCoords = trip.endLocation != null ? trip.endLocation.toMultilineString() : '-';
     return Container(
+      color: olracBlue[50],
       padding: EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          _buildInfoItem('Total hauls ', trip.hauls.length.toString()),
-          _buildInfoItem('Started', friendlyDateTimestamp(trip.startedAt) + '\n' + startCoords),
-          _buildInfoItem('Ended', (friendlyDateTimestamp(trip.endedAt) ?? '-') + '\n' + endCoords),
+          NumberedBoat(
+            number: _trip.id,
+          ),
+          SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                TimeSpace(label: 'Start', location: _trip.startLocation, dateTime: _trip.startedAt),
+                SizedBox(
+                  height: 5,
+                ),
+                _trip.endedAt != null
+                    ? TimeSpace(label: 'End', location: _trip.endLocation, dateTime: _trip.endedAt)
+                    : Container(),
+              ],
+            ),
+          )
         ],
       ),
-    );
-  }
-
-  Widget _buildHaulsList(List<Haul> hauls) {
-    final List<HaulListItem> haulListItems = hauls
-        .map((Haul haul) => HaulListItem(
-              haul,
-              () async => await Navigator.pushNamed(
-                _scaffoldKey.currentContext,
-                '/haul',
-                arguments: haul,
-              ),
-            ))
-        .toList();
-
-    return Expanded(
-      child: ListView(children: haulListItems),
     );
   }
 
   Widget _buildHaulsLabel() {
     return Container(
+      margin: EdgeInsets.all( 10),
       child: Text(
         'Hauls',
-        style: TextStyle(fontSize: 30),
+        style: TextStyle(fontSize: 30, color: olracBlue),
       ),
-      padding: EdgeInsets.only(top: 15),
     );
   }
 
@@ -93,10 +67,11 @@ class TripScreen extends StatelessWidget {
         onPressed: () async {
           bool confirmed = await showDialog<bool>(
             context: _scaffoldKey.currentContext,
-            builder: (_) => ConfirmDialog('End Trip', 'Are you sure you want to end the trip?'),
+            builder: (_) => ConfirmDialog('End Trip', Strings.CONFIRM_END_TRIP),
           );
           if (confirmed == true) {
             await _appStore.endTrip();
+            Navigator.pop(_scaffoldKey.currentContext);
           }
         },
       );
@@ -108,10 +83,10 @@ class TripScreen extends StatelessWidget {
         onPressed: () async {
           bool confirmed = await showDialog<bool>(
             context: _scaffoldKey.currentContext,
-            builder: (_) =>
-                ConfirmDialog('Cancel Trip', 'Are you sure you want to cancel the trip?'),
+            builder: (_) => ConfirmDialog('Cancel Trip', Strings.CONFIRM_CANCEL_TRIP),
           );
           if (confirmed == true) {
+            Navigator.pop(_scaffoldKey.currentContext);
             await _appStore.cancelTrip();
           }
         },
@@ -127,9 +102,8 @@ class TripScreen extends StatelessWidget {
 
     // Is there an active trip? Is this the active trip?
     if (_appStore.hasActiveTrip && _trip.id == _appStore.activeTrip.id) {
-      // Is there no active haul?
+      // Show the actions only if there is no active haul
       if (!_appStore.hasActiveHaul) {
-        // Show the actions
         actions.add(_endTripActionButton());
         actions.add(_cancelTripActionButton());
       }
@@ -139,55 +113,56 @@ class TripScreen extends StatelessWidget {
     return actions;
   }
 
+  Widget get noHauls => Container(
+        alignment: Alignment.center,
+        child: Text(
+          'No hauls on this trip',
+          style: TextStyle(fontSize: 20),
+        ),
+      );
+
+  Widget get stripButton => StripButton(
+        centered: true,
+        labelText: 'Upload Trip',
+        color: olracBlue,
+        onPressed: onPressUploadTrip,
+        icon: Icon(
+          Icons.cloud_upload,
+          color: Colors.white,
+        ),
+      );
+
+  onPressUploadTrip() {
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        content: Text('Trip upload started...'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
-        var title = 'Trip ${_trip.id}';
-        if (_appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id) {
-          title += ' (Active)';
-        }
 
-        final fAB = _appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id
-            ? null
-            : AppFAB(
-                label: Text('Upload Trip'),
-                icon: Icon(Icons.cloud_upload),
-                onPressed: () {
-                  _scaffoldKey.currentState.showSnackBar(
-                    SnackBar(
-                      content: Text('Trip upload started...'),
-                    ),
-                  );
-                },
-              );
         return Scaffold(
           key: _scaffoldKey,
-          floatingActionButton: fAB,
           appBar: AppBar(
             actions: _appBarActions(),
-            title: Text(title),
+            title: Text('Completed Trip'),
           ),
           body: Container(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Container(
-                  child: _buildTripInfo(_trip),
-                  padding: EdgeInsets.all(5),
-                ),
-                Divider(),
+                _buildTripInfo(_trip),
                 _buildHaulsLabel(),
-                _trip.hauls.length > 0
-                    ? _buildHaulsList(_trip.hauls.reversed.toList())
-                    : Expanded(
-                        child: Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            'No hauls on this trip',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ),
+                Expanded(
+                  child: _trip.hauls.length > 0
+                      ? GroupedHaulsList(hauls: _trip.hauls.reversed.toList())
+                      : noHauls,
+                ),
+                _appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id ? Container(): stripButton
               ],
             ),
           ),

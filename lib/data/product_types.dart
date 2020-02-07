@@ -1,6 +1,6 @@
 import 'package:oltrace/models/product_type.dart';
 
-final List<ProductType> productTypes = <ProductType>[
+const List<ProductType> productTypes = <ProductType>[
   ProductType(id: 1, name: 'Carcass'),
   ProductType(id: 2, name: 'Meat'),
   ProductType(id: 4, name: 'Fins Primary'),

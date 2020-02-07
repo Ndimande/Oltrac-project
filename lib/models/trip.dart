@@ -21,7 +21,7 @@ class Trip extends Model {
   /// GPS End Location
   final Location endLocation;
 
-  Trip({
+  const Trip({
     id,
     @required this.startedAt,
     this.endedAt,

@@ -1,38 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 
-// final Color _drawerHeaderColor = AppConfig.backgroundColor;
-// final Color _drawerHeaderTextColor = AppConfig.textColor1;
 final double _drawerItemFontSize = 22;
+const double drawerLabelFontSize = 18;
+const double drawerTextFontSize = 26;
 
 Widget _drawerHeader(Profile profile) {
-  final _vesselName = Text(
-    profile.vesselName,
-    style: TextStyle(fontSize: 30),
+  final vesselName = Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Text(
+        'Vessel Name',
+        style: TextStyle(fontSize: drawerLabelFontSize),
+      ),
+      Text(profile.vesselName, style: TextStyle(fontSize: drawerTextFontSize)),
+    ],
   );
-  final _skipperNameText = Text(
-    profile.skipper.firstName + ' ' + profile.skipper.lastName,
-    style: TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-    ),
+
+  final skipperName = Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Text(
+        'Skipper Name',
+        style: TextStyle(fontSize: drawerLabelFontSize),
+      ),
+      Text(
+        profile.skipper.firstName + ' ' + profile.skipper.lastName,
+        style: TextStyle(
+          fontSize: drawerTextFontSize,
+        ),
+      ),
+    ],
   );
 
   return DrawerHeader(
+    padding: EdgeInsets.all(0),
+    margin: EdgeInsets.all(0),
     child: Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.all(15),
+      color: olracBlue[50],
+      child: Stack(
         children: <Widget>[
+          Container(
+            child: Image(
+              image: AssetImage('assets/images/olsps-logo.png'),
+              width: 100,
+            ),
+            alignment: Alignment.topRight,
+          ),
           Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _vesselName,
-              _skipperNameText,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  vesselName,
+                  skipperName,
+                ],
+              ),
             ],
-          ),
+          )
         ],
       ),
     ),
@@ -48,50 +79,63 @@ class MainDrawer extends StatelessWidget {
       // Add a ListView to the drawer. This ensures the user can scroll
       // through the options in the drawer if there isn't enough vertical
       // space to fit everything.
-      child: ListView(
-        // Important: Remove any padding from the ListView.
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          _drawerHeader(_appStore.profile),
+      child: Container(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            _drawerHeader(_appStore.profile),
+            Divider(
+              color: olracBlue,
+              height: 0,
+              thickness: 5,
+            ),
 
-          // Trip history
-          ListTile(
-            leading: Icon(
-              Icons.history,
+            // Trip history
+            ListTile(
+              leading: Icon(
+                Icons.history,
+                color: olracBlue,
+                size: 36,
+              ),
+              title: Text(
+                'Trip History',
+                style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
+              ),
+              onTap: () => Navigator.pushNamed(context, '/trip_history'),
             ),
-            title: Text(
-              'Trip History',
-              style: TextStyle(fontSize: _drawerItemFontSize),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/trip_history'),
-          ),
 
-          // Settings
-          ListTile(
-            leading: Icon(
-              Icons.settings,
+            // Settings
+            ListTile(
+              leading: Icon(
+                Icons.settings,
+                color: olracBlue,
+                size: 36,
+              ),
+              title: Text(
+                'Settings',
+                style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
+              ),
+              onTap: () {
+                Navigator.pushNamed(context, '/settings');
+              },
             ),
-            title: Text(
-              'Settings',
-              style: TextStyle(fontSize: _drawerItemFontSize),
-            ),
-            onTap: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
 
-          // About
-          ListTile(
-            leading: Icon(
-              Icons.info,
+            // About
+            ListTile(
+              leading: Icon(
+                Icons.info,
+                color: olracBlue,
+                size: 36,
+              ),
+              title: Text(
+                'About',
+                style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
+              ),
+              onTap: () => Navigator.pushNamed(context, '/about'),
             ),
-            title: Text(
-              'About',
-              style: TextStyle(fontSize: _drawerItemFontSize),
-            ),
-            onTap: () => Navigator.pushNamed(context, '/about'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

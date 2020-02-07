@@ -1,6 +1,6 @@
 import 'package:oltrace/models/fishery_type.dart';
 
-final List<FisheryType> fisheries = <FisheryType>[
+const List<FisheryType> fisheries = <FisheryType>[
   FisheryType(
     id: 1,
     name: 'Southern and Eastern Scalefish and Shark Fishery (Shark Gillnet and Shark Hook Sector)',
