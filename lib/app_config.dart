@@ -10,7 +10,7 @@ class AppConfig {
   static const DEV_MODE = false;
 
   /// Drop and recreate the database if true
-  static const RESET_DATABASE = true;
+  static const RESET_DATABASE = false;
 
   /// The title of the app
   static const APP_TITLE = 'OlTrace';
