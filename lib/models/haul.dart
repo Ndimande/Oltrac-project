@@ -73,8 +73,8 @@ class Haul extends Model {
       'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
       'fishingMethod': fishingMethod.toMap(),
       'landings': landings.map((l) => l.toMap()).toList(),
-      'startLocation': startLocation.toJson(),
-      'endLocation': endLocation?.toJson(),
+      'startLocation': startLocation.toMap(),
+      'endLocation': endLocation?.toMap(),
     };
   }
 }

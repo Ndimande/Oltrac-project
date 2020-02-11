@@ -17,7 +17,8 @@ final List<Map<String, String>> appMigrations = const [
         'start_longitude REAL NOT NULL, '
         'end_latitude REAL, '
         'end_longitude REAL, '
-        'ended_at TIMESTAMP'
+        'ended_at TIMESTAMP, '
+        'is_uploaded INT'
         ')',
     'down': 'DROP TABLE trips'
   },
@@ -51,6 +52,7 @@ final List<Map<String, String>> appMigrations = const [
         'individuals INTEGER NOT NULL DEFAULT 1, '
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '
+        'done_tagging INTEGER DEFAULT 0, '
         'FOREIGN KEY (haul_id) REFERENCES hauls (id)'
         ')',
     'down': 'DROP TABLE landings'

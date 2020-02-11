@@ -15,6 +15,8 @@ class AppConfig {
   /// The title of the app
   static const APP_TITLE = 'OlTrace';
 
+  static const TRIP_UPLOAD_URL = 'https://tracing.olracddm.com/incomings';
+
   static const defaultUserSettings = <String, dynamic>{
     'mobile_data': false,
     'uploadAutomatically': false,

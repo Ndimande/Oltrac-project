@@ -97,6 +97,7 @@ class TripRepository extends DatabaseRepository<Trip> {
         longitude: result['start_longitude'],
       ),
       endLocation: endLocation,
+      isUploaded: result['is_uploaded'] == 1 ? true: false,
     );
   }
 
@@ -109,6 +110,7 @@ class TripRepository extends DatabaseRepository<Trip> {
       'start_longitude': trip.startLocation.longitude,
       'end_latitude': trip.startLocation.latitude,
       'end_longitude': trip.startLocation.longitude,
+      'is_uploaded': trip.isUploaded
     };
   }
 }

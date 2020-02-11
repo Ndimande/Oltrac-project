@@ -63,23 +63,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  _floatingActionButton() {
-    return Container(
-      margin: EdgeInsets.only(top: 100),
-      height: 65,
-      width: 180,
-      child: FloatingActionButton.extended(
-        backgroundColor: Colors.green,
-        label: Text(
-          'Save',
-          style: TextStyle(fontSize: 22),
-        ),
-        icon: Icon(Icons.save),
-        onPressed: () async => await _onPressSaveButton(),
-      ),
-    );
-  }
-
   _onPressSaveButton() async {
     if (_tagCode == null) {
       _scaffoldKey.currentState.showSnackBar(

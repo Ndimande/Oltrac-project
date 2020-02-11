@@ -70,12 +70,12 @@ class Product extends Model {
     return {
       'id': id,
       'tagCode': tagCode,
-      'createdAt': createdAt,
+      'createdAt': createdAt.toIso8601String(),
       'location': location.toMap(),
       'productType': productType.toMap(),
       'landingId': landingId,
       'weight': weight,
-      'weightUnit': weightUnit,
+      'weightUnit': weightUnit.toString(),
     };
   }
 }

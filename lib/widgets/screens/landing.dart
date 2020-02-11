@@ -197,7 +197,7 @@ class LandingScreen extends StatelessWidget {
   }
 
   Widget tagProductButton(Haul haul, Landing landing) {
-    if (haul == null) {
+    if (haul == null || !(haul.tripId == _appStore.activeTrip?.id) ||landing.doneTagging == true){
       return Container();
     }
 
@@ -220,6 +220,22 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
+  Widget doneTaggingSwitch(Landing landing) {
+    // TODO only show this if it is a landing of an active trip
+    return Row(
+      children: <Widget>[
+        Text('Done'),
+        Switch(
+          value: landing.doneTagging ?? false,
+          onChanged: (bool value) async {
+            await _appStore.editLanding(landing.copyWith(doneTagging: value));
+          },
+        )
+      ],
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
@@ -234,7 +250,8 @@ class LandingScreen extends StatelessWidget {
       return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text('Shark'),
+          title: Text(landing.individuals > 1 ? 'Bulk bin' : 'Shark'),
+          actions: <Widget>[doneTaggingSwitch(landing)],
         ),
         body: Column(
           children: <Widget>[
@@ -266,7 +283,7 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
             ),
-            haul.tripId == _appStore.activeTrip?.id ? tagProductButton(haul, landing) : Container()
+            tagProductButton(haul, landing)
           ],
         ),
       );

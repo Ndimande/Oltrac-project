@@ -21,6 +21,8 @@ class Trip extends Model {
   /// GPS End Location
   final Location endLocation;
 
+  final bool isUploaded;
+
   const Trip({
     id,
     @required this.startedAt,
@@ -28,6 +30,7 @@ class Trip extends Model {
     this.hauls = const [],
     @required this.startLocation,
     this.endLocation,
+    this.isUploaded = false,
   }) : super(id: id);
 
   Trip.fromMap(Map data)
@@ -36,6 +39,7 @@ class Trip extends Model {
         hauls = (data['hauls'] as List).map((haul) => Haul.fromMap(haul)).toList(),
         startLocation = Location.fromMap(data['endLocation']),
         endLocation = Location.fromMap(data['startLocation']),
+        isUploaded = data['isUploaded'],
         super.fromMap(data);
 
   Trip copyWith({
@@ -46,6 +50,7 @@ class Trip extends Model {
     List<Haul> hauls,
     Location startLocation,
     Location endLocation,
+    bool isUploaded
   }) {
     return Trip(
       id: id ?? this.id,
@@ -54,6 +59,7 @@ class Trip extends Model {
       hauls: hauls ?? this.hauls,
       startLocation: startLocation ?? this.startLocation,
       endLocation: endLocation ?? this.endLocation,
+      isUploaded: isUploaded ?? this.isUploaded
     );
   }
 
@@ -63,8 +69,9 @@ class Trip extends Model {
       'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
       'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
       'hauls': hauls.map((Haul haul) => haul.toMap()).toList(),
-      'startLocation': startLocation.toJson(),
-      'endLocation': endLocation?.toJson(),
+      'startLocation': startLocation.toMap(),
+      'endLocation': endLocation?.toMap(),
+      'isUploaded': isUploaded,
     };
   }
 }

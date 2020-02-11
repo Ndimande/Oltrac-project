@@ -28,6 +28,8 @@ class Landing extends Model {
   // The number of fish
   final int individuals;
 
+  final bool doneTagging;
+
   const Landing({
     id,
     @required this.haulId,
@@ -37,13 +39,11 @@ class Landing extends Model {
     @required this.weight,
     @required this.length,
     this.products = const [],
-    individuals,
-    weightUnit,
-    lengthUnit,
-  })  : this.weightUnit = weightUnit ?? WeightUnit.GRAMS,
-        this.lengthUnit = lengthUnit ?? LengthUnit.CENTIMETERS,
-        this.individuals = individuals ?? 1,
-        super(id: id);
+    this.individuals = 1,
+    this.weightUnit = WeightUnit.GRAMS,
+    this.lengthUnit = LengthUnit.CENTIMETERS,
+    this.doneTagging = false,
+  }) : super(id: id);
 
   Landing.fromMap(Map data)
       : haulId = data['haulId'],
@@ -56,6 +56,7 @@ class Landing extends Model {
         weightUnit = data['weightUnit'],
         lengthUnit = data['lengthUnit'],
         individuals = data['inidividuals'],
+        doneTagging = data['doneTagging'],
         super.fromMap(data);
 
   Landing copyWith({
@@ -71,20 +72,21 @@ class Landing extends Model {
     WeightUnit weightUnit,
     LengthUnit lengthUnit,
     int individuals,
+    bool doneTagging,
   }) {
     return Landing(
-      id: id ?? this.id,
-      haulId: haulId ?? this.haulId,
-      species: species ?? this.species,
-      createdAt: createdAt ?? this.createdAt,
-      location: location ?? this.location,
-      weight: weight ?? this.weight,
-      length: length ?? this.length,
-      products: products ?? this.products,
-      weightUnit: weightUnit ?? this.weightUnit,
-      lengthUnit: lengthUnit ?? this.lengthUnit,
-      individuals: individuals ?? this.individuals,
-    );
+        id: id ?? this.id,
+        haulId: haulId ?? this.haulId,
+        species: species ?? this.species,
+        createdAt: createdAt ?? this.createdAt,
+        location: location ?? this.location,
+        weight: weight ?? this.weight,
+        length: length ?? this.length,
+        products: products ?? this.products,
+        weightUnit: weightUnit ?? this.weightUnit,
+        lengthUnit: lengthUnit ?? this.lengthUnit,
+        individuals: individuals ?? this.individuals,
+        doneTagging: doneTagging ?? this.doneTagging);
   }
 
   Map<String, dynamic> toMap() {
@@ -92,14 +94,16 @@ class Landing extends Model {
       'id': id,
       'haulId': haulId,
       'species': species.toMap(),
-      'createdAt': createdAt,
+      'createdAt': createdAt.toIso8601String(),
       'location': location.toMap(),
       'weight': weight,
       'length': length,
       'products': products,
-      'weightUnit': weightUnit,
-      'lengthUnit': lengthUnit,
+      'products': products.map((Product product) => product.toMap()).toList(),
+      'weightUnit': weightUnit.toString(),
+      'lengthUnit': lengthUnit.toString(),
       'individuals': individuals,
+      'doneTagging': doneTagging
     };
   }
 
@@ -107,7 +111,8 @@ class Landing extends Model {
 
   bool get isBulk => this.individuals > 1;
 
-  String get weightKilograms => (this.weight / 1000).toString() + ' kg' + (this.isBulk ? ' total' : '');
+  String get weightKilograms =>
+      (this.weight / 1000).toString() + ' kg' + (this.isBulk ? ' total' : '');
 
   String get lengthCentimeters => (this.length).toString() + ' cm' + (this.isBulk ? ' avg.' : '');
 }

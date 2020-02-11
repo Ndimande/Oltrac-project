@@ -23,32 +23,49 @@ class LandingIcon extends StatelessWidget {
         ),
       );
 
-  Widget get tagTotal {
-    IconData icon = Icons.local_offer;
+  Widget get tagTotalIcon {
+    IconData icon = landing.doneTagging == true ? Icons.done : Icons.local_offer;
     Color tagColor = landing.products.length == 0 ? Colors.red : olracBlue;
 
+    final stackChildren = <Widget>[
+      Container(
+        child: Icon(
+          icon,
+          size: 42,
+          color: tagColor,
+        ),
+      ),
+    ];
+
+    if (landing.doneTagging == null || !landing.doneTagging == true) {
+      stackChildren.add(Container(
+        margin: EdgeInsets.only(left: 8, top: 11),
+        child: Container(
+          width: 26,
+          child: Text(
+            landing.products.length.toString(),
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ));
+    }
     return Container(
       margin: EdgeInsets.only(left: 25),
       child: Stack(
-        children: <Widget>[
-          Icon(
-            icon,
-            size: 42,
-            color: tagColor,
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 8, top: 11),
-            child: Container(
-              width: 26,
-              child: Text(
-              landing.products.length.toString(),
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
+        children: stackChildren,
+      ),
+    );
+  }
+
+  Widget get doneTaggingIcon {
+    return Container(
+      width: 20,
+      height: 20,
+      child: Icon(
+        Icons.delete,
+        size: 20,
       ),
     );
   }
@@ -57,8 +74,7 @@ class LandingIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-//        sharkIcon,
-        tagTotal,
+        tagTotalIcon,
         sharkId,
       ],
     );

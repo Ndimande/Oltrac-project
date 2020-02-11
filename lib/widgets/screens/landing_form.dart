@@ -179,7 +179,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                 size: 50,
               ),
               Text(
-                'Shark ${landing.species.englishName} (ID ${landing.id.toString()}) saved!',
+                'Shark ${landing.species.englishName} ${landing.id.toString()} saved!',
                 style: TextStyle(fontSize: 26),
                 textAlign: TextAlign.center,
               ),
@@ -265,7 +265,8 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     final List<Species> sortedSpecies = List.from(species);
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
 
-    final String titleText = widget.landingArg == null ? 'Add Shark' : 'Edit Shark';
+    final String titleText =
+        widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Shark' : 'Edit Shark';
 
     return Scaffold(
       key: _scaffoldKey,

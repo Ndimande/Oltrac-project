@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
@@ -31,6 +33,8 @@ abstract class _AppStore with Store {
   final _productRepo = ProductRepository();
 
   final _locationProvider = LocationProvider();
+
+  final Dio dio = Dio();
 
   /// Trips that have been completed / ended.
   @observable
@@ -148,7 +152,6 @@ abstract class _AppStore with Store {
 
   @action
   Future<Haul> startHaul(FishingMethod method) async {
-
     assert(activeHaul == null);
     assert(activeTrip != null);
 
@@ -272,6 +275,38 @@ abstract class _AppStore with Store {
   }
 
   @action
+  Future<void> uploadTrip(Trip trip) async {
+    // you can't upload an active trip
+    assert(!_isActiveTrip(trip));
+
+    Response response = await dio.post(
+      AppConfig.TRIP_UPLOAD_URL,
+      data: trip.toMap(),
+      options: RequestOptions(headers: {'Content-Type': 'application/json'}),
+    );
+
+    _updateTrip(trip.id, trip.copyWith(isUploaded: true));
+  }
+
+  Trip findTrip(int id) {
+    if(activeTrip?.id == id) {
+      return activeTrip;
+    }
+    return completedTrips.singleWhere((Trip t) => t.id == id,orElse: () => null);
+  }
+
+  void _updateTrip(int id, Trip trip) {
+    if (activeTrip?.id == id) {
+      activeTrip = trip;
+      return;
+    }
+    _tripRepo.store(trip);
+
+    final List<Trip> updatedCompletedTrips = completedTrips.map((Trip t) => t.id == id ? trip : t).toList();
+    completedTrips = updatedCompletedTrips;
+  }
+
+  @action
   Future<void> saveProfile(Profile updatedProfile) async {
     await _jsonRepo.set('profile', updatedProfile);
     profile = updatedProfile;
@@ -327,6 +362,5 @@ abstract class _AppStore with Store {
     );
   }
 
-  bool isActiveTrip(int tripId) => hasActiveTrip ? activeTrip.id == tripId : false;
-
+  bool _isActiveTrip(Trip trip) => hasActiveTrip ? activeTrip.id == trip.id : false;
 }

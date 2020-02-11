@@ -13,7 +13,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
       return await database.insert(tableName, toDatabaseMap(landing));
     }
 
-    final withoutId = toDatabaseMap(landing)..remove('id');
+    final withoutId = toDatabaseMap(landing)
+      ..remove('id');
 
     return await database.update(tableName, withoutId, where: 'id = ${landing.id}');
   }
@@ -57,7 +58,9 @@ class LandingRepository extends DatabaseRepository<Landing> {
       weight: result['weight'],
       lengthUnit: lengthUnit,
       weightUnit: weightUnit,
-      species: speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
+      species:
+      speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
+      doneTagging: result['doneTagging'] == 1 ? true: false,
     );
   }
 
@@ -74,6 +77,7 @@ class LandingRepository extends DatabaseRepository<Landing> {
       'weight': landing.weight,
       'length': landing.length,
       'individuals': landing.individuals,
+      'done_tagging': landing.doneTagging == true ? 0 : 1
     };
   }
 }

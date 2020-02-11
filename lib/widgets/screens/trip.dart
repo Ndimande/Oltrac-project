@@ -1,24 +1,31 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/strings.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
-class TripScreen extends StatelessWidget {
+class TripScreen extends StatefulWidget {
+  final Trip tripArg;
+
+  TripScreen(this.tripArg);
+
+  @override
+  State<StatefulWidget> createState() {
+    return TripScreenState();
+  }
+}
+
+class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final AppStore _appStore = StoreProvider().appStore;
-
-  final Trip _trip;
-
-  TripScreen(this._trip);
+  Dio dio = Dio();
+  bool uploading = false;
 
   Widget _buildTripInfo(Trip trip) {
     return Container(
@@ -28,19 +35,19 @@ class TripScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           NumberedBoat(
-            number: _trip.id,
+            number: trip.id,
           ),
           SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                TimeSpace(label: 'Start', location: _trip.startLocation, dateTime: _trip.startedAt),
+                TimeSpace(label: 'Start', location: trip.startLocation, dateTime: trip.startedAt),
                 SizedBox(
                   height: 5,
                 ),
-                _trip.endedAt != null
-                    ? TimeSpace(label: 'End', location: _trip.endLocation, dateTime: _trip.endedAt)
+                trip.endedAt != null
+                    ? TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt)
                     : Container(),
               ],
             ),
@@ -52,7 +59,7 @@ class TripScreen extends StatelessWidget {
 
   Widget _buildHaulsLabel() {
     return Container(
-      margin: EdgeInsets.all( 10),
+      margin: EdgeInsets.all(10),
       child: Text(
         'Hauls',
         style: TextStyle(fontSize: 30, color: olracBlue),
@@ -60,109 +67,87 @@ class TripScreen extends StatelessWidget {
     );
   }
 
-  Widget _endTripActionButton() => FlatButton.icon(
-        textColor: Colors.white,
-        icon: Icon(Icons.check_circle),
-        label: Text('End'),
-        onPressed: () async {
-          bool confirmed = await showDialog<bool>(
-            context: _scaffoldKey.currentContext,
-            builder: (_) => ConfirmDialog('End Trip', Strings.CONFIRM_END_TRIP),
-          );
-          if (confirmed == true) {
-            await _appStore.endTrip();
-            Navigator.pop(_scaffoldKey.currentContext);
-          }
-        },
-      );
-
-  Widget _cancelTripActionButton() => FlatButton.icon(
-        textColor: Colors.white,
-        icon: Icon(Icons.cancel),
-        label: Text('Cancel'),
-        onPressed: () async {
-          bool confirmed = await showDialog<bool>(
-            context: _scaffoldKey.currentContext,
-            builder: (_) => ConfirmDialog('Cancel Trip', Strings.CONFIRM_CANCEL_TRIP),
-          );
-          if (confirmed == true) {
-            Navigator.pop(_scaffoldKey.currentContext);
-            await _appStore.cancelTrip();
-          }
-        },
-      );
-
-  /// Allows the user to cancel or end a [Trip].
-  ///
-  /// The action buttons will be hidden if there is
-  /// an active [Haul] because the user may not end
-  /// the [Trip] if a [Haul] is active.
-  List<Widget> _appBarActions() {
-    var actions = <Widget>[];
-
-    // Is there an active trip? Is this the active trip?
-    if (_appStore.hasActiveTrip && _trip.id == _appStore.activeTrip.id) {
-      // Show the actions only if there is no active haul
-      if (!_appStore.hasActiveHaul) {
-        actions.add(_endTripActionButton());
-        actions.add(_cancelTripActionButton());
-      }
-    }
-    // You may not delete a trip that has been completed
-    // so there is no delete button.
-    return actions;
-  }
-
   Widget get noHauls => Container(
         alignment: Alignment.center,
-        child: Text(
-          'No hauls on this trip',
-          style: TextStyle(fontSize: 20),
-        ),
+        child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
       );
 
-  Widget get stripButton => StripButton(
-        centered: true,
-        labelText: 'Upload Trip',
-        color: olracBlue,
-        onPressed: onPressUploadTrip,
-        icon: Icon(
-          Icons.cloud_upload,
-          color: Colors.white,
-        ),
-      );
-
-  onPressUploadTrip() {
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        content: Text('Trip upload started...'),
+  Widget stripButton(Trip trip) {
+    final label = trip.isUploaded ? 'Upload Complete' : 'Upload Trip';
+    final Function onPress = trip.isUploaded ? null : () async => await onPressUploadTrip(trip);
+    return StripButton(
+      centered: true,
+      labelText: label,
+      disabled: trip.isUploaded,
+      color: olracBlue,
+      onPressed: onPress,
+      icon: Icon(
+        trip.isUploaded ? Icons.check_circle_outline : Icons.cloud_upload,
+        color: Colors.white,
       ),
     );
+  }
+
+  onPressUploadTrip(Trip trip) async {
+    // Don't upload if already uploading
+    if (uploading) {
+      return;
+    }
+    setState(() {
+      uploading = true;
+    });
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        content: Text('Uploading Trip...'),
+        duration: Duration(minutes: 20), // keep open
+      ),
+    );
+    try {
+      await _appStore.uploadTrip(trip);
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Trip upload complete'),
+        ),
+      );
+    } catch (e) {
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Trip upload failed. Please check your connection.'),
+        ),
+      );
+      print(e);
+    }
+    setState(() {
+      uploading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
+        final trip = _appStore.findTrip(widget.tripArg.id);
+        final mainButton = _appStore.hasActiveTrip && _appStore.activeTrip.id == trip.id
+            ? Container()
+            : stripButton(trip);
 
         return Scaffold(
           key: _scaffoldKey,
-          appBar: AppBar(
-            actions: _appBarActions(),
-            title: Text('Completed Trip'),
-          ),
+          appBar: AppBar(title: Text('Completed Trip')),
           body: Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _buildTripInfo(_trip),
+                _buildTripInfo(trip),
                 _buildHaulsLabel(),
                 Expanded(
-                  child: _trip.hauls.length > 0
-                      ? GroupedHaulsList(hauls: _trip.hauls.reversed.toList())
+                  child: trip.hauls.length > 0
+                      ? GroupedHaulsList(hauls: trip.hauls.reversed.toList())
                       : noHauls,
                 ),
-                _appStore.hasActiveTrip && _appStore.activeTrip.id == _trip.id ? Container(): stripButton
+                mainButton
               ],
             ),
           ),

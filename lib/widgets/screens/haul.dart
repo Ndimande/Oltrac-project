@@ -4,6 +4,7 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
@@ -15,6 +16,7 @@ class HaulScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final Haul _haul;
+  final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
 
   HaulScreen(this._haul);
 
@@ -47,7 +49,7 @@ class HaulScreen extends StatelessWidget {
                 onPressCancelHaul: onPressCancelHaul,
               ),
               _buildLandingsSection(haul.landings),
-              _isHaulOfActiveTrip(haul) ? addLandingButton(haul) : Container(),
+              _isHaulOfActiveTrip(haul) ? addLandingButtons(haul) : Container(),
             ],
           ),
         ),
@@ -55,16 +57,34 @@ class HaulScreen extends StatelessWidget {
     });
   }
 
-  Widget addLandingButton(Haul haul) => Builder(
-        builder: (context) => StripButton(
-          centered: true,
-          icon: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
-          color: Colors.green,
-          labelText: 'Add Shark',
-          onPressed: () async => await _onPressAddLandingButton(haul, context),
+  Widget addLandingButtons(Haul haul) => Builder(
+        builder: (context) => Row(
+          children: <Widget>[
+            Expanded(
+              child: StripButton(
+                centered: true,
+                icon: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+                color: Colors.green,
+                labelText: 'Add Shark',
+                onPressed: () async => await _onPressAddLandingButton(haul, context),
+              ),
+            ),
+            Expanded(
+              child: StripButton(
+                centered: true,
+                icon: Icon(
+                  Icons.library_add,
+                  color: Colors.white,
+                ),
+                color: olracBlue,
+                labelText: 'Add Bulk',
+                onPressed: () async => await _onPressAddBulkLandingButton(haul, context),
+              ),
+            )
+          ],
         ),
       );
 
@@ -116,7 +136,15 @@ class HaulScreen extends StatelessWidget {
   }
 
   Future<void> _onPressAddLandingButton(Haul haul, context) async {
+    sharedPrefs.setBool('bulkMode', false);
     await Navigator.pushNamed(context, '/create_landing', arguments: haul);
+  }
+
+  Future<void> _onPressAddBulkLandingButton(Haul haul, context) async {
+    sharedPrefs.setBool('bulkMode', true);
+
+    await Navigator.pushNamed(context, '/create_landing', arguments: haul);
+
   }
 
   Widget _buildLandingsLabel(List<Landing> landings) {
