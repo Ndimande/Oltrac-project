@@ -11,7 +11,6 @@ import 'package:oltrace/models/product_type.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
@@ -21,8 +20,9 @@ class CreateProductScreen extends StatefulWidget {
   final Landing initialSourceLanding;
   final AppStore _appStore = StoreProvider().appStore;
   final Geolocator geoLocator = Geolocator();
+  final int listIndex;
 
-  CreateProductScreen(this.initialSourceLanding);
+  CreateProductScreen(this.initialSourceLanding, this.listIndex);
 
   @override
   State<StatefulWidget> createState() => CreateProductScreenState(initialSourceLanding);
@@ -121,7 +121,23 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     Navigator.pop(context);
   }
 
+  _onPressDialogYes() {
+    Navigator.of(context).pop(true);
+  }
+
+  _onPressDialogNo() {
+    Navigator.of(context).pop(false);
+  }
+
+  _onPressDialogDone()async {
+    final Landing landing = _sourceLandings[0].copyWith(doneTagging: true);
+    await widget._appStore.editLanding(landing);
+    // set the landing tagging compelted = true
+    Navigator.of(context).pop(false);
+  }
+
   Future<bool> _showProductSavedDialog(Product product) {
+    const actionStyle = TextStyle(fontSize: 26);
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -129,22 +145,21 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         contentPadding: EdgeInsets.all(15),
         actions: <Widget>[
           Container(
-            margin: EdgeInsets.only(right: 60),
             child: FlatButton(
-              child: Text(
-                'Yes',
-                style: TextStyle(fontSize: 26),
-              ),
-              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Yes', style: actionStyle),
+              onPressed: _onPressDialogYes,
             ),
           ),
           Container(
             child: FlatButton(
-              child: Text(
-                'No',
-                style: TextStyle(fontSize: 26),
-              ),
-              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('No', style: actionStyle),
+              onPressed: _onPressDialogNo,
+            ),
+          ),
+          Container(
+            child: FlatButton(
+              child: Text('Tagging Completed', style: actionStyle),
+              onPressed: _onPressDialogDone,
             ),
           ),
         ],
@@ -214,29 +229,33 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 children: <Widget>[
                   // Source landing
                   Container(
+                    height: 80,
                     child: SharkInfoCard(
                       landing: _sourceLandings[0],
+                      listIndex: widget.listIndex,
                     ),
                   ),
 
                   //Product Type
                   Container(
-                    padding: EdgeInsets.all(15),
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                     child: _buildProductTypeDropdown(),
                   ),
 
                   // Tag code
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: RFID(
-                      tagCode: _tagCode,
-                      onLongPress: () => setState(
-                        () {
-                          _tagCode = randomTagCode();
-                        },
-                      ),
-                    ), // Hardcode in dev mode
-                  ),
+                  _productType == null
+                      ? Container()
+                      : Container(
+                          alignment: Alignment.centerLeft,
+                          child: RFID(
+                            tagCode: _tagCode,
+                            onLongPress: () => setState(
+                              () {
+                                _tagCode = randomTagCode();
+                              },
+                            ),
+                          ), // Hardcode in dev mode
+                        ),
 
                   // Space for FAB
                 ],

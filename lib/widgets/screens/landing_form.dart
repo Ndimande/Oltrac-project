@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/data/olrac_icons.dart';
 import 'package:oltrace/data/species.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/strings.dart';
+import 'package:oltrace/messages.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/olrac_icon.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
 const textFieldTextStyle = TextStyle(fontSize: 20, color: olracBlue);
@@ -59,7 +62,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       : _weightController = TextEditingController(
             text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
         _lengthController =
-            TextEditingController(text: landingArg != null ? landingArg.length.toString() : null),
+            TextEditingController(text: landingArg != null ? (landingArg.length / 10000).toString() : null),
         _individualsController = TextEditingController(
             text: landingArg != null ? landingArg?.individuals.toString() : null),
         _selectedSpecies = landingArg?.species,
@@ -69,30 +72,57 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
   bool get isEditMode => landingArg != null;
 
-  _onPressSaveButton(haul, context) async {
+  // Convert Kilograms -> Grams
+  int _parseWeightInput() {
+    return (double.parse(_weightController.value.text) * 1000).round();
+  }
+
+  // Convert centimeters -> micrometers
+  int _parseLengthInput() {
+    return (double.parse(_lengthController.value.text) * 10 * 1000).round();
+  }
+
+  int _parseIndividualsInput() {
+    // If bulk mode is disabled, default to 1
+    if (_bulkMode != true) {
+      return 1;
+    }
+
+    int individuals = int.tryParse(_individualsController.value.text);
+
+    if (individuals == null || individuals < 2) {
+      // invalid input
+      return null;
+    }
+
+    return individuals;
+  }
+
+  _onPressSaveButton(Haul haul, BuildContext context) async {
     if (!_formKey.currentState.validate()) {
       return;
     }
 
     if (_selectedSpecies == null) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Please select a species'),
-        ),
-      );
+      showTextSnackBar(_scaffoldKey, 'Please select a species');
       return;
     }
 
-    final int weightGrams = (double.parse(_weightController.value.text) * 1000).round();
-    final int length = int.parse(_lengthController.value.text);
+    final int weightGrams = _parseWeightInput();
+    final int lengthMicrometers = _parseLengthInput();
 
-    // If bulk mode is disabled, default to 1
-    final int individuals = _bulkMode == true ? int.tryParse(_individualsController.value.text) : 1;
+
+    final int individuals = _parseIndividualsInput();
+
+    if (individuals == null) {
+      showTextSnackBar(_scaffoldKey, 'Please enter 2 or higher for individuals');
+      return;
+    }
 
     if (isEditMode) {
       final updatedLanding = landingArg.copyWith(
         weight: weightGrams,
-        length: length,
+        length: lengthMicrometers,
         species: _selectedSpecies,
         individuals: individuals,
       );
@@ -109,8 +139,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       );
       return;
     }
-
-    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(Strings.WAITING_FOR_GPS)));
+    showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
     // TODO get from location provider
     var position = await geolocator.getCurrentPosition();
     _scaffoldKey.currentState.hideCurrentSnackBar();
@@ -122,7 +151,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         location: Location.fromPosition(position),
         // kg -> g
         weight: weightGrams,
-        length: length,
+        length: lengthMicrometers,
         haulId: haul.id,
         individuals: _bulkMode ? int.parse(_individualsController.value.text) : 1,
       ),
@@ -142,6 +171,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   }
 
   Future<bool> _showLandingSavedDialog(Landing landing) {
+    const actionTextStyle = TextStyle(fontSize: 26);
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -151,19 +181,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
           Container(
             margin: EdgeInsets.only(right: 60),
             child: FlatButton(
-              child: Text(
-                'Yes',
-                style: TextStyle(fontSize: 26),
-              ),
+              child: Text('Yes', style: actionTextStyle),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ),
           Container(
             child: FlatButton(
-              child: Text(
-                'No',
-                style: TextStyle(fontSize: 26),
-              ),
+              child: Text('No', style: actionTextStyle),
               onPressed: () => Navigator.of(context).pop(false),
             ),
           ),
@@ -174,12 +198,9 @@ class LandingFormScreenState extends State<LandingFormScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Icon(
-                Icons.check_circle_outline,
-                size: 50,
-              ),
+              Icon(Icons.check_circle_outline, size: 50),
               Text(
-                'Shark ${landing.species.englishName} ${landing.id.toString()} saved!',
+                '${landing.species.englishName} saved!',
                 style: TextStyle(fontSize: 26),
                 textAlign: TextAlign.center,
               ),
@@ -239,20 +260,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
   Widget _bulkModeButtonSwitch() {
     return FlatButton(
-      onPressed: () {
-        _changeBulkMode();
-      },
+      onPressed: () => _changeBulkMode(),
       child: Row(
         children: <Widget>[
-          Text(
-            'Bulk Mode',
-            style: TextStyle(color: Colors.white),
-          ),
+          Text('Bulk Mode', style: TextStyle(color: Colors.white)),
           Switch(
             activeColor: Colors.white,
-            onChanged: (bool value) {
-              _changeBulkMode();
-            },
+            onChanged: (bool value) => _changeBulkMode(),
             value: _bulkMode,
           )
         ],
@@ -268,6 +282,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     final String titleText =
         widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Shark' : 'Edit Shark';
 
+    int listIndex = 0;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -288,15 +303,30 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                   children: <Widget>[
                     // Select species
                     Container(
-                      margin: EdgeInsets.symmetric(vertical: 15),
                       child: ModelDropdown<Species>(
                         label: 'Species',
                         selected: _selectedSpecies,
                         items: sortedSpecies.map<DropdownMenuItem<Species>>(
                           (Species species) {
+//                            final Color bgColor = _selectedSpecies?.alpha3Code == species.alpha3Code
+//                                ? Colors.white
+//                                : listIndex % 2 == 0 ? Colors.white : olracBlue[50];
+                            listIndex++;
                             return DropdownMenuItem<Species>(
                               value: species,
-                              child: Text(species.englishName),
+                              child: Container(
+//                                color: bgColor,
+                                child: Row(
+                                  children: <Widget>[
+                                    Text(species.englishName),
+                                    SizedBox(width: 10),
+                                    OlracIcon(
+                                      assetPath: OlracIcons.path(species.scientificName),
+                                      darker: true,
+                                    )
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ).toList(),

@@ -7,7 +7,7 @@ class AboutScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
   String get copyright {
     final year = DateTime.now().year;
-    return '© $year OlSPS Marine';
+    return '© $year OLSPS Marine';
   }
 
   @override

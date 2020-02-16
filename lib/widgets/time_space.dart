@@ -12,7 +12,7 @@ class TimeSpace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String dateTimeLabel = friendlyDateTimestamp(dateTime) ?? 'In progress';
+    String dateTimeLabel = friendlyDateTime(dateTime) ?? 'In progress';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

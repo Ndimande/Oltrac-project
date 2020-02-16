@@ -30,7 +30,7 @@ class TripListItem extends StatelessWidget {
           number: _trip.id,
         ),
         title: Text(_haulsText(_trip.hauls.length)),
-        subtitle: Text(friendlyDateTimestamp(_trip.endedAt)),
+        subtitle: Text(_trip.endedAt == null ? '-': friendlyDateTime(_trip.endedAt)),
         trailing: ForwardArrow(),
       ),
       onPressed: onPressed,

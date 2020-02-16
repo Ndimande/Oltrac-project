@@ -23,12 +23,12 @@ import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
+import 'package:oltrace/widgets/screens/edit_trip.dart';
 import 'package:oltrace/widgets/screens/landing_form.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 import 'package:oltrace/widgets/screens/main.dart';
 import 'package:oltrace/widgets/screens/product.dart';
-import 'package:oltrace/widgets/screens/products.dart';
 import 'package:oltrace/widgets/screens/settings.dart';
 import 'package:oltrace/widgets/screens/splash.dart';
 import 'package:oltrace/widgets/screens/landing.dart';
@@ -277,10 +277,17 @@ class OlTraceAppState extends State<OlTraceApp> {
 
             return MaterialPageRoute(builder: (_) => TripScreen(trip));
 
-          case '/haul':
-            final Haul haul = settings.arguments;
+          case '/edit_trip':
+            final Trip trip = settings.arguments;
 
-            return MaterialPageRoute(builder: (_) => HaulScreen(haul));
+            return MaterialPageRoute(builder: (_) => EditTripScreen(trip));
+
+          case '/haul':
+            final List arguments = settings.arguments as List;
+            final Haul haul = arguments[0];
+            final int index = arguments[1];
+
+            return MaterialPageRoute(builder: (_) => HaulScreen(haul, listIndex: index));
 
           case '/fishing_methods':
             return MaterialPageRoute(builder: (_) => FishingMethodScreen());
@@ -298,8 +305,15 @@ class OlTraceAppState extends State<OlTraceApp> {
             );
 
           case '/landing':
-            final Landing landing = settings.arguments;
-            return MaterialPageRoute(builder: (_) => LandingScreen(landing));
+            final List arguments = settings.arguments as List;
+            final Landing landing = arguments[0];
+            final int listIndex = arguments[1];
+
+            return MaterialPageRoute(
+                builder: (_) => LandingScreen(
+                      landing,
+                      listIndex: listIndex,
+                    ));
 
           case '/create_landing':
             final Haul haul = settings.arguments;
@@ -310,11 +324,10 @@ class OlTraceAppState extends State<OlTraceApp> {
             return MaterialPageRoute(builder: (_) => LandingFormScreen(landingArg: landing));
 
           case '/create_product':
-            final Landing landing = settings.arguments;
-            return MaterialPageRoute(builder: (_) => CreateProductScreen(landing));
-
-          case '/products':
-            return MaterialPageRoute(builder: (_) => ProductsScreen());
+            final List arguments = settings.arguments as List;
+            final Landing landing = arguments[0];
+            final int listIndex = arguments[1];
+            return MaterialPageRoute(builder: (_) => CreateProductScreen(landing, listIndex));
 
           case '/product':
             final Product product = settings.arguments;

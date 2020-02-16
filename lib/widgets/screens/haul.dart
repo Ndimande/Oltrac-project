@@ -17,45 +17,9 @@ class HaulScreen extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final Haul _haul;
   final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
+  final int listIndex;
 
-  HaulScreen(this._haul);
-
-  @override
-  Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      // Is the haul arg in the current trip?
-      final bool isActiveTrip =
-          _appStore.hasActiveTrip ? _appStore.activeTrip.id == _haul.tripId : false;
-
-      // Either the active trip or a completed trip
-      final Trip trip = isActiveTrip
-          ? _appStore.activeTrip
-          : _appStore.completedTrips.firstWhere((trip) => trip.id == _haul.tripId);
-
-      // Look through all hauls including hauls in the active trip
-      final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
-
-      return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(haul.fishingMethod.name),
-        ),
-        body: Container(
-          child: Column(
-            children: <Widget>[
-              HaulInfo(
-                haul: haul,
-                onPressEndHaul: onPressEndHaul,
-                onPressCancelHaul: onPressCancelHaul,
-              ),
-              _buildLandingsSection(haul.landings),
-              _isHaulOfActiveTrip(haul) ? addLandingButtons(haul) : Container(),
-            ],
-          ),
-        ),
-      );
-    });
-  }
+  HaulScreen(this._haul, {this.listIndex});
 
   Widget addLandingButtons(Haul haul) => Builder(
         builder: (context) => Row(
@@ -117,13 +81,23 @@ class HaulScreen extends StatelessWidget {
     );
   }
 
+  _onPressLandingListItem(Landing landing, landingIndex) async {
+    await Navigator.pushNamed(
+      _scaffoldKey.currentContext,
+      '/landing',
+      arguments: [landing, landingIndex],
+    );
+  }
+
   Widget _buildLandingsList(List<Landing> landings) {
+    int landingIndex = landings.length;
+
     final List<LandingListItem> listLandings = landings.reversed
         .map(
           (Landing landing) => LandingListItem(
-            landing,
-            () async => await Navigator.pushNamed(_scaffoldKey.currentContext, '/landing',
-                arguments: landing),
+            landing: landing,
+            onPressed: (index) async => await _onPressLandingListItem(landing, index), //() async => await _onPressLandingListItem(landing, landingIndex),
+            listIndex: landingIndex--,
           ),
         )
         .toList();
@@ -144,7 +118,6 @@ class HaulScreen extends StatelessWidget {
     sharedPrefs.setBool('bulkMode', true);
 
     await Navigator.pushNamed(context, '/create_landing', arguments: haul);
-
   }
 
   Widget _buildLandingsLabel(List<Landing> landings) {
@@ -194,5 +167,43 @@ class HaulScreen extends StatelessWidget {
     if (confirmed == true) {
       await _appStore.endHaul();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Observer(builder: (_) {
+      // Is the haul arg in the current trip?
+      final bool isActiveTrip =
+          _appStore.hasActiveTrip ? _appStore.activeTrip.id == _haul.tripId : false;
+
+      // Either the active trip or a completed trip
+      final Trip trip = isActiveTrip
+          ? _appStore.activeTrip
+          : _appStore.completedTrips.firstWhere((trip) => trip.id == _haul.tripId);
+
+      // Look through all hauls including hauls in the active trip
+      final haul = trip.hauls.firstWhere((h) => _haul.id == h.id);
+
+      return Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text(haul.fishingMethod.name),
+        ),
+        body: Container(
+          child: Column(
+            children: <Widget>[
+              HaulInfo(
+                haul: haul,
+                onPressEndHaul: onPressEndHaul,
+                onPressCancelHaul: onPressCancelHaul,
+                listIndex: listIndex,
+              ),
+              _buildLandingsSection(haul.landings),
+              _isHaulOfActiveTrip(haul) ? addLandingButtons(haul) : Container(),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }

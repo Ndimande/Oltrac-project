@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/location_button.dart';
-import 'package:oltrace/widgets/product_list_item.dart';
+import 'package:oltrace/widgets/screens/landing/landing_details.dart';
+import 'package:oltrace/widgets/screens/landing/products_list.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
 const double rowFontSize = 18;
-final _rowFontStyle = TextStyle(fontSize: rowFontSize);
 
 class LandingScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -23,80 +20,13 @@ class LandingScreen extends StatelessWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final Landing _landingArg;
+  final int listIndex;
 
-  LandingScreen(this._landingArg);
+  LandingScreen(this._landingArg, {this.listIndex});
 
-  _buildRow(String key, String val) => Container(
-        margin: EdgeInsets.symmetric(vertical: 5),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 4,
-              child: Text(
-                key,
-                style: TextStyle(fontSize: rowFontSize, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Expanded(
-              flex: 5,
-              child: Text(
-                val,
-                style: _rowFontStyle,
-                textAlign: TextAlign.right,
-              ),
-            ),
-          ],
-        ),
-      );
-
-  _onPressFloatingActionButton(Landing landing) async {
+  _onPressTagProduct(Landing landing) async {
     // We will pop true if a product was created
-    await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: landing);
-  }
-
-  // (Catch section)
-  Widget _landingDetailsSection(landing) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              'Location',
-              style: TextStyle(fontSize: rowFontSize, fontWeight: FontWeight.bold),
-            ),
-            LocationButton(location: _landingArg.location),
-          ],
-        ),
-        _buildRow('Timestamp', friendlyDateTimestamp(landing.createdAt)),
-        _buildRow('Individuals', landing.individuals.toString()),
-        _buildRow('Australian name', landing.species.australianName),
-        _buildRow('Scientific name', landing.species.scientificName),
-      ],
-    );
-  }
-
-  Widget _productsList(landing) {
-    final List<Widget> items = landing.products
-        .map<Widget>((Product p) => ProductListItem(p, () {
-              Navigator.pushNamed(_scaffoldKey.currentContext, '/product', arguments: p);
-            }))
-        .toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(left: 10),
-          child: Text(
-            'Product Tags',
-            style: TextStyle(fontSize: 28, color: olracBlue),
-          ),
-        ),
-        Column(children: items),
-      ],
-    );
+    await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments:[ landing,listIndex]);
   }
 
   Widget actionButtons() {
@@ -105,19 +35,7 @@ class LandingScreen extends StatelessWidget {
         Expanded(
           child: StripButton(
             centered: true,
-            onPressed: _onPressEditAction,
-            labelText: 'Edit',
-            color: olracBlue,
-            icon: Icon(
-              Icons.edit,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        Expanded(
-          child: StripButton(
-            centered: true,
-            onPressed: _onPressDeleteAction,
+            onPressed: _onPressDelete,
             labelText: 'Delete',
             color: Colors.red,
             icon: Icon(
@@ -126,11 +44,23 @@ class LandingScreen extends StatelessWidget {
             ),
           ),
         ),
+        Expanded(
+          child: StripButton(
+            centered: true,
+            onPressed: _onPressEdit,
+            labelText: 'Edit',
+            color: olracBlue,
+            icon: Icon(
+              Icons.edit,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  _onPressDeleteAction() async {
+  _onPressDelete() async {
     bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
       builder: (_) => ConfirmDialog('Delete Shark', 'Are you sure you want to delete this shark?'),
@@ -141,7 +71,6 @@ class LandingScreen extends StatelessWidget {
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(
         content: Text('Shark deleted'),
-        onVisible: () async {},
       ),
     );
     await Future.delayed(Duration(seconds: 1));
@@ -150,7 +79,7 @@ class LandingScreen extends StatelessWidget {
     await _appStore.deleteLanding(_landingArg);
   }
 
-  _onPressEditAction() {
+  _onPressEdit() {
     final Landing landing = _getLandingFromState(_getHaulFromActiveTripState());
     Navigator.pushNamed(_scaffoldKey.currentContext, '/edit_landing', arguments: landing);
   }
@@ -197,7 +126,7 @@ class LandingScreen extends StatelessWidget {
   }
 
   Widget tagProductButton(Haul haul, Landing landing) {
-    if (haul == null || !(haul.tripId == _appStore.activeTrip?.id) ||landing.doneTagging == true){
+    if (haul == null || !(haul.tripId == _appStore.activeTrip?.id) || landing.doneTagging == true) {
       return Container();
     }
 
@@ -209,7 +138,7 @@ class LandingScreen extends StatelessWidget {
         Icons.local_offer,
         color: Colors.white,
       ),
-      onPressed: () async => await _onPressFloatingActionButton(landing),
+      onPressed: () async => await _onPressTagProduct(landing),
     );
   }
 
@@ -226,6 +155,7 @@ class LandingScreen extends StatelessWidget {
       children: <Widget>[
         Text('Done'),
         Switch(
+          activeColor: Colors.white,
           value: landing.doneTagging ?? false,
           onChanged: (bool value) async {
             await _appStore.editLanding(landing.copyWith(doneTagging: value));
@@ -234,7 +164,6 @@ class LandingScreen extends StatelessWidget {
       ],
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -265,18 +194,21 @@ class LandingScreen extends StatelessWidget {
                         color: olracBlue[50],
                         child: SharkInfoCard(
                           landing: landing,
+                          listIndex: listIndex,
                         ),
                       ),
                       haul.tripId == _appStore.activeTrip?.id ? actionButtons() : Container(),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: _landingDetailsSection(landing),
+                        child: LandingDetails(landing: landing),
                       ),
                       Container(
                         margin: EdgeInsets.symmetric(vertical: 10),
                       ),
                       Container(
-                        child: landing.products.length > 0 ? _productsList(landing) : noProducts(),
+                        child: landing.products.length > 0
+                            ? ProductsList(landing: landing)
+                            : noProducts(),
                       ),
                     ],
                   ),

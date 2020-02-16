@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -57,22 +60,12 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
-  Widget _buildHaulsLabel() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: Text(
-        'Hauls',
-        style: TextStyle(fontSize: 30, color: olracBlue),
-      ),
-    );
-  }
-
   Widget get noHauls => Container(
         alignment: Alignment.center,
         child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
       );
 
-  Widget stripButton(Trip trip) {
+  Widget uploadButton(Trip trip) {
     final label = trip.isUploaded ? 'Upload Complete' : 'Upload Trip';
     final Function onPress = trip.isUploaded ? null : () async => await onPressUploadTrip(trip);
     return StripButton(
@@ -93,6 +86,7 @@ class TripScreenState extends State<TripScreen> {
     if (uploading) {
       return;
     }
+
     setState(() {
       uploading = true;
     });
@@ -103,7 +97,7 @@ class TripScreenState extends State<TripScreen> {
       ),
     );
     try {
-      await _appStore.uploadTrip(trip);
+      final response = await _appStore.uploadTrip(trip);
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -124,24 +118,26 @@ class TripScreenState extends State<TripScreen> {
     });
   }
 
+  Text get title =>
+      Text(_appStore.activeTrip?.id == widget.tripArg.id ? 'Active Trip' : 'Completed Trip');
+
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
-        final trip = _appStore.findTrip(widget.tripArg.id);
+        final Trip trip = _appStore.findTrip(widget.tripArg.id);
         final mainButton = _appStore.hasActiveTrip && _appStore.activeTrip.id == trip.id
             ? Container()
-            : stripButton(trip);
+            : uploadButton(trip);
 
         return Scaffold(
           key: _scaffoldKey,
-          appBar: AppBar(title: Text('Completed Trip')),
+          appBar: AppBar(title: title),
           body: Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _buildTripInfo(trip),
-                _buildHaulsLabel(),
                 Expanded(
                   child: trip.hauls.length > 0
                       ? GroupedHaulsList(hauls: trip.hauls.reversed.toList())

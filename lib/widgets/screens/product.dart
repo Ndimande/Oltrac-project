@@ -50,7 +50,7 @@ class ProductScreen extends StatelessWidget {
                   LocationButton(location: _product.location),
                 ],
               ),
-              _detailRow('Timestamp', friendlyDateTimestamp(_product.createdAt)),
+              _detailRow('Timestamp', friendlyDateTime(_product.createdAt)),
             ],
           ),
         ),

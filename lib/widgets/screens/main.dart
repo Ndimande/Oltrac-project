@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/strings.dart';
+import 'package:oltrace/messages.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/screens/main/drawer.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
@@ -28,13 +29,24 @@ class MainScreenState extends State<MainScreen> {
         ? _appStore.hasActiveHaul ? 'Hauling...' : 'Active Trip'
         : 'Completed Trips';
     return AppBar(
+      actions: <Widget>[appBarDate],
       title: Text(title),
+    );
+  }
+
+  Widget get appBarDate {
+    return Container(
+      margin: EdgeInsets.only(right: 10),
+      alignment: Alignment.center,
+      child: Text(friendlyDate(DateTime.now())),
     );
   }
 
   Future<FishingMethod> _selectFishingMethod() async {
     return await Navigator.push<FishingMethod>(
-        context, MaterialPageRoute(builder: (context) => FishingMethodScreen()));
+      context,
+      MaterialPageRoute(builder: (context) => FishingMethodScreen()),
+    );
   }
 
   _onPressStartHaul() async {
@@ -43,13 +55,8 @@ class MainScreenState extends State<MainScreen> {
       try {
         await _appStore.startHaul(method);
       } catch (e) {
+        showTextSnackBar(_scaffoldKey, 'Could not start haul. ${Messages.LOCATION_NOT_AVAILABLE}');
         print(e);
-        _scaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            content: Text(
-                'Could not start haul because location is not available. Please enable location services on your device and try again.'),
-          ),
-        );
       }
     }
   }
@@ -58,10 +65,7 @@ class MainScreenState extends State<MainScreen> {
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog(
-        'End haul',
-        'Are you sure you want to end the haul?',
-      ),
+      builder: (_) => ConfirmDialog('End haul', Messages.CONFIRM_END_HAUL),
     );
 
     if (confirmed) {
@@ -70,16 +74,12 @@ class MainScreenState extends State<MainScreen> {
       } catch (e) {
         print(e.toString());
         _scaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            content: Text(
-                'Could not end haul because location is not available. Please enable location services on your device and try again.'),
-          ),
+          SnackBar(content: Text('Could not end haul. ${Messages.LOCATION_NOT_AVAILABLE}')),
         );
         return;
       }
     }
   }
-
 
   _onPressHaulActionButton() async {
     if (_appStore.hasActiveHaul) {

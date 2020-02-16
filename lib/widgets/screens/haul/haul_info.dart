@@ -14,8 +14,9 @@ class HaulInfo extends StatelessWidget {
   final Haul haul;
   final Function onPressEndHaul;
   final Function onPressCancelHaul;
+  final int listIndex;
 
-  HaulInfo({this.haul, this.onPressEndHaul, this.onPressCancelHaul});
+  HaulInfo({this.haul, this.onPressEndHaul, this.onPressCancelHaul, this.listIndex});
 
   bool get isActiveHaul => _appStore.activeHaul?.id == haul.id;
 
@@ -36,7 +37,7 @@ class HaulInfo extends StatelessWidget {
       children: <Widget>[
         Container(
           child: Text(
-            haul.id.toString(),
+            listIndex.toString(),
             style: TextStyle(fontSize: 32, color: olracDarkBlue, fontWeight: FontWeight.bold),
             textAlign: TextAlign.left,
           ),
@@ -54,7 +55,7 @@ class HaulInfo extends StatelessWidget {
       );
 
   Text dateTimeText({String label = 'Started '}) => Text(
-        label + friendlyDateTimestamp(haul.startedAt),
+        label + friendlyDateTime(haul.startedAt),
         style: TextStyle(fontSize: 16),
       );
 
@@ -89,7 +90,7 @@ class HaulInfo extends StatelessWidget {
         children: <Widget>[
           numberedIcon(),
           SizedBox(width: 10),
-          Expanded(child: detailsSection,),
+          Expanded(child: detailsSection),
         ],
       ),
     );

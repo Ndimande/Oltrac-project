@@ -33,8 +33,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
     final weightUnitResult = result['weight_unit'];
 
     var lengthUnit;
-    if (lengthUnitResult == LengthUnit.CENTIMETERS.toString()) {
-      lengthUnit = LengthUnit.CENTIMETERS;
+    if (lengthUnitResult == LengthUnit.MICROMETERS.toString()) {
+      lengthUnit = LengthUnit.MICROMETERS;
     } else if (lengthUnitResult == LengthUnit.INCHES.toString()) {
       lengthUnit = LengthUnit.INCHES;
     }

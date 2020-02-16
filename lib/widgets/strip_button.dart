@@ -22,7 +22,7 @@ class StripButton extends StatelessWidget {
     final buttonColor = disabled ? Colors.grey : color;
     return Container(
       decoration: BoxDecoration(shape: BoxShape.rectangle, borderRadius: null, color: buttonColor),
-      height: 50,
+      height: 48,
       child: FlatButton(
         color: buttonColor,
         padding: const EdgeInsets.all(0),

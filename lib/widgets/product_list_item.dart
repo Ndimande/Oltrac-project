@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/time_ago.dart';
@@ -9,14 +10,18 @@ class ProductListItem extends StatelessWidget {
   final Function _onPressed;
 
   ProductListItem(this._product, this._onPressed);
+
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return Container(
+      decoration: new BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey[300]),top: BorderSide(color: Colors.grey[300]))
+      ),
       padding: EdgeInsets.all(0),
-      onPressed: _onPressed,
       child: ListTile(
+        onTap: _onPressed,
         isThreeLine: true,
-        leading: Icon(Icons.local_offer,size: 48,color: olracBlue,),
+        leading: Icon(Icons.local_offer, size: 48, color: olracBlue),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -30,10 +35,7 @@ class ProductListItem extends StatelessWidget {
             ),
           ],
         ),
-        subtitle: TimeAgo(
-          prefix: 'Added ',
-          dateTime: _product.createdAt,
-        ),
+        subtitle: Text(friendlyDateTime(_product.createdAt)),
         trailing: ForwardArrow(),
       ),
     );

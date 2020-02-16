@@ -40,96 +40,95 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   final _skipperLastNameFocusNode = FocusNode();
 
   Widget _buildForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.only(left: 15),
-          child: Text(
-            'General',
-            style: _sectionHeadingTextStyle,
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(left: 15),
+            child: Text(
+              'General',
+              style: _sectionHeadingTextStyle,
+            ),
           ),
-        ),
-        // Country
-        Container(
-          padding: EdgeInsets.all(15),
-          child: ModelDropdown(
-            label: 'Country',
-            labelStyle:
-                TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-            selected: _selectedCountry,
-            onChanged: (_country) => setState(() => _selectedCountry = _country),
-            items: countries.map<DropdownMenuItem<Country>>((Country country) {
-              return DropdownMenuItem<Country>(
-                value: country,
-                child: Text(country.name),
-              );
-            }).toList(),
+          // Country
+          Container(
+            padding: EdgeInsets.all(15),
+            child: ModelDropdown(
+              label: 'Country',
+              labelStyle:
+                  TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+              selected: _selectedCountry,
+              onChanged: (_country) => setState(() => _selectedCountry = _country),
+              items: countries.map<DropdownMenuItem<Country>>((Country country) {
+                return DropdownMenuItem<Country>(
+                  value: country,
+                  child: Text(country.name),
+                );
+              }).toList(),
+            ),
           ),
-        ),
 
-        // todo State / Province
+          // todo State / Province
 
-        // Fishery
-        Container(
-          padding: EdgeInsets.all(15),
-          child: ModelDropdown(
-            label: 'Fishery',
-            labelStyle:
-                TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-            selected: _selectedFisheryType,
-            onChanged: (_fishery) {
-              setState(() => _selectedFisheryType = _fishery);
-            },
-            items: fisheries
-                .map<DropdownMenuItem<FisheryType>>(
-                  (FisheryType fishery) => DropdownMenuItem<FisheryType>(
-                    value: fishery,
-                    child: Text(fishery.safsCode),
-                  ),
-                )
-                .toList(),
+          // Fishery
+          Container(
+            padding: EdgeInsets.all(15),
+            child: ModelDropdown(
+              label: 'Fishery',
+              labelStyle:
+                  TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+              selected: _selectedFisheryType,
+              onChanged: (_fishery) {
+                setState(() => _selectedFisheryType = _fishery);
+              },
+              items: fisheries
+                  .map<DropdownMenuItem<FisheryType>>(
+                    (FisheryType fishery) => DropdownMenuItem<FisheryType>(
+                      value: fishery,
+                      child: Text(fishery.safsCode),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
-        ),
 
-        Divider(),
-
-        // Vessel
-        Container(
-          padding: EdgeInsets.all(15),
-          margin: EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Vessel',
-                style: _sectionHeadingTextStyle,
-              ),
-              _buildVesselNameTextFormField(),
-              _buildVesselIdTextFormField(),
-            ],
+          // Vessel
+          Container(
+            padding: EdgeInsets.all(15),
+            margin: EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Vessel',
+                  style: _sectionHeadingTextStyle,
+                ),
+                _buildVesselNameTextFormField(),
+                _buildVesselIdTextFormField(),
+              ],
+            ),
           ),
-        ),
 
-        Divider(),
-
-        // Skipper
-        Container(
-          padding: EdgeInsets.all(15),
-          margin: EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Skipper',
-                style: _sectionHeadingTextStyle,
-              ),
-              _buildSkipperFirstNameTextFormField(),
-              _buildSkipperLastNameTextFormField(),
-            ],
-          ),
-        )
-      ],
+          // Skipper
+          Container(
+            padding: EdgeInsets.all(15),
+            margin: EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Skipper',
+                  style: _sectionHeadingTextStyle,
+                ),
+                _buildSkipperFirstNameTextFormField(),
+                _buildSkipperLastNameTextFormField(),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -273,39 +272,33 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign Up'), centerTitle: true,),
+      appBar: AppBar(
+        title: Text('Sign Up'),
+        centerTitle: true,
+      ),
       key: _scaffoldKey,
-      body: Builder(
-        builder: (context) => SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  child: Divider(),
-                ),
-
-                // User info form
-                _buildForm(),
-                StripButton(
-                  centered: true,
-                  labelText: 'Save',
-                  color: Colors.green,
-                  icon: Icon(
-                    Icons.save,
-                    color: Colors.white,
-                  ),
-                  onPressed: () async => _onPressSave(context),
-                ),
-              ],
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(10),
+              child: _buildForm(),
             ),
           ),
-        ),
+          StripButton(
+            centered: true,
+            labelText: 'Save',
+            color: Colors.green,
+            icon: Icon(
+              Icons.save,
+              color: Colors.white,
+            ),
+            onPressed: () async => _onPressSave(context),
+          ),
+        ],
       ),
     );
+
   }
 }
 
@@ -332,31 +325,5 @@ Widget _welcomeTextFormField({
       onFieldSubmitted: onFieldSubmitted,
       validator: validator,
     ),
-  );
-}
-
-Widget _welcomeMessage() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Container(
-        alignment: Alignment.center,
-        margin: EdgeInsets.only(bottom: 10),
-        child: Text(
-          'Welcome to OlTrace',
-          style: TextStyle(fontSize: 34),
-          textAlign: TextAlign.start,
-        ),
-      ),
-      Container(
-        alignment: Alignment.center,
-        margin: EdgeInsets.only(bottom: 10),
-        child: Text(
-          'Please enter your information',
-          style: TextStyle(fontSize: 20, color: Colors.grey[400]),
-          textAlign: TextAlign.start,
-        ),
-      )
-    ],
   );
 }

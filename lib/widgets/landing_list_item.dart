@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/landing_icon.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 
 class LandingListItem extends StatelessWidget {
-  final Landing _landing;
-  final Function _onPressed;
+  final Landing landing;
+  final Function onPressed;
+  final int listIndex;
 
-  LandingListItem(this._landing, this._onPressed);
+  LandingListItem({this.landing, this.onPressed, this.listIndex});
 
   Text get speciesName => Text(
-        _landing.species.englishName,
+        landing.species.englishName,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 22),
+        style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
       );
 
-  Text get individuals => Text(' (${_landing.individuals})');
+  Text get individuals => Text(' (${landing.individuals})');
 
   Widget get cardTitle {
     final firstRow = <Widget>[
@@ -25,7 +28,7 @@ class LandingListItem extends StatelessWidget {
       )
     ];
 
-    if (_landing.isBulk) {
+    if (landing.isBulk) {
       firstRow.add(individuals);
     }
 
@@ -35,18 +38,22 @@ class LandingListItem extends StatelessWidget {
   Widget get subtitle => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('${_landing.weightKilograms}, ${_landing.lengthCentimeters}'),
-          TimeAgo(prefix: 'Added ', dateTime: _landing.createdAt),
+          Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
+//          TimeAgo(prefix: 'Added ', dateTime: landing.createdAt),
+          Text(friendlyDateTime(landing.createdAt)),
         ],
       );
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return Container(
+      decoration: new BoxDecoration(
+        border: listIndex == 1 ? Border(bottom: BorderSide(color: Colors.grey[300]),top: BorderSide(color: Colors.grey[300])) :Border(top: BorderSide(color: Colors.grey[300]))
+      ),
       padding: EdgeInsets.all(0),
-      onPressed: _onPressed,
       child: ListTile(
-        leading: LandingIcon(landing: _landing),
+        onTap: () => onPressed(listIndex),
+        leading: LandingIcon(landing: landing,listIndex: listIndex,),
         title: cardTitle,
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

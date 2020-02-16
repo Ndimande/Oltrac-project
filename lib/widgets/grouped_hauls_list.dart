@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/olrac_icons.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
@@ -11,8 +12,8 @@ class GroupedHaulsList extends StatelessWidget {
 
   GroupedHaulsList({this.hauls, this.onPressHaul});
 
-  _onPressHaulListItem(context, Haul haul) async {
-    await Navigator.pushNamed(context, '/haul', arguments: haul);
+  _onPressHaulListItem(context, Haul haul, int index) async {
+    await Navigator.pushNamed(context, '/haul', arguments: [haul, index]);
   }
 
   @override
@@ -24,6 +25,7 @@ class GroupedHaulsList extends StatelessWidget {
             .toList();
 
     return ListView.builder(
+        addSemanticIndexes: true,
         itemCount: groupedByFishingMethod.length,
         itemBuilder: (BuildContext context, int index) {
           final Map fishingMethodGroup = groupedByFishingMethod[index];
@@ -42,6 +44,8 @@ class GroupedHaulsList extends StatelessWidget {
           );
 
           return ExpansionTile(
+            backgroundColor: olracBlue[50],
+            initiallyExpanded: true,
             title: Row(
               children: <Widget>[
                 svg,
@@ -51,17 +55,20 @@ class GroupedHaulsList extends StatelessWidget {
                 Container(
                   width: 220,
                   child: Text(
-
-                    fishingMethodGroup['fishingMethod'].name,
+                    fishingMethodGroup['fishingMethod'].name + ' hauls',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 22),
+                    style: TextStyle(fontSize: 22, color: olracDarkBlue),
                   ),
                 )
               ],
             ),
             children: fishingMethodGroup['hauls']
-                .map<Widget>((haul) => HaulListItem(
-                    haul, () async => await _onPressHaulListItem(context, haul), haulIndex--))
+                .map<Widget>((Haul haul) => HaulListItem(
+                      haul: haul,
+                      onPressed: (int pressedIndex) async =>
+                          await _onPressHaulListItem(context, haul, pressedIndex),
+                      listIndex: haulIndex--,
+                    ))
                 .toList(),
           );
         });

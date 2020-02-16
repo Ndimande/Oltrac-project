@@ -4,28 +4,26 @@ import 'package:oltrace/data/olrac_icons.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
 
-enum TagState {
-  untagged,
-}
-
 class LandingIcon extends StatelessWidget {
   final Landing landing;
-
-  LandingIcon({this.landing});
+  final int listIndex;
+  LandingIcon({this.landing, this.listIndex});
 
   Widget get sharkIcon => OlracIcon(assetPath: OlracIcons.path('Shark'));
 
-  Widget get sharkId => Container(
+  Widget get indexNumber => Container(
         margin: EdgeInsets.only(left: 5, top: 5),
         child: Text(
-          landing.id.toString(),
+          listIndex.toString(),
           style: TextStyle(fontSize: 28, color: olracBlue),
         ),
       );
 
   Widget get tagTotalIcon {
-    IconData icon = landing.doneTagging == true ? Icons.done : Icons.local_offer;
-    Color tagColor = landing.products.length == 0 ? Colors.red : olracBlue;
+    IconData icon = Icons.local_offer;
+    Color tagColor = landing.doneTagging == true
+        ? Colors.green
+        : landing.products.length == 0 ? Colors.red : olracBlue;
 
     final stackChildren = <Widget>[
       Container(
@@ -35,10 +33,7 @@ class LandingIcon extends StatelessWidget {
           color: tagColor,
         ),
       ),
-    ];
-
-    if (landing.doneTagging == null || !landing.doneTagging == true) {
-      stackChildren.add(Container(
+      Container(
         margin: EdgeInsets.only(left: 8, top: 11),
         child: Container(
           width: 26,
@@ -49,8 +44,9 @@ class LandingIcon extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-      ));
-    }
+      )
+    ];
+
     return Container(
       margin: EdgeInsets.only(left: 25),
       child: Stack(
@@ -75,7 +71,7 @@ class LandingIcon extends StatelessWidget {
     return Stack(
       children: <Widget>[
         tagTotalIcon,
-        sharkId,
+        indexNumber,
       ],
     );
   }

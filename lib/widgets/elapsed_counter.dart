@@ -6,13 +6,13 @@ final _updateInterval = Duration(milliseconds: 1000);
 
 class ElapsedCounter extends StatefulWidget {
   final DateTime startedDateTime;
-  final TextStyle textStyle;
+  final TextStyle style;
   final String prefix;
   final String suffix;
 
   ElapsedCounter({
     this.startedDateTime,
-    this.textStyle,
+    this.style,
     this.prefix = '',
     this.suffix = '',
   });
@@ -43,7 +43,7 @@ class ElapsedCounterState extends State<ElapsedCounter> {
 
     return Text(
       text,
-      style: widget.textStyle,
+      style: widget.style,
     );
   }
 

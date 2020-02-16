@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/models/fishing_method.dart';
@@ -15,7 +19,7 @@ import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/strings.dart';
+import 'package:oltrace/messages.dart';
 import 'package:package_info/package_info.dart';
 
 // Include generated file
@@ -178,7 +182,7 @@ abstract class _AppStore with Store {
     return haul;
   }
 
-  void _updateHaul(Haul haul) {
+  void _updateActiveTripHaul(Haul haul) {
     final updatedHauls = activeTrip.hauls.map((Haul h) => haul.id == h.id ? haul : h).toList();
 
     activeTrip = activeTrip.copyWith(hauls: updatedHauls);
@@ -201,7 +205,7 @@ abstract class _AppStore with Store {
 
     await _haulRepo.store(endedHaul);
 
-    _updateHaul(endedHaul);
+    _updateActiveTripHaul(endedHaul);
 
     return endedHaul;
   }
@@ -209,7 +213,7 @@ abstract class _AppStore with Store {
   @action
   Future<void> cancelHaul() async {
     // Make sure we don't get a funny state
-    assert(activeHaul != null);
+    assert(hasActiveHaul);
 
     // Always modify db first
     await _haulRepo.delete(activeHaul.id);
@@ -221,6 +225,7 @@ abstract class _AppStore with Store {
     activeTrip = activeTrip.copyWith(hauls: updatedHauls);
   }
 
+  // TODO leave the error handling to the widget. Not all widgets have scaffolds and passing them is annoying
   @action
   Future<Trip> startTrip(GlobalKey<ScaffoldState> _scaffoldKey) async {
     _showWaitingForGpsSnackBar(_scaffoldKey);
@@ -249,14 +254,17 @@ abstract class _AppStore with Store {
 
     final Location location = await _locationProvider.location;
 
-    final endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
+    final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
 
-    int tripId = await _tripRepo.store(endedTrip);
-    final storedEndedTrip = endedTrip.copyWith(id: tripId);
+    assert(endedTrip.endedAt != null);
+
+    await _tripRepo.store(endedTrip);
     final updatedCompletedTrips = completedTrips;
 
+    assert(endedTrip.endedAt != null);
+
     // Add ended trip to state
-    updatedCompletedTrips.add(storedEndedTrip);
+    updatedCompletedTrips.add(endedTrip);
     completedTrips = updatedCompletedTrips;
 
     activeTrip = null;
@@ -266,6 +274,7 @@ abstract class _AppStore with Store {
 
   @action
   Future<Trip> cancelTrip() async {
+    assert(hasActiveHaul == null);
     assert(hasActiveTrip != null);
     final trip = activeTrip;
 
@@ -275,34 +284,48 @@ abstract class _AppStore with Store {
   }
 
   @action
-  Future<void> uploadTrip(Trip trip) async {
+  Future<Response> uploadTrip(Trip trip) async {
     // you can't upload an active trip
     assert(!_isActiveTrip(trip));
 
+    (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client) {
+      client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
+
     Response response = await dio.post(
       AppConfig.TRIP_UPLOAD_URL,
-      data: trip.toMap(),
+      data: {
+        'datetimereceived': DateFormat('yy-MM-dd HH:mm:ss').format(DateTime.now()),
+        'json': {
+          'trip': trip.toMap(),
+          'user': profile.toMap(),
+        }
+      },
       options: RequestOptions(headers: {'Content-Type': 'application/json'}),
     );
 
-    _updateTrip(trip.id, trip.copyWith(isUploaded: true));
+    await _updateTrip(trip.copyWith(isUploaded: true));
+    return response;
   }
 
   Trip findTrip(int id) {
-    if(activeTrip?.id == id) {
+    if (activeTrip?.id == id) {
       return activeTrip;
     }
-    return completedTrips.singleWhere((Trip t) => t.id == id,orElse: () => null);
+    // TODO Too many elements exception. Sometimes two copies of a trip get into the state.
+    return completedTrips.singleWhere((Trip t) => t.id == id, orElse: () => null);
   }
 
-  void _updateTrip(int id, Trip trip) {
-    if (activeTrip?.id == id) {
+  Future<void> _updateTrip(Trip trip) async {
+    if (activeTrip?.id == trip.id) {
       activeTrip = trip;
       return;
     }
-    _tripRepo.store(trip);
+    await _tripRepo.store(trip);
 
-    final List<Trip> updatedCompletedTrips = completedTrips.map((Trip t) => t.id == id ? trip : t).toList();
+    final List<Trip> updatedCompletedTrips =
+        completedTrips.map((Trip t) => t.id == trip.id ? trip : t).toList();
     completedTrips = updatedCompletedTrips;
   }
 
@@ -348,7 +371,7 @@ abstract class _AppStore with Store {
   void _showWaitingForGpsSnackBar(GlobalKey<ScaffoldState> _scaffoldKey) {
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(
-        content: Text(Strings.WAITING_FOR_GPS),
+        content: Text(Messages.WAITING_FOR_GPS),
         duration: Duration(minutes: 999), // Show until location is available
       ),
     );
@@ -357,7 +380,7 @@ abstract class _AppStore with Store {
   void _showLocationNotAvailableSnackBar(GlobalKey<ScaffoldState> _scaffoldKey) {
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(
-        content: Text(Strings.LOCATION_NOT_AVAILABLE),
+        content: Text(Messages.LOCATION_NOT_AVAILABLE),
       ),
     );
   }

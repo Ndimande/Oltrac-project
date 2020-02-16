@@ -41,7 +41,7 @@ class Landing extends Model {
     this.products = const [],
     this.individuals = 1,
     this.weightUnit = WeightUnit.GRAMS,
-    this.lengthUnit = LengthUnit.CENTIMETERS,
+    this.lengthUnit = LengthUnit.MICROMETERS,
     this.doneTagging = false,
   }) : super(id: id);
 
@@ -114,5 +114,5 @@ class Landing extends Model {
   String get weightKilograms =>
       (this.weight / 1000).toString() + ' kg' + (this.isBulk ? ' total' : '');
 
-  String get lengthCentimeters => (this.length).toString() + ' cm' + (this.isBulk ? ' avg.' : '');
+  String get lengthCentimeters => (this.length / 10000).toString() + ' cm' + (this.isBulk ? ' avg.' : '');
 }

@@ -53,15 +53,15 @@ class TripRepository extends DatabaseRepository<Trip> {
 
   /// Store a Trip
   /// returns id of new row
-  Future<int> store(Trip trip) async {
-    if (trip.id == null) {
-      return await _database.insert(tableName, toDatabaseMap(trip));
-    }
-    // remove null id
-    final withoutId = toDatabaseMap(trip)..remove('id');
-
-    return await _database.update(tableName, withoutId);
-  }
+//  Future<int> store(Trip trip) async {
+//    if (trip.id == null) {
+//      return await _database.insert(tableName, toDatabaseMap(trip));
+//    }
+//    // remove null id
+//    final withoutId = toDatabaseMap(trip)..remove('id');
+//
+//    return await _database.update(tableName, withoutId);
+//  }
 
   /// Get the active Trip. The active trip is the trip
   /// that has ended_at = null.
@@ -83,10 +83,7 @@ class TripRepository extends DatabaseRepository<Trip> {
 
     final Location endLocation = result['end_latitude'] == null || result['end_longitude'] == null
         ? null
-        : Location(
-            latitude: result['end_latitude'],
-            longitude: result['end_longitude'],
-          );
+        : Location(latitude: result['end_latitude'], longitude: result['end_longitude']);
 
     return Trip(
       id: result['id'],
@@ -97,7 +94,7 @@ class TripRepository extends DatabaseRepository<Trip> {
         longitude: result['start_longitude'],
       ),
       endLocation: endLocation,
-      isUploaded: result['is_uploaded'] == 1 ? true: false,
+      isUploaded: result['is_uploaded'] == 1 ? true : false,
     );
   }
 
