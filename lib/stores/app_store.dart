@@ -274,8 +274,7 @@ abstract class _AppStore with Store {
 
   @action
   Future<Trip> cancelTrip() async {
-    assert(hasActiveHaul == null);
-    assert(hasActiveTrip != null);
+
     final trip = activeTrip;
 
     await _tripRepo.delete(trip.id);

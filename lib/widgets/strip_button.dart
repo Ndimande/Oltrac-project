@@ -9,13 +9,14 @@ class StripButton extends StatelessWidget {
   final Color color;
   final bool centered;
 
-  StripButton(
-      {@required this.icon,
-      @required this.labelText,
-      @required this.onPressed,
-      this.color,
-      this.disabled = false,
-      this.centered = false});
+  StripButton({
+    @required this.icon,
+    @required this.labelText,
+    @required this.onPressed,
+    this.color,
+    this.disabled = false,
+    this.centered = false,
+  });
 
   @override
   Widget build(BuildContext context) {

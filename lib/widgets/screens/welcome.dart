@@ -46,6 +46,13 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
+            child: Image(
+              image: AssetImage('assets/images/olsps-logo.png'),
+              width: 100,
+            ),
+            alignment: Alignment.topRight,
+          ),
+          Container(
             padding: EdgeInsets.only(left: 15),
             child: Text(
               'General',
@@ -298,7 +305,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         ],
       ),
     );
-
   }
 }
 

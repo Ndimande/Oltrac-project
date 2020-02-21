@@ -22,6 +22,7 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
+import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
 import 'package:oltrace/widgets/screens/edit_trip.dart';
 import 'package:oltrace/widgets/screens/landing_form.dart';
@@ -332,6 +333,11 @@ class OlTraceAppState extends State<OlTraceApp> {
           case '/product':
             final Product product = settings.arguments;
             return MaterialPageRoute(builder: (_) => ProductScreen(product));
+
+          case '/add_source_landing':
+            final List<Landing> landings = settings.arguments;
+            return MaterialPageRoute(builder: (_) => AddSourceLandingsScreen(landings));
+
 
           default:
             throw ('No such route: ${settings.name}');

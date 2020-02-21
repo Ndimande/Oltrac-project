@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
 import 'package:oltrace/providers/store.dart';
@@ -15,6 +18,8 @@ import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/tag/rfid.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+
+enum DialogResult { Yes, No, DoneTagging }
 
 class CreateProductScreen extends StatefulWidget {
   final Landing initialSourceLanding;
@@ -33,7 +38,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
   final List<Landing> _sourceLandings;
   ProductType _productType;
+  PackagingType _packagingType;
+
   String _tagCode = AppConfig.DEV_MODE ? randomTagCode() : null;
+  final TextEditingController _totalController = TextEditingController();
 
   CreateProductScreenState(initialSourceLanding)
       : this._sourceLandings = initialSourceLanding != null ? [initialSourceLanding] : [];
@@ -64,6 +72,15 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   _onPressSaveButton() async {
+    if (_totalController.value == null || _totalController.value.text == '') {
+      _scaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          content: Text('Invalid number of products.'),
+        ),
+      );
+      return;
+    }
+
     if (_tagCode == null) {
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -91,18 +108,13 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       return;
     }
 
-    Position position = await widget.geoLocator.getLastKnownPosition();
-
-    if (position == null) {
-      // This can take a few seconds
-      position = await widget.geoLocator.getCurrentPosition();
-    }
+    Position position = await widget.geoLocator.getCurrentPosition();
 
     final product = Product(
       tagCode: _tagCode,
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
-      productType: productTypes.firstWhere((ProductType pt) => pt.id == _productType.id),
+      productType: _productType,
       landingId: _sourceLandings[0].id,
     );
 
@@ -112,33 +124,61 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     setState(() {
       _tagCode = null;
       _productType = null;
+      _packagingType = null;
+      _totalController.clear();
     });
 
-    bool createAnother = await _showProductSavedDialog(savedProduct);
-    if (createAnother) {
+    DialogResult result = await _showProductSavedDialog(savedProduct);
+    if (result == DialogResult.Yes) {
       return;
+    } else if (result == DialogResult.No) {
+      int count = 0;
+      Navigator.popUntil(context, (route) {
+        return count++ == 2;
+      });
+      return;
+    } else if (result == DialogResult.DoneTagging) {
+      // must get latest landing from state
+
+      // Look through all hauls including hauls in the active trip
+      final haul =
+          widget._appStore.activeTrip.hauls.firstWhere((h) => _sourceLandings[0].haulId == h.id);
+      final Landing landing =
+          haul.landings.firstWhere((Landing l) => l.id == _sourceLandings[0].id);
+      await widget._appStore.editLanding(landing.copyWith(doneTagging: true));
+      int count = 0;
+      Navigator.popUntil(context, (route) {
+        return count++ == 2;
+      });
     }
-    Navigator.pop(context);
   }
 
   _onPressDialogYes() {
-    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(DialogResult.Yes);
   }
 
   _onPressDialogNo() {
-    Navigator.of(context).pop(false);
+    Navigator.of(context).pop(DialogResult.No);
   }
 
-  _onPressDialogDone()async {
-    final Landing landing = _sourceLandings[0].copyWith(doneTagging: true);
-    await widget._appStore.editLanding(landing);
-    // set the landing tagging compelted = true
-    Navigator.of(context).pop(false);
+  _onPressDialogDone() async {
+    Navigator.of(context).pop(DialogResult.DoneTagging);
   }
 
-  Future<bool> _showProductSavedDialog(Product product) {
+  _onPressAddShark() async {
+    final Landing additionalSource =
+        await Navigator.pushNamed(context, '/add_source_landing', arguments: _sourceLandings)
+            as Landing;
+    if (additionalSource != null) {
+      setState(() {
+        _sourceLandings.add(additionalSource);
+      });
+    }
+  }
+
+  Future<DialogResult> _showProductSavedDialog(Product product) {
     const actionStyle = TextStyle(fontSize: 26);
-    return showDialog<bool>(
+    return showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
@@ -179,7 +219,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Do you want to create another product from this shark?',
+                'Do you want to create another product?',
                 style: TextStyle(fontSize: 20),
                 textAlign: TextAlign.center,
               ),
@@ -187,6 +227,71 @@ class CreateProductScreenState extends State<CreateProductScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _totalTextInput() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(bottom: 15),
+            child: Text(
+              'Number of Products',
+              style: TextStyle(fontSize: 20, color: olracBlue),
+            ),
+          ),
+          TextFormField(
+            style: TextStyle(fontSize: 30),
+            keyboardType: TextInputType.number,
+            controller: _totalController,
+            validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter total number of products';
+              }
+
+              // check if valid float
+              if (int.tryParse(value) == null) {
+                return 'Please enter a valid number of products';
+              }
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sourceLandingsList() {
+    return Column(
+      children: _sourceLandings
+          .map<Widget>(
+            (Landing sl) => Container(
+              decoration:
+                  new BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  SharkInfoCard(showIndex: false, landing: sl, listIndex: 1),
+                  IconButton(
+                    color: Colors.red,
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() {
+                        if (_sourceLandings.length > 1) {
+                          _sourceLandings.remove(sl);
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ),
+              height: 80,
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -224,41 +329,74 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  // Source landing
-                  Container(
-                    height: 80,
-                    child: SharkInfoCard(
-                      landing: _sourceLandings[0],
-                      listIndex: widget.listIndex,
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    // Source landing
+                    _sourceLandingsList(),
+
+                    StripButton(
+                      centered: true,
+                      color: olracBlue,
+                      icon: Icon(Icons.save, color: Colors.white),
+                      labelText: 'Add Shark',
+                      onPressed: _onPressAddShark,
                     ),
-                  ),
+                    //Product Type
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      child: _buildProductTypeDropdown(),
+                    ),
 
-                  //Product Type
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    child: _buildProductTypeDropdown(),
-                  ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      child: ModelDropdown<PackagingType>(
+                        label: 'Packaging Type',
+                        selected: _packagingType,
+                        items: packagingTypes.map<DropdownMenuItem<PackagingType>>(
+                          (PackagingType packagingType) {
+                            return DropdownMenuItem<PackagingType>(
+                              value: packagingType,
+                              child: Container(
+//                                color: bgColor,
+                                child: Row(
+                                  children: <Widget>[
+                                    Text(packagingType.name),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ).toList(),
+                        onChanged: (PackagingType packagingType) {
+                          setState(() => _packagingType = packagingType);
+                        },
+                      ),
+                    ),
 
-                  // Tag code
-                  _productType == null
-                      ? Container()
-                      : Container(
-                          alignment: Alignment.centerLeft,
-                          child: RFID(
-                            tagCode: _tagCode,
-                            onLongPress: () => setState(
-                              () {
-                                _tagCode = randomTagCode();
-                              },
-                            ),
-                          ), // Hardcode in dev mode
-                        ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      child: _totalTextInput(),
+                    ),
+                    // Tag code
+                    _productType == null
+                        ? Container()
+                        : Container(
+                            alignment: Alignment.centerLeft,
+                            child: RFID(
+                              tagCode: _tagCode,
+                              onLongPress: () => setState(
+                                () {
+                                  _tagCode = randomTagCode();
+                                },
+                              ),
+                            ), // Hardcode in dev mode
+                          ),
 
-                  // Space for FAB
-                ],
+                    // Space for FAB
+                  ],
+                ),
               ),
             ),
             StripButton(

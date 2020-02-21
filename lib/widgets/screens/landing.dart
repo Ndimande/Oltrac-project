@@ -151,6 +151,10 @@ class LandingScreen extends StatelessWidget {
 
   Widget doneTaggingSwitch(Landing landing) {
     // TODO only show this if it is a landing of an active trip
+    final Haul haul = getHaulFromState();
+    if(_appStore.activeTrip?.id != haul.tripId) {
+      return Container();
+    }
     return Row(
       children: <Widget>[
         Text('Done'),

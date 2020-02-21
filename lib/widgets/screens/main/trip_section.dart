@@ -16,7 +16,7 @@ class TripSection extends StatelessWidget {
   _onPressEndTrip(BuildContext context) async {
 
     if(_appStore.hasActiveHaul) {
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text('You must first end the trip')));
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text('You must first end the haul')));
       return;
     }
 
@@ -31,6 +31,12 @@ class TripSection extends StatelessWidget {
   }
 
   _onPressCancelTrip(BuildContext context) async {
+
+    if(_appStore.hasActiveHaul) {
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text('You must first end the haul')));
+      return;
+    }
+
     final bool confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => ConfirmDialog('Cancel Trip', Messages.CONFIRM_CANCEL_TRIP),

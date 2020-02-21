@@ -317,9 +317,10 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                               child: Container(
 //                                color: bgColor,
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
-                                    Text(species.englishName),
-                                    SizedBox(width: 10),
+                                    Text(species.englishName,style: TextStyle(fontSize: 18),),
+
                                     OlracIcon(
                                       assetPath: OlracIcons.path(species.scientificName),
                                       darker: true,
@@ -335,6 +336,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                         },
                       ),
                     ),
+
 
                     // Weight
                     Container(
