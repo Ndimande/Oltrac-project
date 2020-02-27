@@ -237,6 +237,9 @@ class OlTraceAppState extends State<OlTraceApp> {
     _initApp().then((AppStore appStore) async {
       print('State restored in ${stopwatch.elapsed}');
 
+      // Delay to show logos
+      await Future.delayed(Duration(seconds: 2) - stopwatch.elapsed);
+
       // If profile is not already setup, show welcome screen
       if (appStore.profileConfigured) {
         await _navigatorKey.currentState.pushReplacementNamed('/');

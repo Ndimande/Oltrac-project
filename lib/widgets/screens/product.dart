@@ -44,38 +44,6 @@ class ProductScreen extends StatelessWidget {
     );
   }
 
-  Widget buildHasData(AsyncSnapshot snapshot) {
-    final Product product = snapshot.data;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Product'),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(15),
-          child: Column(
-            children: <Widget>[
-              _detailRow('Timestamp', product.tagCode),
-              _detailRow('ID', product.id.toString()),
-              _detailRow('Product Type', product.productType.name),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    'Location',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  LocationButton(location: product.location),
-                ],
-              ),
-              _detailRow('Timestamp', friendlyDateTime(product.createdAt)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -95,6 +63,7 @@ class ProductScreen extends StatelessWidget {
                   _detailRow('Tag Code', product.tagCode),
                   _detailRow('ID', product.id.toString()),
                   _detailRow('Product Type', product.productType.name),
+                  _detailRow('Packaging Type', product.packagingType.name),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[

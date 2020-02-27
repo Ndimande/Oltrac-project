@@ -1,6 +1,8 @@
+import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
 
@@ -57,6 +59,8 @@ class ProductRepository extends DatabaseRepository<Product> {
       }),
       weight: result['weight'],
       productType: productTypes.firstWhere((ProductType pt) => pt.id == result['product_type_id']),
+      packagingType:
+          packagingTypes.firstWhere((PackagingType pt) => pt.id == result['packaging_type_id']),
       landingId: result['landing_id'],
     );
   }
@@ -70,6 +74,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       'longitude': product.location.longitude,
       'weight': product.weight,
       'product_type_id': product.productType.id,
+      'packaging_type_id': product.packagingType.id,
       'landing_id': product.landingId
     };
   }

@@ -1,5 +1,6 @@
 <?php
-/*
+/* This is a script to convert the csv of species to dart objects.
+
  * USAGE
  * php csv2model.php filename.csv
  */

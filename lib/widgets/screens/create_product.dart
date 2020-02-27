@@ -15,7 +15,6 @@ import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
-import 'package:oltrace/widgets/screens/tag/rfid.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
@@ -42,6 +41,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
   String _tagCode = AppConfig.DEV_MODE ? randomTagCode() : null;
   final TextEditingController _totalController = TextEditingController();
+  final TextEditingController _tagCodeController = TextEditingController();
 
   CreateProductScreenState(initialSourceLanding)
       : this._sourceLandings = initialSourceLanding != null ? [initialSourceLanding] : [];
@@ -50,10 +50,18 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   void initState() {
     super.initState();
     // When a tag is held to the device, read the tag
-    FlutterNfcReader.onTagDiscovered().listen((NfcData onData) {
-      setState(() {
-        _tagCode = onData.id;
-      });
+    FlutterNfcReader.onTagDiscovered().listen(onTagDiscovered);
+  }
+
+  void onTagDiscovered(NfcData data) {
+    print('Tag scanned!');
+    print(data.id);
+    print(data.content);
+    print(data.hashCode);
+    print(data.error);
+    setState(() {
+      _tagCodeController.text = data.id;
+      _tagCode = data.id;
     });
   }
 
@@ -71,40 +79,35 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  _onPressSaveButton() async {
+  List<String> getValidationErrors() {
+    List<String> errorMessages = [];
     if (_totalController.value == null || _totalController.value.text == '') {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Invalid number of products.'),
-        ),
-      );
-      return;
+      errorMessages.add('Invalid number of products.');
+
     }
 
     if (_tagCode == null) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('No RFID has been scanned.'),
-        ),
-      );
-      return;
+      errorMessages.add('No RFID tag has been scanned.');
+
     }
 
     if (_sourceLandings.length == 0) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('You must select at least one source tag.'),
-        ),
-      );
-      return;
+      errorMessages.add('You must select at least one source tag.');
     }
 
     if (_productType == null) {
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('No product type seletected.'),
-        ),
-      );
+      errorMessages.add('No product type seletected.');
+    }
+
+    return errorMessages;
+  }
+
+  _onPressSaveButton() async {
+
+    final List<String> errorMessages = getValidationErrors();
+
+    if(errorMessages.length != 0) {
+      showTextSnackBar(_scaffoldKey, errorMessages.join("\n"));
       return;
     }
 
@@ -114,6 +117,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       tagCode: _tagCode,
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
+      packagingType: _packagingType,
       productType: _productType,
       landingId: _sourceLandings[0].id,
     );
@@ -236,14 +240,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(bottom: 15),
-            child: Text(
-              'Number of Products',
-              style: TextStyle(fontSize: 20, color: olracBlue),
-            ),
-          ),
           TextFormField(
+            decoration: InputDecoration(
+              labelText: 'Number of products',
+              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              helperText: 'The total number of products associated with the tag',
+            ),
             style: TextStyle(fontSize: 30),
             keyboardType: TextInputType.number,
             controller: _totalController,
@@ -295,32 +297,82 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
+  StripButton get saveButton => StripButton(
+        icon: Icon(
+          Icons.save,
+          color: Colors.white,
+        ),
+        labelText: 'Save',
+        centered: true,
+        color: Colors.green,
+        onPressed: _onPressSaveButton,
+      );
+
+  StripButton get addSharkButton => StripButton(
+        centered: true,
+        color: olracBlue,
+        icon: Icon(Icons.save, color: Colors.white),
+        labelText: 'Add Shark',
+        onPressed: _onPressAddShark,
+      );
+
+  Future<bool> get onWillPop async {
+    // Have things changed since the initial state?
+    final bool changed = _sourceLandings.length > 1 || // There are at least two landings
+        (_sourceLandings.length == 1 &&
+            _sourceLandings[0] != widget.initialSourceLanding) || // There is one but it's different
+        _tagCode != null; // They have scanned in a tag
+
+    // If there are changes warn the user before navigating away
+    if (changed) {
+      bool confirmed = await showDialog<bool>(
+        context: _scaffoldKey.currentContext,
+        builder: (_) => ConfirmDialog('Cancel',
+            'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?'),
+      );
+
+      if (!confirmed) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  Widget tagCode() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextFormField(
+            controller: _tagCodeController,
+            textCapitalization: TextCapitalization.words,
+            autocorrect: false,
+            style: TextStyle(fontSize: 30),
+            decoration: InputDecoration(
+              labelText: 'Tag code',
+              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              helperText: 'Hold tag infront of reader to scan',
+            ),
+            onFieldSubmitted: (t) {},
+            onChanged: (String enteredText) {
+              setState(() {
+                _tagCode = enteredText;
+              });
+            },
+            validator: (t) => t,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        // Have things changed since the initial state?
-        final bool changed = _sourceLandings.length > 1 || // There are at least two landings
-            (_sourceLandings.length == 1 &&
-                _sourceLandings[0] !=
-                    widget.initialSourceLanding) || // There is one but it's different
-            _tagCode != null; // They have scanned in a tag
-
-        // If there are changes warn the user before navigating away
-        if (changed) {
-          bool confirmed = await showDialog<bool>(
-            context: _scaffoldKey.currentContext,
-            builder: (_) => ConfirmDialog('Cancel',
-                'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?'),
-          );
-
-          if (!confirmed) {
-            return false;
-          }
-        }
-
-        return true;
-      },
+      onWillPop: () async => await onWillPop,
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -336,13 +388,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                     // Source landing
                     _sourceLandingsList(),
 
-                    StripButton(
-                      centered: true,
-                      color: olracBlue,
-                      icon: Icon(Icons.save, color: Colors.white),
-                      labelText: 'Add Shark',
-                      onPressed: _onPressAddShark,
-                    ),
+                    addSharkButton,
+
                     //Product Type
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
@@ -350,7 +397,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                     ),
 
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 15),
                       child: ModelDropdown<PackagingType>(
                         label: 'Packaging Type',
                         selected: _packagingType,
@@ -380,35 +427,16 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                       child: _totalTextInput(),
                     ),
                     // Tag code
-                    _productType == null
+                    _productType == null || _packagingType == null
                         ? Container()
-                        : Container(
-                            alignment: Alignment.centerLeft,
-                            child: RFID(
-                              tagCode: _tagCode,
-                              onLongPress: () => setState(
-                                () {
-                                  _tagCode = randomTagCode();
-                                },
-                              ),
-                            ), // Hardcode in dev mode
-                          ),
+                        : tagCode(),
 
                     // Space for FAB
                   ],
                 ),
               ),
             ),
-            StripButton(
-              icon: Icon(
-                Icons.save,
-                color: Colors.white,
-              ),
-              labelText: 'Save',
-              centered: true,
-              color: Colors.green,
-              onPressed: _onPressSaveButton,
-            ),
+            saveButton
           ],
         ),
       ),

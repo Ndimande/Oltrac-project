@@ -63,6 +63,7 @@ final List<Map<String, String>> appMigrations = const [
         'id INTEGER PRIMARY KEY, '
         'tag_code TEXT NOT NULL, '
         'product_type_id NOT NULL, '
+        'packaging_type_id NOT NULL, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '
