@@ -10,7 +10,7 @@ class LandingDetails extends StatelessWidget {
 
   LandingDetails({this.landing});
 
-  _buildRow(String key, String val) => Container(
+  _buildRow(String key, String val, {bool italic = false}) => Container(
     margin: EdgeInsets.symmetric(vertical: 5),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -27,7 +27,7 @@ class LandingDetails extends StatelessWidget {
           flex: 5,
           child: Text(
             val,
-            style: _rowFontStyle,
+            style: _rowFontStyle.copyWith(fontStyle: italic ? FontStyle.italic : FontStyle.normal),
             textAlign: TextAlign.right,
           ),
         ),
@@ -53,7 +53,7 @@ class LandingDetails extends StatelessWidget {
         _buildRow('Timestamp', friendlyDateTime(landing.createdAt)),
         _buildRow('Individuals', landing.individuals.toString()),
         _buildRow('Australian name', landing.species.australianName),
-        _buildRow('Scientific name', landing.species.scientificName),
+        _buildRow('Scientific name', landing.species.scientificName,italic: true),
       ],
     );
   }

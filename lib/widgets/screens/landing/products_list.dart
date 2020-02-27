@@ -13,7 +13,7 @@ class ProductsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> items = landing.products
       .map<Widget>((Product p) => ProductListItem(p, () {
-      Navigator.pushNamed(context, '/product', arguments: p);
+      Navigator.pushNamed(context, '/product', arguments: p.id);
     }))
       .toList();
     return Column(

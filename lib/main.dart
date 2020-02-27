@@ -331,8 +331,8 @@ class OlTraceAppState extends State<OlTraceApp> {
             return MaterialPageRoute(builder: (_) => CreateProductScreen(landing, listIndex));
 
           case '/product':
-            final Product product = settings.arguments;
-            return MaterialPageRoute(builder: (_) => ProductScreen(product));
+            final int productId = settings.arguments;
+            return MaterialPageRoute(builder: (_) => ProductScreen(productId));
 
           case '/add_source_landing':
             final List<Landing> landings = settings.arguments;

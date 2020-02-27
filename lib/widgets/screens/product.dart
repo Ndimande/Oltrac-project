@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/product.dart';
+import 'package:oltrace/providers/database.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/location_button.dart';
+import 'package:sqflite/sqflite.dart';
+
+final _productRepo = ProductRepository();
+
+Future<Product> getProduct(int id) async {
+  final Database db = DatabaseProvider().database;
+  final List<Map<String, dynamic>> results = await db.query('products', where: 'id= $id');
+
+  if (results.length == 0) {
+    return null;
+  }
+  print(results);
+  assert(results.length == 1);
+  return _productRepo.fromDatabaseMap(results.first);
+}
 
 class ProductScreen extends StatelessWidget {
-  final Product _product;
+  final int _productId;
 
-  ProductScreen(this._product);
+  ProductScreen(this._productId);
 
   Widget _detailRow(String lhs, String rhs) {
     return Container(
@@ -27,19 +44,20 @@ class ProductScreen extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget buildHasData(AsyncSnapshot snapshot) {
+    final Product product = snapshot.data;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Tag ${_product.tagCode}'),
+        title: Text('Product'),
       ),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(15),
           child: Column(
             children: <Widget>[
-              _detailRow('ID', _product.id.toString()),
-              _detailRow('Product Type', _product.productType.name),
+              _detailRow('Timestamp', product.tagCode),
+              _detailRow('ID', product.id.toString()),
+              _detailRow('Product Type', product.productType.name),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -47,14 +65,53 @@ class ProductScreen extends StatelessWidget {
                     'Location',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  LocationButton(location: _product.location),
+                  LocationButton(location: product.location),
                 ],
               ),
-              _detailRow('Timestamp', friendlyDateTime(_product.createdAt)),
+              _detailRow('Timestamp', friendlyDateTime(product.createdAt)),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: getProduct(_productId),
+      initialData: null,
+      builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
+        final Product product = snapshot.data;
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Product'),
+          ),
+          body: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.all(15),
+              child: Column(
+                children: <Widget>[
+                  _detailRow('Tag Code', product.tagCode),
+                  _detailRow('ID', product.id.toString()),
+                  _detailRow('Product Type', product.productType.name),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        'Location',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      LocationButton(location: product.location),
+                    ],
+                  ),
+                  _detailRow('Timestamp', friendlyDateTime(product.createdAt)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
