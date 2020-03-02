@@ -9,8 +9,11 @@ import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
+import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/haul/haul_info.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+
+enum SpeciesDialogSelection { Single, Bulk, Cancel }
 
 class HaulScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -21,7 +24,7 @@ class HaulScreen extends StatelessWidget {
 
   HaulScreen(this._haul, {this.listIndex});
 
-  Widget addLandingButtons(Haul haul) => Builder(
+  Widget bottomButtons(Haul haul) => Builder(
         builder: (context) => Row(
           children: <Widget>[
             Expanded(
@@ -32,7 +35,7 @@ class HaulScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
                 color: Colors.green,
-                labelText: 'Add Shark',
+                labelText: 'Species',
                 onPressed: () async => await _onPressAddLandingButton(haul, context),
               ),
             ),
@@ -40,12 +43,12 @@ class HaulScreen extends StatelessWidget {
               child: StripButton(
                 centered: true,
                 icon: Icon(
-                  Icons.library_add,
+                  Icons.local_offer,
                   color: Colors.white,
                 ),
                 color: olracBlue,
-                labelText: 'Add Bulk',
-                onPressed: () async => await _onPressAddBulkLandingButton(haul, context),
+                labelText: 'Tag',
+                onPressed: () async => await _onPressAddTagButton(haul, context),
               ),
             )
           ],
@@ -96,7 +99,8 @@ class HaulScreen extends StatelessWidget {
         .map(
           (Landing landing) => LandingListItem(
             landing: landing,
-            onPressed: (index) async => await _onPressLandingListItem(landing, index), //() async => await _onPressLandingListItem(landing, landingIndex),
+            onPressed: (index) async => await _onPressLandingListItem(landing, index),
+            //() async => await _onPressLandingListItem(landing, landingIndex),
             listIndex: landingIndex--,
           ),
         )
@@ -110,14 +114,80 @@ class HaulScreen extends StatelessWidget {
   }
 
   Future<void> _onPressAddLandingButton(Haul haul, context) async {
-    sharedPrefs.setBool('bulkMode', false);
+    // todo update to ask for bulk / single with dialog
+    final bool bulkMode = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text('Add Species'),
+        content: Text('How do you want to add species?'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Single'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          FlatButton(
+            child: Text('Bulk'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+          FlatButton(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(null),
+          ),
+        ],
+      ),
+    );
+    if (bulkMode == null) {
+      return;
+    }
+    sharedPrefs.setBool('bulkMode', bulkMode);
     await Navigator.pushNamed(context, '/create_landing', arguments: haul);
   }
 
-  Future<void> _onPressAddBulkLandingButton(Haul haul, context) async {
-    sharedPrefs.setBool('bulkMode', true);
+  showAddSpeciesDialog(BuildContext context) async {
+    return await showDialog<SpeciesDialogSelection>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Single'),
+            onPressed: () => Navigator.of(_).pop(SpeciesDialogSelection.Single),
+          ),
+          FlatButton(
+            child: Text('Bulk'),
+            onPressed: () => Navigator.of(_).pop(SpeciesDialogSelection.Bulk),
+          ),
+          FlatButton(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.of(_).pop(SpeciesDialogSelection.Cancel),
+          ),
+        ],
+        title: Text('Add Species'),
+        content: Text('How do you want to add species?'),
+      ),
+    );
+  }
 
-    await Navigator.pushNamed(context, '/create_landing', arguments: haul);
+  Future<void> _onPressAddTagButton(Haul haul, context) async {
+    SpeciesDialogSelection selection = await showAddSpeciesDialog(context);
+    if (selection == SpeciesDialogSelection.Cancel) {
+      return;
+    }
+    print(selection);
+// todo show select species screen
+    final List<Landing> selectedLandings = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddSourceLandingsScreen(
+          alreadySelectedLandings: [],
+          selectionMode: selection,
+          sourceHaul: _haul,
+        ),
+      ),
+    );
+    await Navigator.pushNamed(context, '/create_product',
+        arguments: {'haul': haul, 'landings': selectedLandings});
   }
 
   Widget _buildLandingsLabel(List<Landing> landings) {
@@ -125,7 +195,7 @@ class HaulScreen extends StatelessWidget {
       padding: EdgeInsets.only(left: 10, top: 10),
       alignment: Alignment.centerLeft,
       child: Text(
-        'Sharks',
+        'Species List',
         style: TextStyle(fontSize: 30, color: olracBlue),
       ),
     );
@@ -199,7 +269,7 @@ class HaulScreen extends StatelessWidget {
                 listIndex: listIndex,
               ),
               _buildLandingsSection(haul.landings),
-              _isHaulOfActiveTrip(haul) ? addLandingButtons(haul) : Container(),
+              _isHaulOfActiveTrip(haul) ? bottomButtons(haul) : Container(),
             ],
           ),
         ),

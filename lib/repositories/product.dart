@@ -1,6 +1,7 @@
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/database_repository.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
@@ -31,16 +32,16 @@ class ProductRepository extends DatabaseRepository<Product> {
     }
 
     // We need to store in the pivot table
-    // for (var landing in product.landings) {
-    //   final List<Map<String, dynamic>> res = await database.query('product_landings',
-    //       where: 'product_id = $createdId AND landing_id = ${landing.id}');
-    //   if (res.length == 0) {
-    //     await database.insert(
-    //       'product_landings',
-    //       {'product_id': createdId, 'landing_id': landing.id},
-    //     );
-    //   }
-    // }
+     for (var landing in product.landings) {
+       final List<Map<String, dynamic>> res = await database.query('product_has_landings',
+           where: 'product_id = $createdId AND landing_id = ${landing.id}');
+       if (res.length == 0) {
+         await database.insert(
+           'product_has_landings',
+           {'product_id': createdId, 'landing_id': landing.id},
+         );
+       }
+     }
 
     return createdId;
   }
@@ -48,7 +49,7 @@ class ProductRepository extends DatabaseRepository<Product> {
   @override
   Product fromDatabaseMap(Map<String, dynamic> result) {
     final createdAt = result['created_at'] != null ? DateTime.parse(result['created_at']) : null;
-
+    final List<Landing> landings = <Landing>[];
     return Product(
       id: result['id'],
       createdAt: createdAt,
@@ -61,7 +62,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       productType: productTypes.firstWhere((ProductType pt) => pt.id == result['product_type_id']),
       packagingType:
           packagingTypes.firstWhere((PackagingType pt) => pt.id == result['packaging_type_id']),
-      landingId: result['landing_id'],
+      landings: landings,
     );
   }
 
@@ -75,7 +76,6 @@ class ProductRepository extends DatabaseRepository<Product> {
       'weight': product.weight,
       'product_type_id': product.productType.id,
       'packaging_type_id': product.packagingType.id,
-      'landing_id': product.landingId
     };
   }
 }

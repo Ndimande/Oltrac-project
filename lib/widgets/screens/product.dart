@@ -15,7 +15,6 @@ Future<Product> getProduct(int id) async {
   if (results.length == 0) {
     return null;
   }
-  print(results);
   assert(results.length == 1);
   return _productRepo.fromDatabaseMap(results.first);
 }
@@ -75,6 +74,8 @@ class ProductScreen extends StatelessWidget {
                     ],
                   ),
                   _detailRow('Timestamp', friendlyDateTime(product.createdAt)),
+                  Text('Source landings will be here'),
+
                 ],
               ),
             ),

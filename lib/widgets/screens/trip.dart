@@ -12,6 +12,7 @@ import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
+import 'package:path_provider/path_provider.dart';
 
 class TripScreen extends StatefulWidget {
   final Trip tripArg;
@@ -29,6 +30,26 @@ class TripScreenState extends State<TripScreen> {
   final AppStore _appStore = StoreProvider().appStore;
   Dio dio = Dio();
   bool uploading = false;
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    print('write trip to $path');
+    return File('$path/trip.json');
+  }
+
+  Future<File> writeTripJson(String json) async {
+    final file = await _localFile;
+
+    // Write the file.
+    return file.writeAsString(json);
+  }
+
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationSupportDirectory();
+
+    return directory.path;
+  }
 
   Widget _buildTripInfo(Trip trip) {
     return Container(
@@ -82,6 +103,7 @@ class TripScreenState extends State<TripScreen> {
   }
 
   onPressUploadTrip(Trip trip) async {
+    await writeTripJson(trip.toString());
     // Don't upload if already uploading
     if (uploading) {
       return;

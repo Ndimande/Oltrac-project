@@ -68,9 +68,18 @@ final List<Map<String, String>> appMigrations = const [
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '
         'weight INTEGER, '
-        'landing_id INTEGER NOT NULL, '
         'FOREIGN KEY (landing_id) REFERENCES landings (id)'
         ')',
     'down': 'DROP TABLE products'
   },
+  {
+    'name': 'create_product_has_landings',
+    'up':'CREATE TABLE product_has_landings( '
+      'landing_id INTEGER, '
+      'product_id INTEGER, '
+      'FOREIGN KEY (landing_id) REFERENCES landings (id), '
+      'FOREIGN KEY (product_id) REFERENCES products (id) '
+      ')',
+    'down': 'DROP TABLE product_has_landings'
+  }
 ];

@@ -6,6 +6,7 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/packaging_type.dart';
@@ -15,21 +16,23 @@ import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
+import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
 enum DialogResult { Yes, No, DoneTagging }
 
 class CreateProductScreen extends StatefulWidget {
-  final Landing initialSourceLanding;
+  final Haul sourceHaul;
+  final List<Landing> initialSourceLandings;
   final AppStore _appStore = StoreProvider().appStore;
   final Geolocator geoLocator = Geolocator();
   final int listIndex;
 
-  CreateProductScreen(this.initialSourceLanding, this.listIndex);
+  CreateProductScreen({this.initialSourceLandings, this.sourceHaul, this.listIndex});
 
   @override
-  State<StatefulWidget> createState() => CreateProductScreenState(initialSourceLanding);
+  State<StatefulWidget> createState() => CreateProductScreenState(initialSourceLandings);
 }
 
 class CreateProductScreenState extends State<CreateProductScreen> {
@@ -43,8 +46,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   final TextEditingController _totalController = TextEditingController();
   final TextEditingController _tagCodeController = TextEditingController();
 
-  CreateProductScreenState(initialSourceLanding)
-      : this._sourceLandings = initialSourceLanding != null ? [initialSourceLanding] : [];
+  CreateProductScreenState(List<Landing> initialSourceLandings)
+      : this._sourceLandings = initialSourceLandings != null ? initialSourceLandings : [];
 
   @override
   void initState() {
@@ -83,12 +86,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     List<String> errorMessages = [];
     if (_totalController.value == null || _totalController.value.text == '') {
       errorMessages.add('Invalid number of products.');
-
     }
 
     if (_tagCode == null) {
       errorMessages.add('No RFID tag has been scanned.');
-
     }
 
     if (_sourceLandings.length == 0) {
@@ -103,10 +104,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   _onPressSaveButton() async {
-
     final List<String> errorMessages = getValidationErrors();
 
-    if(errorMessages.length != 0) {
+    if (errorMessages.length != 0) {
       showTextSnackBar(_scaffoldKey, errorMessages.join("\n"));
       return;
     }
@@ -119,7 +119,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       location: Location.fromPosition(position),
       packagingType: _packagingType,
       productType: _productType,
-      landingId: _sourceLandings[0].id,
+      landings: _sourceLandings,
     );
 
     // Create a product
@@ -170,14 +170,23 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   _onPressAddShark() async {
-    final Landing additionalSource =
-        await Navigator.pushNamed(context, '/add_source_landing', arguments: _sourceLandings)
-            as Landing;
-    if (additionalSource != null) {
-      setState(() {
-        _sourceLandings.add(additionalSource);
-      });
+    final List<Landing> additionalSources = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddSourceLandingsScreen(
+          alreadySelectedLandings: _sourceLandings,
+          sourceHaul: widget.sourceHaul,
+        ),
+      ),
+    );
+
+    if (additionalSources == null || additionalSources.length == 0) {
+      return;
     }
+
+    setState(() {
+      _sourceLandings.addAll(additionalSources);
+    });
   }
 
   Future<DialogResult> _showProductSavedDialog(Product product) {
@@ -242,7 +251,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         children: <Widget>[
           TextFormField(
             decoration: InputDecoration(
-              labelText: 'Number of products',
+              labelText: 'Number of Product Units',
               labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               helperText: 'The total number of products associated with the tag',
             ),
@@ -320,7 +329,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     // Have things changed since the initial state?
     final bool changed = _sourceLandings.length > 1 || // There are at least two landings
         (_sourceLandings.length == 1 &&
-            _sourceLandings[0] != widget.initialSourceLanding) || // There is one but it's different
+            _sourceLandings[0] !=
+                widget.initialSourceLandings) || // There is one but it's different
         _tagCode != null; // They have scanned in a tag
 
     // If there are changes warn the user before navigating away
@@ -427,9 +437,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                       child: _totalTextInput(),
                     ),
                     // Tag code
-                    _productType == null || _packagingType == null
-                        ? Container()
-                        : tagCode(),
+                    _productType == null || _packagingType == null ? Container() : tagCode(),
 
                     // Space for FAB
                   ],
