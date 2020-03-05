@@ -10,9 +10,11 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -56,17 +58,18 @@ class TripScreen extends StatefulWidget {
 
 class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final AppStore _appStore = StoreProvider().appStore;
 
   Dio dio = Dio();
   bool uploading = false;
   Trip trip;
   bool isActiveTrip;
 
-  Future<File> writeTripJson(String json) async {
-    final path = await getApplicationSupportDirectory()
+  Future<File> _writeJson(String json) async {
+    final path = await getApplicationDocumentsDirectory()
       ..path;
-    print('write trip to $path');
-    final file = File('$path/trip.json');
+    print('write json to $path');
+    final file = File('$path/test.json');
 
     // Write the file.
     return file.writeAsString(json);
@@ -142,8 +145,7 @@ class TripScreenState extends State<TripScreen> {
       'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       'json': {
         'trip': trip.toMap(),
-//        'user': _appStore.profile.toMap(),
-        'user': {'todo':'todo'},
+        'user': _appStore.profile.toMap(),
       }
     };
 

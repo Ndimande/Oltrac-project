@@ -161,12 +161,20 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressAddLandingButton(Haul haul, BuildContext context) async {
-    final bool bulkMode = await showDialog<bool>(
+    final bool bulkMode = await _showAddSpeciesDialog(context);
+    if (bulkMode == null) {
+      return;
+    }
+    widget.sharedPrefs.setBool('bulkMode', bulkMode);
+    await Navigator.pushNamed(context, '/create_landing', arguments: haul);
+    setState(() {});
+  }
+
+  Future<bool> _showAddSpeciesDialog(BuildContext context) async {
+    return showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: Text('Add Species'),
-        content: Text('How do you want to add species?'),
         actions: <Widget>[
           FlatButton(
             child: Text('Single'),
@@ -179,35 +187,6 @@ class HaulScreenState extends State<HaulScreen> {
           FlatButton(
             child: Text('Cancel'),
             onPressed: () => Navigator.of(context).pop(null),
-          ),
-        ],
-      ),
-    );
-    if (bulkMode == null) {
-      return;
-    }
-    widget.sharedPrefs.setBool('bulkMode', bulkMode);
-    await Navigator.pushNamed(context, '/create_landing', arguments: haul);
-    setState(() {});
-  }
-
-  Future<SpeciesSelectMode> _showAddSpeciesDialog(BuildContext context) async {
-    return await showDialog<SpeciesSelectMode>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Single'),
-            onPressed: () => Navigator.of(_).pop(SpeciesSelectMode.Single),
-          ),
-          FlatButton(
-            child: Text('Bulk'),
-            onPressed: () => Navigator.of(_).pop(SpeciesSelectMode.Bulk),
-          ),
-          FlatButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(_).pop(SpeciesSelectMode.Cancel),
           ),
         ],
         title: Text('Add Species'),
@@ -242,17 +221,17 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressAddProductButton(Haul haul, context) async {
-    SpeciesSelectMode selection = await _showAddProductDialog(context);
-    if (selection == SpeciesSelectMode.Cancel) {
-      return;
-    }
+//    SpeciesSelectMode selection = await _showAddProductDialog(context);
+//    if (selection == SpeciesSelectMode.Cancel) {
+//      return;
+//    }
 
     final List<Landing> selectedLandings = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddSourceLandingsScreen(
           alreadySelectedLandings: [],
-          selectionMode: selection,
+          selectionMode: SpeciesSelectMode.Single,
           sourceHaul: haul,
         ),
       ),
