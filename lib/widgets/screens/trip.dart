@@ -9,10 +9,14 @@ import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/database.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
@@ -24,19 +28,40 @@ import 'package:path_provider/path_provider.dart';
 final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
+final _productRepo = ProductRepository();
 
-Future<Trip> _getWithHaulsAndLandings(Trip trip) async {
+Future<File> _writeJson(String json) async {
+  final dir = await getApplicationDocumentsDirectory();
+  final path = dir.path;
+  print('write json to $path');
+  final file = File('$path/test.json');
+  final db = DatabaseProvider().database;
+//  await db.insert('json', {'key': 'tripeg','json':json});
+  final sp = SharedPreferencesProvider().sharedPreferences;
+  sp.setString('tripeg', json);
+  // Write the file.
+  return file.writeAsString(json);
+}
+
+Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
   final List<Haul> hauls = [];
   for (Haul haul in activeTripHauls) {
     final List<Landing> landings = await _landingRepo.forHaul(haul);
-    hauls.add(haul.copyWith(landings: landings));
+    final List<Landing> landingsWithProducts = [];
+    for (Landing landing in landings) {
+      final List<Product> products = await _productRepo.forLanding(landing.id);
+      landingsWithProducts.add(landing.copyWith(products: products));
+    }
+    hauls.add(haul.copyWith(landings: landingsWithProducts));
   }
-  return trip.copyWith(hauls: hauls);
+  final Trip tripWithNested = trip.copyWith(hauls: hauls);
+  await _writeJson(tripWithNested.toJson());
+  return tripWithNested;
 }
 
 Future<Map<String, dynamic>> _load(int tripId) async {
-  final Trip trip = await _getWithHaulsAndLandings(await _tripRepo.find(tripId));
+  final Trip trip = await _getWithNested(await _tripRepo.find(tripId));
   final Trip activeTrip = await _tripRepo.getActive();
   return {
     'trip': trip,
@@ -62,7 +87,7 @@ class TripScreenState extends State<TripScreen> {
 
   Dio dio = Dio();
   bool uploading = false;
-  Trip trip;
+  Trip _trip;
   bool isActiveTrip;
 
   Widget _buildTripInfo(Trip trip) {
@@ -201,10 +226,10 @@ class TripScreenState extends State<TripScreen> {
           return Scaffold();
         }
 
-        trip = snapshot.data['trip'];
+        _trip = snapshot.data['trip'];
         isActiveTrip = snapshot.data['isActiveTrip'];
 
-        final mainButton = isActiveTrip ? Container() : uploadButton(trip);
+        final mainButton = isActiveTrip ? Container() : uploadButton(_trip);
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(title: title),
@@ -212,10 +237,10 @@ class TripScreenState extends State<TripScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _buildTripInfo(trip),
+                _buildTripInfo(_trip),
                 Expanded(
-                  child: trip.hauls.length > 0
-                      ? GroupedHaulsList(hauls: trip.hauls.reversed.toList())
+                  child: _trip.hauls.length > 0
+                      ? GroupedHaulsList(hauls: _trip.hauls.reversed.toList())
                       : noHauls,
                 ),
                 mainButton
