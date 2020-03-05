@@ -107,7 +107,19 @@ class HaulScreenState extends State<HaulScreen> {
       child: Container(
         alignment: Alignment.center,
         child: Text(
-          'No sharks',
+          'No species in this haul yet',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _noProducts() {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          'No tags in this haul yet',
           style: TextStyle(fontSize: 20),
         ),
       ),
@@ -121,10 +133,6 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _listsSection(List<Landing> landings) {
-    if (landings.length == 0) {
-      return _noLandings();
-    }
-
     return Expanded(
       child: Container(
         child: Column(
@@ -178,6 +186,9 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _productList() {
+    if (_products.length == 0) {
+      return _noProducts();
+    }
     final List<Widget> items = _products
         .map((Product product) => ProductListItem(
               product: product,
@@ -188,6 +199,9 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _landingsList(List<Landing> landings) {
+    if (landings.length == 0) {
+      return _noLandings();
+    }
     int landingIndex = landings.length;
 
     final List<LandingListItem> listLandings = landings.reversed

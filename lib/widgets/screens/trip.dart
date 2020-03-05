@@ -65,16 +65,6 @@ class TripScreenState extends State<TripScreen> {
   Trip trip;
   bool isActiveTrip;
 
-  Future<File> _writeJson(String json) async {
-    final path = await getApplicationDocumentsDirectory()
-      ..path;
-    print('write json to $path');
-    final file = File('$path/test.json');
-
-    // Write the file.
-    return file.writeAsString(json);
-  }
-
   Widget _buildTripInfo(Trip trip) {
     return Container(
       color: olracBlue[50],

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 final _tripRepo = TripRepository();
