@@ -29,10 +29,17 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
   final List<Landing> landings = await _landingRepo.forHaul(haul);
   final List<Landing> landingsWithProducts = [];
+  
   List<Product> flatProducts = [];
+  
   for (Landing landing in landings) {
     final List<Product> products = await _productRepo.forLanding(landing.id);
-    flatProducts.addAll(products);
+    for (Product product in products) {
+      List foundProds = flatProducts.where((Product p) => p.id == product.id).toList();
+      if(foundProds.length == 0) {
+        flatProducts.add(product);
+      }
+    }
     landingsWithProducts.add(landing.copyWith(products: products));
   }
 
