@@ -58,7 +58,7 @@ class LandingDetails extends StatelessWidget {
         _buildRow('Australian name', landing.species.australianName),
         _buildRow('Scientific name', landing.species.scientificName, italic: true),
         _buildRow('Family', landing.species.family),
-        _buildRow('Marjor Group', landing.species.majorGroup),
+        _buildRow('Major Group', landing.species.majorGroup),
         _buildRow('3 Alpha Code', landing.species.alpha3Code),
         _buildRow('Caab Code', landing.species.caabCode),
         _buildRow('CPC Class', landing.species.cpcClass),

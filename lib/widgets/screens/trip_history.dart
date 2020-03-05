@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 final _tripRepo = TripRepository();
+final _haulRepo = HaulRepository();
+
 Future<Map> _load() async {
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
 
-  return {'completedTrips':completedTrips};
+  final List<Trip> tripsWithHauls = [];
+  for(Trip trip in completedTrips) {
+    List<Haul> hauls = await _haulRepo.forTripId(trip.id);
+    tripsWithHauls.add(trip.copyWith(hauls: hauls));
+  }
+  return {'completedTrips':tripsWithHauls};
 }
 
 
