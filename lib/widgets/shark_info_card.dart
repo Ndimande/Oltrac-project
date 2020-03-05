@@ -26,6 +26,7 @@ class SharkInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -47,7 +48,6 @@ class SharkInfoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
-//                      TimeAgo(prefix: 'Added ', dateTime: landing.createdAt),
                       Text(friendlyDateTime(landing.createdAt)),
                     ],
                   )

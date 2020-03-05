@@ -185,7 +185,7 @@ class TripScreenState extends State<TripScreen> {
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
-          content: Text('Trip upload failed. Please check your connection.'),
+          content: Text('Trip upload failed.\n' + e.toString()),
         ),
       );
     }
