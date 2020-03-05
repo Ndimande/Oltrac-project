@@ -161,12 +161,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     } else if (result == DialogResult.DoneTagging) {
       // must get latest landing from state
 
-// mark all source landings done
+      // mark all source landings done
       for (Landing landing in _sourceLandings) {
         await _landingRepo.store(landing.copyWith(doneTagging: true));
       }
-//      final Landing landing =
-//          widget.sourceHaul.landings.firstWhere((Landing l) => l.id == _sourceLandings[0].id);
 
       int count = 0;
       Navigator.popUntil(context, (route) {

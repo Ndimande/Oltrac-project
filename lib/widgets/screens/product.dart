@@ -14,16 +14,21 @@ final _landingRepo = LandingRepository();
 
 final Database db = DatabaseProvider().database;
 
-Future<Product> getProduct(int id) async {
-  final List<Map<String, dynamic>> results = await db.query('products', where: 'id= $id');
+Future<Product> _load(int productId) async {
+  final List<Map<String, dynamic>> results = await db.query('products', where: 'id= $productId');
 
   if (results.length == 0) {
     return null;
   }
   assert(results.length == 1);
   final Product product = _productRepo.fromDatabaseMap(results.first);
-  final List<Landing> landings = await _getLandings(id);
-  return product.copyWith(landings: landings);
+  final List<Landing> landings = await _getLandings(productId);
+  final List<Landing> landingsWithProducts = [];
+  for (Landing landing in landings) {
+    final List<Product> products = await _productRepo.forLanding(landing.id);
+    landingsWithProducts.add(landing.copyWith(products: products));
+  }
+  return product.copyWith(landings: landingsWithProducts);
 }
 
 Future<List<Landing>> _getLandings(int productId) async {
@@ -128,7 +133,7 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: getProduct(productId),
+      future: _load(productId),
       initialData: null,
       builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
         if (snapshot.hasError) {

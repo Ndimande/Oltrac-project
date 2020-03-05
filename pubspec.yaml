@@ -12,7 +12,7 @@ description: An app for tracking shark fins and other products.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.4.1+1
+version: 1.4.2+1
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
