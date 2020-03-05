@@ -32,7 +32,10 @@ class TagScannerState extends State<TagScanner> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Text('Tag Code',style: TextStyle(color: olracBlue),),
+        Text(
+          'Tag Code',
+          style: TextStyle(color: olracBlue),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

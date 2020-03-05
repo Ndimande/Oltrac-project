@@ -12,7 +12,7 @@ class SharedPreferencesProvider {
   }
 
   SharedPreferences get sharedPreferences {
-    if(_sharedPreferences == null) {
+    if (_sharedPreferences == null) {
       throw Exception('Shared Preferences not connected');
     }
     return _sharedPreferences;

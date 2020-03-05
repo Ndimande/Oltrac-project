@@ -3,7 +3,6 @@ import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
-import 'package:oltrace/widgets/time_ago.dart';
 
 String _haulsText(int length) {
   switch (length) {
@@ -30,7 +29,7 @@ class TripListItem extends StatelessWidget {
           number: _trip.id,
         ),
         title: Text(_haulsText(_trip.hauls.length)),
-        subtitle: Text(_trip.endedAt == null ? '-': friendlyDateTime(_trip.endedAt)),
+        subtitle: Text(_trip.endedAt == null ? '-' : friendlyDateTime(_trip.endedAt)),
         trailing: ForwardArrow(),
       ),
       onPressed: onPressed,

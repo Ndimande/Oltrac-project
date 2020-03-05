@@ -11,7 +11,7 @@ class TripRepository extends DatabaseRepository<Trip> {
 
   /// Get a Trip by [id]
   Future<Trip> find(int id, {bool withHauls = false}) async {
-    List results = await _database.query(tableName, where: 'id = $id');
+    final List results = await _database.query(tableName, where: 'id = $id');
 
     // Nothing found.
     if (results.length == 0) {
@@ -51,21 +51,9 @@ class TripRepository extends DatabaseRepository<Trip> {
     return Future.wait(tripsWithHaulsFutures);
   }
 
-  /// Store a Trip
-  /// returns id of new row
-//  Future<int> store(Trip trip) async {
-//    if (trip.id == null) {
-//      return await _database.insert(tableName, toDatabaseMap(trip));
-//    }
-//    // remove null id
-//    final withoutId = toDatabaseMap(trip)..remove('id');
-//
-//    return await _database.update(tableName, withoutId);
-//  }
-
   /// Get the active Trip. The active trip is the trip
   /// that has ended_at = null.
-  Future<Trip> getActiveTrip() async {
+  Future<Trip> getActive() async {
     List results = await _database.query(tableName, where: "ended_at is null");
     if (results.length > 1) {
       throw Exception('More than one active Trip is not allowed');
@@ -74,6 +62,18 @@ class TripRepository extends DatabaseRepository<Trip> {
     }
 
     return fromDatabaseMap(results.first);
+  }
+
+  Future<List<Trip>> getCompleted() async {
+    final List results = await _database.query(tableName, where: "ended_at is not null");
+    final List<Trip> trips = [];
+
+    for (Map result in results) {
+      trips.add(fromDatabaseMap(result));
+    }
+
+
+    return trips;
   }
 
   Trip fromDatabaseMap(Map<String, dynamic> result) {

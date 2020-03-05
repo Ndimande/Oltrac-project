@@ -39,13 +39,13 @@ class Migrator {
     } catch (e) {
       print('Migrating failed');
       print(e);
+      throw e;
     }
   }
 
   /// Check if a table exists.
   Future<bool> tableExists(String name) async {
-    String sql =
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='$name'";
+    String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='$name'";
     var result = await _database.rawQuery(sql);
 
     return result.length > 0 ? true : false;
@@ -71,8 +71,7 @@ class Migrator {
   }
 
   /// Run all pending migrations.
-  Future<void> _migrate(Iterable pendingMigrations,
-      {bool fresh = false}) async {
+  Future<void> _migrate(Iterable pendingMigrations, {bool fresh = false}) async {
     for (var migration in pendingMigrations) {
       String name = migration['name'];
       print('Migrating $name');

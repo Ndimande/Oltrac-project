@@ -7,7 +7,7 @@ class AppConfig {
   ///
   /// Enables / disables development features
   /// like buttons to fake data etc.
-  static const DEV_MODE = false;
+  static const DEV_MODE = true;
 
   /// Drop and recreate the database if true
   static const RESET_DATABASE = false;

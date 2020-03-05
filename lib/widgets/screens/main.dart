@@ -1,17 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/fishing_method.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/messages.dart';
+import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/providers/location.dart';
+import 'package:oltrace/repositories/haul.dart';
+import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/screens/main/drawer.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
+import 'package:oltrace/widgets/screens/main/drawer.dart';
 import 'package:oltrace/widgets/screens/main/haul_section.dart';
 import 'package:oltrace/widgets/screens/main/no_active_trip.dart';
 import 'package:oltrace/widgets/screens/main/trip_section.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+
+final _tripRepo = TripRepository();
+final _haulRepo = HaulRepository();
+final _landingRepo = LandingRepository();
+final _locationProvider = LocationProvider();
+
+Future<Trip> _getWithHaulsAndLandings(Trip trip) async {
+  List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
+  final List<Haul> hauls = [];
+  for (Haul haul in activeTripHauls) {
+    final List<Landing> landings = await _landingRepo.forHaul(haul);
+    hauls.add(haul.copyWith(landings: landings));
+  }
+  return trip.copyWith(hauls: hauls);
+}
+
+Future<Map> _load() async {
+  final Haul activeHaul = await _haulRepo.getActiveHaul();
+  Trip activeTrip = await _tripRepo.getActive();
+  if (activeTrip != null) {
+    activeTrip = await _getWithHaulsAndLandings(activeTrip);
+  }
+
+  final List<Trip> completedTrips = await _tripRepo.getCompleted();
+  final List<Trip> tripsWithHauls = [];
+  for (Trip trip in completedTrips) {
+    final Trip withNested = await _getWithHaulsAndLandings(trip);
+    tripsWithHauls.add(withNested);
+  }
+
+  return {
+    'activeTrip': activeTrip,
+    'activeHaul': activeHaul,
+    'completedTrips': tripsWithHauls,
+  };
+}
 
 class MainScreen extends StatefulWidget {
   MainScreen();
@@ -22,12 +63,14 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final AppStore _appStore = StoreProvider().appStore;
+
+  Trip activeTrip;
+  Haul activeHaul;
+  List<Trip> completedTrips;
 
   Widget _appBar() {
-    final title = _appStore.hasActiveTrip
-        ? _appStore.hasActiveHaul ? 'Hauling...' : 'Active Trip'
-        : 'Completed Trips';
+    final title =
+        activeTrip != null ? activeHaul != null ? 'Hauling...' : 'Active Trip' : 'Completed Trips';
     return AppBar(
       actions: <Widget>[appBarDate],
       title: Text(title),
@@ -49,11 +92,21 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  _onPressStartHaul() async {
-    final method = await _selectFishingMethod();
+  Future<void> _onPressStartHaul() async {
+    final FishingMethod method = await _selectFishingMethod();
     if (method != null) {
       try {
-        await _appStore.startHaul(method);
+        final Location location = await _locationProvider.location;
+
+        final haul = Haul(
+          fishingMethod: method,
+          startedAt: DateTime.now(),
+          tripId: activeTrip.id,
+          startLocation: location,
+        );
+
+        await _haulRepo.store(haul);
+        setState(() {});
       } catch (e) {
         showTextSnackBar(_scaffoldKey, 'Could not start haul. ${Messages.LOCATION_NOT_AVAILABLE}');
         print(e);
@@ -61,7 +114,7 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  _onPressEndHaul() async {
+  Future<void> _onPressEndHaul() async {
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -70,27 +123,82 @@ class MainScreenState extends State<MainScreen> {
 
     if (confirmed) {
       try {
-        await _appStore.endHaul();
+        final Location location = await _locationProvider.location;
+
+        final endedHaul = activeHaul.copyWith(
+          endedAt: DateTime.now(),
+          tripId: activeTrip.id,
+          endLocation: location,
+        );
+
+        await _haulRepo.store(endedHaul);
+        setState(() {});
       } catch (e) {
         print(e.toString());
-        _scaffoldKey.currentState.showSnackBar(
-          SnackBar(content: Text('Could not end haul. ${Messages.LOCATION_NOT_AVAILABLE}')),
-        );
+        showTextSnackBar(_scaffoldKey, 'Could not end haul. ${Messages.LOCATION_NOT_AVAILABLE}');
         return;
       }
     }
   }
 
-  _onPressHaulActionButton() async {
-    if (_appStore.hasActiveHaul) {
+  Future<void> _onPressHaulActionButton() async {
+    if (activeHaul != null) {
       await _onPressEndHaul();
     } else {
       await _onPressStartHaul();
     }
   }
 
-  _onPressStartTripButton() async {
-    await _appStore.startTrip(_scaffoldKey);
+  Future<void> _onPressStartTripButton() async {
+    showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
+
+    try {
+      final Location location = await _locationProvider.location;
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      final trip = Trip(startedAt: DateTime.now(), startLocation: location);
+      await _tripRepo.store(trip);
+      setState(() {});
+    } catch (e) {
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      showTextSnackBar(_scaffoldKey, Messages.LOCATION_NOT_AVAILABLE);
+    }
+    showTextSnackBar(_scaffoldKey, 'Trip has started');
+  }
+
+  Future<void> _onPressCancelTrip(bool hasActiveHaul) async {
+    if (hasActiveHaul) {
+      showTextSnackBar(_scaffoldKey, 'You must first end the haul');
+      return;
+    }
+
+    final bool confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => ConfirmDialog('Cancel Trip', Messages.CONFIRM_CANCEL_TRIP),
+    );
+    if (confirmed == true) {
+      await _tripRepo.delete(activeTrip.id);
+      setState(() {});
+    }
+  }
+
+  Future<void> _onPressEndTrip(bool hasActiveHaul) async {
+    if (hasActiveHaul) {
+      _scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text('You must first end the haul')));
+      return;
+    }
+
+    bool confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ConfirmDialog('End Trip', Messages.CONFIRM_END_TRIP),
+    );
+    if (confirmed == true) {
+      final Location location = await _locationProvider.location;
+      final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
+      await _tripRepo.store(endedTrip);
+      setState(() {});
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -99,40 +207,64 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      final String labelText = _appStore.hasActiveHaul ? 'End Haul' : 'Start Haul';
-      return WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          key: _scaffoldKey,
-          appBar: _appBar(),
-          drawer: MainDrawer(),
-          body: Builder(
-            builder: (_) {
-              if (!_appStore.hasActiveTrip) {
-                return NoActiveTrip(onPressStartTrip: () async => await _onPressStartTripButton());
-              }
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: FutureBuilder(
+        future: _load(),
+        initialData: null,
+        builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
+          if (snapshot.hasError) {
+            throw Exception(snapshot.error.toString());
+          }
+          // Show blank screen until ready
+          if (!snapshot.hasData) {
+            return Scaffold();
+          }
 
-              return Column(
-                children: <Widget>[
-                  TripSection(),
-                  Expanded(child: HaulSection()),
-                  StripButton(
-                    centered: true,
-                    labelText: labelText,
-                    icon: Icon(
-                      _appStore.hasActiveHaul ? Icons.stop : Icons.play_arrow,
-                      color: Colors.white,
+          activeTrip = snapshot.data['activeTrip'] as Trip;
+          activeHaul = snapshot.data['activeHaul'] as Haul;
+          completedTrips = snapshot.data['completedTrips'] as List<Trip>;
+
+          final String labelText = activeHaul != null ? 'End Haul' : 'Start Haul';
+          return Scaffold(
+            key: _scaffoldKey,
+            appBar: _appBar(),
+            drawer: MainDrawer(),
+            body: Builder(
+              builder: (_) {
+                if (activeTrip == null) {
+                  return NoActiveTrip(
+                    completedTrips: completedTrips,
+                    onPressStartTrip: () async => await _onPressStartTripButton(),
+                  );
+                }
+
+                return Column(
+                  children: <Widget>[
+                    TripSection(
+                      trip: activeTrip,
+                      hasActiveHaul: activeHaul != null,
+                      onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
+                      onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
                     ),
-                    color: _appStore.hasActiveHaul ? Colors.red : Colors.green,
-                    onPressed: () async => await _onPressHaulActionButton(),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      );
-    });
+                    Expanded(child: HaulSection(hauls: activeTrip.hauls)),
+                    StripButton(
+                      centered: true,
+                      labelText: labelText,
+                      icon: Icon(
+                        activeHaul != null ? Icons.stop : Icons.play_arrow,
+                        color: Colors.white,
+                      ),
+                      color: activeHaul != null ? Colors.red : Colors.green,
+                      onPressed: () async => await _onPressHaulActionButton(),
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
   }
 }

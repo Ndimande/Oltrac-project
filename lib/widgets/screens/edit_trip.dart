@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -55,10 +54,6 @@ class EditTripScreenState extends State<EditTripScreen> {
     );
   }
 
-  Widget locationEditor() {
-
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,10 +63,12 @@ class EditTripScreenState extends State<EditTripScreen> {
       body: Column(
         children: <Widget>[
           Expanded(
-            child: SingleChildScrollView(child: dateTimeEditor(),),
+            child: SingleChildScrollView(
+              child: dateTimeEditor(),
+            ),
           ),
           StripButton(
-            onPressed: (){},
+            onPressed: () {},
             centered: true,
             labelText: 'Save',
             icon: Icon(

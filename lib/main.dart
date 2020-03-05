@@ -7,32 +7,27 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/user_settings.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/product.dart';
-import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/json.dart';
-import 'package:oltrace/repositories/landing.dart';
-import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
 import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
 import 'package:oltrace/widgets/screens/edit_trip.dart';
-import 'package:oltrace/widgets/screens/landing_form.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
+import 'package:oltrace/widgets/screens/landing.dart';
+import 'package:oltrace/widgets/screens/landing_form.dart';
 import 'package:oltrace/widgets/screens/main.dart';
 import 'package:oltrace/widgets/screens/product.dart';
 import 'package:oltrace/widgets/screens/settings.dart';
 import 'package:oltrace/widgets/screens/splash.dart';
-import 'package:oltrace/widgets/screens/landing.dart';
 import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/screens/trip_history.dart';
 import 'package:oltrace/widgets/screens/welcome.dart';
@@ -49,11 +44,7 @@ Database _database;
 /// A connection to SharedPreferences / NSUserDefaults
 SharedPreferences _sharedPreferences;
 
-final TripRepository _tripRepo = TripRepository();
-final HaulRepository _haulRepo = HaulRepository();
 final JsonRepository _jsonRepo = JsonRepository();
-final LandingRepository _landingRepo = LandingRepository();
-final ProductRepository _productRepository = ProductRepository();
 
 final LocationProvider _locationProvider = LocationProvider();
 
@@ -138,71 +129,7 @@ Future<AppStore> _restoreState() async {
   if (profile != null) {
     _appStore.profile = Profile.fromMap(profile);
   }
-
-  await _restoreActiveTrip(_appStore);
-
-  await _restoreCompletedTrips(_appStore);
   return _appStore;
-}
-
-Future<void> _restoreActiveTrip(appStore) async {
-  final Trip activeTrip = await _tripRepo.getActiveTrip();
-
-  if (activeTrip != null) {
-    final List<Haul> activeTripHauls = await _haulRepo.all(where: 'trip_id = ${activeTrip.id}');
-
-    var newHauls = <Haul>[];
-    for (Haul haul in activeTripHauls) {
-      final List<Landing> haulLandings = await _landingRepo.all(where: 'haul_id = ${haul.id}');
-
-      final updatedHaulLandings = <Landing>[];
-      for (Landing currentLanding in haulLandings) {
-        // Get the products for this landing
-        final landingProducts =
-            await _productRepository.all(where: 'landing_id = ${currentLanding.id}');
-        updatedHaulLandings.add(currentLanding.copyWith(products: landingProducts));
-      }
-
-      final newHaul = haul.copyWith(landings: updatedHaulLandings);
-      newHauls.add(newHaul);
-    }
-
-    _appStore.activeTrip = activeTrip.copyWith(hauls: newHauls);
-    print('Restored active trip');
-  }
-}
-
-Future<void> _restoreCompletedTrips(appStore) async {
-  // I should never be forgiven for the code I've written below.
-  // All I can ask for is understanding...
-  final completedTrips = await _tripRepo.all(where: 'ended_at IS NOT NULL');
-  final updatedTrips = <Trip>[];
-
-  for (Trip trip in completedTrips) {
-    // Get all hauls for this trip
-    final tripHauls = await _haulRepo.all(where: 'trip_id = ${trip.id} AND ended_at IS NOT NULL');
-
-    final updatedHauls = <Haul>[];
-
-    for (Haul currentHaul in tripHauls) {
-      // Get catches for this haul
-      final haulLandings = await _landingRepo.all(where: 'haul_id = ${currentHaul.id}');
-
-      final updatedHaulLandings = <Landing>[];
-      for (Landing currentLanding in haulLandings) {
-        // Get the products for this landing
-        final landingProducts =
-            await _productRepository.all(where: 'landing_id = ${currentLanding.id}');
-        updatedHaulLandings.add(currentLanding.copyWith(products: landingProducts));
-      }
-
-      updatedHauls.add(currentHaul.copyWith(landings: updatedHaulLandings));
-    }
-    updatedTrips.add(trip.copyWith(hauls: updatedHauls));
-  }
-
-  appStore.completedTrips = updatedTrips;
-  print('Restored ' + updatedTrips.length.toString() + ' completed trips');
 }
 
 /// The main widget of the app
@@ -279,7 +206,7 @@ class OlTraceAppState extends State<OlTraceApp> {
           case '/trip':
             final Trip trip = settings.arguments;
 
-            return MaterialPageRoute(builder: (_) => TripScreen(trip));
+            return MaterialPageRoute(builder: (_) => TripScreen(tripId: trip.id));
 
           case '/edit_trip':
             final Trip trip = settings.arguments;
@@ -287,11 +214,14 @@ class OlTraceAppState extends State<OlTraceApp> {
             return MaterialPageRoute(builder: (_) => EditTripScreen(trip));
 
           case '/haul':
-            final List arguments = settings.arguments as List;
-            final Haul haul = arguments[0];
-            final int index = arguments[1];
+            final Map args = settings.arguments as Map<String, dynamic>;
+            final int haulId = args['haulId'] as int;
+            final int listIndex = args['listIndex'] as int;
 
-            return MaterialPageRoute(builder: (_) => HaulScreen(haul, listIndex: index));
+            assert(haulId != null);
+            assert(listIndex != null);
+
+            return MaterialPageRoute(builder: (_) => HaulScreen(haulId: haulId, listIndex: listIndex));
 
           case '/fishing_methods':
             return MaterialPageRoute(builder: (_) => FishingMethodScreen());
@@ -309,15 +239,16 @@ class OlTraceAppState extends State<OlTraceApp> {
             );
 
           case '/landing':
-            final List arguments = settings.arguments as List;
-            final Landing landing = arguments[0];
-            final int listIndex = arguments[1];
+            final Map args = settings.arguments as Map<String, dynamic>;
+            final landingId = args['landingId'] as int;
+            final listIndex = args['listIndex'] as int;
+
+            assert(landingId != null);
+            assert(listIndex != null);
 
             return MaterialPageRoute(
-                builder: (_) => LandingScreen(
-                      landing,
-                      listIndex: listIndex,
-                    ));
+              builder: (_) => LandingScreen(landingId: landingId, listIndex: listIndex),
+            );
 
           case '/create_landing':
             final Haul haul = settings.arguments;
@@ -329,18 +260,27 @@ class OlTraceAppState extends State<OlTraceApp> {
 
           case '/create_product':
             final Map args = settings.arguments as Map;
+            assert(args.containsKey('landings'));
+            assert(args.containsKey('haul'));
             final List<Landing> sourceLandings = args['landings'] as List<Landing>;
             final Haul sourceHaul = args['haul'];
-            return MaterialPageRoute(builder: (_) => CreateProductScreen(initialSourceLandings: sourceLandings,sourceHaul: sourceHaul,listIndex: 0,));
+            return MaterialPageRoute(
+                builder: (_) => CreateProductScreen(
+                      initialSourceLandings: sourceLandings,
+                      sourceHaul: sourceHaul,
+                      listIndex: 0,
+                    ));
 
           case '/product':
-            final int productId = settings.arguments;
-            return MaterialPageRoute(builder: (_) => ProductScreen(productId));
+            final args = settings.arguments as Map<String, dynamic>;
+            final int productId = args['productId'] as int;
+
+            return MaterialPageRoute(builder: (_) => ProductScreen(productId: productId));
 
           case '/add_source_landing':
             final List<Landing> landings = settings.arguments as List<Landing>;
-            return MaterialPageRoute(builder: (_) => AddSourceLandingsScreen(alreadySelectedLandings: landings));
-
+            return MaterialPageRoute(
+                builder: (_) => AddSourceLandingsScreen(alreadySelectedLandings: landings));
 
           default:
             throw ('No such route: ${settings.name}');

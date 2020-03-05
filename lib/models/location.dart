@@ -1,8 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'dart:math' as math;
-
 import 'package:oltrace/framework/model.dart';
 
 @immutable

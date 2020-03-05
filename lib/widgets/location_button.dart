@@ -30,6 +30,5 @@ class LocationButton extends StatelessWidget {
       icon: Icon(Icons.my_location),
       onPressed: onPressLocation,
     );
-
   }
 }

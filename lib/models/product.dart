@@ -10,6 +10,7 @@ import 'package:oltrace/models/product_type.dart';
 
 @immutable
 class Product extends Model {
+  // The unique code of the RFID tag
   final String tagCode;
 
   final DateTime createdAt;
@@ -26,6 +27,9 @@ class Product extends Model {
 
   final List<Landing> landings;
 
+  // The total number of products
+  final int productUnits;
+
   const Product({
     id,
     @required this.tagCode,
@@ -34,6 +38,7 @@ class Product extends Model {
     @required this.productType,
     @required this.packagingType,
     @required this.landings,
+    this.productUnits = 1,
     this.weight,
     this.weightUnit = WeightUnit.GRAMS,
   }) : super(id: id);
@@ -47,19 +52,20 @@ class Product extends Model {
         landings = data['landings'],
         weight = data['weight'],
         weightUnit = data['weightUnit'],
+        productUnits = data['productUnits'],
         super.fromMap(data);
 
-  Product copyWith({
-    int id,
-    String tagId,
-    DateTime createdAt,
-    Location location,
-    ProductType productType,
-    PackagingType packagingType,
-    List<Landing> landings,
-    int weight,
-    WeightUnit weightUnit,
-  }) {
+  Product copyWith(
+      {int id,
+      String tagId,
+      DateTime createdAt,
+      Location location,
+      ProductType productType,
+      PackagingType packagingType,
+      List<Landing> landings,
+      int weight,
+      WeightUnit weightUnit,
+      int productUnits}) {
     return Product(
       id: id ?? this.id,
       tagCode: tagId ?? this.tagCode,
@@ -70,6 +76,7 @@ class Product extends Model {
       landings: landings ?? this.landings,
       weight: weight ?? this.weight,
       weightUnit: weightUnit ?? this.weightUnit,
+      productUnits: productUnits ?? this.productUnits,
     );
   }
 
@@ -84,6 +91,7 @@ class Product extends Model {
       'landings': landings,
       'weight': weight,
       'weightUnit': weightUnit.toString(),
+      'productUnits': productUnits
     };
   }
 }

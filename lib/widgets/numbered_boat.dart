@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/data/olrac_icons.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
 
 class NumberedBoat extends StatelessWidget {
@@ -17,14 +17,14 @@ class NumberedBoat extends StatelessWidget {
           width: size,
           height: size,
           child: OlracIcon(
-            assetPath: OlracIcons.path('Boat'),
+            assetPath: SvgIcons.path('Boat'),
           ),
         ),
         Container(
           margin: EdgeInsets.only(top: 10),
           child: Text(
             number.toString(),
-            style: TextStyle(color: Colors.white, fontSize: 22,fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
           ),
         )
       ],

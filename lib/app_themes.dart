@@ -28,7 +28,6 @@ const MaterialColor olracDarkBlue = MaterialColor(0xFF242C4D, {
   900: Color.fromRGBO(4, 131, 184, 1),
 });
 
-
 final _olspsTheme = ThemeData(
   primarySwatch: olracBlue,
   accentColor: olracBlue,
@@ -46,11 +45,9 @@ final _olspsTheme = ThemeData(
   cardTheme: CardTheme(
     margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
   ),
-
   snackBarTheme: SnackBarThemeData(
     contentTextStyle: TextStyle(fontSize: 18),
   ),
-
 );
 
 final _darkTheme = ThemeData(

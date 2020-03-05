@@ -38,7 +38,8 @@ class HaulSubtitleState extends State<HaulSubtitle> {
 
   int get elapsedSeconds => elapsed.inSeconds;
 
-  double get kilogramsPerSecond => elapsed.inSeconds == 0 ? 0 : (totalWeightGrams / 1000) / elapsedSeconds;
+  double get kilogramsPerSecond =>
+      elapsed.inSeconds == 0 ? 0 : (totalWeightGrams / 1000) / elapsedSeconds;
 
   double get kilogramsPerMinute => kilogramsPerSecond * 60;
 
@@ -76,11 +77,10 @@ class HaulSubtitleState extends State<HaulSubtitle> {
   }
 }
 
-
 String _getHours(Duration difference) => difference.inHours.toString();
 
 String _getMinutes(Duration difference) =>
-  (difference.inMinutes % 60).round().toString().padLeft(2, '0');
+    (difference.inMinutes % 60).round().toString().padLeft(2, '0');
 
 String _getSeconds(Duration difference) =>
-  (difference.inSeconds % 60).round().toString().padLeft(2, '0');
+    (difference.inSeconds % 60).round().toString().padLeft(2, '0');

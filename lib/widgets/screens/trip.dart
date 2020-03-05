@@ -1,23 +1,52 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/repositories/haul.dart';
+import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 import 'package:path_provider/path_provider.dart';
 
-class TripScreen extends StatefulWidget {
-  final Trip tripArg;
+final _tripRepo = TripRepository();
+final _haulRepo = HaulRepository();
+final _landingRepo = LandingRepository();
 
-  TripScreen(this.tripArg);
+Future<Trip> _getWithHaulsAndLandings(Trip trip) async {
+  List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
+  final List<Haul> hauls = [];
+  for (Haul haul in activeTripHauls) {
+    final List<Landing> landings = await _landingRepo.forHaul(haul);
+    hauls.add(haul.copyWith(landings: landings));
+  }
+  return trip.copyWith(hauls: hauls);
+}
+
+Future<Map<String, dynamic>> _load(int tripId) async {
+  final Trip trip = await _getWithHaulsAndLandings(await _tripRepo.find(tripId));
+  final Trip activeTrip = await _tripRepo.getActive();
+  return {
+    'trip': trip,
+    'isActiveTrip': trip.id == activeTrip?.id,
+  };
+}
+
+class TripScreen extends StatefulWidget {
+  final Dio dio = Dio();
+  final int tripId;
+
+  TripScreen({this.tripId});
 
   @override
   State<StatefulWidget> createState() {
@@ -27,28 +56,20 @@ class TripScreen extends StatefulWidget {
 
 class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final AppStore _appStore = StoreProvider().appStore;
+
   Dio dio = Dio();
   bool uploading = false;
-
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    print('write trip to $path');
-    return File('$path/trip.json');
-  }
+  Trip trip;
+  bool isActiveTrip;
 
   Future<File> writeTripJson(String json) async {
-    final file = await _localFile;
+    final path = await getApplicationSupportDirectory()
+      ..path;
+    print('write trip to $path');
+    final file = File('$path/trip.json');
 
     // Write the file.
     return file.writeAsString(json);
-  }
-
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationSupportDirectory();
-
-    return directory.path;
   }
 
   Widget _buildTripInfo(Trip trip) {
@@ -67,9 +88,7 @@ class TripScreenState extends State<TripScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 TimeSpace(label: 'Start', location: trip.startLocation, dateTime: trip.startedAt),
-                SizedBox(
-                  height: 5,
-                ),
+                SizedBox(height: 5),
                 trip.endedAt != null
                     ? TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt)
                     : Container(),
@@ -88,7 +107,7 @@ class TripScreenState extends State<TripScreen> {
 
   Widget uploadButton(Trip trip) {
     final label = trip.isUploaded ? 'Upload Complete' : 'Upload Trip';
-    final Function onPress = trip.isUploaded ? null : () async => await onPressUploadTrip(trip);
+    final Function onPress = trip.isUploaded ? null : () async => await onPressUpload(trip);
     return StripButton(
       centered: true,
       labelText: label,
@@ -102,24 +121,56 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
-  onPressUploadTrip(Trip trip) async {
-    await writeTripJson(trip.toString());
-    // Don't upload if already uploading
+  Future<void> onPressUpload(Trip trip) async {
+    print('Uploading trip');
+
+    // You may not upload active trip
+    assert(!isActiveTrip);
+
     if (uploading) {
+      print('Already uploading');
       return;
     }
 
-    setState(() {
-      uploading = true;
-    });
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(
         content: Text('Uploading Trip...'),
         duration: Duration(minutes: 20), // keep open
       ),
     );
+    final Map<String, dynamic> data = {
+      'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+      'json': {
+        'trip': trip.toMap(),
+//        'user': _appStore.profile.toMap(),
+        'user': {'todo':'todo'},
+      }
+    };
+
+    print('Data:');
+    print(data.toString());
+
+    setState(() {
+      uploading = true;
+    });
     try {
-      final response = await _appStore.uploadTrip(trip);
+      // Accept self signed cert
+      (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client) {
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        return client;
+      };
+      final String json = jsonEncode(data);
+      Response response = await dio.post(
+        AppConfig.TRIP_UPLOAD_URL,
+        data: json,
+        options: RequestOptions(headers: {'Content-Type': 'application/json'}),
+      );
+      print('Response:');
+      print(response.toString());
+
+      await _tripRepo.store(trip.copyWith(isUploaded: true));
+
+      print('Trip uploaded');
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -127,31 +178,41 @@ class TripScreenState extends State<TripScreen> {
         ),
       );
     } catch (e) {
+      print('Error:');
+      print(e.toString());
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
           content: Text('Trip upload failed. Please check your connection.'),
         ),
       );
-      print(e);
     }
+
     setState(() {
       uploading = false;
     });
   }
 
-  Text get title =>
-      Text(_appStore.activeTrip?.id == widget.tripArg.id ? 'Active Trip' : 'Completed Trip');
+  Text get title => Text(isActiveTrip ? 'Active Trip' : 'Completed Trip');
 
   @override
   Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        final Trip trip = _appStore.findTrip(widget.tripArg.id);
-        final mainButton = _appStore.hasActiveTrip && _appStore.activeTrip.id == trip.id
-            ? Container()
-            : uploadButton(trip);
+    return FutureBuilder(
+      future: _load(widget.tripId),
+      initialData: null,
+      builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
+        if (snapshot.hasError) {
+          return Scaffold(body: Text(snapshot.error.toString()));
+        }
+        // Show blank screen until ready
+        if (!snapshot.hasData) {
+          return Scaffold();
+        }
 
+        trip = snapshot.data['trip'];
+        isActiveTrip = snapshot.data['isActiveTrip'];
+
+        final mainButton = isActiveTrip ? Container() : uploadButton(trip);
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(title: title),

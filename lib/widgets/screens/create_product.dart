@@ -12,24 +12,32 @@ import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
+final _landingRepo = LandingRepository();
+
 enum DialogResult { Yes, No, DoneTagging }
 
 class CreateProductScreen extends StatefulWidget {
   final Haul sourceHaul;
   final List<Landing> initialSourceLandings;
-  final AppStore _appStore = StoreProvider().appStore;
+
   final Geolocator geoLocator = Geolocator();
   final int listIndex;
+  final ProductRepository _productRepository = ProductRepository();
 
-  CreateProductScreen({this.initialSourceLandings, this.sourceHaul, this.listIndex});
+  CreateProductScreen({
+    @required this.initialSourceLandings,
+    @required this.sourceHaul,
+    this.listIndex,
+  })  : assert(sourceHaul != null),
+        assert(initialSourceLandings != null);
 
   @override
   State<StatefulWidget> createState() => CreateProductScreenState(initialSourceLandings);
@@ -43,7 +51,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   PackagingType _packagingType;
 
   String _tagCode = AppConfig.DEV_MODE ? randomTagCode() : null;
-  final TextEditingController _totalController = TextEditingController();
+  final TextEditingController _productUnitsController = TextEditingController();
   final TextEditingController _tagCodeController = TextEditingController();
 
   CreateProductScreenState(List<Landing> initialSourceLandings)
@@ -84,7 +92,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
   List<String> getValidationErrors() {
     List<String> errorMessages = [];
-    if (_totalController.value == null || _totalController.value.text == '') {
+    if (_productUnitsController.value == null || _productUnitsController.value.text == '') {
       errorMessages.add('Invalid number of products.');
     }
 
@@ -106,6 +114,11 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   _onPressSaveButton() async {
     final List<String> errorMessages = getValidationErrors();
 
+    final int productUnits = int.tryParse(_productUnitsController.text);
+    if (productUnits == null) {
+      errorMessages.add('Invalid Number of Product Units');
+    }
+
     if (errorMessages.length != 0) {
       showTextSnackBar(_scaffoldKey, errorMessages.join("\n"));
       return;
@@ -120,16 +133,19 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       packagingType: _packagingType,
       productType: _productType,
       landings: _sourceLandings,
+      productUnits: productUnits,
     );
 
     // Create a product
-    Product savedProduct = await widget._appStore.saveProduct(product);
+    final int savedProductId =
+        await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
+    final savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {
       _tagCode = null;
       _productType = null;
       _packagingType = null;
-      _totalController.clear();
+      _productUnitsController.clear();
     });
 
     DialogResult result = await _showProductSavedDialog(savedProduct);
@@ -144,12 +160,13 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     } else if (result == DialogResult.DoneTagging) {
       // must get latest landing from state
 
-      // Look through all hauls including hauls in the active trip
-      final haul =
-          widget._appStore.activeTrip.hauls.firstWhere((h) => _sourceLandings[0].haulId == h.id);
-      final Landing landing =
-          haul.landings.firstWhere((Landing l) => l.id == _sourceLandings[0].id);
-      await widget._appStore.editLanding(landing.copyWith(doneTagging: true));
+// mark all source landings done
+      for (Landing landing in _sourceLandings) {
+        await _landingRepo.store(landing.copyWith(doneTagging: true));
+      }
+//      final Landing landing =
+//          widget.sourceHaul.landings.firstWhere((Landing l) => l.id == _sourceLandings[0].id);
+
       int count = 0;
       Navigator.popUntil(context, (route) {
         return count++ == 2;
@@ -165,11 +182,11 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     Navigator.of(context).pop(DialogResult.No);
   }
 
-  _onPressDialogDone() async {
+  _onPressDialogDone() {
     Navigator.of(context).pop(DialogResult.DoneTagging);
   }
 
-  _onPressAddShark() async {
+  Future<void> _onPressAddShark() async {
     final List<Landing> additionalSources = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -243,9 +260,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  Widget _totalTextInput() {
+  Widget _productUnitsTextInput() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -257,7 +273,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
             ),
             style: TextStyle(fontSize: 30),
             keyboardType: TextInputType.number,
-            controller: _totalController,
+            controller: _productUnitsController,
             validator: (value) {
               if (value.isEmpty) {
                 return 'Please enter total number of products';
@@ -321,17 +337,17 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         centered: true,
         color: olracBlue,
         icon: Icon(Icons.save, color: Colors.white),
-        labelText: 'Add Shark',
+        labelText: 'Add Species',
         onPressed: _onPressAddShark,
       );
 
+  bool hasChanged() {
+    return _tagCode != null;
+  }
+
   Future<bool> get onWillPop async {
     // Have things changed since the initial state?
-    final bool changed = _sourceLandings.length > 1 || // There are at least two landings
-        (_sourceLandings.length == 1 &&
-            _sourceLandings[0] !=
-                widget.initialSourceLandings) || // There is one but it's different
-        _tagCode != null; // They have scanned in a tag
+    final bool changed = hasChanged();
 
     // If there are changes warn the user before navigating away
     if (changed) {
@@ -434,7 +450,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: _totalTextInput(),
+                      child: _productUnitsTextInput(),
                     ),
                     // Tag code
                     _productType == null || _packagingType == null ? Container() : tagCode(),
