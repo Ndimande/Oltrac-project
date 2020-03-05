@@ -160,6 +160,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         _selectedSpecies = null;
         _weightController.clear();
         _lengthController.clear();
+        _individualsController.clear();
       });
 
       if (createAnotherDialogResponse == false) {
