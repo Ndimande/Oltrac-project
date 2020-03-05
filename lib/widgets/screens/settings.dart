@@ -26,7 +26,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: widget.userSettings.allowMobileData,
+      value: true, //widget.userSettings.allowMobileData,
       onChanged: (state) {
         widget.updateSettings(widget.userSettings.copyWith(allowMobileData: state));
       },
@@ -43,7 +43,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: widget.userSettings.uploadAutomatically,
+      value: false, // widget.userSettings.uploadAutomatically,
       onChanged: (state) {
         widget.updateSettings(widget.userSettings.copyWith(uploadAutomatically: state));
       },
@@ -62,7 +62,6 @@ class SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               _buildAllowMobile(),
               _buildAutoUpload(),
-//              _buildEnableDarkTheme(),
             ],
           ),
         ));
