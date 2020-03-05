@@ -32,6 +32,7 @@ import 'package:oltrace/widgets/screens/trip.dart';
 import 'package:oltrace/widgets/screens/trip_history.dart';
 import 'package:oltrace/widgets/screens/welcome.dart';
 import 'package:package_info/package_info.dart';
+import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -44,17 +45,40 @@ Database _database;
 /// A connection to SharedPreferences / NSUserDefaults
 SharedPreferences _sharedPreferences;
 
+final sentry = SentryClient(dsn: AppConfig.SENTRY_DSN);
+
 final JsonRepository _jsonRepo = JsonRepository();
 
 final LocationProvider _locationProvider = LocationProvider();
 
 /// The app entry point. Execution starts here.
-void main() {
-  // Being timing the boot process
+void main() async {
+
+  FlutterError.onError = (details, {bool forceReport = false}) {
+    try {
+      sentry.captureException(exception: details.exception, stackTrace: details.stack);
+      print('Flutter Exception! Sentry report sending..');
+    } catch (e) {
+      print('Sending report to sentry.io failed: $e');
+    } finally {
+      // Also use Flutter's pretty error logging to the device's console.
+      FlutterError.dumpErrorToConsole(details, forceReport: forceReport);
+    }
+  };
+
   final stopwatch = Stopwatch()..start();
-  boot().then((_) {
+  print('=== OlTrace Started ===');
+  // Being timing the boot process
+  try {
+    await boot();
     print('Booted in ${stopwatch.elapsed}');
-  });
+  } catch(error, stackTrace) {
+    print('General Exception! Sentry report sending...');
+    await sentry.captureException(
+      exception: error,
+      stackTrace: stackTrace,
+    );
+  }
 }
 
 /// Boot the application.
@@ -81,7 +105,20 @@ Future<void> boot() async {
   final UserSettings userSettings = _restoreUserSettings();
 
   // Run the Flutter app
-  runApp(OlTraceApp(userSettings));
+  runZoned(
+    () => runApp(OlTraceApp(userSettings)),
+    onError: (Object error, StackTrace stackTrace) {
+      try {
+        print('Zoned Exception! Sentry report sending..');
+        sentry.captureException(exception: error, stackTrace: stackTrace);
+      } catch (e) {
+        print('Sending report to sentry.io failed: $e');
+        print('Original error: $error');
+      }
+    },
+  );
+
+
 }
 
 /// Restore the user defined preferences for the app.
@@ -186,6 +223,7 @@ class OlTraceAppState extends State<OlTraceApp> {
 
   @override
   Widget build(BuildContext context) {
+
     final theme = _userSettings.darkMode ? appThemes['dark'] : appThemes['light'];
     return MaterialApp(
       navigatorKey: _navigatorKey,
@@ -221,7 +259,8 @@ class OlTraceAppState extends State<OlTraceApp> {
             assert(haulId != null);
             assert(listIndex != null);
 
-            return MaterialPageRoute(builder: (_) => HaulScreen(haulId: haulId, listIndex: listIndex));
+            return MaterialPageRoute(
+                builder: (_) => HaulScreen(haulId: haulId, listIndex: listIndex));
 
           case '/fishing_methods':
             return MaterialPageRoute(builder: (_) => FishingMethodScreen());

@@ -17,6 +17,8 @@ class AppConfig {
 
   static const TRIP_UPLOAD_URL = 'https://tracing.olracddm.com/incomings';
 
+  static const SENTRY_DSN = 'https://46c3ef2535a2460a8a00c013f0738e17@sentry.io/3728395';
+
   static const defaultUserSettings = <String, dynamic>{
     'mobile_data': false,
     'uploadAutomatically': false,
