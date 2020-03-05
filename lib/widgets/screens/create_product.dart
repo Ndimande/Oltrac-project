@@ -146,6 +146,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       _productType = null;
       _packagingType = null;
       _productUnitsController.clear();
+      _tagCodeController.clear();
     });
 
     DialogResult result = await _showProductSavedDialog(savedProduct);
