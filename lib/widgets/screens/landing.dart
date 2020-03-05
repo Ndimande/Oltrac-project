@@ -58,11 +58,12 @@ class LandingScreenState extends State<LandingScreen> {
   final _landingRepository = LandingRepository();
 
   Future<void> _onPressTagProduct(Landing landing) async {
-    final Haul haul = await HaulRepository().find(landing.haulId);
 
+    final Haul haul = await HaulRepository().find(landing.haulId);;
+    final List<Landing> landings =  await _landingRepository.forHaul(haul);
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: {
       'landings': [landing],
-      'haul': haul
+      'haul': haul.copyWith(landings: landings),
     });
   }
 

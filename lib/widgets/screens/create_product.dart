@@ -186,7 +186,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     Navigator.of(context).pop(DialogResult.DoneTagging);
   }
 
-  Future<void> _onPressAddShark() async {
+  Future<void> _onPressAddLanding() async {
     final List<Landing> additionalSources = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -338,7 +338,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         color: olracBlue,
         icon: Icon(Icons.save, color: Colors.white),
         labelText: 'Add Species',
-        onPressed: _onPressAddShark,
+        onPressed: _onPressAddLanding,
       );
 
   bool hasChanged() {

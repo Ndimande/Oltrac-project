@@ -14,15 +14,14 @@ class AddSourceLandingsScreen extends StatelessWidget {
   Widget _buildLandingsList(List<Landing> landings) {
     final landingsNotAlreadySelected = landings
         .where((Landing t) => !alreadySelectedLandings.map((sel) => sel.id).toList().contains(t.id))
-        .toList().reversed;
+        .toList()
+        .reversed;
 
     return Builder(
       builder: (context) {
         int listIndex = 1;
         return landingsNotAlreadySelected.length == 0
-            ? Container(
-                child: Text('No unselected sharks in this haul'),
-              )
+            ? _noUnselectedLandings()
             : Column(
                 children: landingsNotAlreadySelected.map((Landing l) {
                 return LandingListItem(
@@ -34,6 +33,12 @@ class AddSourceLandingsScreen extends StatelessWidget {
                 );
               }).toList());
       },
+    );
+  }
+
+  Widget _noUnselectedLandings() {
+    return Center(
+      child: Text('No unselected species in this haul', style: TextStyle(fontSize: 20)),
     );
   }
 
