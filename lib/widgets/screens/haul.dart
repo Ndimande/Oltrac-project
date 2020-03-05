@@ -13,6 +13,7 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
+import 'package:oltrace/widgets/product_list_item.dart';
 import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/haul/haul_info.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -28,12 +29,16 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
   final List<Landing> landings = await _landingRepo.forHaul(haul);
   final List<Landing> landingsWithProducts = [];
+  List<Product> flatProducts = [];
   for (Landing landing in landings) {
     final List<Product> products = await _productRepo.forLanding(landing.id);
+    flatProducts.addAll(products);
     landingsWithProducts.add(landing.copyWith(products: products));
   }
+
   return {
     'haul': haul.copyWith(landings: landingsWithProducts),
+    'products': flatProducts,
     'isActiveTrip': isActiveTrip,
   };
 }
@@ -61,7 +66,10 @@ class HaulScreen extends StatefulWidget {
 class HaulScreenState extends State<HaulScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Haul haul;
+  Haul _haul;
+  List<Product> _products;
+
+  bool _showProductList = false;
 
   Widget _addLandingButton(Haul haul, BuildContext context) => StripButton(
         centered: true,
@@ -106,7 +114,13 @@ class HaulScreenState extends State<HaulScreen> {
     );
   }
 
-  Widget _landingsSection(List<Landing> landings) {
+  void _onPressShowProductListSwitch(bool value) {
+    setState(() {
+      _showProductList = value;
+    });
+  }
+
+  Widget _listsSection(List<Landing> landings) {
     if (landings.length == 0) {
       return _noLandings();
     }
@@ -115,12 +129,36 @@ class HaulScreenState extends State<HaulScreen> {
       child: Container(
         child: Column(
           children: <Widget>[
-            _landingsLabel(landings),
-            _landingsList(landings),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
+                Row(
+                  children: <Widget>[
+                    Text(_showProductList ? 'Show Species List' : 'Show Tags List'),
+                    Switch(
+                      onChanged: (bool v) => _onPressShowProductListSwitch(v),
+                      value: _showProductList,
+                    )
+                  ],
+                )
+              ],
+            ),
+            _showProductList ? _productList() : _landingsList(landings),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _onPressProductListItem(int productId) async {
+    await Navigator.pushNamed(
+      _scaffoldKey.currentContext,
+      '/product',
+      arguments: {'productId': productId},
+    );
+    setState(() {});
   }
 
   Future<void> _onPressLandingListItem(int landingId, int landingIndex) async {
@@ -137,6 +175,16 @@ class HaulScreenState extends State<HaulScreen> {
     );
 
     setState(() {});
+  }
+
+  Widget _productList() {
+    final List<Widget> items = _products
+        .map((Product product) => ProductListItem(
+              product: product,
+              onPressed: () async => await _onPressProductListItem(product.id),
+            ))
+        .toList();
+    return Expanded(child: ListView(children: items));
   }
 
   Widget _landingsList(List<Landing> landings) {
@@ -221,6 +269,7 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressAddProductButton(Haul haul, context) async {
+    // todo temp until multi select is ready
 //    SpeciesSelectMode selection = await _showAddProductDialog(context);
 //    if (selection == SpeciesSelectMode.Cancel) {
 //      return;
@@ -243,13 +292,13 @@ class HaulScreenState extends State<HaulScreen> {
         arguments: {'haul': haul, 'landings': selectedLandings});
   }
 
-  Widget _landingsLabel(List<Landing> landings) {
+  Widget _listsLabel(String text) {
     return Container(
       padding: EdgeInsets.only(left: 10, top: 10),
       alignment: Alignment.centerLeft,
       child: Text(
-        'Species List',
-        style: TextStyle(fontSize: 30, color: olracBlue),
+        text,
+        style: TextStyle(fontSize: 28, color: olracBlue),
       ),
     );
   }
@@ -281,7 +330,7 @@ class HaulScreenState extends State<HaulScreen> {
     if (confirmed == true) {
       final Location location = await widget._locationProvider.location;
 
-      final endedHaul = haul.copyWith(
+      final endedHaul = _haul.copyWith(
         endedAt: DateTime.now(),
         endLocation: location,
       );
@@ -305,27 +354,28 @@ class HaulScreenState extends State<HaulScreen> {
           return Scaffold();
         }
 
-        haul = snapshot.data['haul'];
+        _haul = snapshot.data['haul'];
+        _products = snapshot.data['products'];
 
         final bool isActiveTrip = snapshot.data['isActiveTrip'];
 
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
-            title: Text(haul.fishingMethod.name),
+            title: Text(_haul.fishingMethod.name),
           ),
           body: Container(
             child: Column(
               children: <Widget>[
                 HaulInfo(
-                  haul: haul,
+                  haul: _haul,
                   onPressEndHaul: _onPressEndHaul,
                   onPressCancelHaul: _onPressCancelHaul,
                   listIndex: widget.listIndex,
-                  isActiveHaul: haul.endedAt == null,
+                  isActiveHaul: _haul.endedAt == null,
                 ),
-                _landingsSection(haul.landings),
-                isActiveTrip ? _bottomButtons(haul) : Container(),
+                _listsSection(_haul.landings),
+                isActiveTrip ? _bottomButtons(_haul) : Container(),
               ],
             ),
           ),
