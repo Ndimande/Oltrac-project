@@ -8,6 +8,15 @@ final List<Map<String, String>> appMigrations = const [
         ')',
     'down': 'DROP TABLE json'
   },
+  // {
+  //   'name': 'create_error_log_table',
+  //   'up': 'CREATE TABLE error_log ( '
+  //       'id int PRIMARY KEY, '
+  //       'created_at TIMESTAMP NOT NULL, '
+  //       'message TEXT NOT NULL '
+  //       ')',
+  //   'down': 'DROP TABLE json'
+  // },
   {
     'name': 'create_trips_table',
     'up': 'CREATE TABLE trips ( '
@@ -18,7 +27,7 @@ final List<Map<String, String>> appMigrations = const [
         'end_latitude REAL, '
         'end_longitude REAL, '
         'ended_at TIMESTAMP, '
-        'is_uploaded INT'
+        'is_uploaded INT '
         ')',
     'down': 'DROP TABLE trips'
   },
@@ -62,15 +71,25 @@ final List<Map<String, String>> appMigrations = const [
     'up': 'CREATE TABLE products( '
         'id INTEGER PRIMARY KEY, '
         'tag_code TEXT NOT NULL, '
-        'product_type_id NOT NULL, '
-        'packaging_type_id NOT NULL, '
+        'product_type_id INTEGER NOT NULL, '
+        'packaging_type_id INTEGER NOT NULL, '
+        'weight INTEGER, '
+        'weight_unit TEXT NOT NULL, '
+        'product_units INTEGER NOT NULL DEFAULT 1, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'latitude REAL NOT NULL, '
-        'longitude REAL NOT NULL, '
-        'weight INTEGER, '
-        'landing_id INTEGER NOT NULL, '
-        'FOREIGN KEY (landing_id) REFERENCES landings (id)'
+        'longitude REAL NOT NULL '
         ')',
     'down': 'DROP TABLE products'
   },
+  {
+    'name': 'create_product_has_landings',
+    'up': 'CREATE TABLE product_has_landings( ' // todo rename to landing_has_products
+        'landing_id INTEGER NOT NULL, '
+        'product_id INTEGER NOT NULL, '
+        'FOREIGN KEY (landing_id) REFERENCES landings (id), '
+        'FOREIGN KEY (product_id) REFERENCES products (id) '
+        ')',
+    'down': 'DROP TABLE product_has_landings'
+  }
 ];

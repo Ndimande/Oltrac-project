@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/data/olrac_icons.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
@@ -13,7 +13,8 @@ class GroupedHaulsList extends StatelessWidget {
   GroupedHaulsList({this.hauls, this.onPressHaul});
 
   _onPressHaulListItem(context, Haul haul, int index) async {
-    await Navigator.pushNamed(context, '/haul', arguments: [haul, index]);
+
+    await Navigator.pushNamed(context, '/haul', arguments: {'haulId': haul.id, 'listIndex': index});
   }
 
   @override
@@ -38,7 +39,7 @@ class GroupedHaulsList extends StatelessWidget {
             width: 36,
             height: 36,
             child: OlracIcon(
-              assetPath: OlracIcons.path(fishingMethodGroup['fishingMethod'].name),
+              assetPath: SvgIcons.path(fishingMethodGroup['fishingMethod'].name),
               darker: true,
             ),
           );

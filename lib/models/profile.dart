@@ -6,6 +6,7 @@ import 'package:oltrace/models/skipper.dart';
 
 @immutable
 class Profile extends Model {
+  final String uuid;
   final String vesselName;
   final String vesselId;
   final FisheryType fisheryType;
@@ -15,6 +16,7 @@ class Profile extends Model {
 
   const Profile({
     id,
+    @required this.uuid,
     @required this.vesselName,
     this.vesselId,
     @required this.fisheryType,
@@ -24,7 +26,8 @@ class Profile extends Model {
   }) : super(id: id);
 
   Profile.fromMap(Map data)
-      : vesselName = data['vesselName'],
+      : uuid = data['uuid'],
+        vesselName = data['vesselName'],
         vesselId = data['vesselId'],
         fisheryType = FisheryType.fromMap(data['fisheryType']),
         skipper = Skipper.fromMap(data['skipper']),
@@ -34,6 +37,7 @@ class Profile extends Model {
 
   Map<String, dynamic> toMap() {
     return {
+      'uuid': uuid,
       'vesselName': vesselName,
       'vesselId': vesselId,
       'fisheryType': fisheryType.toMap(),
@@ -44,6 +48,7 @@ class Profile extends Model {
   }
 
   Profile copyWith({
+    String uuid,
     String vesselName,
     String vesselId,
     FisheryType fisheryType,
@@ -51,6 +56,7 @@ class Profile extends Model {
     Country country,
   }) {
     return Profile(
+      uuid: uuid ?? this.uuid,
       vesselName: vesselName ?? this.vesselName,
       vesselId: vesselId ?? this.vesselId,
       fisheryType: fisheryType ?? this.fisheryType,

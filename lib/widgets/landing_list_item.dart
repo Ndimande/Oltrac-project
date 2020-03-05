@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/landing_icon.dart';
-import 'package:oltrace/widgets/time_ago.dart';
 
 class LandingListItem extends StatelessWidget {
   final Landing landing;
   final Function onPressed;
   final int listIndex;
 
-  LandingListItem({this.landing, this.onPressed, this.listIndex});
+  LandingListItem({
+    @required this.landing,
+    @required this.onPressed,
+    @required this.listIndex,
+  })  : assert(landing != null),
+        assert(onPressed != null),
+        assert(listIndex != null);
 
   Text get speciesName => Text(
         landing.species.englishName,
@@ -39,7 +43,6 @@ class LandingListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
-//          TimeAgo(prefix: 'Added ', dateTime: landing.createdAt),
           Text(friendlyDateTime(landing.createdAt)),
         ],
       );

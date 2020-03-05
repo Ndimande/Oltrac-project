@@ -14,7 +14,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-
   SettingsScreenState(UserSettings userSettings);
 
   Widget _buildAllowMobile() {
@@ -27,7 +26,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: widget.userSettings.allowMobileData,
+      value: true, //widget.userSettings.allowMobileData,
       onChanged: (state) {
         widget.updateSettings(widget.userSettings.copyWith(allowMobileData: state));
       },
@@ -44,26 +43,9 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: widget.userSettings.uploadAutomatically,
+      value: false, // widget.userSettings.uploadAutomatically,
       onChanged: (state) {
         widget.updateSettings(widget.userSettings.copyWith(uploadAutomatically: state));
-      },
-    );
-  }
-
-  Widget _buildEnableDarkTheme() {
-    final title = 'Dark Theme';
-    final subtitle = 'Use a theme that is better for viewing in the dark';
-
-    return SwitchListTile(
-      subtitle: Text(subtitle),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: _fontSize),
-      ),
-      value: widget.userSettings.darkMode,
-      onChanged: (state) {
-        widget.updateSettings(widget.userSettings.copyWith(darkMode: state));
       },
     );
   }
@@ -80,7 +62,6 @@ class SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               _buildAllowMobile(),
               _buildAutoUpload(),
-//              _buildEnableDarkTheme(),
             ],
           ),
         ));

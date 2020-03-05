@@ -42,25 +42,23 @@ class Trip extends Model {
         isUploaded = data['isUploaded'],
         super.fromMap(data);
 
-  Trip copyWith({
-    int id,
-    Profile vessel,
-    DateTime startedAt,
-    DateTime endedAt,
-    List<Haul> hauls,
-    Location startLocation,
-    Location endLocation,
-    bool isUploaded
-  }) {
+  Trip copyWith(
+      {int id,
+      Profile vessel,
+      DateTime startedAt,
+      DateTime endedAt,
+      List<Haul> hauls,
+      Location startLocation,
+      Location endLocation,
+      bool isUploaded}) {
     return Trip(
-      id: id ?? this.id,
-      startedAt: startedAt ?? this.startedAt,
-      endedAt: endedAt ?? this.endedAt,
-      hauls: hauls ?? this.hauls,
-      startLocation: startLocation ?? this.startLocation,
-      endLocation: endLocation ?? this.endLocation,
-      isUploaded: isUploaded ?? this.isUploaded
-    );
+        id: id ?? this.id,
+        startedAt: startedAt ?? this.startedAt,
+        endedAt: endedAt ?? this.endedAt,
+        hauls: hauls ?? this.hauls,
+        startLocation: startLocation ?? this.startLocation,
+        endLocation: endLocation ?? this.endLocation,
+        isUploaded: isUploaded ?? this.isUploaded);
   }
 
   Map<String, dynamic> toMap() {

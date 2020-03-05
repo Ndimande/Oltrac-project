@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 
 /// How frequently the text is updated
 final _updateInterval = Duration(milliseconds: 1000);

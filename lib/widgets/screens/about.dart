@@ -5,6 +5,7 @@ import 'package:oltrace/stores/app_store.dart';
 
 class AboutScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
+
   String get copyright {
     final year = DateTime.now().year;
     return '© $year OLSPS Marine';
@@ -16,7 +17,6 @@ class AboutScreen extends StatelessWidget {
 
     final version = _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber;
 
-
     return Scaffold(
       body: Container(
         padding: EdgeInsets.all(100),
@@ -27,7 +27,7 @@ class AboutScreen extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 30 ),
+                style: TextStyle(fontSize: 30),
               ),
               Text(
                 version,

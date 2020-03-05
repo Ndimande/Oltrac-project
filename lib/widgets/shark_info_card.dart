@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/data/olrac_icons.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/landing_icon.dart';
@@ -14,7 +14,7 @@ class SharkInfoCard extends StatelessWidget {
 
   Widget get speciesText {
     String text = landing.species.englishName;
-    if(landing.individuals > 1) {
+    if (landing.individuals > 1) {
       text += ' (${landing.individuals})';
     }
     return Text(
@@ -26,6 +26,7 @@ class SharkInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -47,9 +48,7 @@ class SharkInfoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
-//                      TimeAgo(prefix: 'Added ', dateTime: landing.createdAt),
                       Text(friendlyDateTime(landing.createdAt)),
-
                     ],
                   )
                 ],
@@ -59,7 +58,7 @@ class SharkInfoCard extends StatelessWidget {
         ),
         Container(
           margin: EdgeInsets.only(right: 10),
-          child: OlracIcon(height: 100, assetPath: OlracIcons.path(landing.species.scientificName)),
+          child: OlracIcon(height: 100, assetPath: SvgIcons.path(landing.species.scientificName)),
         ),
       ],
     );

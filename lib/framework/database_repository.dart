@@ -5,6 +5,7 @@ import 'package:oltrace/providers/database.dart';
 /// database records.
 abstract class DatabaseRepository<T extends Model> {
   final database = DatabaseProvider().database;
+
   // Override this to specify table name
   var tableName;
 

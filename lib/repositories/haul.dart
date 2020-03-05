@@ -29,6 +29,8 @@ class HaulRepository extends DatabaseRepository<Haul> {
   ///
   /// Returns [null] if none found.
   Future<Haul> find(int id, {bool withLandings = false}) async {
+    assert(id != null);
+
     var sql = _sqlBasicSelect;
 
     if (withLandings) {
@@ -47,11 +49,25 @@ class HaulRepository extends DatabaseRepository<Haul> {
     return fromDatabaseMap(results[0]);
   }
 
+  Future<List<Haul>> forTripId(int tripId) async {
+    List<Map<String, dynamic>> results =
+        await database.query(tableName, where: 'trip_id = $tripId');
+    if (results.length == 0) {
+      return [];
+    }
+    final hauls = <Haul>[];
+    for (Map<String, dynamic> result in results) {
+      hauls.add(fromDatabaseMap(result));
+    }
+
+    return hauls;
+  }
+
   Future<Haul> getActiveHaul() async {
     List results = await database.query(tableName, where: "ended_at is null");
-    if (results.length > 1) {
-      throw Exception('More than one active Haul is not allowed');
-    } else if (results.length == 0) {
+    assert(results.length < 2);
+
+    if (results.length == 0) {
       return null;
     }
 

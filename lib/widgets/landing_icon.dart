@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/data/olrac_icons.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
 
 class LandingIcon extends StatelessWidget {
   final Landing landing;
   final int listIndex;
+
   LandingIcon({this.landing, this.listIndex});
 
-  Widget get sharkIcon => OlracIcon(assetPath: OlracIcons.path('Shark'));
+  Widget get sharkIcon => OlracIcon(assetPath: SvgIcons.path('Shark'));
 
   Widget get indexNumber => Container(
         margin: EdgeInsets.only(left: 5, top: 5),

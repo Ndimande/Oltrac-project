@@ -1,5 +1,5 @@
-import 'package:oltrace/framework/model.dart';
 import 'package:meta/meta.dart';
+import 'package:oltrace/framework/model.dart';
 
 @immutable
 class Skipper extends Model {

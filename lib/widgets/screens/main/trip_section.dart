@@ -1,61 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/messages.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
+import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
 class TripSection extends StatelessWidget {
-  final AppStore _appStore = StoreProvider().appStore;
+  final Trip trip;
+  final bool hasActiveHaul;
+  final Function onPressEndTrip;
+  final Function onPressCancelTrip;
 
-  _onPressEndTrip(BuildContext context) async {
-
-    if(_appStore.hasActiveHaul) {
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text('You must first end the haul')));
-      return;
-    }
-
-    bool confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => ConfirmDialog('End Trip', Messages.CONFIRM_END_TRIP),
-    );
-    if (confirmed == true) {
-      await _appStore.endTrip();
-    }
-  }
-
-  _onPressCancelTrip(BuildContext context) async {
-
-    if(_appStore.hasActiveHaul) {
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text('You must first end the haul')));
-      return;
-    }
-
-    final bool confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => ConfirmDialog('Cancel Trip', Messages.CONFIRM_CANCEL_TRIP),
-    );
-    if (confirmed == true) {
-      await _appStore.cancelTrip();
-    }
-  }
+  TripSection({this.trip, this.hasActiveHaul,this.onPressEndTrip,this.onPressCancelTrip});
 
   _onPressEditTrip(BuildContext context) async {
-    await Navigator.pushNamed(context, '/edit_trip', arguments: _appStore.activeTrip);
+    await Navigator.pushNamed(context, '/edit_trip', arguments: trip);
   }
 
   Widget get endTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
           centered: true,
           labelText: 'End',
-          color: _appStore.hasActiveHaul ? Colors.grey : Colors.red,
-          onPressed: () async => await _onPressEndTrip(context),
+          color: hasActiveHaul ? Colors.grey : Colors.red,
+          onPressed: () async => await onPressEndTrip(),
           icon: Icon(
             Icons.stop,
             color: Colors.white,
@@ -67,8 +36,8 @@ class TripSection extends StatelessWidget {
         return StripButton(
           centered: true,
           labelText: 'Cancel',
-          color: _appStore.hasActiveHaul ? Colors.grey : olracBlue,
-          onPressed: () async => await _onPressCancelTrip(context),
+          color: hasActiveHaul ? Colors.grey : olracBlue,
+          onPressed: () async => await onPressCancelTrip(),
           icon: Icon(
             Icons.cancel,
             color: Colors.white,
@@ -94,14 +63,14 @@ class TripSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         LocationButton(
-          location: _appStore.activeTrip.startLocation,
+          location: trip.startLocation,
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
               child: Text(
-                'Start: ' + friendlyDateTime(_appStore.activeTrip.startedAt),
+                'Start: ' + friendlyDateTime(trip.startedAt),
                 style: TextStyle(fontSize: 18),
               ),
             ),
@@ -109,10 +78,9 @@ class TripSection extends StatelessWidget {
               child: ElapsedCounter(
                 style: TextStyle(fontSize: 18),
                 prefix: 'Duration: ',
-                startedDateTime: _appStore.activeTrip.startedAt,
+                startedDateTime: trip.startedAt,
               ),
             ),
-
           ],
         )
       ],
@@ -128,7 +96,7 @@ class TripSection extends StatelessWidget {
             padding: EdgeInsets.all(10),
             child: Row(
               children: <Widget>[
-                NumberedBoat(number: _appStore.activeTrip.id),
+                NumberedBoat(number: trip.id),
                 SizedBox(width: 5),
                 tripInfo
               ],

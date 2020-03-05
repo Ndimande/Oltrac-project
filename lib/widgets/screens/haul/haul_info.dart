@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/data/olrac_icons.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
 class HaulInfo extends StatelessWidget {
-  final AppStore _appStore = StoreProvider().appStore;
   final Haul haul;
   final Function onPressEndHaul;
   final Function onPressCancelHaul;
   final int listIndex;
+  final bool isActiveHaul;
 
-  HaulInfo({this.haul, this.onPressEndHaul, this.onPressCancelHaul, this.listIndex});
-
-  bool get isActiveHaul => _appStore.activeHaul?.id == haul.id;
+  HaulInfo({
+    @required this.haul,
+    @required this.onPressEndHaul,
+    @required this.onPressCancelHaul,
+    @required this.listIndex,
+    @required this.isActiveHaul,
+  })  : assert(haul != null),
+        assert(onPressEndHaul != null),
+        assert(onPressCancelHaul != null),
+        assert(listIndex != null),
+        assert(isActiveHaul != null);
 
   Widget numberedIcon() {
     final Widget svg = Builder(builder: (context) {
@@ -26,7 +32,7 @@ class HaulInfo extends StatelessWidget {
         width: 64,
         height: 64,
         child: OlracIcon(
-          assetPath: OlracIcons.path(haul.fishingMethod.name),
+          assetPath: SvgIcons.path(haul.fishingMethod.name),
           darker: true,
         ),
       );
@@ -64,7 +70,6 @@ class HaulInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-//          fishingMethodText,
           TimeSpace(
             label: 'Started ',
             dateTime: haul.startedAt,

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/countries.dart';
 import 'package:oltrace/data/fishery_types.dart';
-import 'package:oltrace/widgets/model_dropdown.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/country.dart';
 import 'package:oltrace/models/fishery_type.dart';
-import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/models/profile.dart';
+import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+import 'package:uuid/uuid.dart';
 
 final TextStyle _sectionHeadingTextStyle =
     TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: olracBlue);
@@ -234,20 +237,16 @@ class WelcomeScreenState extends State<WelcomeScreen> {
       setState(() {
         isSaving = false;
       });
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Please select a fishery type'),
-        ),
-      );
+
+      showTextSnackBar(_scaffoldKey, 'Please select a fishery type');
       return;
     }
     if (_selectedCountry == null) {
       setState(() {
         isSaving = false;
       });
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(content: Text('Please select a country')),
-      );
+
+      showTextSnackBar(_scaffoldKey, 'Please select a country');
       return;
     }
 
@@ -260,16 +259,12 @@ class WelcomeScreenState extends State<WelcomeScreen> {
       ),
       fisheryType: _selectedFisheryType,
       country: _selectedCountry,
+      uuid: Uuid().v4(),
     );
 
     await widget._appStore.saveProfile(profile);
 
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        content: Text('Profile saved'),
-      ),
-    );
-
+    showTextSnackBar(_scaffoldKey, 'Profile saved');
     // Give them time to see the SnackBar
     await Future.delayed(Duration(seconds: 1));
 
@@ -318,6 +313,7 @@ Widget _welcomeTextFormField({
 }) {
   return Container(
     child: TextFormField(
+      initialValue: AppConfig.DEV_MODE ? 'DEV_MODE' : '',
       focusNode: focusNode,
       textCapitalization: TextCapitalization.words,
       autocorrect: false,

@@ -13,8 +13,8 @@ class PackagingType extends Model {
 
   PackagingType copyWith({String firstName, String id, String jurisdiction}) {
     return PackagingType(
-        name: firstName ?? this.name,
-        id: id ?? this.id,
+      name: firstName ?? this.name,
+      id: id ?? this.id,
     );
   }
 
@@ -24,5 +24,4 @@ class PackagingType extends Model {
       'id': id,
     };
   }
-
 }

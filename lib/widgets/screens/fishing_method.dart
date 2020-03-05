@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/fishing_methods.dart';
-import 'package:oltrace/data/olrac_icons.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
@@ -28,7 +28,7 @@ class FishingMethodScreen extends StatelessWidget {
         height: 64,
         child: OlracIcon(
           darker: true,
-          assetPath: OlracIcons.path(method.name),
+          assetPath: SvgIcons.path(method.name),
         ),
       );
     });

@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/data/olrac_icons.dart';
 import 'package:oltrace/data/species.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/providers/shared_preferences.dart';
-import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/messages.dart';
-import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
+import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/olrac_icon.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
 const textFieldTextStyle = TextStyle(fontSize: 20, color: olracBlue);
 
 class LandingFormScreen extends StatefulWidget {
-  final AppStore _appStore = StoreProvider().appStore;
   final Haul haulArg;
   final Landing landingArg;
 
@@ -45,6 +43,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   final TextEditingController _lengthController;
   final TextEditingController _individualsController;
 
+  final _landingRepo = LandingRepository();
   final Haul haul;
 
   /// If this is null we are creating.
@@ -61,8 +60,8 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   LandingFormScreenState({this.haul, this.landingArg})
       : _weightController = TextEditingController(
             text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
-        _lengthController =
-            TextEditingController(text: landingArg != null ? (landingArg.length / 10000).toString() : null),
+        _lengthController = TextEditingController(
+            text: landingArg != null ? (landingArg.length / 10000).toString() : null),
         _individualsController = TextEditingController(
             text: landingArg != null ? landingArg?.individuals.toString() : null),
         _selectedSpecies = landingArg?.species,
@@ -94,7 +93,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       // invalid input
       return null;
     }
-
     return individuals;
   }
 
@@ -111,7 +109,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     final int weightGrams = _parseWeightInput();
     final int lengthMicrometers = _parseLengthInput();
 
-
     final int individuals = _parseIndividualsInput();
 
     if (individuals == null) {
@@ -126,7 +123,8 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         species: _selectedSpecies,
         individuals: individuals,
       );
-      await widget._appStore.editLanding(updatedLanding);
+
+      await _landingRepo.store(updatedLanding);
 
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
@@ -137,15 +135,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
           },
         ),
       );
-      return;
-    }
-    showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
-    // TODO get from location provider
-    var position = await geolocator.getCurrentPosition();
-    _scaffoldKey.currentState.hideCurrentSnackBar();
+    } else {
+      showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
+      // TODO get from location provider
+      var position = await geolocator.getCurrentPosition();
+      _scaffoldKey.currentState.hideCurrentSnackBar();
 
-    final landing = await widget._appStore.saveLanding(
-      Landing(
+      final landing = Landing(
         species: _selectedSpecies,
         createdAt: DateTime.now(),
         location: Location.fromPosition(position),
@@ -154,19 +150,22 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         length: lengthMicrometers,
         haulId: haul.id,
         individuals: _bulkMode ? int.parse(_individualsController.value.text) : 1,
-      ),
-    );
+      );
 
-    bool createAnotherDialogResponse = await _showLandingSavedDialog(landing);
+      await _landingRepo.store(landing);
 
-    setState(() {
-      _selectedSpecies = null;
-      _weightController.clear();
-      _lengthController.clear();
-    });
+      bool createAnotherDialogResponse = await _showLandingSavedDialog(landing);
 
-    if (createAnotherDialogResponse == false) {
-      Navigator.pop(context);
+      setState(() {
+        _selectedSpecies = null;
+        _weightController.clear();
+        _lengthController.clear();
+        _individualsController.clear();
+      });
+
+      if (createAnotherDialogResponse == false) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -280,9 +279,8 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
 
     final String titleText =
-        widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Shark' : 'Edit Shark';
+        widget.landingArg == null ? _bulkMode ? 'Add Species' : 'Add Species' : 'Edit Species';
 
-    int listIndex = 0;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -308,21 +306,18 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                         selected: _selectedSpecies,
                         items: sortedSpecies.map<DropdownMenuItem<Species>>(
                           (Species species) {
-//                            final Color bgColor = _selectedSpecies?.alpha3Code == species.alpha3Code
-//                                ? Colors.white
-//                                : listIndex % 2 == 0 ? Colors.white : olracBlue[50];
-                            listIndex++;
                             return DropdownMenuItem<Species>(
                               value: species,
                               child: Container(
-//                                color: bgColor,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
-                                    Text(species.englishName,style: TextStyle(fontSize: 18),),
-
+                                    Text(
+                                      species.englishName,
+                                      style: TextStyle(fontSize: 18),
+                                    ),
                                     OlracIcon(
-                                      assetPath: OlracIcons.path(species.scientificName),
+                                      assetPath: SvgIcons.path(species.scientificName),
                                       darker: true,
                                     )
                                   ],
@@ -336,7 +331,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                         },
                       ),
                     ),
-
 
                     // Weight
                     Container(

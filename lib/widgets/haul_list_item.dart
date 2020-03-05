@@ -4,8 +4,6 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
 import 'package:oltrace/widgets/haul_subtitle.dart';
 import 'package:oltrace/widgets/time_ago.dart';
@@ -13,7 +11,6 @@ import 'package:oltrace/widgets/time_ago.dart';
 const double titleFontSize = 16;
 
 class HaulListItem extends StatelessWidget {
-  final AppStore _appStore = StoreProvider().appStore;
 
   final Haul haul;
   final Function onPressed;
@@ -28,12 +25,17 @@ class HaulListItem extends StatelessWidget {
   Widget get title => temporal;
 
   Widget get completeHaulTitle {
-    return Text('End '+friendlyDateTime(haul.endedAt),style: TextStyle(fontWeight: FontWeight.bold),);
+    return Text(
+      'End ' + friendlyDateTime(haul.endedAt),
+      style: TextStyle(fontWeight: FontWeight.bold),
+    );
   }
 
   Widget get activeHaulTitle {
-    return Text('Start '+friendlyDateTime(haul.startedAt),style: TextStyle(fontWeight: FontWeight.bold),);
-
+    return Text(
+      'Start ' + friendlyDateTime(haul.startedAt),
+      style: TextStyle(fontWeight: FontWeight.bold),
+    );
   }
 
   ElapsedCounter get durationCounter => ElapsedCounter(
@@ -48,16 +50,13 @@ class HaulListItem extends StatelessWidget {
         textStyle: TextStyle(fontSize: titleFontSize),
       );
 
-  bool get isActiveHaul => _appStore.activeHaul?.id == haul.id;
+  bool get isActiveHaul => haul.endedAt == null;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-
       decoration: new BoxDecoration(
-        color: Colors.white,
-        border: new Border(top: BorderSide(color: Colors.grey[300]))
-      ),
+          color: Colors.white, border: new Border(top: BorderSide(color: Colors.grey[300]))),
 //      color: listIndex % 2 == 1 ? olracBlue[50]: Colors.white,
       child: ListTile(
         onTap: () => onPressed(listIndex),
@@ -72,7 +71,9 @@ class HaulListItem extends StatelessWidget {
         ),
 //            title: cardTitle,
         title: isActiveHaul ? activeHaulTitle : completeHaulTitle,
-        subtitle: HaulSubtitle(haul: haul,),
+        subtitle: HaulSubtitle(
+          haul: haul,
+        ),
         trailing: Icon(
           Icons.add_circle,
           color: olracBlue,

@@ -7,7 +7,7 @@ Widget _spinnerStack() {
         width: 200,
         height: 200,
         child: CircularProgressIndicator(
-          strokeWidth: 40,
+          strokeWidth: 30,
         ),
       ),
       Container(
@@ -29,7 +29,18 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: _spinnerStack()),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            _spinnerStack(),
+            Image(
+              image: AssetImage('assets/images/olsps-logo.png'),
+              width: 200,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

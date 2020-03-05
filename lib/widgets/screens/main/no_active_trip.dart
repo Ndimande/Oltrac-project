@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 class NoActiveTrip extends StatelessWidget {
-  final AppStore _appStore = StoreProvider().appStore;
   final Function onPressStartTrip;
+  final List<Trip> completedTrips;
 
-  NoActiveTrip({this.onPressStartTrip});
+  NoActiveTrip({@required this.completedTrips, @required this.onPressStartTrip})
+      : assert(completedTrips != null),
+        assert(onPressStartTrip != null);
 
   Widget _completedTripList() {
-    print(_appStore.completedTrips.map((t) => t.id).toList().toString());
-    final List completedTrips = _appStore.completedTrips.reversed.toList();//.reversed
-//        .where((Trip t) =>
-//            t.endedAt !=
-//            null) // TODO This is to hide a bug where a trip gets into completed trips without having endedAt
-//        .toList();
+    final List reversedCompletedTrips = completedTrips.reversed.toList();
 
-    if (completedTrips.length == 0) {
+    if (reversedCompletedTrips.length == 0) {
       return Container(
           alignment: Alignment.center,
           child: Text(
@@ -29,10 +24,10 @@ class NoActiveTrip extends StatelessWidget {
           ));
     }
     return ListView.builder(
-      itemCount: completedTrips.length,
+      itemCount: reversedCompletedTrips.length,
       itemBuilder: (context, index) {
-        return TripListItem(completedTrips[index], () async {
-          await Navigator.pushNamed(context, '/trip', arguments: completedTrips[index]);
+        return TripListItem(reversedCompletedTrips[index], () async {
+          await Navigator.pushNamed(context, '/trip', arguments: reversedCompletedTrips[index]);
         });
       },
     );
