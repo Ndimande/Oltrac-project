@@ -30,18 +30,18 @@ final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
 
-Future<File> _writeJson(String json) async {
-  final dir = await getApplicationDocumentsDirectory();
-  final path = dir.path;
-  print('write json to $path');
-  final file = File('$path/test.json');
-  final db = DatabaseProvider().database;
-//  await db.insert('json', {'key': 'tripeg','json':json});
-  final sp = SharedPreferencesProvider().sharedPreferences;
-  sp.setString('tripeg', json);
-  // Write the file.
-  return file.writeAsString(json);
-}
+//Future<File> _writeJson(String json) async {
+//  final dir = await getApplicationDocumentsDirectory();
+//  final path = dir.path;
+//  print('write json to $path');
+//  final file = File('$path/test.json');
+//  final db = DatabaseProvider().database;
+////  await db.insert('json', {'key': 'tripeg','json':json});
+//  final sp = SharedPreferencesProvider().sharedPreferences;
+//  sp.setString('tripeg', json);
+//  // Write the file.
+//  return file.writeAsString(json);
+//}
 
 Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
@@ -56,7 +56,7 @@ Future<Trip> _getWithNested(Trip trip) async {
     hauls.add(haul.copyWith(landings: landingsWithProducts));
   }
   final Trip tripWithNested = trip.copyWith(hauls: hauls);
-  await _writeJson(tripWithNested.toJson());
+//  await _writeJson(tripWithNested.toJson());
   return tripWithNested;
 }
 
@@ -156,6 +156,7 @@ class TripScreenState extends State<TripScreen> {
         duration: Duration(minutes: 20), // keep open
       ),
     );
+
     final Map<String, dynamic> data = {
       'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       'json': {

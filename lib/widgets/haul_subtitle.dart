@@ -24,11 +24,11 @@ class HaulSubtitleState extends State<HaulSubtitle> {
     _timer = Timer.periodic(_updateInterval, (Timer t) => setState(() {}));
   }
 
-  int get totalWeightGrams => widget.haul.landings.fold(0, (total, Landing l) => total + l.weight);
+  int get _totalWeightGrams => widget.haul.landings.fold(0, (total, Landing l) => total + l.weight);
 
-  double get totalWeightKilograms => (totalWeightGrams / 1000);
+  double get _totalWeightKilograms => (_totalWeightGrams / 1000);
 
-  Duration get elapsed {
+  Duration get _elapsed {
     final DateTime endedAt = widget.haul.endedAt;
     final DateTime startedAt = widget.haul.startedAt;
 
@@ -36,27 +36,28 @@ class HaulSubtitleState extends State<HaulSubtitle> {
     return until.difference(startedAt);
   }
 
-  int get elapsedSeconds => elapsed.inSeconds;
-
-  double get kilogramsPerSecond =>
-      elapsed.inSeconds == 0 ? 0 : (totalWeightGrams / 1000) / elapsedSeconds;
-
-  double get kilogramsPerMinute => kilogramsPerSecond * 60;
-
   TextSpan get elapsedTextSpan => TextSpan(
-        text: '${_getHours(elapsed)}:${_getMinutes(elapsed)}:${_getSeconds(elapsed)}',
+        text: '${_getHours(_elapsed)}:${_getMinutes(_elapsed)}:${_getSeconds(_elapsed)}, ',
         style: TextStyle(color: Colors.black),
       );
 
-  TextSpan get kilogramsTotalTextSpan => TextSpan(
-        text: ' ${totalWeightKilograms.toStringAsFixed(2)}kg ',
+  TextSpan get _kilogramsTotal => TextSpan(
+        text: ' ${_totalWeightKilograms.toStringAsFixed(2)}kg, ',
         style: TextStyle(color: Colors.black),
       );
 
-  TextSpan get kilogramsPerMinuteTextSpan => TextSpan(
-        text: '(${kilogramsPerMinute.toStringAsFixed(2)}kg/min)',
-        style: TextStyle(color: Colors.black),
-      );
+
+  TextSpan get _totalProducts {
+    int totalProducts = 0;
+    for (Landing landing in widget.haul.landings) {
+      totalProducts += landing.products.length;
+    }
+
+    return TextSpan(
+      text: '$totalProducts tags',
+      style: TextStyle(color: Colors.black),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +65,8 @@ class HaulSubtitleState extends State<HaulSubtitle> {
       overflow: TextOverflow.ellipsis,
       text: TextSpan(children: <TextSpan>[
         elapsedTextSpan,
-        kilogramsTotalTextSpan,
-        kilogramsPerMinuteTextSpan,
+        _kilogramsTotal,
+        _totalProducts,
       ]),
     );
   }

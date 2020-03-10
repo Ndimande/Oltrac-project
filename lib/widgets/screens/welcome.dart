@@ -313,7 +313,7 @@ Widget _welcomeTextFormField({
 }) {
   return Container(
     child: TextFormField(
-      initialValue: AppConfig.DEV_MODE ? 'DEV_MODE' : '',
+      initialValue: AppConfig.debugMode ? 'DEV_MODE' : '',
       focusNode: focusNode,
       textCapitalization: TextCapitalization.words,
       autocorrect: false,

@@ -29,18 +29,73 @@ const MaterialColor olracDarkBlue = MaterialColor(0xFF242C4D, {
 });
 
 final _olspsTheme = ThemeData(
+//  dialogBackgroundColor: olracBlue,
+  dialogTheme: DialogTheme(
+    backgroundColor: olracBlue,
+    titleTextStyle: TextStyle(fontSize: 32, color: Colors.white),
+    contentTextStyle: TextStyle(fontSize: 20, color: Colors.white),
+  ),
   primarySwatch: olracBlue,
   accentColor: olracBlue,
-  dialogTheme: DialogTheme(
-    titleTextStyle: TextStyle(fontSize: 32, color: Colors.black),
-    contentTextStyle: TextStyle(fontSize: 20, color: Colors.black),
-  ),
   textTheme: TextTheme(
     body1: TextStyle(color: Colors.black),
-    body2: TextStyle(color: Colors.black), // Drawer menu items
-    caption: TextStyle(color: Colors.black), // List item caption
-    subhead: TextStyle(color: Colors.black), // List item heading / Car items
+    body2: TextStyle(color: Colors.black),
+    // Drawer menu items
+    caption: TextStyle(color: Colors.black),
+    // List item caption
+    subhead: TextStyle(color: Colors.black),
+    // List item heading / Car items
+    display1: TextStyle(color: Colors.lightGreen),
+    display2: TextStyle(color: Colors.lightGreen),
+    display3: TextStyle(color: Colors.lightGreen),
+    display4: TextStyle(color: Colors.lightGreen),
+    button: TextStyle(color: Colors.lightGreen),
+    title: TextStyle(color: Colors.lightGreen),
+    headline: TextStyle(color: Colors.lightGreen),
+    subtitle: TextStyle(color: Colors.lightGreen),
+    overline: TextStyle(color: Colors.lightGreen),
   ),
+  highlightColor: olracBlue,
+  accentTextTheme: TextTheme(
+    body1: TextStyle(color: Colors.lightGreen),
+    body2: TextStyle(color: Colors.lightGreen),
+    // Drawer menu items
+    caption: TextStyle(color: Colors.lightGreen),
+    // List item caption
+    subhead: TextStyle(color: Colors.red),
+    // List item heading / Car items
+    display1: TextStyle(color: Colors.red),
+    display2: TextStyle(color: Colors.red),
+    display3: TextStyle(color: Colors.red),
+    display4: TextStyle(color: Colors.red),
+    button: TextStyle(color: Colors.red),
+    title: TextStyle(color: Colors.red),
+    headline: TextStyle(color: Colors.red),
+    subtitle: TextStyle(color: Colors.red),
+    overline: TextStyle(color: Colors.red),
+  ),
+  primaryTextTheme: TextTheme(
+    body1: TextStyle(color: Colors.white),
+    body2: TextStyle(color: Colors.red),
+    // Drawer menu items
+    caption: TextStyle(color: Colors.red),
+    // List item caption
+    subhead: TextStyle(color: Colors.red),
+    // List item heading / Car items
+    display1: TextStyle(color: Colors.red),
+    display2: TextStyle(color: Colors.red),
+    display3: TextStyle(color: Colors.red),
+    display4: TextStyle(color: Colors.red),
+    button: TextStyle(color: Colors.red),
+    title: TextStyle(color: Colors.white),
+    headline: TextStyle(color: Colors.red),
+    subtitle: TextStyle(color: Colors.red),
+    overline: TextStyle(color: Colors.red),
+  ),
+  buttonColor: Colors.lime,
+  buttonTheme: ButtonThemeData(buttonColor: olracBlue, textTheme: ButtonTextTheme.primary),
+  secondaryHeaderColor: Colors.orange,
+  colorScheme: ColorScheme.light(primary: Colors.white),
   scaffoldBackgroundColor: Colors.white,
   cardTheme: CardTheme(
     margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),

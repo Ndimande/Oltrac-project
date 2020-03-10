@@ -54,16 +54,24 @@ class LandingScreenState extends State<LandingScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Landing _landing;
+  bool _isActiveTrip;
 
   final _landingRepository = LandingRepository();
 
-  Future<void> _onPressTagProduct(Landing landing) async {
+  Future<void> _onPressTagProduct() async {
+    final Haul haul = await HaulRepository().find(_landing.haulId);
 
-    final Haul haul = await HaulRepository().find(landing.haulId);;
-    final List<Landing> landings =  await _landingRepository.forHaul(haul);
+
+    final List<Landing> landings = await _landingRepository.forHaul(haul);
+    final List<Landing> withProducts = [];
+    for(Landing landing in landings) {
+      final List<Product> products = await _productRepository.forLanding(landing.id);
+      withProducts.add(landing.copyWith(products: products));
+    }
+    // add prods
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: {
-      'landings': [landing],
-      'haul': haul.copyWith(landings: landings),
+      'landings': [_landing],
+      'haul': haul.copyWith(landings: withProducts),
     });
   }
 
@@ -93,12 +101,6 @@ class LandingScreenState extends State<LandingScreen> {
         ),
       );
 
-  Widget actionButtons() {
-    return Row(
-      children: <Widget>[deleteButton, editButton],
-    );
-  }
-
   Future<void> _onPressDelete() async {
     bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
@@ -122,8 +124,28 @@ class LandingScreenState extends State<LandingScreen> {
     setState(() {});
   }
 
-  Widget tagProductButton(Landing landing) {
-    if (landing.doneTagging == true) {
+  Widget _doneTaggingButton() {
+    return StripButton(
+      color: olracBlue,
+      centered: true,
+      labelText: _landing.doneTagging ? 'Continue Tagging' : 'Done Tagging',
+      icon: Icon(
+        _landing.doneTagging ? Icons.edit : Icons.check_circle,
+        color: Colors.white,
+      ),
+      onPressed: () async {
+        final bool updatedDoneTagging = !_landing.doneTagging;
+        await _landingRepo.store(_landing.copyWith(doneTagging: updatedDoneTagging));
+        setState(() {});
+        if(updatedDoneTagging == true) {
+          Navigator.pop(context);
+        }
+      },
+    );
+  }
+
+  Widget _tagProductButton() {
+    if (_landing.doneTagging == true) {
       return Container();
     }
 
@@ -135,35 +157,40 @@ class LandingScreenState extends State<LandingScreen> {
         Icons.local_offer,
         color: Colors.white,
       ),
-      onPressed: () async => await _onPressTagProduct(landing),
+      onPressed: () async => await _onPressTagProduct(),
     );
   }
 
-  Widget noProducts() {
+  Widget _noProducts() {
     return Text(
       'No product tags yet',
       style: TextStyle(fontSize: 16),
     );
   }
 
-  Widget _doneTaggingSwitch(bool isActiveTrip) {
-    if (!isActiveTrip) {
+  Widget _landingButtons() {
+    if (!_isActiveTrip || _landing.doneTagging) {
       return Container();
     }
     return Row(
-      children: <Widget>[
-        Text('Done'),
-        Switch(
-          activeColor: Colors.white,
-          value: _landing.doneTagging ?? false,
-          onChanged: (bool value) async {
-
-            await _landingRepo.store(_landing.copyWith(doneTagging: value));
-            setState(() {});
-          },
-        )
-      ],
+      children: <Widget>[deleteButton, editButton],
     );
+  }
+
+  Widget _bottomButtons() {
+    if (!_isActiveTrip) {
+      return Container();
+    }
+
+    final items = <Widget>[];
+
+    if (!_landing.doneTagging) {
+      items.add(_tagProductButton());
+    }
+
+    items.add(_doneTaggingButton());
+
+    return Row(children: items.map((i) => Expanded(child: i)).toList());
   }
 
   @override
@@ -180,14 +207,13 @@ class LandingScreenState extends State<LandingScreen> {
           return Scaffold();
         }
         final Map data = snapshot.data;
-        final bool isActiveTrip = data['isActiveTrip'];
+        _isActiveTrip = data['isActiveTrip'];
         _landing = data['landing'];
 
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
             title: Text(_landing.individuals > 1 ? 'Bulk bin' : 'Species'),
-            actions: <Widget>[_doneTaggingSwitch(isActiveTrip)],
           ),
           body: Column(
             children: <Widget>[
@@ -204,7 +230,7 @@ class LandingScreenState extends State<LandingScreen> {
                             listIndex: widget.listIndex,
                           ),
                         ),
-                        isActiveTrip ? actionButtons() : Container(),
+                        _landingButtons(),
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 10),
                           child: LandingDetails(landing: _landing),
@@ -215,14 +241,14 @@ class LandingScreenState extends State<LandingScreen> {
                         Container(
                           child: _landing.products.length > 0
                               ? ProductsList(products: _landing.products)
-                              : noProducts(),
+                              : _noProducts(),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              isActiveTrip ? tagProductButton(_landing) : Container(),
+              _bottomButtons(),
             ],
           ),
         );

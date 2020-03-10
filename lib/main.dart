@@ -19,6 +19,7 @@ import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
 import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
+import 'package:oltrace/widgets/screens/developer.dart';
 import 'package:oltrace/widgets/screens/edit_trip.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
@@ -53,31 +54,16 @@ final LocationProvider _locationProvider = LocationProvider();
 
 /// The app entry point. Execution starts here.
 void main() async {
-
-  FlutterError.onError = (details, {bool forceReport = false}) {
-    try {
-      sentry.captureException(exception: details.exception, stackTrace: details.stack);
-      print('Flutter Exception! Sentry report sending..');
-    } catch (e) {
-      print('Sending report to sentry.io failed: $e');
-    } finally {
-      // Also use Flutter's pretty error logging to the device's console.
-      FlutterError.dumpErrorToConsole(details, forceReport: forceReport);
-    }
-  };
+  _setFlutterErrorHandler();
 
   final stopwatch = Stopwatch()..start();
   print('=== OlTrace Started ===');
-  // Being timing the boot process
+  print(AppConfig.debugMode ? 'Dev Mode' : 'Release Mode');
   try {
     await boot();
     print('Booted in ${stopwatch.elapsed}');
-  } catch(error, stackTrace) {
-    print('General Exception! Sentry report sending...');
-    await sentry.captureException(
-      exception: error,
-      stackTrace: stackTrace,
-    );
+  } catch (exception, stack) {
+    await _handleError(exception, stack);
   }
 }
 
@@ -102,7 +88,7 @@ Future<void> boot() async {
   _database = await DatabaseProvider().connect();
 
   // Get the user's app preferences from SharedPreferences.
-  final UserSettings userSettings = _restoreUserSettings();
+  final UserSettings userSettings = _getUserSettings();
 
   // Run the Flutter app
   runZoned(
@@ -116,26 +102,6 @@ Future<void> boot() async {
         print('Original error: $error');
       }
     },
-  );
-
-
-}
-
-/// Restore the user defined preferences for the app.
-/// These can be modified by the user in the SettingsScreen.
-UserSettings _restoreUserSettings() {
-  final defaults = AppConfig.defaultUserSettings;
-
-  final bool darkMode = _sharedPreferences.getBool('darkMode') ?? defaults['darkMode'];
-  final bool allowMobileData =
-      _sharedPreferences.getBool('allowMobileData') ?? defaults['uploadAutomatically'];
-  final bool uploadAutomatically =
-      _sharedPreferences.getBool('uploadAutomatically') ?? defaults['uploadAutomatically'];
-
-  return UserSettings(
-    darkMode: darkMode,
-    allowMobileData: allowMobileData,
-    uploadAutomatically: uploadAutomatically,
   );
 }
 
@@ -223,7 +189,6 @@ class OlTraceAppState extends State<OlTraceApp> {
 
   @override
   Widget build(BuildContext context) {
-
     final theme = _userSettings.darkMode ? appThemes['dark'] : appThemes['light'];
     return MaterialApp(
       navigatorKey: _navigatorKey,
@@ -321,10 +286,61 @@ class OlTraceAppState extends State<OlTraceApp> {
             return MaterialPageRoute(
                 builder: (_) => AddSourceLandingsScreen(alreadySelectedLandings: landings));
 
+          case '/developer':
+            return MaterialPageRoute(builder: (_) => DeveloperScreen());
+
           default:
             throw ('No such route: ${settings.name}');
         }
       },
     );
   }
+}
+
+/// Restore the user defined preferences for the app.
+/// These can be modified by the user in the SettingsScreen.
+UserSettings _getUserSettings() {
+  final defaults = AppConfig.defaultUserSettings;
+
+  final bool darkMode = _sharedPreferences.getBool('darkMode') ?? defaults['darkMode'];
+  final bool allowMobileData =
+      _sharedPreferences.getBool('allowMobileData') ?? defaults['uploadAutomatically'];
+  final bool uploadAutomatically =
+      _sharedPreferences.getBool('uploadAutomatically') ?? defaults['uploadAutomatically'];
+
+  return UserSettings(
+    darkMode: darkMode,
+    allowMobileData: allowMobileData,
+    uploadAutomatically: uploadAutomatically,
+  );
+}
+
+void _setFlutterErrorHandler() {
+  FlutterError.onError = (details, {bool forceReport = false}) {
+    _handleError(details.exception, details.stack);
+    FlutterError.dumpErrorToConsole(details, forceReport: forceReport);
+  };
+}
+
+Future<void> _sendSentryReport(Object exception, StackTrace stack) async {
+  print('Sending report to Sentry.io...');
+  try {
+    await sentry.captureException(
+      exception: exception,
+      stackTrace: stack,
+    );
+    print('Sentry report sent');
+  } catch (e) {
+    print('Sending report to sentry.io failed: $e');
+  }
+}
+
+Future<void> _handleError(Object exception, StackTrace stack) async {
+  print(exception);
+  print(stack);
+  if (AppConfig.debugMode) {
+    return;
+  }
+
+  _sendSentryReport(exception, stack);
 }

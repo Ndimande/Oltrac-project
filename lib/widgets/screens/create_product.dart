@@ -5,6 +5,7 @@ import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
+import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
@@ -16,6 +17,7 @@ import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
+import 'package:oltrace/widgets/olrac_icon.dart';
 import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -50,7 +52,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   ProductType _productType;
   PackagingType _packagingType;
 
-  String _tagCode = AppConfig.DEV_MODE ? randomTagCode() : null;
+  String _tagCode = AppConfig.debugMode ? randomTagCode() : null;
   final TextEditingController _productUnitsController = TextEditingController();
   final TextEditingController _tagCodeController = TextEditingController();
 
@@ -76,7 +78,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     });
   }
 
-  Widget _buildProductTypeDropdown() {
+  Widget _productTypeDropdown() {
     return ModelDropdown<ProductType>(
       selected: _productType,
       label: 'Product Type',
@@ -93,7 +95,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   List<String> getValidationErrors() {
     List<String> errorMessages = [];
     if (_productUnitsController.value == null || _productUnitsController.value.text == '') {
-      errorMessages.add('Invalid number of products.');
+      errorMessages.add('Invalid quantity.');
     }
 
     if (_tagCode == null) {
@@ -116,7 +118,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
     final int productUnits = int.tryParse(_productUnitsController.text);
     if (productUnits == null) {
-      errorMessages.add('Invalid Number of Product Units');
+      errorMessages.add('Invalid Quantity');
     }
 
     if (errorMessages.length != 0) {
@@ -152,11 +154,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     DialogResult result = await _showProductSavedDialog(savedProduct);
     if (result == DialogResult.Yes) {
       return;
-    } else if (result == DialogResult.No) {
-      int count = 0;
-      Navigator.popUntil(context, (route) {
-        return count++ == 2;
-      });
+    }
+
+    if (result == DialogResult.No) {
+      Navigator.pop(context);
       return;
     } else if (result == DialogResult.DoneTagging) {
       // must get latest landing from state
@@ -165,12 +166,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       for (Landing landing in _sourceLandings) {
         await _landingRepo.store(landing.copyWith(doneTagging: true));
       }
-
-      int count = 0;
-      Navigator.popUntil(context, (route) {
-        return count++ == 2;
-      });
     }
+    Navigator.pop(context);
+
   }
 
   _onPressDialogYes() {
@@ -206,7 +204,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   Future<DialogResult> _showProductSavedDialog(Product product) {
-    const actionStyle = TextStyle(fontSize: 26);
+    const actionStyle = TextStyle(fontSize: 26,color: Colors.white);
     return showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
@@ -221,13 +219,13 @@ class CreateProductScreenState extends State<CreateProductScreen> {
           ),
           Container(
             child: FlatButton(
-              child: Text('No', style: actionStyle),
+              child: Text('Not now', style: actionStyle),
               onPressed: _onPressDialogNo,
             ),
           ),
           Container(
             child: FlatButton(
-              child: Text('Tagging Completed', style: actionStyle),
+              child: Text('Completed', style: actionStyle),
               onPressed: _onPressDialogDone,
             ),
           ),
@@ -241,6 +239,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
               Icon(
                 Icons.check_circle_outline,
                 size: 50,
+                color: Colors.white,
               ),
               Text(
                 '${product.productType.name} Tag\n${product.tagCode}\nsaved!',
@@ -266,7 +265,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         children: <Widget>[
           TextFormField(
             decoration: InputDecoration(
-              labelText: 'Number of Product Units',
+              labelText: 'Quantity',
               labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               helperText: 'The total number of products associated with the tag',
             ),
@@ -364,7 +363,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     return true;
   }
 
-  Widget tagCode() {
+  Widget _tagCodeInput() {
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.symmetric(horizontal: 15),
@@ -418,7 +417,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                     //Product Type
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      child: _buildProductTypeDropdown(),
+                      child: _productTypeDropdown(),
                     ),
 
                     Container(
@@ -431,10 +430,14 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                             return DropdownMenuItem<PackagingType>(
                               value: packagingType,
                               child: Container(
-//                                color: bgColor,
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
                                     Text(packagingType.name),
+                                    OlracIcon(
+                                      assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
+                                      darker: true,
+                                    )
                                   ],
                                 ),
                               ),
@@ -452,8 +455,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                       child: _productUnitsTextInput(),
                     ),
                     // Tag code
-                    _productType == null || _packagingType == null ? Container() : tagCode(),
-
+                    _productType == null || _packagingType == null ? Container() : _tagCodeInput(),
+                    SizedBox(height: 10),
                     // Space for FAB
                   ],
                 ),

@@ -3,6 +3,16 @@ class SvgIcons {
   static const sharksPath = '$iconsPath/sharks';
 
   static const Map<String, String> _icons = {
+    // Packaging
+    'bag': '$iconsPath/packaging/bag.svg',
+    'basket': '$iconsPath/packaging/basket.svg',
+    'bin': '$iconsPath/packaging/bin.svg',
+    'box': '$iconsPath/packaging/box.svg',
+    'carton': '$iconsPath/packaging/carton.svg',
+    'drum': '$iconsPath/packaging/drum.svg',
+    'ring': '$iconsPath/packaging/ring.svg',
+    'unpacked': '$iconsPath/packaging/unpacked.svg',
+
     // Fishing methods
     'Beach seine': '$iconsPath/fishing_methods/Oltrace_Beach_Seine.svg',
     'Beam trawl': '$iconsPath/fishing_methods/Oltrace_Beam_Trawl.svg',

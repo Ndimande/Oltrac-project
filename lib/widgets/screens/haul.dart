@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
@@ -14,7 +16,6 @@ import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/haul/haul_info.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
@@ -29,14 +30,14 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
   final List<Landing> landings = await _landingRepo.forHaul(haul);
   final List<Landing> landingsWithProducts = [];
-  
+
   List<Product> flatProducts = [];
-  
+
   for (Landing landing in landings) {
     final List<Product> products = await _productRepo.forLanding(landing.id);
     for (Product product in products) {
       List foundProds = flatProducts.where((Product p) => p.id == product.id).toList();
-      if(foundProds.length == 0) {
+      if (foundProds.length == 0) {
         flatProducts.add(product);
       }
     }
@@ -75,63 +76,8 @@ class HaulScreenState extends State<HaulScreen> {
 
   Haul _haul;
   List<Product> _products;
-
+  List<Landing> _selectedLandings = [];
   bool _showProductList = false;
-
-  Widget _addLandingButton(Haul haul, BuildContext context) => StripButton(
-        centered: true,
-        icon: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-        color: Colors.green,
-        labelText: 'Species',
-        onPressed: () async => await _onPressAddLandingButton(haul, context),
-      );
-
-  Widget _addProductButton(Haul haul, BuildContext context) => StripButton(
-        centered: true,
-        icon: Icon(
-          Icons.local_offer,
-          color: Colors.white,
-        ),
-        color: olracBlue,
-        labelText: 'Tag',
-        onPressed: () async => await _onPressAddProductButton(haul, context),
-      );
-
-  Widget _bottomButtons(Haul haul) => Builder(
-        builder: (context) => Row(
-          children: <Widget>[
-            Expanded(child: _addLandingButton(haul, context)),
-            Expanded(child: _addProductButton(haul, context)),
-          ],
-        ),
-      );
-
-  Widget _noLandings() {
-    return Expanded(
-      child: Container(
-        alignment: Alignment.center,
-        child: Text(
-          'No species in this haul yet',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-    );
-  }
-
-  Widget _noProducts() {
-    return Expanded(
-      child: Container(
-        alignment: Alignment.center,
-        child: Text(
-          'No tags in this haul yet',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-    );
-  }
 
   void _onPressShowProductListSwitch(bool value) {
     setState(() {
@@ -149,15 +95,17 @@ class HaulScreenState extends State<HaulScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
-                Row(
-                  children: <Widget>[
-                    Text(_showProductList ? 'Show Species List' : 'Show Tags List'),
-                    Switch(
-                      onChanged: (bool v) => _onPressShowProductListSwitch(v),
-                      value: _showProductList,
-                    )
-                  ],
-                )
+                _products.length == 0
+                    ? Container()
+                    : Row(
+                        children: <Widget>[
+                          Text(_showProductList ? 'Show Species List' : 'Show Tags List'),
+                          Switch(
+                            onChanged: (bool v) => _onPressShowProductListSwitch(v),
+                            value: _showProductList,
+                          )
+                        ],
+                      )
               ],
             ),
             _showProductList ? _productList() : _landingsList(landings),
@@ -190,138 +138,6 @@ class HaulScreenState extends State<HaulScreen> {
     );
 
     setState(() {});
-  }
-
-  Widget _productList() {
-    if (_products.length == 0) {
-      return _noProducts();
-    }
-    final List<Widget> items = _products
-        .map((Product product) => ProductListItem(
-              product: product,
-              onPressed: () async => await _onPressProductListItem(product.id),
-            ))
-        .toList();
-    return Expanded(child: ListView(children: items));
-  }
-
-  Widget _landingsList(List<Landing> landings) {
-    if (landings.length == 0) {
-      return _noLandings();
-    }
-    int landingIndex = landings.length;
-
-    final List<LandingListItem> listLandings = landings.reversed
-        .map(
-          (Landing landing) => LandingListItem(
-            landing: landing,
-            onPressed: (int indexPressed) async =>
-                await _onPressLandingListItem(landing.id, indexPressed),
-            listIndex: landingIndex--,
-          ),
-        )
-        .toList();
-
-    return Expanded(
-      child: ListView(
-        children: listLandings,
-      ),
-    );
-  }
-
-  Future<void> _onPressAddLandingButton(Haul haul, BuildContext context) async {
-    final bool bulkMode = await _showAddSpeciesDialog(context);
-    if (bulkMode == null) {
-      return;
-    }
-    widget.sharedPrefs.setBool('bulkMode', bulkMode);
-    await Navigator.pushNamed(context, '/create_landing', arguments: haul);
-    setState(() {});
-  }
-
-  Future<bool> _showAddSpeciesDialog(BuildContext context) async {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Single'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          FlatButton(
-            child: Text('Bulk'),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-          FlatButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(null),
-          ),
-        ],
-        title: Text('Add Species'),
-        content: Text('How do you want to add species?'),
-      ),
-    );
-  }
-
-  Future<SpeciesSelectMode> _showAddProductDialog(BuildContext context) async {
-    return await showDialog<SpeciesSelectMode>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Single'),
-            onPressed: () => Navigator.of(_).pop(SpeciesSelectMode.Single),
-          ),
-          FlatButton(
-            child: Text('Mixed'),
-            onPressed: () => Navigator.of(_).pop(SpeciesSelectMode.Bulk),
-          ),
-          FlatButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(_).pop(SpeciesSelectMode.Cancel),
-          ),
-        ],
-        title: Text('Add Tag'),
-        content: Text('What product do you want to tag?'),
-      ),
-    );
-  }
-
-  Future<void> _onPressAddProductButton(Haul haul, context) async {
-    // todo temp until multi select is ready
-//    SpeciesSelectMode selection = await _showAddProductDialog(context);
-//    if (selection == SpeciesSelectMode.Cancel) {
-//      return;
-//    }
-
-    final List<Landing> selectedLandings = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddSourceLandingsScreen(
-          alreadySelectedLandings: [],
-          selectionMode: SpeciesSelectMode.Single,
-          sourceHaul: haul,
-        ),
-      ),
-    );
-    if (selectedLandings == null) {
-      return;
-    }
-    await Navigator.pushNamed(context, '/create_product',
-        arguments: {'haul': haul, 'landings': selectedLandings});
-  }
-
-  Widget _listsLabel(String text) {
-    return Container(
-      padding: EdgeInsets.only(left: 10, top: 10),
-      alignment: Alignment.centerLeft,
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 28, color: olracBlue),
-      ),
-    );
   }
 
   Future<void> _onPressCancelHaul() async {
@@ -357,9 +173,219 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
       await _haulRepo.store(endedHaul);
-      Navigator.pop(_scaffoldKey.currentContext);
+      showTextSnackBar(_scaffoldKey, 'Haul was ended', duration: Duration(seconds: 1));
+      setState(() {});
     }
   }
+
+  Future<void> _onPressAddBulkLanding() async {
+    widget.sharedPrefs.setBool('bulkMode', true);
+    await Navigator.pushNamed(context, '/create_landing', arguments: _haul);
+    setState(() {});
+  }
+
+  Future<void> _onPressAddLandingButton() async {
+    if (_haul.endedAt == null && _haul.fishingMethod.type == FishingMethodType.Dynamic) {
+      showTextSnackBar(_scaffoldKey,
+          'For dynamic fishing methods you must first end the haul before adding species.');
+      return;
+    }
+
+    widget.sharedPrefs.setBool('bulkMode', false);
+    await Navigator.pushNamed(context, '/create_landing', arguments: _haul);
+    setState(() {});
+  }
+
+  Future<void> _onPressTagProduct() async {
+    await Navigator.pushNamed(context, '/create_product',
+        arguments: {'haul': _haul, 'landings': _selectedLandings});
+  }
+
+  bool _landingIsSelected(Landing landing) {
+    final Landing found =
+        _selectedLandings.singleWhere((l) => l.id == landing.id, orElse: () => null);
+    return found == null ? false : true;
+  }
+
+  void _onLongPressLanding(int indexPressed) {
+    final landing = _haul.landings.singleWhere((l) => l.id == indexPressed);
+    setState(() {
+      if (_landingIsSelected(landing)) {
+        _selectedLandings.removeWhere((l) => l.id == landing.id);
+      } else {
+        _selectedLandings.add(landing);
+      }
+    });
+  }
+
+  Widget _productList() {
+    if (_products.length == 0) {
+      return _noProducts();
+    }
+    final List<Widget> items = _products
+        .map((Product product) => ProductListItem(
+              product: product,
+              onPressed: () async => await _onPressProductListItem(product.id),
+            ))
+        .toList();
+    return Expanded(child: ListView(children: items));
+  }
+
+  Widget _landingsList(List<Landing> landings) {
+    if (landings.length == 0) {
+      return _noLandings();
+    }
+    int landingIndex = landings.length;
+
+    final List<LandingListItem> listLandings = landings.reversed
+        .map(
+          (Landing landing) => LandingListItem(
+            isSelected: _landingIsSelected(landing),
+            landing: landing,
+            onLongPress: () => _onLongPressLanding(landing.id),
+            onPressed: (int indexPressed) async =>
+                await _onPressLandingListItem(landing.id, indexPressed),
+            listIndex: landingIndex--,
+          ),
+        )
+        .toList();
+
+    return Expanded(
+      child: ListView(
+        children: listLandings,
+      ),
+    );
+  }
+
+  Widget _addSingleLandingButton() => StripButton(
+        centered: true,
+        icon: Icon(
+          Icons.add_circle,
+          color: Colors.white,
+        ),
+        color: Colors.green,
+        labelText: 'Add Single',
+        onPressed: _onPressAddLandingButton,
+      );
+
+  Widget _addBulkLandingButton() => StripButton(
+        centered: true,
+        icon: Icon(
+          Icons.add_box,
+          color: Colors.white,
+        ),
+        color: olracBlue,
+        labelText: 'Add Bulk',
+        onPressed: _onPressAddBulkLanding,
+      );
+
+  Widget _cancelButton() => StripButton(
+        centered: true,
+        icon: Icon(
+          Icons.clear_all,
+          color: Colors.white,
+        ),
+        color: olracBlue,
+        labelText: 'Deselect',
+        onPressed: () {
+          setState(() {
+            _selectedLandings = [];
+          });
+        },
+      );
+
+  Widget _tagProductButton() => StripButton(
+        centered: true,
+        icon: Icon(
+          Icons.local_offer,
+          color: Colors.white,
+        ),
+        color: Colors.green,
+        labelText: 'Tag Product',
+        onPressed: _onPressTagProduct,
+      );
+
+  Widget _bottomButtons(Haul haul) {
+    if (_selectedLandings.length == 0) {
+      return Row(
+        children: <Widget>[
+          Expanded(child: _addSingleLandingButton()),
+          Expanded(child: _addBulkLandingButton()),
+        ],
+      );
+    }
+
+    return Row(
+      children: <Widget>[
+        Expanded(child: _tagProductButton()),
+        Expanded(child: _cancelButton()),
+      ],
+    );
+  }
+
+  Widget _noLandings() {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          'No species in this haul yet',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _noProducts() {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        child: Text(
+          'No tags in this haul yet',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _listsLabel(String text) {
+    return Container(
+      padding: EdgeInsets.only(left: 10, top: 10),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 22, color: olracBlue),
+      ),
+    );
+  }
+
+  Text _title() {
+    final int numberSelected = _selectedLandings.length;
+
+    if (_selectedLandings.length == 0) {
+      return Text('${_haul.fishingMethod.name} haul');
+    }
+
+    return Text('$numberSelected selected');
+  }
+
+  Widget _leading() => _selectedLandings.length != 0
+    ? IconButton(
+    onPressed: () {
+      setState(() {
+        _selectedLandings = [];
+      });
+    },
+    icon: Icon(
+      Icons.cancel,
+      color: Colors.white,
+    ),
+  )
+    : BackButton(
+    onPressed: () {
+      Navigator.pop(_scaffoldKey.currentContext);
+
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -383,7 +409,8 @@ class HaulScreenState extends State<HaulScreen> {
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
-            title: Text(_haul.fishingMethod.name),
+            title: _title(),
+            leading: _leading(),
           ),
           body: Container(
             child: Column(

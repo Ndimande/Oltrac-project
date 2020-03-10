@@ -73,6 +73,25 @@ Widget _drawerHeader(Profile profile) {
 class MainDrawer extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
 
+  Widget _listTile({IconData iconData, String text, Function onTap}) {
+    return Builder(
+      builder: (BuildContext context) {
+        return ListTile(
+          leading: Icon(
+            iconData,
+            color: olracBlue,
+            size: 36,
+          ),
+          title: Text(
+            text,
+            style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
+          ),
+          onTap: onTap,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -90,48 +109,19 @@ class MainDrawer extends StatelessWidget {
               height: 0,
               thickness: 5,
             ),
-
-            // Trip history
-            ListTile(
-              leading: Icon(
-                Icons.history,
-                color: olracBlue,
-                size: 36,
-              ),
-              title: Text(
-                'Trip History',
-                style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
-              ),
+            _listTile(
+              iconData: Icons.history,
+              text: 'Trip History',
               onTap: () => Navigator.pushNamed(context, '/trip_history'),
             ),
-
-            // Settings
-            ListTile(
-              leading: Icon(
-                Icons.settings,
-                color: olracBlue,
-                size: 36,
-              ),
-              title: Text(
-                'Settings',
-                style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
-              ),
-              onTap: () {
-                Navigator.pushNamed(context, '/settings');
-              },
+            _listTile(
+              iconData: Icons.settings,
+              text: 'Settings',
+              onTap: () => Navigator.pushNamed(context, '/settings'),
             ),
-
-            // About
-            ListTile(
-              leading: Icon(
-                Icons.info,
-                color: olracBlue,
-                size: 36,
-              ),
-              title: Text(
-                'About',
-                style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
-              ),
+            _listTile(
+              iconData: Icons.info,
+              text: 'About',
               onTap: () => Navigator.pushNamed(context, '/about'),
             ),
           ],

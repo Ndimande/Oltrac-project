@@ -10,11 +10,11 @@ class OlracIcon extends StatelessWidget {
   final bool darker;
 
   OlracIcon({
-    this.assetPath,
+    @required this.assetPath,
     this.width = 64,
     this.height = 64,
     this.darker = false,
-  });
+  }) : assert(assetPath != null);
 
   @override
   Widget build(BuildContext context) {

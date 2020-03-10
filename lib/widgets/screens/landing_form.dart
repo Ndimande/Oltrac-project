@@ -96,7 +96,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     return individuals;
   }
 
-  _onPressSaveButton(Haul haul, BuildContext context) async {
+  Future<void> _onPressSaveButton(Haul haul, BuildContext context) async {
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -154,8 +154,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
       await _landingRepo.store(landing);
 
-      bool createAnotherDialogResponse = await _showLandingSavedDialog(landing);
-
       setState(() {
         _selectedSpecies = null;
         _weightController.clear();
@@ -163,9 +161,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         _individualsController.clear();
       });
 
-      if (createAnotherDialogResponse == false) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     }
   }
 

@@ -5,10 +5,12 @@ import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
@@ -21,14 +23,20 @@ import 'package:oltrace/widgets/strip_button.dart';
 final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
+final _productRepo = ProductRepository();
 final _locationProvider = LocationProvider();
 
-Future<Trip> _getWithHaulsAndLandings(Trip trip) async {
+Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
   final List<Haul> hauls = [];
   for (Haul haul in activeTripHauls) {
     final List<Landing> landings = await _landingRepo.forHaul(haul);
-    hauls.add(haul.copyWith(landings: landings));
+    final List<Landing> landingWithProducts = [];
+    for(Landing landing in landings) {
+      final List<Product> products = await _productRepo.forLanding(landing.id);
+      landingWithProducts.add(landing.copyWith(products: products));
+    }
+    hauls.add(haul.copyWith(landings: landingWithProducts));
   }
   return trip.copyWith(hauls: hauls);
 }
@@ -37,13 +45,13 @@ Future<Map> _load() async {
   final Haul activeHaul = await _haulRepo.getActiveHaul();
   Trip activeTrip = await _tripRepo.getActive();
   if (activeTrip != null) {
-    activeTrip = await _getWithHaulsAndLandings(activeTrip);
+    activeTrip = await _getWithNested(activeTrip);
   }
 
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
   final List<Trip> tripsWithHauls = [];
   for (Trip trip in completedTrips) {
-    final Trip withNested = await _getWithHaulsAndLandings(trip);
+    final Trip withNested = await _getWithNested(trip);
     tripsWithHauls.add(withNested);
   }
 

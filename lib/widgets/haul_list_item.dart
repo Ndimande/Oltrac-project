@@ -50,6 +50,7 @@ class HaulListItem extends StatelessWidget {
         textStyle: TextStyle(fontSize: titleFontSize),
       );
 
+
   bool get isActiveHaul => haul.endedAt == null;
 
   @override
@@ -57,7 +58,6 @@ class HaulListItem extends StatelessWidget {
     return Container(
       decoration: new BoxDecoration(
           color: Colors.white, border: new Border(top: BorderSide(color: Colors.grey[300]))),
-//      color: listIndex % 2 == 1 ? olracBlue[50]: Colors.white,
       child: ListTile(
         onTap: () => onPressed(listIndex),
         leading: Column(
@@ -72,7 +72,7 @@ class HaulListItem extends StatelessWidget {
 //            title: cardTitle,
         title: isActiveHaul ? activeHaulTitle : completeHaulTitle,
         subtitle: HaulSubtitle(
-          haul: haul,
+          haul: haul
         ),
         trailing: Icon(
           Icons.add_circle,
