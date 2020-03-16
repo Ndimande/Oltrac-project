@@ -64,7 +64,7 @@ class TripHistoryScreen extends StatelessWidget {
         }
 
         _completedTrips = snapshot.data['completedTrips'] as List<Trip>;
-        final bool isActiveTrip = snapshot.data['isActiveTrip'];
+
         return Scaffold(
           appBar: AppBar(
             title: Text('Trip History'),

@@ -61,10 +61,9 @@ class LandingScreenState extends State<LandingScreen> {
   Future<void> _onPressTagProduct() async {
     final Haul haul = await HaulRepository().find(_landing.haulId);
 
-
     final List<Landing> landings = await _landingRepository.forHaul(haul);
     final List<Landing> withProducts = [];
-    for(Landing landing in landings) {
+    for (Landing landing in landings) {
       final List<Product> products = await _productRepository.forLanding(landing.id);
       withProducts.add(landing.copyWith(products: products));
     }
@@ -73,6 +72,7 @@ class LandingScreenState extends State<LandingScreen> {
       'landings': [_landing],
       'haul': haul.copyWith(landings: withProducts),
     });
+    setState(() {});
   }
 
   Widget get deleteButton => Expanded(
@@ -104,8 +104,7 @@ class LandingScreenState extends State<LandingScreen> {
   Future<void> _onPressDelete() async {
     bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
-      builder: (_) =>
-          ConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
+      builder: (_) => ConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
     );
     if (!confirmed) {
       return;
@@ -124,6 +123,19 @@ class LandingScreenState extends State<LandingScreen> {
     setState(() {});
   }
 
+  Future<void> _onPressDoneTagging() async {
+    if (_landing.products.length == 0) {
+      showTextSnackBar(_scaffoldKey, 'You must tag at least one');
+      return;
+    }
+    final bool doneTagging = !_landing.doneTagging;
+    await _landingRepo.store(_landing.copyWith(doneTagging: doneTagging));
+    setState(() {});
+    if (doneTagging == true) {
+      Navigator.pop(context);
+    }
+  }
+
   Widget _doneTaggingButton() {
     return StripButton(
       color: olracBlue,
@@ -133,14 +145,7 @@ class LandingScreenState extends State<LandingScreen> {
         _landing.doneTagging ? Icons.edit : Icons.check_circle,
         color: Colors.white,
       ),
-      onPressed: () async {
-        final bool updatedDoneTagging = !_landing.doneTagging;
-        await _landingRepo.store(_landing.copyWith(doneTagging: updatedDoneTagging));
-        setState(() {});
-        if(updatedDoneTagging == true) {
-          Navigator.pop(context);
-        }
-      },
+      onPressed: _onPressDoneTagging,
     );
   }
 
@@ -188,7 +193,9 @@ class LandingScreenState extends State<LandingScreen> {
       items.add(_tagProductButton());
     }
 
-    items.add(_doneTaggingButton());
+    if(_landing.products.length != 0) {
+      items.add(_doneTaggingButton());
+    }
 
     return Row(children: items.map((i) => Expanded(child: i)).toList());
   }
@@ -239,9 +246,8 @@ class LandingScreenState extends State<LandingScreen> {
                           margin: EdgeInsets.symmetric(vertical: 10),
                         ),
                         Container(
-                          child: _landing.products.length > 0
-                              ? ProductsList(products: _landing.products)
-                              : _noProducts(),
+                          child:
+                              _landing.products.length > 0 ? ProductsList(products: _landing.products) : _noProducts(),
                         ),
                       ],
                     ),

@@ -160,7 +160,7 @@ class HaulScreenState extends State<HaulScreen> {
       context: _scaffoldKey.currentContext,
       builder: (_) => ConfirmDialog(
         'End Haul',
-        'Are you sure you want to end the haul? You will not be able to continue later.',
+        'Are you sure you want to end the haul?',
       ),
     );
 
@@ -178,16 +178,25 @@ class HaulScreenState extends State<HaulScreen> {
     }
   }
 
+  void _showFirstEndDynamicHaulSnackbar() {
+    showTextSnackBar(_scaffoldKey, 'For dynamic fishing methods you must first end the haul before adding species.');
+  }
+
+  bool _isDynamicAndNotEnded() => _haul.endedAt == null && _haul.fishingMethod.type == FishingMethodType.Dynamic;
+
   Future<void> _onPressAddBulkLanding() async {
+    if (_isDynamicAndNotEnded()) {
+      _showFirstEndDynamicHaulSnackbar();
+      return;
+    }
     widget.sharedPrefs.setBool('bulkMode', true);
     await Navigator.pushNamed(context, '/create_landing', arguments: _haul);
     setState(() {});
   }
 
   Future<void> _onPressAddLandingButton() async {
-    if (_haul.endedAt == null && _haul.fishingMethod.type == FishingMethodType.Dynamic) {
-      showTextSnackBar(_scaffoldKey,
-          'For dynamic fishing methods you must first end the haul before adding species.');
+    if (_isDynamicAndNotEnded()) {
+      _showFirstEndDynamicHaulSnackbar();
       return;
     }
 
@@ -197,13 +206,14 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressTagProduct() async {
-    await Navigator.pushNamed(context, '/create_product',
-        arguments: {'haul': _haul, 'landings': _selectedLandings});
+    await Navigator.pushNamed(context, '/create_product', arguments: {'haul': _haul, 'landings': _selectedLandings});
+    setState(() {
+      _selectedLandings = [];
+    });
   }
 
   bool _landingIsSelected(Landing landing) {
-    final Landing found =
-        _selectedLandings.singleWhere((l) => l.id == landing.id, orElse: () => null);
+    final Landing found = _selectedLandings.singleWhere((l) => l.id == landing.id, orElse: () => null);
     return found == null ? false : true;
   }
 
@@ -243,8 +253,7 @@ class HaulScreenState extends State<HaulScreen> {
             isSelected: _landingIsSelected(landing),
             landing: landing,
             onLongPress: () => _onLongPressLanding(landing.id),
-            onPressed: (int indexPressed) async =>
-                await _onPressLandingListItem(landing.id, indexPressed),
+            onPressed: (int indexPressed) async => await _onPressLandingListItem(landing.id, indexPressed),
             listIndex: landingIndex--,
           ),
         )
@@ -279,7 +288,13 @@ class HaulScreenState extends State<HaulScreen> {
         onPressed: _onPressAddBulkLanding,
       );
 
-  Widget _cancelButton() => StripButton(
+  void _onPressDeselectButton() {
+    setState(() {
+      _selectedLandings = [];
+    });
+  }
+
+  Widget _deselectButton() => StripButton(
         centered: true,
         icon: Icon(
           Icons.clear_all,
@@ -287,11 +302,7 @@ class HaulScreenState extends State<HaulScreen> {
         ),
         color: olracBlue,
         labelText: 'Deselect',
-        onPressed: () {
-          setState(() {
-            _selectedLandings = [];
-          });
-        },
+        onPressed: _onPressDeselectButton,
       );
 
   Widget _tagProductButton() => StripButton(
@@ -318,7 +329,7 @@ class HaulScreenState extends State<HaulScreen> {
     return Row(
       children: <Widget>[
         Expanded(child: _tagProductButton()),
-        Expanded(child: _cancelButton()),
+        Expanded(child: _deselectButton()),
       ],
     );
   }
@@ -369,23 +380,22 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _leading() => _selectedLandings.length != 0
-    ? IconButton(
-    onPressed: () {
-      setState(() {
-        _selectedLandings = [];
-      });
-    },
-    icon: Icon(
-      Icons.cancel,
-      color: Colors.white,
-    ),
-  )
-    : BackButton(
-    onPressed: () {
-      Navigator.pop(_scaffoldKey.currentContext);
-
-    },
-  );
+      ? IconButton(
+          onPressed: () {
+            setState(() {
+              _selectedLandings = [];
+            });
+          },
+          icon: Icon(
+            Icons.cancel,
+            color: Colors.white,
+          ),
+        )
+      : BackButton(
+          onPressed: () {
+            Navigator.pop(_scaffoldKey.currentContext);
+          },
+        );
 
   @override
   Widget build(BuildContext context) {

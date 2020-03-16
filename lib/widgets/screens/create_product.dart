@@ -78,20 +78,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     });
   }
 
-  Widget _productTypeDropdown() {
-    return ModelDropdown<ProductType>(
-      selected: _productType,
-      label: 'Product Type',
-      onChanged: (ProductType pt) => setState(() => _productType = pt),
-      items: productTypes.map<DropdownMenuItem<ProductType>>((ProductType productType) {
-        return DropdownMenuItem<ProductType>(
-          value: productType,
-          child: Text(productType.name),
-        );
-      }).toList(),
-    );
-  }
-
   List<String> getValidationErrors() {
     List<String> errorMessages = [];
     if (_productUnitsController.value == null || _productUnitsController.value.text == '') {
@@ -113,7 +99,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     return errorMessages;
   }
 
-  _onPressSaveButton() async {
+  Future<void> _onPressSaveButton() async {
     final List<String> errorMessages = getValidationErrors();
 
     final int productUnits = int.tryParse(_productUnitsController.text);
@@ -139,8 +125,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
 
     // Create a product
-    final int savedProductId =
-        await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
+    final int savedProductId = await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
     final savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {
@@ -168,19 +153,42 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       }
     }
     Navigator.pop(context);
-
   }
 
-  _onPressDialogYes() {
+  void _onPressDialogYes() {
     Navigator.of(context).pop(DialogResult.Yes);
   }
 
-  _onPressDialogNo() {
+  void _onPressDialogNo() {
     Navigator.of(context).pop(DialogResult.No);
   }
 
-  _onPressDialogDone() {
+  void _onPressDialogDone() {
     Navigator.of(context).pop(DialogResult.DoneTagging);
+  }
+
+  bool hasChanged() {
+    return _tagCode != null;
+  }
+
+  Future<bool> get onWillPop async {
+    // Have things changed since the initial state?
+    final bool changed = hasChanged();
+
+    // If there are changes warn the user before navigating away
+    if (changed) {
+      bool confirmed = await showDialog<bool>(
+        context: _scaffoldKey.currentContext,
+        builder: (_) => ConfirmDialog(
+            'Cancel', 'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?'),
+      );
+
+      if (!confirmed) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Future<void> _onPressAddLanding() async {
@@ -204,7 +212,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   Future<DialogResult> _showProductSavedDialog(Product product) {
-    const actionStyle = TextStyle(fontSize: 26,color: Colors.white);
+    const actionStyle = TextStyle(fontSize: 26, color: Colors.white);
     return showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
@@ -294,8 +302,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       children: _sourceLandings
           .map<Widget>(
             (Landing sl) => Container(
-              decoration:
-                  new BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
+              decoration: new BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -318,49 +325,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
           )
           .toList(),
     );
-  }
-
-  StripButton get saveButton => StripButton(
-        icon: Icon(
-          Icons.save,
-          color: Colors.white,
-        ),
-        labelText: 'Save',
-        centered: true,
-        color: Colors.green,
-        onPressed: _onPressSaveButton,
-      );
-
-  StripButton get addSharkButton => StripButton(
-        centered: true,
-        color: olracBlue,
-        icon: Icon(Icons.save, color: Colors.white),
-        labelText: 'Add Species',
-        onPressed: _onPressAddLanding,
-      );
-
-  bool hasChanged() {
-    return _tagCode != null;
-  }
-
-  Future<bool> get onWillPop async {
-    // Have things changed since the initial state?
-    final bool changed = hasChanged();
-
-    // If there are changes warn the user before navigating away
-    if (changed) {
-      bool confirmed = await showDialog<bool>(
-        context: _scaffoldKey.currentContext,
-        builder: (_) => ConfirmDialog('Cancel',
-            'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?'),
-      );
-
-      if (!confirmed) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   Widget _tagCodeInput() {
@@ -393,6 +357,70 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
+  Widget _productTypeDropdown() {
+    return ModelDropdown<ProductType>(
+      selected: _productType,
+      label: 'Product Type',
+      onChanged: (ProductType pt) => setState(() => _productType = pt),
+      items: productTypes.map<DropdownMenuItem<ProductType>>((ProductType productType) {
+        return DropdownMenuItem<ProductType>(
+          value: productType,
+          child: Text(productType.name),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _packagingTypeDropdown() {
+    return ModelDropdown<PackagingType>(
+      label: 'Packaging Type',
+      selected: _packagingType,
+      items: packagingTypes.map<DropdownMenuItem<PackagingType>>(
+        (PackagingType packagingType) {
+          return DropdownMenuItem<PackagingType>(
+            value: packagingType,
+            child: Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(packagingType.name),
+                  OlracIcon(
+                    assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
+                    darker: true,
+                    width: 40,
+                    height: 40,
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      ).toList(),
+      onChanged: (PackagingType packagingType) {
+        setState(() => _packagingType = packagingType);
+      },
+    );
+  }
+
+  StripButton get saveButton => StripButton(
+        icon: Icon(
+          Icons.save,
+          color: Colors.white,
+        ),
+        labelText: 'Save',
+        centered: true,
+        color: Colors.green,
+        onPressed: _onPressSaveButton,
+      );
+
+  StripButton get addSharkButton => StripButton(
+        centered: true,
+        color: olracBlue,
+        icon: Icon(Icons.save, color: Colors.white),
+        labelText: 'Add Species',
+        onPressed: _onPressAddLanding,
+      );
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -420,40 +448,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                       child: _productTypeDropdown(),
                     ),
 
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: ModelDropdown<PackagingType>(
-                        label: 'Packaging Type',
-                        selected: _packagingType,
-                        items: packagingTypes.map<DropdownMenuItem<PackagingType>>(
-                          (PackagingType packagingType) {
-                            return DropdownMenuItem<PackagingType>(
-                              value: packagingType,
-                              child: Container(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Text(packagingType.name),
-                                    OlracIcon(
-                                      assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
-                                      darker: true,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ).toList(),
-                        onChanged: (PackagingType packagingType) {
-                          setState(() => _packagingType = packagingType);
-                        },
-                      ),
-                    ),
+                    // Packaging
+                    Container(padding: EdgeInsets.symmetric(horizontal: 15), child: _packagingTypeDropdown()),
 
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: _productUnitsTextInput(),
-                    ),
+                    // Quantity
+                    Container(padding: EdgeInsets.symmetric(horizontal: 15), child: _productUnitsTextInput()),
+
                     // Tag code
                     _productType == null || _packagingType == null ? Container() : _tagCodeInput(),
                     SizedBox(height: 10),

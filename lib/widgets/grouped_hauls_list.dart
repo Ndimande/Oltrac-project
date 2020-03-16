@@ -9,21 +9,21 @@ import 'package:oltrace/widgets/olrac_icon.dart';
 class GroupedHaulsList extends StatelessWidget {
   final List<Haul> hauls;
   final Function onPressHaul;
+  final Function(int,int) onPressHaulItem;
 
-  GroupedHaulsList({this.hauls, this.onPressHaul});
+  GroupedHaulsList({this.hauls, this.onPressHaul, this.onPressHaulItem});
 
   _onPressHaulListItem(context, Haul haul, int index) async {
-
+// todo lift this to the widget that holds state, pass a callback to this class onPressHaulListItem
     await Navigator.pushNamed(context, '/haul', arguments: {'haulId': haul.id, 'listIndex': index});
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> groupedByFishingMethod =
-        groupBy(hauls, (Haul haul) => haul.fishingMethod)
-            .entries
-            .map((entry) => {'fishingMethod': entry.key, 'hauls': entry.value})
-            .toList();
+    final List<Map<String, dynamic>> groupedByFishingMethod = groupBy(hauls, (Haul haul) => haul.fishingMethod)
+        .entries
+        .map((entry) => {'fishingMethod': entry.key, 'hauls': entry.value})
+        .toList();
 
     return ListView.builder(
         addSemanticIndexes: true,
@@ -66,8 +66,7 @@ class GroupedHaulsList extends StatelessWidget {
             children: fishingMethodGroup['hauls']
                 .map<Widget>((Haul haul) => HaulListItem(
                       haul: haul,
-                      onPressed: (int pressedIndex) async =>
-                          await _onPressHaulListItem(context, haul, pressedIndex),
+                      onPressed: (int pressedIndex) async => await onPressHaulItem(haul.id, pressedIndex),
                       listIndex: haulIndex--,
                     ))
                 .toList(),

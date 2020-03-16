@@ -4,8 +4,9 @@ import 'package:oltrace/widgets/grouped_hauls_list.dart';
 
 class HaulSection extends StatelessWidget {
   final List<Haul> hauls;
+  final Function(int,int) onPressHaulItem;
 
-  HaulSection({this.hauls}) :assert(hauls != null);
+  HaulSection({this.hauls, this.onPressHaulItem}) : assert(hauls != null);
 
   Widget _buildNoHauls() {
     return Container(
@@ -22,7 +23,9 @@ class HaulSection extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Container(
-            child: reversedHauls.length == 0 ? _buildNoHauls() : GroupedHaulsList(hauls: reversedHauls),
+            child: reversedHauls.length == 0
+                ? _buildNoHauls()
+                : GroupedHaulsList(hauls: reversedHauls, onPressHaulItem: onPressHaulItem),
           ),
         )
       ],

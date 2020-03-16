@@ -94,10 +94,12 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<FishingMethod> _selectFishingMethod() async {
-    return await Navigator.push<FishingMethod>(
+    final fm = await Navigator.push<FishingMethod>(
       context,
       MaterialPageRoute(builder: (context) => FishingMethodScreen()),
     );
+    setState(() {});
+    return fm;
   }
 
   Future<void> _onPressStartHaul() async {
@@ -164,13 +166,13 @@ class MainScreenState extends State<MainScreen> {
       final Location location = await _locationProvider.location;
       _scaffoldKey.currentState.hideCurrentSnackBar();
       final trip = Trip(startedAt: DateTime.now(), startLocation: location);
-      await _tripRepo.store(trip);
+      final int id = await _tripRepo.store(trip);
       setState(() {});
+      showTextSnackBar(_scaffoldKey, 'Trip $id has started');
     } catch (e) {
       _scaffoldKey.currentState.hideCurrentSnackBar();
       showTextSnackBar(_scaffoldKey, Messages.LOCATION_NOT_AVAILABLE);
     }
-    showTextSnackBar(_scaffoldKey, 'Trip has started');
   }
 
   Future<void> _onPressCancelTrip(bool hasActiveHaul) async {
@@ -205,6 +207,7 @@ class MainScreenState extends State<MainScreen> {
       final Location location = await _locationProvider.location;
       final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
       await _tripRepo.store(endedTrip);
+      showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} has been ended');
       setState(() {});
     }
   }
@@ -255,7 +258,10 @@ class MainScreenState extends State<MainScreen> {
                       onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
                       onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
                     ),
-                    Expanded(child: HaulSection(hauls: activeTrip.hauls)),
+                    Expanded(child: HaulSection(hauls: activeTrip.hauls, onPressHaulItem: (int id, int index) async {
+                      await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
+                      setState(() {});
+                    },)),
                     StripButton(
                       centered: true,
                       labelText: labelText,

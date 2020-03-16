@@ -7,6 +7,7 @@ import 'package:oltrace/stores/app_store.dart';
 class AboutScreen extends StatelessWidget {
   final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   String get copyright {
     final year = DateTime.now().year;
     return '© $year OLSPS Marine';

@@ -22,7 +22,7 @@ class LandingListItem extends StatelessWidget {
         assert(onPressed != null),
         assert(listIndex != null);
 
-  Text get speciesName => Text(
+  Text get _speciesName => Text(
         landing.species.englishName,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -30,10 +30,10 @@ class LandingListItem extends StatelessWidget {
 
   Text get individuals => Text(' (${landing.individuals})');
 
-  Widget get cardTitle {
+  Widget get _title {
     final firstRow = <Widget>[
       Flexible(
-        child: speciesName,
+        child: _speciesName,
       )
     ];
 
@@ -52,17 +52,19 @@ class LandingListItem extends StatelessWidget {
         ],
       );
 
+  Widget get _icon => isSelected ? Icon(Icons.check_circle, color: olracBlue, size: 30) : ForwardArrow();
+
+  BoxDecoration get _decoration => BoxDecoration(
+        color: isSelected ? olracBlue[50] : Colors.transparent,
+        border: listIndex == 1
+            ? Border(bottom: BorderSide(color: Colors.grey[300]), top: BorderSide(color: Colors.grey[300]))
+            : Border(top: BorderSide(color: Colors.grey[300])),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: isSelected ? olracBlue[50] : Colors.transparent,
-        border: listIndex == 1
-              ? Border(
-                  bottom: BorderSide(color: Colors.grey[300]),
-                  top: BorderSide(color: Colors.grey[300]))
-              : Border(top: BorderSide(color: Colors.grey[300]))),
-      padding: EdgeInsets.all(0),
+      decoration: _decoration,
       child: ListTile(
         onLongPress: onLongPress,
         onTap: () => onPressed(listIndex),
@@ -70,13 +72,10 @@ class LandingListItem extends StatelessWidget {
           landing: landing,
           listIndex: listIndex,
         ),
-        title: cardTitle,
+        title: _title,
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            subtitle,
-            ForwardArrow(),
-          ],
+          children: <Widget>[subtitle, _icon],
         ),
       ),
     );
