@@ -37,8 +37,8 @@ class Trip extends Model {
       : startedAt = data['startedAt'] != null ? DateTime.parse(data['startedAt']) : null,
         endedAt = data['endedAt'] != null ? DateTime.parse(data['endedAt']) : null,
         hauls = (data['hauls'] as List).map((haul) => Haul.fromMap(haul)).toList(),
-        startLocation = Location.fromMap(data['endLocation']),
-        endLocation = Location.fromMap(data['startLocation']),
+        startLocation = Location.fromMap(data['startLocation']),
+        endLocation = Location.fromMap(data['endLocation']),
         isUploaded = data['isUploaded'],
         super.fromMap(data);
 

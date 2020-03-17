@@ -32,6 +32,8 @@ class AppConfig {
     'bulkMode': false,
   };
 
+  static const MAX_HISTORY_SELECTABLE = const Duration(days: 100);
+
   /// The sqlite database filename
   static const databaseFilename = 'oltrace.db';
 

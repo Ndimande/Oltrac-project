@@ -13,6 +13,7 @@ import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
+import 'package:oltrace/widgets/screens/edit_trip.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/main/drawer.dart';
 import 'package:oltrace/widgets/screens/main/haul_section.dart';
@@ -32,7 +33,7 @@ Future<Trip> _getWithNested(Trip trip) async {
   for (Haul haul in activeTripHauls) {
     final List<Landing> landings = await _landingRepo.forHaul(haul);
     final List<Landing> landingWithProducts = [];
-    for(Landing landing in landings) {
+    for (Landing landing in landings) {
       final List<Product> products = await _productRepo.forLanding(landing.id);
       landingWithProducts.add(landing.copyWith(products: products));
     }
@@ -77,15 +78,14 @@ class MainScreenState extends State<MainScreen> {
   List<Trip> completedTrips;
 
   Widget _appBar() {
-    final title =
-        activeTrip != null ? activeHaul != null ? 'Hauling...' : 'Active Trip' : 'Completed Trips';
+    final title = activeTrip != null ? activeHaul != null ? 'Hauling...' : 'Active Trip' : 'Completed Trips';
     return AppBar(
-      actions: <Widget>[appBarDate],
+      actions: <Widget>[_appBarDate],
       title: Text(title),
     );
   }
 
-  Widget get appBarDate {
+  Widget get _appBarDate {
     return Container(
       margin: EdgeInsets.only(right: 10),
       alignment: Alignment.center,
@@ -152,11 +152,10 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _onPressHaulActionButton() async {
-    if (activeHaul != null) {
+    if (activeHaul != null)
       await _onPressEndHaul();
-    } else {
+    else
       await _onPressStartHaul();
-    }
   }
 
   Future<void> _onPressStartTripButton() async {
@@ -193,8 +192,7 @@ class MainScreenState extends State<MainScreen> {
 
   Future<void> _onPressEndTrip(bool hasActiveHaul) async {
     if (hasActiveHaul) {
-      _scaffoldKey.currentState
-          .showSnackBar(SnackBar(content: Text('You must first end the haul')));
+      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('You must first end the haul')));
       return;
     }
 
@@ -212,6 +210,17 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<void> _onPressEditTrip() async {
+    final EditTripResult result = await Navigator.push(
+      _scaffoldKey.currentContext,
+      MaterialPageRoute(builder: (_) => EditTripScreen(activeTrip)),
+    );
+
+    if (result == EditTripResult.TripCanceled)
+      showTextSnackBar(_scaffoldKey, 'Trip canceled');
+    else if (result == EditTripResult.Updated) showTextSnackBar(_scaffoldKey, 'Trip updated');
+  }
+
   Future<bool> _onWillPop() async {
     return false;
   }
@@ -224,13 +233,10 @@ class MainScreenState extends State<MainScreen> {
         future: _load(),
         initialData: null,
         builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
-          if (snapshot.hasError) {
-            throw Exception(snapshot.error.toString());
-          }
+          if (snapshot.hasError) throw Exception(snapshot.error.toString());
+
           // Show blank screen until ready
-          if (!snapshot.hasData) {
-            return Scaffold();
-          }
+          if (!snapshot.hasData) return Scaffold();
 
           activeTrip = snapshot.data['activeTrip'] as Trip;
           activeHaul = snapshot.data['activeHaul'] as Haul;
@@ -257,11 +263,17 @@ class MainScreenState extends State<MainScreen> {
                       hasActiveHaul: activeHaul != null,
                       onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
                       onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
+                      onPressEditTrip: _onPressEditTrip,
                     ),
-                    Expanded(child: HaulSection(hauls: activeTrip.hauls, onPressHaulItem: (int id, int index) async {
-                      await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
-                      setState(() {});
-                    },)),
+                    Expanded(
+                      child: HaulSection(
+                        hauls: activeTrip.hauls,
+                        onPressHaulItem: (int id, int index) async {
+                          await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
+                          setState(() {});
+                        },
+                      ),
+                    ),
                     StripButton(
                       centered: true,
                       labelText: labelText,

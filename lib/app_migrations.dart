@@ -8,15 +8,15 @@ final List<Map<String, String>> appMigrations = const [
         ')',
     'down': 'DROP TABLE json'
   },
-  // {
-  //   'name': 'create_error_log_table',
-  //   'up': 'CREATE TABLE error_log ( '
-  //       'id int PRIMARY KEY, '
-  //       'created_at TIMESTAMP NOT NULL, '
-  //       'message TEXT NOT NULL '
-  //       ')',
-  //   'down': 'DROP TABLE json'
-  // },
+   {
+     'name': 'create_log_table',
+     'up': 'CREATE TABLE log ( '
+         'id int PRIMARY KEY, '
+         'created_at TIMESTAMP NOT NULL, '
+         'message TEXT NOT NULL '
+         ')',
+     'down': 'DROP TABLE log'
+   },
   {
     'name': 'create_trips_table',
     'up': 'CREATE TABLE trips ( '
@@ -54,8 +54,8 @@ final List<Map<String, String>> appMigrations = const [
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'haul_id INTEGER NOT NULL, '
         'species_code TEXT NOT NULL, '
-        'weight_unit TEXT NOT NULL, ' // grams / ounces
-        'length_unit TEXT NOT NULL, ' // cm / inches
+        'weight_unit TEXT NOT NULL, '
+        'length_unit TEXT NOT NULL, '
         'weight INTEGER NOT NULL, '
         'length INTEGER NOT NULL, '
         'individuals INTEGER NOT NULL DEFAULT 1, '

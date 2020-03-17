@@ -12,12 +12,15 @@ class TripSection extends StatelessWidget {
   final bool hasActiveHaul;
   final Function onPressEndTrip;
   final Function onPressCancelTrip;
+  final Function onPressEditTrip;
 
-  TripSection({this.trip, this.hasActiveHaul,this.onPressEndTrip,this.onPressCancelTrip});
-
-  _onPressEditTrip(BuildContext context) async {
-    await Navigator.pushNamed(context, '/edit_trip', arguments: trip);
-  }
+  TripSection({
+    this.trip,
+    this.hasActiveHaul,
+    this.onPressEndTrip,
+    this.onPressCancelTrip,
+    this.onPressEditTrip,
+  });
 
   Widget get endTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
@@ -50,7 +53,7 @@ class TripSection extends StatelessWidget {
           centered: true,
           labelText: 'Edit',
           color: olracBlue,
-          onPressed: () async => await _onPressEditTrip(context),
+          onPressed: onPressEditTrip,
           icon: Icon(
             Icons.edit,
             color: Colors.white,
@@ -95,17 +98,13 @@ class TripSection extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(10),
             child: Row(
-              children: <Widget>[
-                NumberedBoat(number: trip.id),
-                SizedBox(width: 5),
-                tripInfo
-              ],
+              children: <Widget>[NumberedBoat(number: trip.id), SizedBox(width: 5), tripInfo],
             ),
           ),
           Row(
             children: <Widget>[
               Expanded(child: endTripButton),
-              Expanded(child: cancelTripButton),
+              Expanded(child: editTripButton),
             ],
           )
         ],

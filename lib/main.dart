@@ -211,11 +211,6 @@ class OlTraceAppState extends State<OlTraceApp> {
 
             return MaterialPageRoute(builder: (_) => TripScreen(tripId: trip.id));
 
-          case '/edit_trip':
-            final Trip trip = settings.arguments;
-
-            return MaterialPageRoute(builder: (_) => EditTripScreen(trip));
-
           case '/haul':
             final Map args = settings.arguments as Map<String, dynamic>;
             final int haulId = args['haulId'] as int;

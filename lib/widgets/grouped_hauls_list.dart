@@ -13,11 +13,6 @@ class GroupedHaulsList extends StatelessWidget {
 
   GroupedHaulsList({this.hauls, this.onPressHaul, this.onPressHaulItem});
 
-  _onPressHaulListItem(context, Haul haul, int index) async {
-// todo lift this to the widget that holds state, pass a callback to this class onPressHaulListItem
-    await Navigator.pushNamed(context, '/haul', arguments: {'haulId': haul.id, 'listIndex': index});
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> groupedByFishingMethod = groupBy(hauls, (Haul haul) => haul.fishingMethod)

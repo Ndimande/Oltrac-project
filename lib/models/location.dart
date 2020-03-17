@@ -1,9 +1,7 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:oltrace/framework/model.dart';
+import 'package:oltrace/models/coordinate.dart';
 
 @immutable
 class Location extends Model {
@@ -18,14 +16,18 @@ class Location extends Model {
     @required this.longitude,
   });
 
-  String get sexagesimalLat {
-    final direction = latitude >= 0 ? "N" : "S";
-    return _decimal2sexagesimal(latitude) + ' ' + direction;
+  String get sexagesimalLatitude {
+    return Coordinate.fromDecimal(
+      decimalValue: latitude,
+      coordinateOrientation: CoordinateOrientation.Latitude,
+    ).sexagesimalString;
   }
 
-  String get sexagesimalLon {
-    final direction = longitude >= 0 ? "E" : "W";
-    return _decimal2sexagesimal(longitude) + ' ' + direction;
+  String get sexagesimalLongitude {
+    return Coordinate.fromDecimal(
+      decimalValue: longitude,
+      coordinateOrientation: CoordinateOrientation.Longitude,
+    ).sexagesimalString;
   }
 
   Location.fromPosition(Position position)
@@ -33,13 +35,13 @@ class Location extends Model {
         longitude = position.longitude;
 
   @override
-  String toString() => "$sexagesimalLat, $sexagesimalLon";
+  String toString() => "$sexagesimalLatitude, $sexagesimalLongitude";
 
-  String toMultilineString() => "$sexagesimalLat\n $sexagesimalLon";
+  String toMultilineString() => "$sexagesimalLatitude\n $sexagesimalLongitude";
 
   @override
   Model copyWith({double latitude, double longitude}) {
-    return Location(latitude: latitude, longitude: longitude);
+    return Location(latitude: latitude ?? this.latitude, longitude: longitude ?? this.longitude);
   }
 
   Location.fromMap(Map data)
@@ -60,30 +62,26 @@ class Location extends Model {
 ///     final String sexa1 = _decimal2sexagesimal(51.519475);
 ///     expect(sexa1, '51° 31\' 10.11"');
 ///
-String _decimal2sexagesimal(final double dec) {
-  List<int> _split(final double value) {
-    // NumberFormat is necessary to create digit after comma if the value
-    // has no decimal point (only necessary for browser)
-    final List<String> tmp =
-        new NumberFormat("0.0#####").format(_round(value, decimals: 10)).split('.');
-    return <int>[int.parse(tmp[0]).abs(), int.parse(tmp[1])];
-  }
-
-  final List<int> parts = _split(dec);
-  final int integerPart = parts[0];
-  final int fractionalPart = parts[1];
-
-  final int deg = integerPart;
-  final double min = double.parse("0.$fractionalPart") * 60;
-
-  final List<int> minParts = _split(min);
-  final int minFractionalPart = minParts[1];
-
-  final double sec = double.parse("0.$minFractionalPart") * 60;
-
-  return "$deg° ${min.floor()}' ${_round(sec, decimals: 2).toStringAsFixed(2)}\"";
-}
-
-/// Rounds [value] to given number of [decimals]
-double _round(final double value, {final int decimals: 6}) =>
-    (value * math.pow(10, decimals)).round() / math.pow(10, decimals);
+//String _decimal2sexagesimal(final double dec) {
+//  List<int> _split(final double value) {
+//    // NumberFormat is necessary to create digit after comma if the value
+//    // has no decimal point (only necessary for browser)
+//    final List<String> tmp =
+//        new NumberFormat("0.0#####").format(roundDouble(value, decimals: 10)).split('.');
+//    return <int>[int.parse(tmp[0]).abs(), int.parse(tmp[1])];
+//  }
+//
+//  final List<int> parts = _split(dec);
+//  final int integerPart = parts[0];
+//  final int fractionalPart = parts[1];
+//
+//  final int deg = integerPart;
+//  final double min = double.parse("0.$fractionalPart") * 60;
+//
+//  final List<int> minParts = _split(min);
+//  final int minFractionalPart = minParts[1];
+//
+//  final double sec = double.parse("0.$minFractionalPart") * 60;
+//
+//  return "$deg° ${min.floor()}' ${roundDouble(sec, decimals: 2).toStringAsFixed(2)}\"";
+//}

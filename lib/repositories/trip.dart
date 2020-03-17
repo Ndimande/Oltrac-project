@@ -105,8 +105,8 @@ class TripRepository extends DatabaseRepository<Trip> {
       'ended_at': trip.endedAt == null ? null : trip.endedAt.toIso8601String(),
       'start_latitude': trip.startLocation.latitude,
       'start_longitude': trip.startLocation.longitude,
-      'end_latitude': trip.startLocation.latitude,
-      'end_longitude': trip.startLocation.longitude,
+      'end_latitude': trip.endLocation?.latitude,
+      'end_longitude': trip.endLocation?.longitude,
       'is_uploaded': trip.isUploaded
     };
   }

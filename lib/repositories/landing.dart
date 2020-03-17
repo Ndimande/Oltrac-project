@@ -28,6 +28,12 @@ class LandingRepository extends DatabaseRepository<Landing> {
     return landing;
   }
 
+  @override
+  Future<void> delete(int id) async {
+    await database.delete(tableName, where: 'id = $id');
+    await database.delete('product_has_landings', where: 'landing_id = $id');
+  }
+
   Future<List<Landing>> forHaul(Haul haul) async {
     final List<Map> results = await database.query(tableName, where: 'haul_id = ${haul.id}');
     List landings = <Landing>[];
@@ -39,8 +45,7 @@ class LandingRepository extends DatabaseRepository<Landing> {
   }
 
   Future<List<Landing>> forProduct(Product product) async {
-    final List<Map> results =
-        await database.query('product_has_landings', where: 'product_id = ${product.id}');
+    final List<Map> results = await database.query('product_has_landings', where: 'product_id = ${product.id}');
 
     List landings = <Landing>[];
     for (Map<String, dynamic> result in results) {
@@ -89,8 +94,7 @@ class LandingRepository extends DatabaseRepository<Landing> {
       lengthUnit: lengthUnit,
       weightUnit: weightUnit,
       individuals: result['individuals'],
-      species:
-          speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
+      species: speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
       doneTagging: result['done_tagging'] == 1 ? true : false,
     );
   }
