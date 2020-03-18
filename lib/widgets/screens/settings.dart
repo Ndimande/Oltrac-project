@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/user_settings.dart';
 
 final double _fontSize = 20;
@@ -62,6 +63,15 @@ class SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               _buildAllowMobile(),
               _buildAutoUpload(),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: Text(
+                  'These settings can not be changed in this version. They will become available in a future version.',
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
             ],
           ),
         ));

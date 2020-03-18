@@ -52,7 +52,7 @@ class AboutScreen extends StatelessWidget {
                   highlightColor: olracBlue,
                   child: Icon(Icons.arrow_back, color: olracBlue),
                   onPressed: _onPressBackButton,
-                  onLongPress: AppConfig.debugMode ? _onLongPressBackButton : null,
+                  onLongPress: _onLongPressBackButton,
                 ),
               )
             ],

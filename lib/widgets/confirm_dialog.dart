@@ -4,7 +4,7 @@ final double _actionFontSize = 22;
 
 Text _actionText(String text) => Text(
       text,
-      style: TextStyle(fontSize: _actionFontSize),
+      style: TextStyle(fontSize: _actionFontSize, color: Colors.white),
     );
 
 class ConfirmDialog extends StatelessWidget {

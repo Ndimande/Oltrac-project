@@ -9,9 +9,11 @@ import 'package:oltrace/widgets/olrac_icon.dart';
 class GroupedHaulsList extends StatelessWidget {
   final List<Haul> hauls;
   final Function onPressHaul;
-  final Function(int,int) onPressHaulItem;
+  final Function(int, int) onPressHaulItem;
 
-  GroupedHaulsList({this.hauls, this.onPressHaul, this.onPressHaulItem});
+  GroupedHaulsList({this.hauls, this.onPressHaul, this.onPressHaulItem})
+      : assert(hauls != null),
+        assert(onPressHaulItem != null);
 
   @override
   Widget build(BuildContext context) {

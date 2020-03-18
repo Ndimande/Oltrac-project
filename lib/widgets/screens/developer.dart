@@ -91,17 +91,27 @@ class DeveloperScreenState extends State<DeveloperScreen> {
   }
 
   Widget _buildReset() {
-    return RaisedButton(
-      color: Colors.red,
-      onPressed: () {
-        showTextSnackBar(_scaffoldKey, 'Press and hold to reset');
-      },
-      onLongPress: () async {
-        await _resetDatabase();
-        await Navigator.of(context)
-            .pushNamedAndRemoveUntil('/welcome', (Route<dynamic> route) => false);
-      },
-      child: Text('Reset App'),
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        children: <Widget>[
+          Text(
+            'Tap and hold the button to reset the app.\nWarning! All data will be deleted!',
+            textAlign: TextAlign.center,
+          ),
+          RaisedButton(
+            color: Colors.red,
+            onPressed: () {
+              showTextSnackBar(_scaffoldKey, 'Press and hold to reset');
+            },
+            onLongPress: () async {
+              await _resetDatabase();
+              await Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (Route<dynamic> route) => false);
+            },
+            child: Text('Reset App'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -110,7 +120,7 @@ class DeveloperScreenState extends State<DeveloperScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Developer'),
+        title: Text('Diagnostics'),
       ),
       body: FutureBuilder(
         future: _load(),

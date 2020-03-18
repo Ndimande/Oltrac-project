@@ -11,8 +11,6 @@ import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/providers/database.dart';
-import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
@@ -23,7 +21,6 @@ import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
-import 'package:path_provider/path_provider.dart';
 
 final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
@@ -124,7 +121,7 @@ class TripScreenState extends State<TripScreen> {
       );
 
   Widget uploadButton(Trip trip) {
-    final label = trip.isUploaded ? 'Upload Complete' : 'Upload Trip';
+    final label = trip.isUploaded ? 'Uploaded' : 'Upload Trip';
     final Function onPress = trip.isUploaded ? null : () async => await onPressUpload(trip);
     return StripButton(
       centered: true,
@@ -241,7 +238,13 @@ class TripScreenState extends State<TripScreen> {
                 _buildTripInfo(_trip),
                 Expanded(
                   child: _trip.hauls.length > 0
-                      ? GroupedHaulsList(hauls: _trip.hauls.reversed.toList())
+                      ? GroupedHaulsList(
+                          hauls: _trip.hauls.reversed.toList(),
+                          onPressHaulItem: (int id, int index) async {
+                            await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
+                            setState(() {});
+                          },
+                        )
                       : noHauls,
                 ),
                 mainButton
