@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 class LandingIcon extends StatelessWidget {
   final Landing landing;
@@ -10,7 +10,7 @@ class LandingIcon extends StatelessWidget {
 
   LandingIcon({this.landing, this.listIndex});
 
-  Widget get sharkIcon => OlracIcon(assetPath: SvgIcons.path('Shark'));
+  Widget get sharkIcon => SvgIcon(assetPath: SvgIcons.path('Shark'));
 
   Widget get indexNumber => Container(
         margin: EdgeInsets.only(left: 5, top: 5),
@@ -20,18 +20,25 @@ class LandingIcon extends StatelessWidget {
         ),
       );
 
-  Widget get tagTotalIcon {
-    IconData icon = Icons.local_offer;
-    Color tagColor = landing.doneTagging == true
-        ? Colors.green
-        : landing.products.length == 0 ? Colors.red : olracBlue;
+  Color get _tagColor {
+    if (landing.doneTagging == true) {
+      return landing.isBulk ? Colors.green : Colors.lightGreen;
+    }
 
+    if (landing.products.isEmpty) {
+      return landing.isBulk ? Colors.red : Colors.redAccent;
+    }
+
+    return landing.isBulk ? olracDarkBlue : olracBlue;
+  }
+
+  Widget get tagTotalIcon {
     final stackChildren = <Widget>[
       Container(
         child: Icon(
-          icon,
+          Icons.local_offer,
           size: 42,
-          color: tagColor,
+          color: _tagColor,
         ),
       ),
       Container(

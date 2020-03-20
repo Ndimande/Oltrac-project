@@ -11,7 +11,6 @@ import 'package:oltrace/widgets/time_ago.dart';
 const double titleFontSize = 16;
 
 class HaulListItem extends StatelessWidget {
-
   final Haul haul;
   final Function onPressed;
   final int listIndex;
@@ -50,14 +49,12 @@ class HaulListItem extends StatelessWidget {
         textStyle: TextStyle(fontSize: titleFontSize),
       );
 
-
   bool get isActiveHaul => haul.endedAt == null;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: new BoxDecoration(
-          color: Colors.white, border: new Border(top: BorderSide(color: Colors.grey[300]))),
+      decoration: new BoxDecoration(color: Colors.white, border: new Border(top: BorderSide(color: Colors.grey[300]))),
       child: ListTile(
         onTap: () => onPressed(listIndex),
         leading: Column(
@@ -69,10 +66,12 @@ class HaulListItem extends StatelessWidget {
             ),
           ],
         ),
-//            title: cardTitle,
         title: isActiveHaul ? activeHaulTitle : completeHaulTitle,
         subtitle: HaulSubtitle(
-          haul: haul
+          startedAt: haul.startedAt,
+          endedAt: haul.endedAt,
+          totalWeight: haul.totalWeight,
+          totalProducts: haul.products.length,
         ),
         trailing: Icon(
           Icons.add_circle,

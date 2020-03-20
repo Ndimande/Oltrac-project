@@ -12,8 +12,8 @@ import 'package:oltrace/models/species.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 const textFieldTextStyle = TextStyle(fontSize: 20, color: olracBlue);
 
@@ -58,16 +58,15 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   bool _bulkMode;
 
   LandingFormScreenState({this.haul, this.landingArg})
-      : _weightController = TextEditingController(
-            text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
-        _lengthController = TextEditingController(
-            text: landingArg != null ? (landingArg.length / 10000).toString() : null),
-        _individualsController = TextEditingController(
-            text: landingArg != null ? landingArg?.individuals.toString() : null),
+      : _weightController =
+            TextEditingController(text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
+        _lengthController =
+            TextEditingController(text: landingArg != null ? (landingArg.length / 10000).toString() : null),
+        _individualsController =
+            TextEditingController(text: landingArg != null ? landingArg?.individuals.toString() : null),
         _selectedSpecies = landingArg?.species,
-        _bulkMode = landingArg != null
-            ? landingArg.individuals > 1 ? true : false
-            : sharedPrefs.getBool('bulkMode') ?? false;
+        _bulkMode =
+            landingArg != null ? landingArg.individuals > 1 ? true : false : sharedPrefs.getBool('bulkMode') ?? false;
 
   bool get isEditMode => landingArg != null;
 
@@ -165,52 +164,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     }
   }
 
-  Future<bool> _showLandingSavedDialog(Landing landing) {
-    const actionTextStyle = TextStyle(fontSize: 26);
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        contentPadding: EdgeInsets.all(15),
-        actions: <Widget>[
-          Container(
-            margin: EdgeInsets.only(right: 60),
-            child: FlatButton(
-              child: Text('Yes', style: actionTextStyle),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ),
-          Container(
-            child: FlatButton(
-              child: Text('No', style: actionTextStyle),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-          ),
-        ],
-        content: Container(
-          height: 250,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.check_circle_outline, size: 50),
-              Text(
-                '${landing.species.englishName} saved!',
-                style: TextStyle(fontSize: 26),
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                'Do you want to add another?',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _individualsTextInput() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 15),
@@ -245,43 +198,17 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     );
   }
 
-  void _changeBulkMode() {
-    setState(() {
-      _bulkMode = !_bulkMode;
-    });
-    sharedPrefs.setBool('bulkMode', _bulkMode);
-    _individualsController.clear();
-  }
-
-  Widget _bulkModeButtonSwitch() {
-    return FlatButton(
-      onPressed: () => _changeBulkMode(),
-      child: Row(
-        children: <Widget>[
-          Text('Bulk Mode', style: TextStyle(color: Colors.white)),
-          Switch(
-            activeColor: Colors.white,
-            onChanged: (bool value) => _changeBulkMode(),
-            value: _bulkMode,
-          )
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<Species> sortedSpecies = List.from(species);
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
 
-    final String titleText =
-        widget.landingArg == null ? _bulkMode ? 'Add Species' : 'Add Species' : 'Edit Species';
+    final String titleText = widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Species' : 'Edit Species';
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(titleText),
-        actions: <Widget>[_bulkModeButtonSwitch()],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -312,7 +239,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                                       species.englishName,
                                       style: TextStyle(fontSize: 18),
                                     ),
-                                    OlracIcon(
+                                    SvgIcon(
                                       assetPath: SvgIcons.path(species.scientificName),
                                       darker: true,
                                     )

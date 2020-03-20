@@ -4,7 +4,7 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 class GroupedHaulsList extends StatelessWidget {
   final List<Haul> hauls;
@@ -35,7 +35,7 @@ class GroupedHaulsList extends StatelessWidget {
           final Widget svg = Container(
             width: 36,
             height: 36,
-            child: OlracIcon(
+            child: SvgIcon(
               assetPath: SvgIcons.path(fishingMethodGroup['fishingMethod'].name),
               darker: true,
             ),

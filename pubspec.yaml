@@ -12,7 +12,7 @@ description: An app for tracking shark fins and other products.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.4.4+1
+version: 1.4.6+1
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -65,7 +65,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/olsps-logo.png
+    - assets/images/
     - assets/icons/
     - assets/icons/fishing_methods/
     - assets/icons/sharks/

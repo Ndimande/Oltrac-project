@@ -33,12 +33,10 @@ class StripButton extends StatelessWidget {
             mainAxisAlignment: centered ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: <Widget>[
               icon,
-              SizedBox(
-                width: 5,
-              ),
+              SizedBox(width: 4),
               Text(
                 labelText,
-                style: TextStyle(fontSize: 22, color: Colors.white),
+                style: TextStyle(fontSize: 21, color: Colors.white),
               )
             ],
           ),

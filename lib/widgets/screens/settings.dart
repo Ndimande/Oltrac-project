@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/user_settings.dart';
 
 final double _fontSize = 20;

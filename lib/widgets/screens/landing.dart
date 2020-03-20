@@ -193,7 +193,7 @@ class LandingScreenState extends State<LandingScreen> {
       items.add(_tagProductButton());
     }
 
-    if(_landing.products.length != 0) {
+    if (_landing.products.length != 0) {
       items.add(_doneTaggingButton());
     }
 
@@ -230,7 +230,6 @@ class LandingScreenState extends State<LandingScreen> {
                     child: Column(
                       children: [
                         Container(
-                          height: 100,
                           color: olracBlue[50],
                           child: SharkInfoCard(
                             landing: _landing,

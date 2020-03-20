@@ -44,7 +44,7 @@ class LandingListItem extends StatelessWidget {
     return Row(children: firstRow);
   }
 
-  Widget get subtitle => Column(
+  Widget get _subtitle => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
@@ -52,7 +52,16 @@ class LandingListItem extends StatelessWidget {
         ],
       );
 
-  Widget get _icon => isSelected ? Icon(Icons.check_circle, color: olracBlue, size: 30) : ForwardArrow();
+  Widget get _icon {
+    return IconButton(
+      icon: onLongPress == null || landing.doneTagging
+          ? ForwardArrow()
+          : Icon(isSelected ? Icons.check_circle : Icons.lens),
+      onPressed: landing.doneTagging ? null : onLongPress,
+      iconSize: 30,
+      color: olracBlue,
+    );
+  }
 
   BoxDecoration get _decoration => BoxDecoration(
         color: isSelected ? olracBlue[50] : Colors.transparent,
@@ -66,7 +75,7 @@ class LandingListItem extends StatelessWidget {
     return Container(
       decoration: _decoration,
       child: ListTile(
-        onLongPress: onLongPress,
+        onLongPress: landing.doneTagging ? null : onLongPress,
         onTap: () => onPressed(listIndex),
         leading: LandingIcon(
           landing: landing,
@@ -75,7 +84,7 @@ class LandingListItem extends StatelessWidget {
         title: _title,
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[subtitle, _icon],
+          children: <Widget>[_subtitle, _icon],
         ),
       ),
     );

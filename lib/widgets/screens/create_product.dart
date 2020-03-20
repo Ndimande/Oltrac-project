@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/data/svg_icons.dart';
@@ -17,10 +16,9 @@ import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
-import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 final _landingRepo = LandingRepository();
 
@@ -62,7 +60,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   @override
   void initState() {
     super.initState();
-    // When a tag is held to the device, read the tag
     FlutterNfcReader.onTagDiscovered().listen(onTagDiscovered);
   }
 
@@ -126,7 +123,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
     // Create a product
     final int savedProductId = await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
-    final savedProduct = product.copyWith(id: savedProductId);
+    final Product savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {
       _tagCode = null;
@@ -145,8 +142,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       Navigator.pop(context);
       return;
     } else if (result == DialogResult.DoneTagging) {
-      // must get latest landing from state
-
       // mark all source landings done
       for (Landing landing in _sourceLandings) {
         await _landingRepo.store(landing.copyWith(doneTagging: true));
@@ -183,32 +178,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
             'Cancel', 'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?'),
       );
 
-      if (!confirmed) {
+      if (confirmed != true) {
         return false;
       }
     }
 
     return true;
-  }
-
-  Future<void> _onPressAddLanding() async {
-    final List<Landing> additionalSources = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddSourceLandingsScreen(
-          alreadySelectedLandings: _sourceLandings,
-          sourceHaul: widget.sourceHaul,
-        ),
-      ),
-    );
-
-    if (additionalSources == null || additionalSources.length == 0) {
-      return;
-    }
-
-    setState(() {
-      _sourceLandings.addAll(additionalSources);
-    });
   }
 
   Future<DialogResult> _showProductSavedDialog(Product product) {
@@ -303,23 +278,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
           .map<Widget>(
             (Landing sl) => Container(
               decoration: new BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  SharkInfoCard(showIndex: false, landing: sl, listIndex: 1),
-                  IconButton(
-                    color: Colors.red,
-                    icon: Icon(Icons.delete),
-                    onPressed: () {
-                      setState(() {
-                        if (_sourceLandings.length > 1) {
-                          _sourceLandings.remove(sl);
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
+              child: SharkInfoCard(showIndex: false, landing: sl, listIndex: 1),
               height: 80,
             ),
           )
@@ -384,11 +343,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Text(packagingType.name),
-                  OlracIcon(
-                    assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
-                    darker: true,
-                    width: 40,
-                    height: 40,
+                  Container(
+                    child: SvgIcon(
+                      assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
+                      darker: true,
+                      height: packagingType.name.toLowerCase() == 'ring' ? 25 : 40,
+                    ),
                   )
                 ],
               ),
@@ -413,14 +373,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         onPressed: _onPressSaveButton,
       );
 
-  StripButton get addSharkButton => StripButton(
-        centered: true,
-        color: olracBlue,
-        icon: Icon(Icons.save, color: Colors.white),
-        labelText: 'Add Species',
-        onPressed: _onPressAddLanding,
-      );
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -439,9 +391,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                   children: <Widget>[
                     // Source landing
                     _sourceLandingsList(),
-
-                    addSharkButton,
-
                     //Product Type
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),

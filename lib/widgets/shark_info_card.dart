@@ -3,7 +3,7 @@ import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/landing_icon.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 class SharkInfoCard extends StatelessWidget {
   final Landing landing;
@@ -17,10 +17,7 @@ class SharkInfoCard extends StatelessWidget {
     if (landing.individuals > 1) {
       text += ' (${landing.individuals})';
     }
-    return Text(
-      text,
-      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-    );
+    return Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
   }
 
   @override
@@ -31,9 +28,7 @@ class SharkInfoCard extends StatelessWidget {
         Row(
           children: <Widget>[
             showIndex == false
-                ? Container(
-                    padding: EdgeInsets.all(5),
-                  )
+                ? Container(padding: EdgeInsets.all(5))
                 : Container(
                     padding: EdgeInsets.all(5),
                     child: LandingIcon(landing: landing, listIndex: listIndex),
@@ -57,8 +52,8 @@ class SharkInfoCard extends StatelessWidget {
           ],
         ),
         Container(
-          margin: EdgeInsets.only(right: 10),
-          child: OlracIcon(height: 100, assetPath: SvgIcons.path(landing.species.scientificName)),
+          margin: EdgeInsets.only(right: 5),
+          child: SvgIcon(height: 95, assetPath: SvgIcons.path(landing.species.scientificName)),
         ),
       ],
     );

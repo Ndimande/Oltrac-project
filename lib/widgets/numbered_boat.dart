@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/data/svg_icons.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 class NumberedBoat extends StatelessWidget {
   final int number;
@@ -16,7 +16,7 @@ class NumberedBoat extends StatelessWidget {
         Container(
           width: size,
           height: size,
-          child: OlracIcon(
+          child: SvgIcon(
             assetPath: SvgIcons.path('Boat'),
           ),
         ),

@@ -5,7 +5,7 @@ import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 
 const double iconBaseSize = 200;
 
@@ -37,7 +37,7 @@ class FishingMethodScreen extends StatelessWidget {
       return Container(
         height: iconSize,
         width: iconSize,
-        child: OlracIcon(
+        child: SvgIcon(
           darker: true,
           assetPath: SvgIcons.path(method.name),
         ),

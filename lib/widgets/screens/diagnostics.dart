@@ -22,16 +22,16 @@ Future<Map> _load() async {
   };
 }
 
-class DeveloperScreen extends StatefulWidget {
+class DiagnosticsScreen extends StatefulWidget {
   final SharedPreferences sharedPreferences = SharedPreferencesProvider().sharedPreferences;
 
   @override
   State<StatefulWidget> createState() {
-    return DeveloperScreenState();
+    return DiagnosticsScreenState();
   }
 }
 
-class DeveloperScreenState extends State<DeveloperScreen> {
+class DiagnosticsScreenState extends State<DiagnosticsScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Profile _profile;
 

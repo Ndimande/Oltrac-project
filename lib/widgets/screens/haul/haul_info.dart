@@ -3,7 +3,7 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/widgets/olrac_icon.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
@@ -31,7 +31,7 @@ class HaulInfo extends StatelessWidget {
       return Container(
         width: 64,
         height: 64,
-        child: OlracIcon(
+        child: SvgIcon(
           assetPath: SvgIcons.path(haul.fishingMethod.name),
           darker: true,
         ),

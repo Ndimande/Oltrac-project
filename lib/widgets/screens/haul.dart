@@ -206,6 +206,10 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressTagProduct() async {
+    if(_selectedLandings.isEmpty) {
+      showTextSnackBar(_scaffoldKey, 'You must first select one or more species to be tagged');
+      return;
+    }
     await Navigator.pushNamed(context, '/create_product', arguments: {'haul': _haul, 'landings': _selectedLandings});
     setState(() {
       _selectedLandings = [];
@@ -273,7 +277,7 @@ class HaulScreenState extends State<HaulScreen> {
           color: Colors.white,
         ),
         color: Colors.green,
-        labelText: 'Add Single',
+        labelText: 'Single',
         onPressed: _onPressAddLandingButton,
       );
 
@@ -283,8 +287,8 @@ class HaulScreenState extends State<HaulScreen> {
           Icons.add_box,
           color: Colors.white,
         ),
-        color: olracBlue,
-        labelText: 'Add Bulk',
+        color: olracDarkBlue,
+        labelText: 'Bulk',
         onPressed: _onPressAddBulkLanding,
       );
 
@@ -294,42 +298,23 @@ class HaulScreenState extends State<HaulScreen> {
     });
   }
 
-  Widget _deselectButton() => StripButton(
-        centered: true,
-        icon: Icon(
-          Icons.clear_all,
-          color: Colors.white,
-        ),
-        color: olracBlue,
-        labelText: 'Deselect',
-        onPressed: _onPressDeselectButton,
-      );
-
   Widget _tagProductButton() => StripButton(
         centered: true,
         icon: Icon(
-          Icons.local_offer,
+          Icons.add,
           color: Colors.white,
         ),
-        color: Colors.green,
-        labelText: 'Tag Product',
+        color: _selectedLandings.isNotEmpty ? olracBlue : Colors.grey,
+        labelText: 'Tag',
         onPressed: _onPressTagProduct,
       );
 
   Widget _bottomButtons(Haul haul) {
-    if (_selectedLandings.length == 0) {
-      return Row(
-        children: <Widget>[
-          Expanded(child: _addSingleLandingButton()),
-          Expanded(child: _addBulkLandingButton()),
-        ],
-      );
-    }
-
     return Row(
       children: <Widget>[
+        Expanded(child: _addSingleLandingButton()),
+        Expanded(child: _addBulkLandingButton()),
         Expanded(child: _tagProductButton()),
-        Expanded(child: _deselectButton()),
       ],
     );
   }
@@ -379,7 +364,7 @@ class HaulScreenState extends State<HaulScreen> {
     return Text('$numberSelected selected');
   }
 
-  Widget _leading() => _selectedLandings.length != 0
+  Widget _appBarLeading() => _selectedLandings.length != 0
       ? IconButton(
           onPressed: () {
             setState(() {
@@ -420,7 +405,7 @@ class HaulScreenState extends State<HaulScreen> {
           key: _scaffoldKey,
           appBar: AppBar(
             title: _title(),
-            leading: _leading(),
+            leading: _appBarLeading(),
           ),
           body: Container(
             child: Column(

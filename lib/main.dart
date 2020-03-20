@@ -19,8 +19,7 @@ import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/screens/about.dart';
 import 'package:oltrace/widgets/screens/add_source_landing.dart';
 import 'package:oltrace/widgets/screens/create_product.dart';
-import 'package:oltrace/widgets/screens/developer.dart';
-import 'package:oltrace/widgets/screens/edit_trip.dart';
+import 'package:oltrace/widgets/screens/diagnostics.dart';
 import 'package:oltrace/widgets/screens/fishing_method.dart';
 import 'package:oltrace/widgets/screens/haul.dart';
 import 'package:oltrace/widgets/screens/landing.dart';
@@ -94,13 +93,7 @@ Future<void> boot() async {
   runZoned(
     () => runApp(OlTraceApp(userSettings)),
     onError: (Object error, StackTrace stackTrace) {
-      try {
-        print('Zoned Exception! Sentry report sending..');
-        sentry.captureException(exception: error, stackTrace: stackTrace);
-      } catch (e) {
-        print('Sending report to sentry.io failed: $e');
-        print('Original error: $error');
-      }
+      _handleError(error, stackTrace);
     },
   );
 }
@@ -116,8 +109,7 @@ Future<AppStore> _initApp() async {
   _appStore.packageInfo = await PackageInfo.fromPlatform();
 
   // Prompt for location access until the user accepts.
-  while (
-      await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
+  while (await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
     // Begin listening to location stream.
     _locationProvider.startListening();
   }
@@ -219,8 +211,7 @@ class OlTraceAppState extends State<OlTraceApp> {
             assert(haulId != null);
             assert(listIndex != null);
 
-            return MaterialPageRoute(
-                builder: (_) => HaulScreen(haulId: haulId, listIndex: listIndex));
+            return MaterialPageRoute(builder: (_) => HaulScreen(haulId: haulId, listIndex: listIndex));
 
           case '/fishing_methods':
             return MaterialPageRoute(builder: (_) => FishingMethodScreen());
@@ -233,8 +224,7 @@ class OlTraceAppState extends State<OlTraceApp> {
 
           case '/settings':
             return MaterialPageRoute(
-              builder: (_) =>
-                  SettingsScreen(_userSettings, (UserSettings us) => _updateUserSettings(us)),
+              builder: (_) => SettingsScreen(_userSettings, (UserSettings us) => _updateUserSettings(us)),
             );
 
           case '/landing':
@@ -278,11 +268,10 @@ class OlTraceAppState extends State<OlTraceApp> {
 
           case '/add_source_landing':
             final List<Landing> landings = settings.arguments as List<Landing>;
-            return MaterialPageRoute(
-                builder: (_) => AddSourceLandingsScreen(alreadySelectedLandings: landings));
+            return MaterialPageRoute(builder: (_) => AddSourceLandingsScreen(alreadySelectedLandings: landings));
 
           case '/developer':
-            return MaterialPageRoute(builder: (_) => DeveloperScreen());
+            return MaterialPageRoute(builder: (_) => DiagnosticsScreen());
 
           default:
             throw ('No such route: ${settings.name}');
@@ -298,10 +287,8 @@ UserSettings _getUserSettings() {
   final defaults = AppConfig.defaultUserSettings;
 
   final bool darkMode = _sharedPreferences.getBool('darkMode') ?? defaults['darkMode'];
-  final bool allowMobileData =
-      _sharedPreferences.getBool('allowMobileData') ?? defaults['uploadAutomatically'];
-  final bool uploadAutomatically =
-      _sharedPreferences.getBool('uploadAutomatically') ?? defaults['uploadAutomatically'];
+  final bool allowMobileData = _sharedPreferences.getBool('allowMobileData') ?? defaults['uploadAutomatically'];
+  final bool uploadAutomatically = _sharedPreferences.getBool('uploadAutomatically') ?? defaults['uploadAutomatically'];
 
   return UserSettings(
     darkMode: darkMode,

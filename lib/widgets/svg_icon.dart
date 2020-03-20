@@ -3,13 +3,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:oltrace/app_themes.dart';
 
 // Todo rename to SvgIcon
-class OlracIcon extends StatelessWidget {
+class SvgIcon extends StatelessWidget {
   final String assetPath;
   final double width;
   final double height;
   final bool darker;
 
-  OlracIcon({
+  SvgIcon({
     @required this.assetPath,
     this.width = 64,
     this.height = 64,

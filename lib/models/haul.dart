@@ -3,6 +3,7 @@ import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/product.dart';
 
 @immutable
 class Haul extends Model {
@@ -21,6 +22,20 @@ class Haul extends Model {
 
   final Location startLocation;
   final Location endLocation;
+
+  List<Product> get products {
+    final List<Product> uniqueProducts = <Product>[];
+    landings.forEach((Landing landing) => landing.products.forEach((Product product) {
+          final Product existingProduct = uniqueProducts
+              .singleWhere((Product p) => p.id == product.id && p.createdAt == product.createdAt, orElse: () => null);
+          if (existingProduct == null) {
+            uniqueProducts.add(product);
+          }
+        }));
+    return uniqueProducts;
+  }
+
+  int get totalWeight => landings.fold(0, (total, Landing l) => total + l.weight);
 
   const Haul({
     id,

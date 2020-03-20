@@ -215,7 +215,7 @@ class MainScreenState extends State<MainScreen> {
       _scaffoldKey.currentContext,
       MaterialPageRoute(builder: (_) => EditTripScreen(activeTrip)),
     );
-
+    setState(() {});
     if (result == EditTripResult.TripCanceled)
       showTextSnackBar(_scaffoldKey, 'Trip canceled');
     else if (result == EditTripResult.Updated) showTextSnackBar(_scaffoldKey, 'Trip updated');

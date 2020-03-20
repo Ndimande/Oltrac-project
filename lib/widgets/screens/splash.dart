@@ -29,15 +29,45 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MaterialColor(0xFF086178, {}),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _spinnerStack(),
-            Image(
-              image: AssetImage('assets/images/olsps-logo.png'),
-              width: 200,
+            Column(
+              children: <Widget>[
+                Image(image: AssetImage('assets/images/oltrace_logo.png'), width: 200),
+                Text(
+                  'Mobile Shark-Product Tracing Application',
+                  style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
+            Column(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text('Developed by', style: TextStyle(color: Colors.white, fontSize: 26)),
+                ),
+                Image(image: AssetImage('assets/images/olsps_logo_white.png'), width: 200),
+              ],
+            ),
+            Column(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text('Supported by', style: TextStyle(color: Colors.white, fontSize: 26)),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Image(image: AssetImage('assets/images/traffic_logo.png'), width: 160),
+                    Image(image: AssetImage('assets/images/fishwell_logo.png'), width: 160),
+                  ],
+                )
+              ],
+            )
           ],
         ),
       ),
