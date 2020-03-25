@@ -65,9 +65,9 @@ class _AboutScreenState extends State<AboutScreen> {
 
   Widget _backButton() {
     return Container(
-      padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: GestureDetector(
-          child: Icon(Icons.arrow_back,color: _backButtonColor),
+          child: Icon(Icons.arrow_back, color: _backButtonColor),
           onLongPressStart: _onLongPressStart,
           onLongPressEnd: _onLongPressEnd,
           onTap: _onPressBackButton,
@@ -82,14 +82,14 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const title = 'OlTrace';
+    const title = 'SharkTrack';
 
     final version = _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber;
 
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
-        padding: const EdgeInsets.all(100),
+        padding: const EdgeInsets.all(50),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
