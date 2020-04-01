@@ -124,7 +124,6 @@ class TripScreenState extends State<TripScreen> {
     final label = trip.isUploaded ? 'Uploaded' : 'Upload Trip';
     final Function onPress = trip.isUploaded ? null : () async => await onPressUpload(trip);
     return StripButton(
-      centered: true,
       labelText: label,
       disabled: trip.isUploaded,
       color: olracBlue,

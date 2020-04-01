@@ -4,14 +4,14 @@ import 'package:oltrace/widgets/grouped_hauls_list.dart';
 
 class HaulSection extends StatelessWidget {
   final List<Haul> hauls;
-  final Function(int,int) onPressHaulItem;
+  final Function(int, int) onPressHaulItem;
 
   HaulSection({this.hauls, this.onPressHaulItem}) : assert(hauls != null);
 
   Widget _buildNoHauls() {
     return Container(
       alignment: Alignment.center,
-      child: Text('No hauls on this trip yet', style: TextStyle(fontSize: 20)),
+      child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
     );
   }
 

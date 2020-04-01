@@ -9,9 +9,9 @@ import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/screens/landing/landing_details.dart';
+import 'package:oltrace/screens/landing/products_list.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/screens/landing/landing_details.dart';
-import 'package:oltrace/widgets/screens/landing/products_list.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
@@ -77,7 +77,6 @@ class LandingScreenState extends State<LandingScreen> {
 
   Widget get deleteButton => Expanded(
         child: StripButton(
-          centered: true,
           onPressed: _onPressDelete,
           labelText: 'Delete',
           color: Colors.red,
@@ -90,7 +89,6 @@ class LandingScreenState extends State<LandingScreen> {
 
   Widget get editButton => Expanded(
         child: StripButton(
-          centered: true,
           onPressed: _onPressEdit,
           labelText: 'Edit',
           color: olracBlue,
@@ -139,7 +137,6 @@ class LandingScreenState extends State<LandingScreen> {
   Widget _doneTaggingButton() {
     return StripButton(
       color: olracBlue,
-      centered: true,
       labelText: _landing.doneTagging ? 'Continue Tagging' : 'Done Tagging',
       icon: Icon(
         _landing.doneTagging ? Icons.edit : Icons.check_circle,
@@ -156,7 +153,6 @@ class LandingScreenState extends State<LandingScreen> {
 
     return StripButton(
       color: Colors.green,
-      centered: true,
       labelText: 'Tag Product',
       icon: Icon(
         Icons.local_offer,
@@ -168,7 +164,7 @@ class LandingScreenState extends State<LandingScreen> {
 
   Widget _noProducts() {
     return Text(
-      'No product tags yet',
+      'No product tags',
       style: TextStyle(fontSize: 16),
     );
   }

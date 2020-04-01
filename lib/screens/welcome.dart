@@ -14,8 +14,7 @@ import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:uuid/uuid.dart';
 
-final TextStyle _sectionHeadingTextStyle =
-    TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: olracBlue);
+final TextStyle _sectionHeadingTextStyle = TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: olracBlue);
 
 class WelcomeScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;
@@ -67,8 +66,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             padding: EdgeInsets.all(15),
             child: ModelDropdown(
               label: 'Country',
-              labelStyle:
-                  TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
               selected: _selectedCountry,
               onChanged: (_country) => setState(() => _selectedCountry = _country),
               items: countries.map<DropdownMenuItem<Country>>((Country country) {
@@ -87,8 +85,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             padding: EdgeInsets.all(15),
             child: ModelDropdown(
               label: 'Fishery',
-              labelStyle:
-                  TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
               selected: _selectedFisheryType,
               onChanged: (_fishery) {
                 setState(() => _selectedFisheryType = _fishery);
@@ -288,7 +285,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             ),
           ),
           StripButton(
-            centered: true,
             labelText: 'Save',
             color: Colors.green,
             icon: Icon(

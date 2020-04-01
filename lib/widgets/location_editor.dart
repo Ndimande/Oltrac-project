@@ -18,7 +18,7 @@ class LocationEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final latitudePicker = CoordinatePicker(
+    final latitudePicker = _CoordinatePicker(
       decimalValue: location.latitude,
       orientation: CoordinateOrientation.Latitude,
       onPressConfirm: (double value) {
@@ -26,7 +26,7 @@ class LocationEditor extends StatelessWidget {
       },
     );
 
-    final longitudePicker = CoordinatePicker(
+    final longitudePicker = _CoordinatePicker(
       decimalValue: location.longitude,
       orientation: CoordinateOrientation.Longitude,
       onPressConfirm: (double value) {
@@ -60,12 +60,12 @@ class LocationEditor extends StatelessWidget {
   }
 }
 
-class CoordinatePicker extends StatelessWidget {
+class _CoordinatePicker extends StatelessWidget {
   final double decimalValue;
   final CoordinateOrientation orientation;
   final Function(double) onPressConfirm;
 
-  CoordinatePicker({@required this.orientation, this.onPressConfirm, @required this.decimalValue})
+  _CoordinatePicker({@required this.orientation, this.onPressConfirm, @required this.decimalValue})
       : assert(orientation != null),
         assert(onPressConfirm != null),
         assert(decimalValue != null);

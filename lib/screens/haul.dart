@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
@@ -13,10 +14,10 @@ import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/screens/haul/haul_info.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-import 'package:oltrace/widgets/screens/haul/haul_info.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
 final _landingRepo = LandingRepository();
@@ -159,8 +160,8 @@ class HaulScreenState extends State<HaulScreen> {
     bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
       builder: (_) => ConfirmDialog(
-        'End Haul',
-        'Are you sure you want to end the haul?',
+        Messages.endHaulTitle(_haul),
+        Messages.endHaulDialogContent(_haul),
       ),
     );
 
@@ -179,7 +180,7 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   void _showFirstEndDynamicHaulSnackbar() {
-    showTextSnackBar(_scaffoldKey, 'For dynamic fishing methods you must first end the haul before adding species.');
+    showTextSnackBar(_scaffoldKey, Messages.LANDING_FIRST_END_DYNAMIC_HAUL);
   }
 
   bool _isDynamicAndNotEnded() => _haul.endedAt == null && _haul.fishingMethod.type == FishingMethodType.Dynamic;
@@ -206,8 +207,8 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressTagProduct() async {
-    if(_selectedLandings.isEmpty) {
-      showTextSnackBar(_scaffoldKey, 'You must first select one or more species to be tagged');
+    if (_selectedLandings.isEmpty) {
+      showTextSnackBar(_scaffoldKey, Messages.LANDING_FIRST_SELECT_SPECIES);
       return;
     }
     await Navigator.pushNamed(context, '/create_product', arguments: {'haul': _haul, 'landings': _selectedLandings});
@@ -271,7 +272,6 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _addSingleLandingButton() => StripButton(
-        centered: true,
         icon: Icon(
           Icons.add_circle,
           color: Colors.white,
@@ -282,7 +282,6 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
   Widget _addBulkLandingButton() => StripButton(
-        centered: true,
         icon: Icon(
           Icons.add_box,
           color: Colors.white,
@@ -292,14 +291,7 @@ class HaulScreenState extends State<HaulScreen> {
         onPressed: _onPressAddBulkLanding,
       );
 
-  void _onPressDeselectButton() {
-    setState(() {
-      _selectedLandings = [];
-    });
-  }
-
   Widget _tagProductButton() => StripButton(
-        centered: true,
         icon: Icon(
           Icons.add,
           color: Colors.white,
@@ -309,7 +301,7 @@ class HaulScreenState extends State<HaulScreen> {
         onPressed: _onPressTagProduct,
       );
 
-  Widget _bottomButtons(Haul haul) {
+  Widget _bottomButtons() {
     return Row(
       children: <Widget>[
         Expanded(child: _addSingleLandingButton()),
@@ -324,7 +316,7 @@ class HaulScreenState extends State<HaulScreen> {
       child: Container(
         alignment: Alignment.center,
         child: Text(
-          'No species in this haul yet',
+          'No species in this haul',
           style: TextStyle(fontSize: 20),
         ),
       ),
@@ -336,7 +328,7 @@ class HaulScreenState extends State<HaulScreen> {
       child: Container(
         alignment: Alignment.center,
         child: Text(
-          'No tags in this haul yet',
+          'No tags in this haul',
           style: TextStyle(fontSize: 20),
         ),
       ),
@@ -358,7 +350,7 @@ class HaulScreenState extends State<HaulScreen> {
     final int numberSelected = _selectedLandings.length;
 
     if (_selectedLandings.length == 0) {
-      return Text('${_haul.fishingMethod.name} haul');
+      return Text(_haul.fishingMethod.name);
     }
 
     return Text('$numberSelected selected');
@@ -371,10 +363,7 @@ class HaulScreenState extends State<HaulScreen> {
               _selectedLandings = [];
             });
           },
-          icon: Icon(
-            Icons.cancel,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.cancel, color: Colors.white),
         )
       : BackButton(
           onPressed: () {
@@ -418,7 +407,7 @@ class HaulScreenState extends State<HaulScreen> {
                   isActiveHaul: _haul.endedAt == null,
                 ),
                 _listsSection(_haul.landings),
-                isActiveTrip ? _bottomButtons(_haul) : Container(),
+                isActiveTrip ? _bottomButtons() : Container(),
               ],
             ),
           ),

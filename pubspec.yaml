@@ -12,7 +12,7 @@ description: An app for tracking shark fins and other products.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.4.7+1
+version: 1.4.8+1
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -86,5 +86,9 @@ flutter:
     - family: RobotoLight
       fonts:
         - asset: assets/fonts/Roboto-Light.ttf
+    - family: FiraSans
+      fonts:
+        - asset: assets/fonts/FiraSansCondensed-Regular.ttf
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

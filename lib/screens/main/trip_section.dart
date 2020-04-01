@@ -24,7 +24,6 @@ class TripSection extends StatelessWidget {
 
   Widget get endTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
-          centered: true,
           labelText: 'End',
           color: hasActiveHaul ? Colors.grey : Colors.red,
           onPressed: () async => await onPressEndTrip(),
@@ -37,7 +36,6 @@ class TripSection extends StatelessWidget {
 
   Widget get cancelTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
-          centered: true,
           labelText: 'Cancel',
           color: hasActiveHaul ? Colors.grey : olracBlue,
           onPressed: () async => await onPressCancelTrip(),
@@ -50,7 +48,6 @@ class TripSection extends StatelessWidget {
 
   Widget get editTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
-          centered: true,
           labelText: 'Edit',
           color: olracBlue,
           onPressed: onPressEditTrip,

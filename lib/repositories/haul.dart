@@ -81,17 +81,9 @@ class HaulRepository extends DatabaseRepository<Haul> {
   }
 
   Haul fromDatabaseMap(Map<String, dynamic> result) {
-    final DateTime startedAt = result['started_at'] != null
-        ? DateTime.parse(
-            result['started_at'],
-          )
-        : null;
+    final DateTime startedAt = result['started_at'] != null ? DateTime.parse(result['started_at']) : null;
 
-    final DateTime endedAt = result['ended_at'] != null
-        ? DateTime.parse(
-            result['ended_at'],
-          )
-        : null;
+    final DateTime endedAt = result['ended_at'] != null ? DateTime.parse(result['ended_at']) : null;
 
     final FishingMethod fishingMethod = fishingMethods.firstWhere(
       (fm) => fm.id == result['fishing_method_id'],
@@ -100,10 +92,7 @@ class HaulRepository extends DatabaseRepository<Haul> {
 
     final Location endLocation = result['end_latitude'] == null || result['end_longitude'] == null
         ? null
-        : Location(
-            latitude: result['end_latitude'],
-            longitude: result['end_longitude'],
-          );
+        : Location(latitude: result['end_latitude'], longitude: result['end_longitude']);
 
     return Haul(
       id: result['id'],
@@ -116,6 +105,9 @@ class HaulRepository extends DatabaseRepository<Haul> {
         longitude: result['start_longitude'],
       ),
       endLocation: endLocation,
+      soakTime: result['soak_time_minutes'] == null
+          ? result['soak_time_minutes']
+          : Duration(minutes: result['soak_time_minutes']),
     );
   }
 
@@ -130,6 +122,7 @@ class HaulRepository extends DatabaseRepository<Haul> {
       'start_longitude': haul.startLocation.longitude,
       'end_latitude': haul.endLocation?.latitude,
       'end_longitude': haul.endLocation?.longitude,
+      'soak_time_minutes': haul.soakTime?.inMinutes,
     };
   }
 }

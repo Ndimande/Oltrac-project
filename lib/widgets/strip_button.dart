@@ -7,7 +7,6 @@ class StripButton extends StatelessWidget {
   final String labelText;
   final bool disabled;
   final Color color;
-  final bool centered;
 
   StripButton({
     @required this.icon,
@@ -15,7 +14,6 @@ class StripButton extends StatelessWidget {
     @required this.onPressed,
     this.color,
     this.disabled = false,
-    this.centered = false,
   });
 
   @override
@@ -26,20 +24,21 @@ class StripButton extends StatelessWidget {
       height: 48,
       child: FlatButton(
         color: buttonColor,
-        padding: const EdgeInsets.all(0),
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 5),
-          child: Row(
-            mainAxisAlignment: centered ? MainAxisAlignment.center : MainAxisAlignment.start,
-            children: <Widget>[
-              icon,
-              SizedBox(width: 4),
-              Text(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            icon,
+            SizedBox(width: 5),
+            Expanded(
+              child: Text(
                 labelText,
-                style: TextStyle(fontSize: 21, color: Colors.white),
-              )
-            ],
-          ),
+                style: TextStyle(fontSize: 20, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ],
         ),
         onPressed: onPressed,
       ),

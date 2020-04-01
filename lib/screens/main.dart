@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/flutter_picker.dart';
+import 'package:oltrace/app_config.dart';
+import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/location.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/screens/edit_trip.dart';
+import 'package:oltrace/screens/fishing_method.dart';
+import 'package:oltrace/screens/main/drawer.dart';
+import 'package:oltrace/screens/main/haul_section.dart';
+import 'package:oltrace/screens/main/no_active_trip.dart';
+import 'package:oltrace/screens/main/trip_section.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/screens/edit_trip.dart';
-import 'package:oltrace/widgets/screens/fishing_method.dart';
-import 'package:oltrace/widgets/screens/main/drawer.dart';
-import 'package:oltrace/widgets/screens/main/haul_section.dart';
-import 'package:oltrace/widgets/screens/main/no_active_trip.dart';
-import 'package:oltrace/widgets/screens/main/trip_section.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
@@ -64,6 +71,8 @@ Future<Map> _load() async {
 }
 
 class MainScreen extends StatefulWidget {
+  final SharedPreferences sharedPrefs = SharedPreferencesProvider().sharedPreferences;
+
   MainScreen();
 
   @override
@@ -77,20 +86,11 @@ class MainScreenState extends State<MainScreen> {
   Haul activeHaul;
   List<Trip> completedTrips;
 
-  Widget _appBar() {
-    final title = activeTrip != null ? activeHaul != null ? 'Hauling...' : 'Active Trip' : 'Completed Trips';
-    return AppBar(
-      actions: <Widget>[_appBarDate],
-      title: Text(title),
-    );
-  }
-
-  Widget get _appBarDate {
-    return Container(
-      margin: EdgeInsets.only(right: 10),
-      alignment: Alignment.center,
-      child: Text(friendlyDate(DateTime.now())),
-    );
+  FishingMethod get _fishingMethod {
+    final String fmCode = widget.sharedPrefs.getString('fishingMethod').toString();
+    return fishingMethods.singleWhere(
+        (FishingMethod element) => element.abbreviation.toLowerCase() == fmCode.toLowerCase(),
+        orElse: () => null);
   }
 
   Future<FishingMethod> _selectFishingMethod() async {
@@ -102,25 +102,49 @@ class MainScreenState extends State<MainScreen> {
     return fm;
   }
 
-  Future<void> _onPressStartHaul() async {
-    final FishingMethod method = await _selectFishingMethod();
-    if (method != null) {
-      try {
-        final Location location = await _locationProvider.location;
+  Picker _soakTimePicker() {
+    return Picker(
+        title: Text('Soak Time'),
+        onConfirm: _onConfirmSoakTime,
+        adapter: PickerDataAdapter<String>(isArray: true, pickerdata: <List<String>>[
+          List.generate(AppConfig.MAX_SOAK_HOURS_SELECTABLE, (int index) => '$index hours'),
+          List.generate(12, (int index) => '${index * 5} minutes'),
+        ]));
+  }
 
-        final haul = Haul(
-          fishingMethod: method,
-          startedAt: DateTime.now(),
-          tripId: activeTrip.id,
-          startLocation: location,
-        );
+  Future<void> _onConfirmSoakTime(Picker picker, List<int> indices) async {
+    final int hours = indices[0];
+    final int minutes = indices[1] * 5;
+    print([hours, minutes]);
+    final Duration soakTime = Duration(hours: hours, minutes: minutes);
+    await _startOperation(soakTime: soakTime);
+  }
 
-        await _haulRepo.store(haul);
-        setState(() {});
-      } catch (e) {
-        showTextSnackBar(_scaffoldKey, 'Could not start haul. ${Messages.LOCATION_NOT_AVAILABLE}');
-        print(e);
-      }
+  Future<void> _startOperation({Duration soakTime}) async {
+    try {
+      final Location location = await _locationProvider.location;
+
+      final haul = Haul(
+        fishingMethod: _fishingMethod,
+        startedAt: DateTime.now(),
+        tripId: activeTrip.id,
+        startLocation: location,
+        soakTime: soakTime,
+      );
+
+      await _haulRepo.store(haul);
+      setState(() {});
+    } catch (e) {
+      showTextSnackBar(_scaffoldKey, 'Could not start fishing/hauling. ${Messages.LOCATION_NOT_AVAILABLE}');
+      print(e);
+    }
+  }
+
+  Future<void> _onPressStartStripButton() async {
+    if (_fishingMethod.type == FishingMethodType.Static) {
+      _soakTimePicker().showModal(context);
+    } else {
+      await _startOperation();
     }
   }
 
@@ -128,7 +152,7 @@ class MainScreenState extends State<MainScreen> {
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog('End haul', Messages.CONFIRM_END_HAUL),
+      builder: (_) => ConfirmDialog(Messages.endHaulTitle(activeHaul), Messages.endHaulDialogContent(activeHaul)),
     );
 
     if (confirmed) {
@@ -145,17 +169,25 @@ class MainScreenState extends State<MainScreen> {
         setState(() {});
       } catch (e) {
         print(e.toString());
-        showTextSnackBar(_scaffoldKey, 'Could not end haul. ${Messages.LOCATION_NOT_AVAILABLE}');
-        return;
+        showTextSnackBar(_scaffoldKey, 'There was an error. Could not end hauling/fishing');
+        rethrow;
       }
     }
   }
 
-  Future<void> _onPressHaulActionButton() async {
+  Future<void> _onPressHaulStripButton() async {
     if (activeHaul != null)
       await _onPressEndHaul();
     else
-      await _onPressStartHaul();
+      await _onPressStartStripButton();
+  }
+
+  Future<void> _onPressFishingMethodStripButton() async {
+    final FishingMethod method = await _selectFishingMethod();
+    if (method != null) {
+      widget.sharedPrefs.setString('fishingMethod', method.abbreviation);
+      setState(() {});
+    }
   }
 
   Future<void> _onPressStartTripButton() async {
@@ -182,7 +214,7 @@ class MainScreenState extends State<MainScreen> {
 
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => ConfirmDialog('Cancel Trip', Messages.CONFIRM_CANCEL_TRIP),
+      builder: (_) => ConfirmDialog('Cancel Trip', Messages.TRIP_CONFIRM_CANCEL),
     );
     if (confirmed == true) {
       await _tripRepo.delete(activeTrip.id);
@@ -192,14 +224,14 @@ class MainScreenState extends State<MainScreen> {
 
   Future<void> _onPressEndTrip(bool hasActiveHaul) async {
     if (hasActiveHaul) {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('You must first end the haul')));
+      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('You must first end hauling/fishing')));
       return;
     }
 
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog('End Trip', Messages.CONFIRM_END_TRIP),
+      builder: (_) => ConfirmDialog('End Trip', Messages.TRIP_CONFIRM_END),
     );
     if (confirmed == true) {
       final Location location = await _locationProvider.location;
@@ -225,6 +257,71 @@ class MainScreenState extends State<MainScreen> {
     return false;
   }
 
+  Text _appBarTitle() {
+    final String verb =
+        activeHaul != null && activeHaul.fishingMethod.type == FishingMethodType.Dynamic ? 'Fishing...' : 'Hauling...';
+    final String title = activeTrip != null ? activeHaul != null ? verb : 'Active Trip' : 'Completed Trips';
+    return Text(title);
+  }
+
+  Widget _appBar() {
+    return AppBar(
+      actions: <Widget>[_appBarDate],
+      title: _appBarTitle(),
+    );
+  }
+
+  Widget get _appBarDate {
+    return Container(
+      margin: EdgeInsets.only(right: 10),
+      alignment: Alignment.center,
+      child: Text(friendlyDate(DateTime.now())),
+    );
+  }
+
+  Widget _fishingMethodStripButton(FishingMethod fishingMethod) {
+    final String title = fishingMethod == null ? 'Fishing Method' : fishingMethod.name;
+    return Expanded(
+      child: StripButton(
+        labelText: title,
+        icon: Icon(
+          Icons.cached,
+          color: Colors.white,
+        ),
+        color: olracBlue,
+        onPressed: () async => await _onPressFishingMethodStripButton(),
+      ),
+    );
+  }
+
+  Widget _haulStripButton(FishingMethod fishingMethod) {
+    final String actionType = (fishingMethod.type == FishingMethodType.Dynamic ? 'Fishing' : 'Hauling');
+    final String actionVerb = activeHaul != null ? 'End' : 'Start';
+    final String labelText = "$actionVerb $actionType";
+    return Expanded(
+      child: StripButton(
+        labelText: labelText,
+        icon: Icon(
+          activeHaul != null ? Icons.stop : Icons.play_arrow,
+          color: Colors.white,
+        ),
+        color: activeHaul != null ? Colors.red : Colors.green,
+        onPressed: () async => await _onPressHaulStripButton(),
+      ),
+    );
+  }
+
+  Widget _bottomButtons() {
+    final FishingMethod fishingMethod = _fishingMethod;
+
+    return Row(
+      children: <Widget>[
+        if (fishingMethod != null) _haulStripButton(fishingMethod),
+        if (activeHaul == null) _fishingMethodStripButton(fishingMethod)
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -242,7 +339,6 @@ class MainScreenState extends State<MainScreen> {
           activeHaul = snapshot.data['activeHaul'] as Haul;
           completedTrips = snapshot.data['completedTrips'] as List<Trip>;
 
-          final String labelText = activeHaul != null ? 'End Haul' : 'Start Haul';
           return Scaffold(
             key: _scaffoldKey,
             appBar: _appBar(),
@@ -274,16 +370,7 @@ class MainScreenState extends State<MainScreen> {
                         },
                       ),
                     ),
-                    StripButton(
-                      centered: true,
-                      labelText: labelText,
-                      icon: Icon(
-                        activeHaul != null ? Icons.stop : Icons.play_arrow,
-                        color: Colors.white,
-                      ),
-                      color: activeHaul != null ? Colors.red : Colors.green,
-                      onPressed: () async => await _onPressHaulActionButton(),
-                    ),
+                    _bottomButtons(),
                   ],
                 );
               },

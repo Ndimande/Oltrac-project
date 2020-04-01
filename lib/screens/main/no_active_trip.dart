@@ -40,7 +40,6 @@ class NoActiveTrip extends StatelessWidget {
         children: <Widget>[
           Expanded(child: _completedTripList()),
           StripButton(
-            centered: true,
             labelText: 'Start Trip',
             color: Colors.green,
             icon: Icon(

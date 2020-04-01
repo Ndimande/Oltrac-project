@@ -363,12 +363,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   StripButton get saveButton => StripButton(
-        icon: Icon(
-          Icons.save,
-          color: Colors.white,
-        ),
+        icon: Icon(Icons.save, color: Colors.white),
         labelText: 'Save',
-        centered: true,
         color: Colors.green,
         onPressed: _onPressSaveButton,
       );
@@ -379,9 +375,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       onWillPop: () async => await onWillPop,
       child: Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text('Tag Product'),
-        ),
+        appBar: AppBar(title: Text('Tag Product')),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

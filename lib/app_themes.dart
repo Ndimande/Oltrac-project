@@ -29,7 +29,7 @@ const MaterialColor olracDarkBlue = MaterialColor(0xFF242C4D, {
 });
 
 final _olspsTheme = ThemeData(
-//  fontFamily: 'Roboto',
+  fontFamily: 'FiraSans',
   dialogTheme: DialogTheme(
     backgroundColor: olracBlue,
     titleTextStyle: TextStyle(fontSize: 32, color: Colors.white),

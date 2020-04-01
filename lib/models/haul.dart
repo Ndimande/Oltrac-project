@@ -22,6 +22,7 @@ class Haul extends Model {
 
   final Location startLocation;
   final Location endLocation;
+  final Duration soakTime;
 
   List<Product> get products {
     final List<Product> uniqueProducts = <Product>[];
@@ -35,7 +36,7 @@ class Haul extends Model {
     return uniqueProducts;
   }
 
-  int get totalWeight => landings.fold(0, (total, Landing l) => total + l.weight);
+  int get totalLandingWeight => landings.fold(0, (total, Landing l) => total + l.weight);
 
   const Haul({
     id,
@@ -46,7 +47,12 @@ class Haul extends Model {
     this.landings = const [],
     @required this.startLocation,
     this.endLocation,
-  }) : super(id: id);
+    this.soakTime,
+  })  : assert(tripId != null),
+        assert(startedAt != null),
+        assert(fishingMethod != null),
+        assert(startLocation != null),
+        super(id: id);
 
   Haul copyWith({
     int id,
@@ -57,6 +63,7 @@ class Haul extends Model {
     List<Landing> landings,
     Location startLocation,
     Location endLocation,
+    Duration soakTime,
   }) {
     return Haul(
       id: id ?? this.id,
@@ -67,6 +74,7 @@ class Haul extends Model {
       landings: landings ?? this.landings,
       startLocation: startLocation ?? this.startLocation,
       endLocation: endLocation ?? this.endLocation,
+      soakTime: soakTime ?? this.soakTime,
     );
   }
 
@@ -78,6 +86,7 @@ class Haul extends Model {
         landings = data['landings'] as List<Landing>,
         startLocation = Location.fromMap(data['startLocation']),
         endLocation = Location.fromMap(data['endLocation']),
+        soakTime = Duration(minutes: data['soakTime']),
         super.fromMap(data);
 
   Map<String, dynamic> toMap() {
@@ -90,6 +99,7 @@ class Haul extends Model {
       'landings': landings.map((l) => l.toMap()).toList(),
       'startLocation': startLocation.toMap(),
       'endLocation': endLocation?.toMap(),
+      'soakTime': soakTime.inMinutes,
     };
   }
 }

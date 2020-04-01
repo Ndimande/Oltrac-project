@@ -70,7 +70,7 @@ class HaulListItem extends StatelessWidget {
         subtitle: HaulSubtitle(
           startedAt: haul.startedAt,
           endedAt: haul.endedAt,
-          totalWeight: haul.totalWeight,
+          totalWeight: haul.totalLandingWeight,
           totalProducts: haul.products.length,
         ),
         trailing: Icon(

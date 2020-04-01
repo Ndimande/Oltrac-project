@@ -15,22 +15,22 @@ import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/json.dart';
+import 'package:oltrace/screens/about.dart';
+import 'package:oltrace/screens/add_source_landing.dart';
+import 'package:oltrace/screens/create_product.dart';
+import 'package:oltrace/screens/diagnostics.dart';
+import 'package:oltrace/screens/fishing_method.dart';
+import 'package:oltrace/screens/haul.dart';
+import 'package:oltrace/screens/landing.dart';
+import 'package:oltrace/screens/landing_form.dart';
+import 'package:oltrace/screens/main.dart';
+import 'package:oltrace/screens/product.dart';
+import 'package:oltrace/screens/settings.dart';
+import 'package:oltrace/screens/splash.dart';
+import 'package:oltrace/screens/trip.dart';
+import 'package:oltrace/screens/trip_history.dart';
+import 'package:oltrace/screens/welcome.dart';
 import 'package:oltrace/stores/app_store.dart';
-import 'package:oltrace/widgets/screens/about.dart';
-import 'package:oltrace/widgets/screens/add_source_landing.dart';
-import 'package:oltrace/widgets/screens/create_product.dart';
-import 'package:oltrace/widgets/screens/diagnostics.dart';
-import 'package:oltrace/widgets/screens/fishing_method.dart';
-import 'package:oltrace/widgets/screens/haul.dart';
-import 'package:oltrace/widgets/screens/landing.dart';
-import 'package:oltrace/widgets/screens/landing_form.dart';
-import 'package:oltrace/widgets/screens/main.dart';
-import 'package:oltrace/widgets/screens/product.dart';
-import 'package:oltrace/widgets/screens/settings.dart';
-import 'package:oltrace/widgets/screens/splash.dart';
-import 'package:oltrace/widgets/screens/trip.dart';
-import 'package:oltrace/widgets/screens/trip_history.dart';
-import 'package:oltrace/widgets/screens/welcome.dart';
 import 'package:package_info/package_info.dart';
 import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -160,7 +160,7 @@ class OlTraceAppState extends State<OlTraceApp> {
       print('State restored in ${stopwatch.elapsed}');
 
       // Delay to show logos
-      await Future.delayed(Duration(seconds: 5) - stopwatch.elapsed);
+      if (!AppConfig.debugMode) await Future.delayed(Duration(seconds: 5) - stopwatch.elapsed);
 
       // If profile is not already setup, show welcome screen
       if (appStore.profileConfigured) {

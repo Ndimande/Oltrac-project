@@ -60,11 +60,11 @@ class EditTripScreenState extends State<EditTripScreen> {
 
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => ConfirmDialog('Cancel Trip', Messages.CONFIRM_CANCEL_TRIP),
+      builder: (_) => ConfirmDialog('Cancel Trip', Messages.TRIP_CONFIRM_CANCEL),
     );
     if (confirmed == true) {
       await widget._tripRepo.delete(widget._trip.id);
-      Navigator.pop(_scaffoldKey.currentContext,EditTripResult.TripCanceled);
+      Navigator.pop(_scaffoldKey.currentContext, EditTripResult.TripCanceled);
     }
   }
 
@@ -90,21 +90,18 @@ class EditTripScreenState extends State<EditTripScreen> {
     Navigator.of(_scaffoldKey.currentContext).pop(EditTripResult.Updated);
   }
 
-
   Widget get _cancelTripButton => StripButton(
-    onPressed: _onPressCancel,
-    centered: true,
-    labelText: 'Cancel Trip',
-    icon: Icon(
-      Icons.cancel,
-      color: Colors.white,
-    ),
-    color: Colors.red,
-  );
+        onPressed: _onPressCancel,
+        labelText: 'Cancel',
+        icon: Icon(
+          Icons.cancel,
+          color: Colors.white,
+        ),
+        color: Colors.red,
+      );
 
   Widget get _saveButton => StripButton(
         onPressed: _onPressSave,
-        centered: true,
         labelText: 'Save',
         icon: Icon(
           Icons.save,
@@ -179,9 +176,16 @@ class EditTripScreenState extends State<EditTripScreen> {
   }
 
   Widget get _bottomButtons {
-    return Row( children: <Widget>[
-      Expanded(child: _saveButton,),Expanded(child: _cancelTripButton,)
-    ],);
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: _saveButton,
+        ),
+        Expanded(
+          child: _cancelTripButton,
+        )
+      ],
+    );
   }
 
   @override

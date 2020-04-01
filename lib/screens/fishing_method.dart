@@ -4,7 +4,6 @@ import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/fishing_method.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
 const double iconBaseSize = 200;
@@ -16,19 +15,10 @@ double _getIconSize(MediaQueryData mediaQuery) {
   final ratio = orientation == Orientation.portrait ? width / height : height / width;
   return ratio * iconBaseSize;
 }
+
 class FishingMethodScreen extends StatelessWidget {
   _onCardPressed(context, method) async {
-    bool answer = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) =>
-        ConfirmDialog(
-          'Start Haul?', 'Are you sure you want to start a ${method.name.toLowerCase()} haul?'),
-    );
-
-    if (answer) {
-      Navigator.pop(context, method);
-    }
+    Navigator.pop(context, method);
   }
 
   Widget _buildFishingMethodCard(FishingMethod method) {
@@ -53,15 +43,13 @@ class FishingMethodScreen extends StatelessWidget {
           children: <Widget>[
             Text(
               method.name,
-              style: TextStyle(fontSize: 18,color: Colors.black),
+              style: TextStyle(fontSize: 18, color: Colors.black),
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
             ),
             Text(
               '(${method.abbreviation})',
-              style: TextStyle(
-                fontSize: 18,color: olracDarkBlue
-              ),
+              style: TextStyle(fontSize: 18, color: olracDarkBlue),
             ),
           ],
         )
@@ -79,18 +67,8 @@ class FishingMethodScreen extends StatelessWidget {
     });
   }
 
-  Widget get grid {
-    return Column(
-      children: <Widget>[
-        Row(
-          children: <Widget>[],
-        ),
-      ],
-    );
-  }
-
   chunk(list, int perChunk) =>
-    list.isEmpty ? list : ([list.take(perChunk)]..addAll(chunk(list.skip(perChunk), perChunk)));
+      list.isEmpty ? list : ([list.take(perChunk)]..addAll(chunk(list.skip(perChunk), perChunk)));
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +98,7 @@ class FishingMethodScreen extends StatelessWidget {
             );
           },
         ),
-      ));
+      ),
+    );
   }
 }

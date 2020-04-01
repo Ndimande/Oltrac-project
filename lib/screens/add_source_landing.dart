@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/screens/haul.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
-import 'package:oltrace/widgets/screens/haul.dart';
 
 class AddSourceLandingsScreen extends StatelessWidget {
   final List<Landing> alreadySelectedLandings;

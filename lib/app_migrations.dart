@@ -1,4 +1,4 @@
-final List<Map<String, String>> appMigrations = const [
+const List<Map<String, String>> appMigrations = const [
   {
     'name': 'create_json_table',
     'up': 'CREATE TABLE json ( '
@@ -8,15 +8,15 @@ final List<Map<String, String>> appMigrations = const [
         ')',
     'down': 'DROP TABLE json'
   },
-   {
-     'name': 'create_log_table',
-     'up': 'CREATE TABLE log ( '
-         'id int PRIMARY KEY, '
-         'created_at TIMESTAMP NOT NULL, '
-         'message TEXT NOT NULL '
-         ')',
-     'down': 'DROP TABLE log'
-   },
+  {
+    'name': 'create_log_table',
+    'up': 'CREATE TABLE log ( '
+        'id int PRIMARY KEY, '
+        'created_at TIMESTAMP NOT NULL, '
+        'message TEXT NOT NULL '
+        ')',
+    'down': 'DROP TABLE log'
+  },
   {
     'name': 'create_trips_table',
     'up': 'CREATE TABLE trips ( '
@@ -43,6 +43,7 @@ final List<Map<String, String>> appMigrations = const [
         'end_longitude REAL, '
         'trip_id INTEGER NOT NULL, '
         'fishing_method_id INTEGER NOT NULL, '
+        'soak_time_minutes INTEGER, '
         'FOREIGN KEY (trip_id) REFERENCES trips (id) '
         ')',
     'down': 'DROP TABLE hauls'

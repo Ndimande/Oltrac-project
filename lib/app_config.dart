@@ -14,16 +14,16 @@ class AppConfig {
   })();
 
   /// Drop and recreate the database if true
-  static const RESET_DATABASE = false;
+  static const bool RESET_DATABASE = false;
 
   /// The title of the app
-  static const APP_TITLE = 'OlTrace';
+  static const String APP_TITLE = 'SharkTrack';
 
   /// The URL to upload trips to
   static const TRIP_UPLOAD_URL = 'https://tracing.olracddm.com/incomings';
 
   /// The API key for this app for Sentry.io error reporting
-  static const SENTRY_DSN = 'https://46c3ef2535a2460a8a00c013f0738e17@sentry.io/3728395';
+  static const String SENTRY_DSN = 'https://46c3ef2535a2460a8a00c013f0738e17@sentry.io/3728395';
 
   static const defaultUserSettings = <String, dynamic>{
     'mobile_data': false,
@@ -32,10 +32,12 @@ class AppConfig {
     'bulkMode': false,
   };
 
-  static const MAX_HISTORY_SELECTABLE = const Duration(days: 100);
+  static const Duration MAX_HISTORY_SELECTABLE = const Duration(days: 100);
+
+  static const int MAX_SOAK_HOURS_SELECTABLE = 500;
 
   /// The sqlite database filename
-  static const databaseFilename = 'oltrace.db';
+  static const String DATABASE_FILENAME = 'oltrace.db';
 
   static final migrations = appMigrations;
 }

@@ -329,7 +329,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
             ),
           ),
           StripButton(
-            centered: true,
             icon: Icon(
               Icons.save,
               color: Colors.white,

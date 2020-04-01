@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/messages.dart';
+import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/widgets/svg_icon.dart';
 import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/svg_icon.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
 class HaulInfo extends StatelessWidget {
@@ -65,7 +67,7 @@ class HaulInfo extends StatelessWidget {
         style: TextStyle(fontSize: 16),
       );
 
-  Widget get detailsSection {
+  Widget _detailsSection() {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,27 +77,35 @@ class HaulInfo extends StatelessWidget {
             dateTime: haul.startedAt,
             location: haul.startLocation,
           ),
-          !isActiveHaul
-              ? TimeSpace(
-                  label: 'Ended ',
-                  dateTime: haul.endedAt,
-                  location: haul.endLocation,
-                )
-              : Container(),
+          !isActiveHaul ? TimeSpace(label: 'Ended ', dateTime: haul.endedAt, location: haul.endLocation) : Container(),
+          if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime()
         ],
       ),
     );
   }
 
-  Widget _buildHaulDetails(Haul haul) {
+  Widget _soakTime() {
+    final int hours = haul.soakTime.inHours;
+    final int minutes = haul.soakTime.inMinutes % 60;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('Soak Time', style: TextStyle(fontSize: 14)),
+        Text('$hours hours $minutes minutes', style: TextStyle(fontSize: 17)),
+      ],
+    );
+  }
+
+  Widget _buildHaulDetails() {
     return Container(
+      color: olracBlue[50],
       padding: EdgeInsets.all(10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           numberedIcon(),
           SizedBox(width: 10),
-          Expanded(child: detailsSection),
+          Expanded(child: _detailsSection()),
         ],
       ),
     );
@@ -106,9 +116,8 @@ class HaulInfo extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: StripButton(
-            centered: true,
             onPressed: onPressEndHaul,
-            labelText: 'End Haul',
+            labelText: Messages.endHaulTitle(haul),
             color: Colors.red,
             icon: Icon(
               Icons.stop,
@@ -118,7 +127,6 @@ class HaulInfo extends StatelessWidget {
         ),
         Expanded(
           child: StripButton(
-            centered: true,
             onPressed: onPressCancelHaul,
             labelText: 'Cancel',
             color: olracBlue,
@@ -134,19 +142,11 @@ class HaulInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List rows = <Widget>[
-      Container(
-        color: olracBlue[50],
-        child: _buildHaulDetails(haul),
-      )
-    ];
-
-    if (isActiveHaul) {
-      rows.add(actionButtons());
-    }
-
     return Column(
-      children: rows,
+      children: <Widget>[
+        _buildHaulDetails(),
+        if (isActiveHaul) actionButtons(),
+      ],
     );
   }
 }

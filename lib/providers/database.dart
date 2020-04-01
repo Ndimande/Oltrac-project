@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseProvider {
   /// SQLite db filename
-  static const _filename = AppConfig.databaseFilename;
+  static const _filename = AppConfig.DATABASE_FILENAME;
 
   /// DatabaseProvider instance
   static final DatabaseProvider _databaseProvider = DatabaseProvider._();
