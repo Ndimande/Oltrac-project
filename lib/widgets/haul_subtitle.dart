@@ -43,7 +43,7 @@ class HaulSubtitleState extends State<HaulSubtitle> {
   }
 
   TextSpan get elapsedTextSpan => TextSpan(
-        text: '${_getHours(_elapsed)}:${_getMinutes(_elapsed)}:${_getSeconds(_elapsed)}, ',
+        text: '${_getHours(_elapsed)}h ${_getMinutes(_elapsed)}m ${_getSeconds(_elapsed)}s, ',
         style: TextStyle(color: Colors.black),
       );
 

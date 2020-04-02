@@ -22,12 +22,12 @@ class FishingMethodScreen extends StatelessWidget {
   }
 
   Widget _buildFishingMethodCard(FishingMethod method) {
-    final Widget svg = Builder(builder: (context) {
-      final double iconSize = _getIconSize(MediaQuery.of(context));
+    final Widget svg = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      print('width' + constraints.maxWidth.toString());
+      print(constraints.maxHeight);
       return Container(
-        height: iconSize,
-        width: iconSize,
         child: SvgIcon(
+          height: constraints.maxWidth * 0.4, // we have to use height for width because height constraint is infinite
           darker: true,
           assetPath: SvgIcons.path(method.name),
         ),

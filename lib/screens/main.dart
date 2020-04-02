@@ -148,7 +148,7 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _onPressEndHaul() async {
+  Future<void> _onPressEndEndStripButton() async {
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -177,7 +177,7 @@ class MainScreenState extends State<MainScreen> {
 
   Future<void> _onPressHaulStripButton() async {
     if (activeHaul != null)
-      await _onPressEndHaul();
+      await _onPressEndEndStripButton();
     else
       await _onPressStartStripButton();
   }
@@ -285,7 +285,7 @@ class MainScreenState extends State<MainScreen> {
       child: StripButton(
         labelText: title,
         icon: Icon(
-          Icons.cached,
+          Icons.apps,
           color: Colors.white,
         ),
         color: olracBlue,

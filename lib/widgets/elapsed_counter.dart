@@ -31,8 +31,7 @@ class ElapsedCounterState extends State<ElapsedCounter> {
     _timer = Timer.periodic(_updateInterval, (Timer t) => setState(() {}));
   }
 
-  @override
-  Widget build(BuildContext context) {
+  String get _text {
     final Duration difference = DateTime.now().difference(widget.startedDateTime);
     final hours = _getHours(difference);
 
@@ -40,10 +39,13 @@ class ElapsedCounterState extends State<ElapsedCounter> {
 
     final seconds = _getSeconds(difference);
 
-    final text = "${widget.prefix}$hours:$minutes:$seconds${widget.suffix}";
+    return "${widget.prefix}${hours}h ${minutes}m ${seconds}s ${widget.suffix}";
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Text(
-      text,
+      _text,
       style: widget.style,
     );
   }
@@ -57,8 +59,6 @@ class ElapsedCounterState extends State<ElapsedCounter> {
 
 String _getHours(Duration difference) => difference.inHours.toString();
 
-String _getMinutes(Duration difference) =>
-    (difference.inMinutes % 60).round().toString().padLeft(2, '0');
+String _getMinutes(Duration difference) => (difference.inMinutes % 60).round().toString();
 
-String _getSeconds(Duration difference) =>
-    (difference.inSeconds % 60).round().toString().padLeft(2, '0');
+String _getSeconds(Duration difference) => (difference.inSeconds % 60).round().toString();

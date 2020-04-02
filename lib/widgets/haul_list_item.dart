@@ -25,14 +25,14 @@ class HaulListItem extends StatelessWidget {
 
   Widget get completeHaulTitle {
     return Text(
-      'End ' + friendlyDateTime(haul.endedAt),
+      'Ended ' + friendlyDateTime(haul.endedAt),
       style: TextStyle(fontWeight: FontWeight.bold),
     );
   }
 
   Widget get activeHaulTitle {
     return Text(
-      'Start ' + friendlyDateTime(haul.startedAt),
+      'Started ' + friendlyDateTime(haul.startedAt),
       style: TextStyle(fontWeight: FontWeight.bold),
     );
   }

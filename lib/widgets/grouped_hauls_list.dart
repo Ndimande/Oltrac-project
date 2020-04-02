@@ -53,7 +53,7 @@ class GroupedHaulsList extends StatelessWidget {
                 Container(
                   width: 220,
                   child: Text(
-                    fishingMethodGroup['fishingMethod'].name + ' hauls',
+                    fishingMethodGroup['fishingMethod'].name,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 22, color: olracDarkBlue),
                   ),

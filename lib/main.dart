@@ -188,94 +188,92 @@ class OlTraceAppState extends State<OlTraceApp> {
       theme: theme,
       initialRoute: 'splash',
       onGenerateRoute: (RouteSettings settings) {
-        switch (settings.name) {
-          case 'splash':
-            return MaterialPageRoute(builder: (_) => SplashScreen());
+        return MaterialPageRoute(builder: (_) {
+          switch (settings.name) {
+            case 'splash':
+              return SplashScreen();
 
-          case '/':
-            return MaterialPageRoute(builder: (_) => MainScreen());
+            case '/':
+              return MainScreen();
 
-          case '/about':
-            return MaterialPageRoute(builder: (_) => AboutScreen());
+            case '/about':
+              return AboutScreen();
 
-          case '/trip':
-            final Trip trip = settings.arguments;
+            case '/trip':
+              final Trip trip = settings.arguments;
 
-            return MaterialPageRoute(builder: (_) => TripScreen(tripId: trip.id));
+              return TripScreen(tripId: trip.id);
 
-          case '/haul':
-            final Map args = settings.arguments as Map<String, dynamic>;
-            final int haulId = args['haulId'] as int;
-            final int listIndex = args['listIndex'] as int;
+            case '/haul':
+              final Map args = settings.arguments as Map<String, dynamic>;
+              final int haulId = args['haulId'] as int;
+              final int listIndex = args['listIndex'] as int;
 
-            assert(haulId != null);
-            assert(listIndex != null);
+              assert(haulId != null);
+              assert(listIndex != null);
 
-            return MaterialPageRoute(builder: (_) => HaulScreen(haulId: haulId, listIndex: listIndex));
+              return HaulScreen(haulId: haulId, listIndex: listIndex);
 
-          case '/fishing_methods':
-            return MaterialPageRoute(builder: (_) => FishingMethodScreen());
+            case '/fishing_methods':
+              return FishingMethodScreen();
 
-          case '/welcome':
-            return MaterialPageRoute(builder: (_) => WelcomeScreen());
+            case '/welcome':
+              return WelcomeScreen();
 
-          case '/trip_history':
-            return MaterialPageRoute(builder: (_) => TripHistoryScreen());
+            case '/trip_history':
+              return TripHistoryScreen();
 
-          case '/settings':
-            return MaterialPageRoute(
-              builder: (_) => SettingsScreen(_userSettings, (UserSettings us) => _updateUserSettings(us)),
-            );
+            case '/settings':
+              return SettingsScreen(_userSettings, (UserSettings us) => _updateUserSettings(us));
 
-          case '/landing':
-            final Map args = settings.arguments as Map<String, dynamic>;
-            final landingId = args['landingId'] as int;
-            final listIndex = args['listIndex'] as int;
+            case '/landing':
+              final Map args = settings.arguments as Map<String, dynamic>;
+              final landingId = args['landingId'] as int;
+              final listIndex = args['listIndex'] as int;
 
-            assert(landingId != null);
-            assert(listIndex != null);
+              assert(landingId != null);
+              assert(listIndex != null);
 
-            return MaterialPageRoute(
-              builder: (_) => LandingScreen(landingId: landingId, listIndex: listIndex),
-            );
+              return LandingScreen(landingId: landingId, listIndex: listIndex);
 
-          case '/create_landing':
-            final Haul haul = settings.arguments;
-            return MaterialPageRoute(builder: (_) => LandingFormScreen(haulArg: haul));
+            case '/create_landing':
+              final Haul haul = settings.arguments;
+              return LandingFormScreen(haulArg: haul);
 
-          case '/edit_landing':
-            final Landing landing = settings.arguments;
-            return MaterialPageRoute(builder: (_) => LandingFormScreen(landingArg: landing));
+            case '/edit_landing':
+              final Landing landing = settings.arguments;
+              return LandingFormScreen(landingArg: landing);
 
-          case '/create_product':
-            final Map args = settings.arguments as Map;
-            assert(args.containsKey('landings'));
-            assert(args.containsKey('haul'));
-            final List<Landing> sourceLandings = args['landings'] as List<Landing>;
-            final Haul sourceHaul = args['haul'];
-            return MaterialPageRoute(
-                builder: (_) => CreateProductScreen(
-                      initialSourceLandings: sourceLandings,
-                      sourceHaul: sourceHaul,
-                      listIndex: 0,
-                    ));
+            case '/create_product':
+              final Map args = settings.arguments as Map;
+              assert(args.containsKey('landings'));
+              assert(args.containsKey('haul'));
+              final List<Landing> sourceLandings = args['landings'] as List<Landing>;
+              final Haul sourceHaul = args['haul'];
 
-          case '/product':
-            final args = settings.arguments as Map<String, dynamic>;
-            final int productId = args['productId'] as int;
+              return CreateProductScreen(
+                initialSourceLandings: sourceLandings,
+                sourceHaul: sourceHaul,
+                listIndex: 0,
+              );
 
-            return MaterialPageRoute(builder: (_) => ProductScreen(productId: productId));
+            case '/product':
+              final args = settings.arguments as Map<String, dynamic>;
+              final int productId = args['productId'] as int;
 
-          case '/add_source_landing':
-            final List<Landing> landings = settings.arguments as List<Landing>;
-            return MaterialPageRoute(builder: (_) => AddSourceLandingsScreen(alreadySelectedLandings: landings));
+              return ProductScreen(productId: productId);
 
-          case '/developer':
-            return MaterialPageRoute(builder: (_) => DiagnosticsScreen());
+            case '/add_source_landing':
+              final List<Landing> landings = settings.arguments as List<Landing>;
+              return AddSourceLandingsScreen(alreadySelectedLandings: landings);
 
-          default:
-            throw ('No such route: ${settings.name}');
-        }
+            case '/developer':
+              return DiagnosticsScreen();
+
+            default:
+              throw ('No such route: ${settings.name}');
+          }
+        });
       },
     );
   }
