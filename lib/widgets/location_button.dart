@@ -24,7 +24,7 @@ class LocationButton extends StatelessWidget {
               location.longitude,
             );
     return IconButton(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.center,
       tooltip: location.toString(),
       iconSize: iconSize,
       icon: Icon(Icons.my_location),

@@ -56,13 +56,7 @@ class HaulInfo extends StatelessWidget {
     );
   }
 
-  Text get fishingMethodText => Text(
-        haul.fishingMethod.name,
-        style: TextStyle(fontSize: 24),
-        softWrap: true,
-      );
-
-  Text dateTimeText({String label = 'Started '}) => Text(
+  Text _dateTimeText({String label = 'Started '}) => Text(
         label + friendlyDateTime(haul.startedAt),
         style: TextStyle(fontSize: 16),
       );
@@ -90,8 +84,8 @@ class HaulInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Soak Time', style: TextStyle(fontSize: 14)),
-        Text('$hours hours $minutes minutes', style: TextStyle(fontSize: 17)),
+        Text('Soak Time', style: TextStyle(fontSize: 13)),
+        Text('$hours hours $minutes minutes', style: TextStyle(fontSize: 14)),
       ],
     );
   }

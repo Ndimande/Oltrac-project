@@ -27,7 +27,7 @@ class TimeSpace extends StatelessWidget {
             ),
             Text(
               dateTimeLabel,
-              style: TextStyle(fontSize: 17),
+              style: TextStyle(fontSize: 15),
               textAlign: TextAlign.left,
             )
           ],

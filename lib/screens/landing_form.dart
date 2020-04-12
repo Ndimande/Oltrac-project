@@ -241,7 +241,6 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                                     ),
                                     SvgIcon(
                                       assetPath: SvgIcons.path(species.scientificName),
-                                      darker: true,
                                     )
                                   ],
                                 ),

@@ -158,7 +158,7 @@ class _ProductScreenState extends State<ProductScreen> {
     return ExpansionTile(
       title: Text(
         'QR Code',
-        style: TextStyle(color: olracBlue, fontSize: 28),
+        style: TextStyle(color: olracBlue, fontSize: 22),
       ),
       children: <Widget>[
         FlatButton(
@@ -262,8 +262,8 @@ class _ProductScreenState extends State<ProductScreen> {
 
     return ExpansionTile(
       title: Text(
-        'Product Sources',
-        style: TextStyle(fontSize: 28, color: olracBlue),
+        'Source Sharks',
+        style: TextStyle(fontSize: 22, color: olracBlue),
       ),
       children: landingItems,
     );
@@ -287,12 +287,13 @@ class _ProductScreenState extends State<ProductScreen> {
       padding: EdgeInsets.all(15),
       child: Column(
         children: <Widget>[
-          _detailRow('RFID Tag Code', _product.tagCode),
-          _detailRow('Product Type', _product.productType.name),
+          Text('RFID Tag Code',style: TextStyle(fontSize: 12),),
+          Text(_product.tagCode,style: TextStyle(fontSize: 32),),
+          _locationRow(),
           _detailRow('Packaging Type', _product.packagingType.name),
+          _detailRow('Product Type', _product.productType.name),
           _detailRow('Quantity', _product.productUnits.toString()),
           _detailRow('Created At', friendlyDateTime(_product.createdAt)),
-          _locationRow(),
         ],
       ),
     );
@@ -303,8 +304,8 @@ class _ProductScreenState extends State<ProductScreen> {
       child: Column(
         children: <Widget>[
           _details(),
-          _qrCode(),
           _landingItems(),
+          _qrCode(),
         ],
       ),
     );
@@ -329,7 +330,7 @@ class _ProductScreenState extends State<ProductScreen> {
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
-            title: Text('Product'),
+            title: Text('Product (${_product.productType.name})'),
           ),
           body: Column(
             children: <Widget>[

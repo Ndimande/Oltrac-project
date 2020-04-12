@@ -3,6 +3,7 @@ import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/landing_icon.dart';
+import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
 class SharkInfoCard extends StatelessWidget {
@@ -12,12 +13,46 @@ class SharkInfoCard extends StatelessWidget {
 
   SharkInfoCard({this.landing, this.listIndex, this.showIndex = true});
 
-  Widget get speciesText {
-    String text = landing.species.englishName;
-    if (landing.individuals > 1) {
-      text += ' (${landing.individuals})';
-    }
-    return Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold));
+  Widget _locationRow() {
+    return Row(
+      children: <Widget>[
+        LocationButton(location: landing.location),
+        Text(
+          landing.location.toString(),
+          style: TextStyle(fontSize: 15),
+        ),
+      ],
+    );
+  }
+
+  Widget _sharkIcon() {
+    return Container(
+      margin: EdgeInsets.only(right: 5),
+      child: SvgIcon(height: 100, assetPath: SvgIcons.path(landing.species.scientificName)),
+    );
+  }
+
+  Widget _sharkInfo() {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('${landing.weightKilograms}, ${landing.lengthCentimeters}',style: TextStyle(fontSize: 15)),
+          Text(friendlyDateTime(landing.createdAt),style: TextStyle(fontSize: 15)),
+          if(landing.individuals > 1) Text('${landing.individuals} individuals',style: TextStyle(fontSize: 15))
+        ],
+      ),
+    );
+  }
+
+  Widget _indexIcon() {
+    return showIndex == false
+        ? Container(padding: EdgeInsets.all(5))
+        : Container(
+            padding: EdgeInsets.all(5),
+            child: LandingIcon(landing: landing, listIndex: listIndex),
+          );
   }
 
   @override
@@ -25,36 +60,22 @@ class SharkInfoCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Row(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            showIndex == false
-                ? Container(padding: EdgeInsets.all(5))
-                : Container(
-                    padding: EdgeInsets.all(5),
-                    child: LandingIcon(landing: landing, listIndex: listIndex),
-                  ),
-            Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Row(
                 children: <Widget>[
-                  speciesText,
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
-                      Text(friendlyDateTime(landing.createdAt)),
-                    ],
-                  )
+                  _indexIcon(),
+                  _sharkInfo(),
                 ],
               ),
             ),
+           if(showIndex) _locationRow(),
           ],
         ),
-        Container(
-          margin: EdgeInsets.only(right: 5),
-          child: SvgIcon(height: 95, assetPath: SvgIcons.path(landing.species.scientificName)),
-        ),
+        _sharkIcon(),
       ],
     );
   }

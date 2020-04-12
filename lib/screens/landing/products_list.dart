@@ -12,24 +12,20 @@ class ProductsList extends StatelessWidget {
     await Navigator.pushNamed(context, '/product', arguments: {'productId': product.id});
   }
 
+  List<Widget> _productListItems(BuildContext context) => products
+    .map<Widget>((Product p) => ProductListItem(product: p, onPressed: () async => await _onPressed(context, p)))
+    .toList();
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> items = products
-        .map<Widget>((Product p) =>
-            ProductListItem(product: p, onPressed: () async => await _onPressed(context, p)))
-        .toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(left: 10),
-          child: Text(
-            'Product Tags',
-            style: TextStyle(fontSize: 28, color: olracBlue),
-          ),
-        ),
-        Column(children: items),
-      ],
+    final List<Widget> items = products.length > 0 ? _productListItems(context) : [ListTile(title: Text('No Product Tags'),)];
+    return ExpansionTile(
+      initiallyExpanded: true,
+      title: Text(
+        'Product Tags',
+        style: TextStyle(fontSize: 22, color: olracBlue),
+      ),
+      children: items,
     );
   }
 }

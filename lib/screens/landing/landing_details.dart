@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/location_button.dart';
 
-const double rowFontSize = 18;
-final _rowFontStyle = TextStyle(fontSize: rowFontSize);
+const double rowFontSize = 16;
+const TextStyle _rowFontStyle = const TextStyle(fontSize: rowFontSize);
 
 class LandingDetails extends StatelessWidget {
   final Landing landing;
@@ -13,7 +14,7 @@ class LandingDetails extends StatelessWidget {
 
   _buildRow(String key, String val, {bool italic = false}) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
+      margin: EdgeInsets.symmetric(horizontal: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,15 +23,14 @@ class LandingDetails extends StatelessWidget {
             flex: 4,
             child: Text(
               key,
-              style: TextStyle(fontSize: rowFontSize, fontWeight: FontWeight.bold),
+              style: _rowFontStyle.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
             flex: 5,
             child: Text(
               val,
-              style:
-              _rowFontStyle.copyWith(fontStyle: italic ? FontStyle.italic : FontStyle.normal),
+              style: _rowFontStyle.copyWith(fontStyle: italic ? FontStyle.italic : FontStyle.normal),
               textAlign: TextAlign.right,
             ),
           ),
@@ -41,20 +41,13 @@ class LandingDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              'Location',
-              style: TextStyle(fontSize: rowFontSize, fontWeight: FontWeight.bold),
-            ),
-            LocationButton(location: landing.location),
-          ],
-        ),
-        _buildRow('Created At', friendlyDateTime(landing.createdAt)),
-        _buildRow('Individuals', landing.individuals.toString()),
+    return ExpansionTile(
+      initiallyExpanded: true,
+      title: Text(
+        'Species Information',
+        style: TextStyle(fontSize: 22, color: olracBlue),
+      ),
+      children: <Widget>[
         _buildRow('Australian name', landing.species.australianName),
         _buildRow('Scientific name', landing.species.scientificName, italic: true),
         _buildRow('Family', landing.species.family),

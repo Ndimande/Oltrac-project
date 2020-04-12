@@ -162,13 +162,6 @@ class LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  Widget _noProducts() {
-    return Text(
-      'No product tags',
-      style: TextStyle(fontSize: 16),
-    );
-  }
-
   Widget _landingButtons() {
     if (!_isActiveTrip || _landing.doneTagging) {
       return Container();
@@ -212,14 +205,8 @@ class LandingScreenState extends State<LandingScreen> {
                     ),
                   ),
                   _landingButtons(),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: LandingDetails(landing: _landing),
-                  ),
-                  SizedBox(height: 10),
-                  Container(
-                    child: _landing.products.length > 0 ? ProductsList(products: _landing.products) : _noProducts(),
-                  ),
+                  ProductsList(products: _landing.products),
+                  LandingDetails(landing: _landing),
                 ],
               ),
             ),
@@ -250,7 +237,7 @@ class LandingScreenState extends State<LandingScreen> {
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
-            title: Text(_landing.individuals > 1 ? 'Bulk bin' : 'Species'),
+            title: Text(_landing.individuals > 1 ? 'Bulk bin (${_landing.species.englishName})': _landing.species.englishName),
           ),
           body: _body(),
         );
