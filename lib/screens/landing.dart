@@ -196,6 +196,40 @@ class LandingScreenState extends State<LandingScreen> {
     return Row(children: items.map((i) => Expanded(child: i)).toList());
   }
 
+  Widget _body() {
+    return Column(
+      children: <Widget>[
+        Expanded(
+          child: SingleChildScrollView(
+            child: Container(
+              child: Column(
+                children: [
+                  Container(
+                    color: olracBlue[50],
+                    child: SharkInfoCard(
+                      landing: _landing,
+                      listIndex: widget.listIndex,
+                    ),
+                  ),
+                  _landingButtons(),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: LandingDetails(landing: _landing),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    child: _landing.products.length > 0 ? ProductsList(products: _landing.products) : _noProducts(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        _bottomButtons(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -218,40 +252,7 @@ class LandingScreenState extends State<LandingScreen> {
           appBar: AppBar(
             title: Text(_landing.individuals > 1 ? 'Bulk bin' : 'Species'),
           ),
-          body: Column(
-            children: <Widget>[
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    child: Column(
-                      children: [
-                        Container(
-                          color: olracBlue[50],
-                          child: SharkInfoCard(
-                            landing: _landing,
-                            listIndex: widget.listIndex,
-                          ),
-                        ),
-                        _landingButtons(),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: LandingDetails(landing: _landing),
-                        ),
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        Container(
-                          child:
-                              _landing.products.length > 0 ? ProductsList(products: _landing.products) : _noProducts(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              _bottomButtons(),
-            ],
-          ),
+          body: _body(),
         );
       },
     );

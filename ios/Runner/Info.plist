@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs to write to your storage.</string>
 	<key>NFCReaderUsageDescription</key>
 	<string>This app needs to read a NFC tag.</string>
     <key>NSLocationAlwaysUsageDescription</key>
@@ -47,5 +49,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
+
 </dict>
 </plist>

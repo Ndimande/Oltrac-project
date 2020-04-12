@@ -346,7 +346,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                   Container(
                     child: SvgIcon(
                       assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
-                      darker: true,
                       height: packagingType.name.toLowerCase() == 'ring' ? 25 : 40,
                     ),
                   )

@@ -12,7 +12,7 @@ description: An app for tracking shark fins and other products.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.4.8+1
+version: 1.4.9+1
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -26,7 +26,6 @@ dependencies:
   flutter_mobx: ^0.3.3
   timeago: ^2.0.21
   geolocator: ^5.1.4+2
-  cupertino_icons: ^0.1.2
   sqflite: 1.1.7+2
   package_info: ^0.4.0+13
   shared_preferences: ^0.5.6
@@ -38,6 +37,9 @@ dependencies:
   flutter_picker: ^1.1.0
   uuid: ^2.0.4
   sentry: ^3.0.1
+  qr_flutter: ^3.1.0
+  esys_flutter_share: ^1.0.2
+  gallery_saver: ^2.0.1
 
 dev_dependencies:
   flutter_test:

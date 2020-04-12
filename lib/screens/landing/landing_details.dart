@@ -53,7 +53,7 @@ class LandingDetails extends StatelessWidget {
             LocationButton(location: landing.location),
           ],
         ),
-        _buildRow('Timestamp', friendlyDateTime(landing.createdAt)),
+        _buildRow('Created At', friendlyDateTime(landing.createdAt)),
         _buildRow('Individuals', landing.individuals.toString()),
         _buildRow('Australian name', landing.species.australianName),
         _buildRow('Scientific name', landing.species.scientificName, italic: true),
