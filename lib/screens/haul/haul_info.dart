@@ -34,7 +34,7 @@ class HaulInfo extends StatelessWidget {
         width: 64,
         height: 64,
         child: SvgIcon(
-          assetPath: SvgIcons.path(haul.fishingMethod.name),
+          assetPath: SvgIcons.path(haul.fishingMethod.abbreviation),
           darker: true,
         ),
       );

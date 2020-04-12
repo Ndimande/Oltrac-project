@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
+import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/widgets/haul_list_item.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
@@ -32,11 +33,13 @@ class GroupedHaulsList extends StatelessWidget {
           // Relative index in list
           int haulIndex = totalHauls;
 
+          final FishingMethod fishingMethod = fishingMethodGroup['fishingMethod'];
+
           final Widget svg = Container(
             width: 36,
             height: 36,
             child: SvgIcon(
-              assetPath: SvgIcons.path(fishingMethodGroup['fishingMethod'].name),
+              assetPath: SvgIcons.path(fishingMethod.abbreviation),
               darker: true,
             ),
           );

@@ -280,7 +280,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _fishingMethodStripButton(FishingMethod fishingMethod) {
-    final String title = fishingMethod == null ? 'Fishing Method' : fishingMethod.name;
+    final String title = fishingMethod == null ? 'Fishing Method' : 'Change Method';
     return Expanded(
       child: StripButton(
         labelText: title,

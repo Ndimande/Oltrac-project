@@ -4,49 +4,49 @@ import 'package:oltrace/models/fishing_method_type.dart';
 const List<FishingMethod> fishingMethods = <FishingMethod>[
   FishingMethod(
     id: 1,
-    name: 'Beach seine',
+    name: 'Beach Seine',
     abbreviation: 'SB',
     type: FishingMethodType.Dynamic,
   ),
   FishingMethod(
     id: 2,
-    name: 'Boat seine',
+    name: 'Boat Seine',
     abbreviation: 'SV',
     type: FishingMethodType.Dynamic,
   ),
   FishingMethod(
     id: 3,
-    name: 'Beam trawl',
+    name: 'Beam Trawl',
     abbreviation: 'TBB',
     type: FishingMethodType.Dynamic,
   ),
   FishingMethod(
     id: 4,
-    name: 'Single boat bottom otter trawl',
+    name: 'Single Boat Bottom Otter Trawl',
     abbreviation: 'OTB',
     type: FishingMethodType.Dynamic,
   ),
   FishingMethod(
     id: 5,
-    name: 'Set gillnet (anchored)',
+    name: 'Gillnets Anchored',
     abbreviation: 'GNS',
     type: FishingMethodType.Static,
   ),
   FishingMethod(
     id: 6,
-    name: 'Drift gillnet',
+    name: 'Drift Gillnet',
     abbreviation: 'GND',
     type: FishingMethodType.Static,
   ),
   FishingMethod(
     id: 7,
-    name: 'Set longline',
+    name: 'Bottom Longline',
     abbreviation: 'LLS',
     type: FishingMethodType.Static,
   ),
   FishingMethod(
     id: 8,
-    name: 'Drifting longline',
+    name: 'Drifting Longline',
     abbreviation: 'LLD',
     type: FishingMethodType.Static,
   )

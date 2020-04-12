@@ -29,7 +29,7 @@ class FishingMethodScreen extends StatelessWidget {
         child: SvgIcon(
           height: constraints.maxWidth * 0.4, // we have to use height for width because height constraint is infinite
           darker: true,
-          assetPath: SvgIcons.path(method.name),
+          assetPath: SvgIcons.path(method.abbreviation),
         ),
       );
     });

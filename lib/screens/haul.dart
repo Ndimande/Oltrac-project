@@ -86,36 +86,6 @@ class HaulScreenState extends State<HaulScreen> {
     });
   }
 
-  Widget _listsSection(List<Landing> landings) {
-    return Expanded(
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
-                _products.length == 0
-                    ? Container()
-                    : Row(
-                        children: <Widget>[
-                          Text(_showProductList ? 'Show Species List' : 'Show Tags List'),
-                          Switch(
-                            onChanged: (bool v) => _onPressShowProductListSwitch(v),
-                            value: _showProductList,
-                          )
-                        ],
-                      )
-              ],
-            ),
-            _showProductList ? _productList() : _landingsList(landings),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _onPressProductListItem(int productId) async {
     await Navigator.pushNamed(
       _scaffoldKey.currentContext,
@@ -233,6 +203,36 @@ class HaulScreenState extends State<HaulScreen> {
     });
   }
 
+  Widget _toggleListButton() {
+    return Container(
+      margin: EdgeInsets.only(right: 5),
+      child: RaisedButton(
+        child: Text(_showProductList ? 'Show Species List' : 'Show Tags List'),
+        onPressed: () => _onPressShowProductListSwitch(!_showProductList),
+      ),
+    );
+  }
+
+  Widget _listsSection(List<Landing> landings) {
+    return Expanded(
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
+                if (_products.length != 0) _toggleListButton(),
+              ],
+            ),
+            _showProductList ? _productList() : _landingsList(landings),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _productList() {
     if (_products.length == 0) {
       return _noProducts();
@@ -306,7 +306,7 @@ class HaulScreenState extends State<HaulScreen> {
       children: <Widget>[
         Expanded(child: _addSingleLandingButton()),
         Expanded(child: _addBulkLandingButton()),
-        Expanded(child: _tagProductButton()),
+        if (!_showProductList) Expanded(child: _tagProductButton()),
       ],
     );
   }
