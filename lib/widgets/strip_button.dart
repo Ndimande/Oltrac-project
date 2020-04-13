@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_themes.dart';
 
 class StripButton extends StatelessWidget {
   final Function onPressed;
@@ -12,7 +13,7 @@ class StripButton extends StatelessWidget {
     @required this.icon,
     @required this.labelText,
     @required this.onPressed,
-    this.color,
+    this.color = olracBlue,
     this.disabled = false,
   });
 
@@ -28,7 +29,7 @@ class StripButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            icon,
+            if(icon != null) icon,
             SizedBox(width: 5),
             Expanded(
               child: Text(

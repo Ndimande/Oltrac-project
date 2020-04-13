@@ -8,17 +8,17 @@ import 'package:flutter/rendering.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/framework/util.dart' as util;
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
+import 'package:oltrace/widgets/SharkTrackQrImage.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sqflite/sqflite.dart';
 
 final _productRepo = ProductRepository();
@@ -45,7 +45,7 @@ Future<Product> _load(int productId) async {
     final List<Product> products = await _productRepo.forLanding(landing.id);
     landingsWithProducts.add(landing.copyWith(products: products));
   }
-  return product.copyWith(landings: landingsWithProducts);
+  return product.copyWith(products: landingsWithProducts);
 }
 
 Future<List<Landing>> _getLandings(int productId) async {
@@ -89,16 +89,6 @@ class _ProductScreenState extends State<ProductScreen> {
     });
   }
 
-  Future<ui.Image> _saveQRRenderAsImage() async {
-    final RenderRepaintBoundary boundary = _renderObjectKey.currentContext.findRenderObject();
-    return await boundary.toImage(pixelRatio: 3);
-  }
-
-  Future<Uint8List> _getImageByteStream(ui.Image image) async {
-    final ByteData pngBytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    return pngBytes.buffer.asUint8List();
-  }
-
   String _getImageFilename() {
     const String prefix = 'st';
     final String nonce = (DateTime.now().millisecondsSinceEpoch % 100).toString();
@@ -106,37 +96,24 @@ class _ProductScreenState extends State<ProductScreen> {
     return '${prefix}_${_product.tagCode}_$nonce.$extension';
   }
 
-  Future<String> _getOutputPath(String filename) async {
-    final Directory tmp = await getTemporaryDirectory();
-    return '${tmp.path}/$filename';
-  }
 
   Future<void> _onPressShareQR() async {
-    final ui.Image image = await _saveQRRenderAsImage();
-    final Uint8List byteStream = await _getImageByteStream(image);
-
+    final Uint8List pngBytes = await util.imageSnapshot(_renderObjectKey.currentContext.findRenderObject());
     final String filename = _getImageFilename();
-    final String fullPath = await _getOutputPath(filename);
+    final String fullPath = await util.writeToTemp(filename, pngBytes);
 
     // Write to tmp
-    File(fullPath).writeAsBytesSync(byteStream);
-    await Share.file('Share QR Code', filename, byteStream, 'image/png', text: _qrLabel());
+    File(fullPath).writeAsBytesSync(pngBytes);
+    await Share.file('Share QR Code', filename, pngBytes, 'image/png', text: _qrLabel());
   }
 
   Future<void> _onPressExportQR() async {
-    final ui.Image image = await _saveQRRenderAsImage();
-    final Uint8List byteStream = await _getImageByteStream(image);
+    final Uint8List bytes = await util.imageSnapshot(_renderObjectKey.currentContext.findRenderObject());
+    final String fullPath = await util.writeToTemp(_getImageFilename(), bytes);
 
-    final String filename = _getImageFilename();
-    final String fullPath = await _getOutputPath(filename);
-
-    print(fullPath);
-
-    // Write to tmp
-    File(fullPath).writeAsBytesSync(byteStream);
     final bool success = await GallerySaver.saveImage(fullPath, albumName: AppConfig.APP_TITLE);
     if (success) {
-      showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
+      util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
     }
   }
 
@@ -161,35 +138,13 @@ class _ProductScreenState extends State<ProductScreen> {
         style: TextStyle(color: olracBlue, fontSize: 22),
       ),
       children: <Widget>[
-        FlatButton(
-          padding: EdgeInsets.all(0),
+        SharkTrackQrImage(
+          data: _product.tagCode,
+          title: code,
+          subtitle: labelText,
           onPressed: _onPressShareQR,
           onLongPress: _onPressExportQR,
-          child: RepaintBoundary(
-            key: _renderObjectKey,
-            child: Container(
-              color: Colors.white,
-              child: Column(
-                children: <Widget>[
-                  QrImage(
-                    data: _product.tagCode,
-                    version: QrVersions.auto,
-                    size: 200.0,
-                    embeddedImage: AssetImage('assets/images/shark_track_icon_bw.png'),
-                    embeddedImageStyle: QrEmbeddedImageStyle(size: Size(36, 36)),
-                  ),
-                  Text(
-                    code,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  Text(
-                    labelText,
-                    style: TextStyle(fontSize: 11),
-                  )
-                ],
-              ),
-            ),
-          ),
+          renderKey: _renderObjectKey,
         ),
         SizedBox(height: 5),
         Padding(
@@ -287,13 +242,19 @@ class _ProductScreenState extends State<ProductScreen> {
       padding: EdgeInsets.all(15),
       child: Column(
         children: <Widget>[
-          Text('RFID Tag Code',style: TextStyle(fontSize: 12),),
-          Text(_product.tagCode,style: TextStyle(fontSize: 32),),
+          Text(
+            'RFID Tag Code',
+            style: TextStyle(fontSize: 12),
+          ),
+          Text(
+            _product.tagCode,
+            style: TextStyle(fontSize: 32),
+          ),
           _locationRow(),
           _detailRow('Packaging Type', _product.packagingType.name),
           _detailRow('Product Type', _product.productType.name),
           _detailRow('Quantity', _product.productUnits.toString()),
-          _detailRow('Created At', friendlyDateTime(_product.createdAt)),
+          _detailRow('Created At', util.friendlyDateTime(_product.createdAt)),
         ],
       ),
     );

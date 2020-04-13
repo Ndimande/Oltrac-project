@@ -122,7 +122,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
 
     // Create a product
-    final int savedProductId = await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
+    final int savedProductId = await widget._productRepository.store(product.copyWith(products: _sourceLandings));
     final Product savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {

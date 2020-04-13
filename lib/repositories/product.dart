@@ -18,10 +18,20 @@ class ProductRepository extends DatabaseRepository<Product> {
   }
 
   Future<List<Product>> forLanding(int landingId) async {
-    final List<Map> results =
-        await database.query('product_has_landings', where: 'landing_id = $landingId');
+    final List<Map> results = await database.query('product_has_landings', where: 'landing_id = $landingId');
     final List products = <Product>[];
 
+    for (Map result in results) {
+      final Product product = await find(result['product_id']);
+      products.add(product);
+    }
+    return products;
+  }
+
+  Future<List<Product>> forMasterContainer(int masterContainerId) async {
+    final List<Map> results =
+        await database.query('master_container_has_products', where: 'master_container_id = $masterContainerId');
+    final List products = <Product>[];
     for (Map result in results) {
       final Product product = await find(result['product_id']);
       products.add(product);
@@ -47,8 +57,7 @@ class ProductRepository extends DatabaseRepository<Product> {
     // We need to store in the pivot table
     for (var landing in storedProduct.landings) {
       final String where = 'product_id = $createdId AND landing_id = ${landing.id}';
-      final List<Map<String, dynamic>> res =
-          await database.query('product_has_landings', where: where);
+      final List<Map<String, dynamic>> res = await database.query('product_has_landings', where: where);
       if (res.length == 0) {
         await database.insert(
           'product_has_landings',
@@ -100,8 +109,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       weight: result['weight'],
       weightUnit: weightUnit,
       productType: productTypes.firstWhere((ProductType pt) => pt.id == result['product_type_id']),
-      packagingType:
-          packagingTypes.firstWhere((PackagingType pt) => pt.id == result['packaging_type_id']),
+      packagingType: packagingTypes.firstWhere((PackagingType pt) => pt.id == result['packaging_type_id']),
       landings: landings,
       productUnits: result['product_units'],
     );

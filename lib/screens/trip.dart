@@ -50,7 +50,7 @@ Future<Trip> _getWithNested(Trip trip) async {
       final List<Product> products = await _productRepo.forLanding(landing.id);
       landingsWithProducts.add(landing.copyWith(products: products));
     }
-    hauls.add(haul.copyWith(landings: landingsWithProducts));
+    hauls.add(haul.copyWith(products: landingsWithProducts));
   }
   final Trip tripWithNested = trip.copyWith(hauls: hauls);
 //  await _writeJson(tripWithNested.toJson());

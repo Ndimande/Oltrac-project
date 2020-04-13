@@ -92,5 +92,24 @@ const List<Map<String, String>> appMigrations = const [
         'FOREIGN KEY (product_id) REFERENCES products (id) '
         ')',
     'down': 'DROP TABLE product_has_landings'
+  },
+  {
+    'name': 'create master_containers table',
+    'up': 'CREATE TABLE master_containers( '
+        'id INTEGER PRIMARY KEY, '
+        'tag_code TEXT NOT NULL, '
+        'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
+        'latitude REAL NOT NULL, '
+        'longitude REAL NOT NULL '
+        ')'
+  },
+  {
+    'name': 'create master_container_has_products table',
+    'up': 'CREATE TABLE master_container_has_products( '
+        'master_container_id INTEGER NOT NULL, '
+        'product_id INTEGER NOT NULL, '
+        'FOREIGN KEY (master_container_id) REFERENCES master_containers (id), '
+        'FOREIGN KEY (product_id) REFERENCES products (id) '
+        ')',
   }
 ];

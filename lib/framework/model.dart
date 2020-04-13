@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-abstract class Model {
+abstract class Model extends Object {
   /// The id assigned by sqlite upon storing.
   final int id;
 
@@ -22,4 +22,10 @@ abstract class Model {
 
   /// Convert the model to a json string.
   String toJson() => jsonEncode(this.toMap());
+
+  @override
+  bool operator ==(other) => other.hashCode == hashCode;
+
+  @override
+  int get hashCode => id.hashCode;
 }

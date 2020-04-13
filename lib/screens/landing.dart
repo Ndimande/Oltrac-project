@@ -70,7 +70,7 @@ class LandingScreenState extends State<LandingScreen> {
     // add prods
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: {
       'landings': [_landing],
-      'haul': haul.copyWith(landings: withProducts),
+      'haul': haul.copyWith(products: withProducts),
     });
     setState(() {});
   }

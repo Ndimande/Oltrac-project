@@ -24,6 +24,7 @@ import 'package:oltrace/screens/haul.dart';
 import 'package:oltrace/screens/landing.dart';
 import 'package:oltrace/screens/landing_form.dart';
 import 'package:oltrace/screens/main.dart';
+import 'package:oltrace/screens/master_containers.dart';
 import 'package:oltrace/screens/product.dart';
 import 'package:oltrace/screens/settings.dart';
 import 'package:oltrace/screens/splash.dart';
@@ -266,6 +267,9 @@ class OlTraceAppState extends State<OlTraceApp> {
             case '/add_source_landing':
               final List<Landing> landings = settings.arguments as List<Landing>;
               return AddSourceLandingsScreen(alreadySelectedLandings: landings);
+
+            case '/master_containers':
+              return MasterContainersScreen();
 
             case '/developer':
               return DiagnosticsScreen();

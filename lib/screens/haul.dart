@@ -46,7 +46,7 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   }
 
   return {
-    'haul': haul.copyWith(landings: landingsWithProducts),
+    'haul': haul.copyWith(products: landingsWithProducts),
     'products': flatProducts,
     'isActiveTrip': isActiveTrip,
   };
@@ -58,7 +58,7 @@ class HaulScreen extends StatefulWidget {
   final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
   final int listIndex;
   final int haulId;
-  final _locationProvider = LocationProvider();
+  final LocationProvider _locationProvider = LocationProvider();
 
   HaulScreen({
     @required this.haulId,

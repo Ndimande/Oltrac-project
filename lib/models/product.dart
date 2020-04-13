@@ -62,7 +62,7 @@ class Product extends Model {
       Location location,
       ProductType productType,
       PackagingType packagingType,
-      List<Landing> landings,
+      List<Landing> products,
       int weight,
       WeightUnit weightUnit,
       int productUnits}) {
@@ -73,7 +73,7 @@ class Product extends Model {
       location: location ?? this.location,
       productType: productType ?? this.productType,
       packagingType: packagingType ?? this.packagingType,
-      landings: landings ?? this.landings,
+      landings: products ?? this.landings,
       weight: weight ?? this.weight,
       weightUnit: weightUnit ?? this.weightUnit,
       productUnits: productUnits ?? this.productUnits,

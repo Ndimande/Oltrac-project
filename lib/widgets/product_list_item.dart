@@ -7,16 +7,17 @@ import 'package:oltrace/widgets/forward_arrow.dart';
 class ProductListItem extends StatelessWidget {
   final Product product;
   final Function onPressed;
+  final bool selected;
 
-  ProductListItem({this.product, this.onPressed});
+  ProductListItem({this.product, this.onPressed, this.selected = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: new BoxDecoration(
-          border: Border(
-              bottom: BorderSide(color: Colors.grey[300]),
-              top: BorderSide(color: Colors.grey[300]))),
+      decoration: BoxDecoration(
+        color: selected ? olracBlue[50] : null,
+        border: Border(bottom: BorderSide(color: Colors.grey[300],width: 0.5), top: BorderSide(color: Colors.grey[300],width: 0.5)),
+      ),
       padding: EdgeInsets.all(0),
       child: ListTile(
         onTap: onPressed,
