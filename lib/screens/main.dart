@@ -72,6 +72,8 @@ Future<Map> _load() async {
 
 class MainScreen extends StatefulWidget {
   final SharedPreferences sharedPrefs = SharedPreferencesProvider().sharedPreferences;
+  final TextEditingController _soakTimeHoursController = TextEditingController(text: '0');
+  final TextEditingController _soakTimeMinutesController = TextEditingController(text: '0');
 
   MainScreen();
 
@@ -102,24 +104,6 @@ class MainScreenState extends State<MainScreen> {
     return fm;
   }
 
-  Picker _soakTimePicker() {
-    return Picker(
-        title: Text('Soak Time'),
-        onConfirm: _onConfirmSoakTime,
-        adapter: PickerDataAdapter<String>(isArray: true, pickerdata: <List<String>>[
-          List.generate(AppConfig.MAX_SOAK_HOURS_SELECTABLE, (int index) => '$index hours'),
-          List.generate(12, (int index) => '${index * 5} minutes'),
-        ]));
-  }
-
-  Future<void> _onConfirmSoakTime(Picker picker, List<int> indices) async {
-    final int hours = indices[0];
-    final int minutes = indices[1] * 5;
-    print([hours, minutes]);
-    final Duration soakTime = Duration(hours: hours, minutes: minutes);
-    await _startOperation(soakTime: soakTime);
-  }
-
   Future<void> _startOperation({Duration soakTime}) async {
     try {
       final Location location = await _locationProvider.location;
@@ -140,9 +124,159 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  Widget _soakTimeDialog() {
+    const String INVALID_MINUTES_MESSAGE = 'Invalid minutes';
+    const String INVALID_HOURS_MESSAGE = 'Invalid hours';
+    String hoursError = int.tryParse(widget._soakTimeHoursController.text) == null
+        ? INVALID_HOURS_MESSAGE
+        : int.tryParse(widget._soakTimeHoursController.text) == 0 && int.tryParse(widget._soakTimeMinutesController.text) == 0
+            ? INVALID_HOURS_MESSAGE
+            : null;
+    String minutesError = int.tryParse(widget._soakTimeMinutesController.text) == null
+        ? INVALID_MINUTES_MESSAGE
+        : int.tryParse(widget._soakTimeHoursController.text) == 0 && int.tryParse(widget._soakTimeMinutesController.text) == 0
+            ? INVALID_MINUTES_MESSAGE
+            : null;
+
+    return AlertDialog(
+      title: Text('Soak Time'),
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Row(
+            children: <Widget>[
+              // Hours
+              Expanded(
+                child: TextField(
+                  onChanged: (String val) {
+                    final hours = int.tryParse(val);
+                    final minutes =int.tryParse(widget._soakTimeMinutesController.text);
+
+                    setState(() {
+                      if (hours == null) {
+                        hoursError = INVALID_HOURS_MESSAGE;
+                      } else {
+                        hoursError = null;
+                      }
+
+                    });
+                  },
+                  style: TextStyle(color: Colors.white, fontSize: 26),
+                  controller: widget._soakTimeHoursController,
+                  keyboardType: TextInputType.numberWithOptions(signed: false),
+                  onTap: () {
+                    if(int.tryParse(widget._soakTimeHoursController.text) == 0) {
+                      widget._soakTimeHoursController.clear();
+                    }
+                  },
+                  decoration: InputDecoration(
+                    errorText: hoursError,
+                    contentPadding: EdgeInsets.all(0),
+                    helperText: "Hours",
+                    helperStyle: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+
+              // Minutes
+              Expanded(
+                child: TextField(
+                  onChanged: (String val) {
+                    final minutes = int.tryParse(val);
+
+                    setState(() {
+                      if (minutes == null) {
+                        minutesError = INVALID_MINUTES_MESSAGE;
+                      } else {
+                        minutesError = null;
+                      }
+                    });
+                  },
+                  style: TextStyle(color: Colors.white, fontSize: 26),
+                  controller: widget._soakTimeMinutesController,
+                  keyboardType: TextInputType.numberWithOptions(signed: false),
+                  onTap: () {
+                    if(int.tryParse(widget._soakTimeMinutesController.text) == 0) {
+                      widget._soakTimeMinutesController.clear();
+                    }
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.all(0),
+                    helperText: "Minutes",
+                    helperStyle: TextStyle(color: Colors.white),
+                    errorText: minutesError,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      actions: <Widget>[
+        FlatButton(
+          onPressed: () {
+            if (minutesError != null || hoursError != null) {
+              return;
+            }
+            _onPressSoakTimeDialogDoneButton();
+          },
+          child: Text(
+            'Start',
+            style: TextStyle(fontSize: 22, color: Colors.white),
+          ),
+        ),
+        FlatButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Cancel',
+            style: TextStyle(fontSize: 22, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onPressSoakTimeDialogDoneButton() {
+    final List<String> validationErrors = [];
+
+    final int hours = int.tryParse(widget._soakTimeHoursController.text);
+    final int minutes = int.tryParse(widget._soakTimeMinutesController.text);
+
+    if (hours == 0 && minutes == 0) {
+      validationErrors.add('You may not enter 0 minutes');
+    } else {
+      if (hours == null) {
+        validationErrors.add('You must enter valid hours and hours');
+      }
+      if (minutes == null) {
+        validationErrors.add('You must enter valid hours and minutes');
+      }
+    }
+
+    if (validationErrors.isNotEmpty) {
+      showTextSnackBar(_scaffoldKey, validationErrors.join('\n'));
+      Navigator.pop(context);
+    } else {
+      final Duration soakDuration = Duration(
+        hours: hours,
+        minutes: minutes,
+      );
+      Navigator.pop(context, soakDuration);
+      widget._soakTimeHoursController.clear();
+      widget._soakTimeMinutesController.clear();
+
+    }
+  }
+
   Future<void> _onPressStartStripButton() async {
     if (_fishingMethod.type == FishingMethodType.Static) {
-      _soakTimePicker().showModal(context);
+      final Duration soakTime = await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return _soakTimeDialog();
+          });
+      if (soakTime != null) {
+        _startOperation(soakTime: soakTime);
+      }
     } else {
       await _startOperation();
     }

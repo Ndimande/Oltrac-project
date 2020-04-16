@@ -39,10 +39,11 @@ class ConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: _buildTitle(),
-        actions: _buildActions(context),
-        content: SingleChildScrollView(
-          child: Text(this._question),
-        ));
+      title: _buildTitle(),
+      actions: _buildActions(context),
+      content: SingleChildScrollView(
+        child: Text(this._question),
+      ),
+    );
   }
 }
