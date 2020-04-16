@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/master_container.dart';
+import 'package:oltrace/widgets/forward_arrow.dart';
 
 class MasterContainerListItem extends StatelessWidget {
   final MasterContainer masterContainer;
@@ -23,7 +25,9 @@ class MasterContainerListItem extends StatelessWidget {
             top: BorderSide(color: Colors.grey[300], width: 0.5)),
       ),
       child: ListTile(
-        leading: Text(masterContainer.tagCode),
+        title: Text(masterContainer.tagCode),
+        subtitle: Text(friendlyDateTime(masterContainer.createdAt)),
+        trailing: ForwardArrow(),
         onTap: onTap != null ? () => onTap(masterContainer.id) : null,
       ),
     );

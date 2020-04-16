@@ -2,6 +2,7 @@ import 'package:oltrace/models/species.dart';
 
 const List<Species> species = <Species>[
   Species(
+    id: 1,
     alpha3Code: 'HXT',
     taxonomicCode: '1050200301',
     englishName: 'Sharpnose sevengill shark',
@@ -17,6 +18,7 @@ const List<Species> species = <Species>[
     australianName: 'Sharpnose Sevengill Shark',
   ),
   Species(
+    id: 2,
     alpha3Code: 'NTC',
     taxonomicCode: '1050200502',
     englishName: 'Broadnose sevengill shark',
@@ -32,6 +34,7 @@ const List<Species> species = <Species>[
     australianName: 'Broadnose Shark',
   ),
   Species(
+    id: 3,
     alpha3Code: 'HXN',
     taxonomicCode: '1050200202',
     englishName: 'Bigeyed sixgill shark',
@@ -47,6 +50,7 @@ const List<Species> species = <Species>[
     australianName: 'Bigeye Sixgill Shark',
   ),
   Species(
+    id: 4,
     alpha3Code: 'SBL',
     taxonomicCode: '1050200201',
     englishName: 'Bluntnose sixgill shark',
@@ -62,6 +66,7 @@ const List<Species> species = <Species>[
     australianName: 'Bluntnose Sixgill Shark',
   ),
   Species(
+    id: 5,
     alpha3Code: 'HXC',
     taxonomicCode: '1050100101',
     englishName: 'Frilled shark',
@@ -77,6 +82,7 @@ const List<Species> species = <Species>[
     australianName: 'Frill Shark',
   ),
   Species(
+    id: 6,
     alpha3Code: 'HEK',
     taxonomicCode: '1040100105',
     englishName: 'Port Jackson shark',
@@ -92,6 +98,7 @@ const List<Species> species = <Species>[
     australianName: 'Port Jackson Shark',
   ),
   Species(
+    id: 7,
     alpha3Code: 'SMA',
     taxonomicCode: '1060800201',
     englishName: 'Shortfin mako',
@@ -107,6 +114,7 @@ const List<Species> species = <Species>[
     australianName: 'Shortfin Mako',
   ),
   Species(
+    id: 8,
     alpha3Code: 'LMA',
     taxonomicCode: '1060800203',
     englishName: 'Longfin mako',
@@ -122,6 +130,7 @@ const List<Species> species = <Species>[
     australianName: 'Longfin Mako',
   ),
   Species(
+    id: 9,
     alpha3Code: 'BTH',
     taxonomicCode: '1060600603',
     englishName: 'Bigeye thresher',
@@ -137,6 +146,7 @@ const List<Species> species = <Species>[
     australianName: 'Bigeye Thresher',
   ),
   Species(
+    id: 10,
     alpha3Code: 'PTH',
     taxonomicCode: '1060600602',
     englishName: 'Pelagic thresher',
@@ -152,6 +162,7 @@ const List<Species> species = <Species>[
     australianName: 'Pelagic Thresher',
   ),
   Species(
+    id: 11,
     alpha3Code: 'ORO',
     taxonomicCode: '1070200203',
     englishName: 'Ornate wobbegong',
@@ -167,6 +178,7 @@ const List<Species> species = <Species>[
     australianName: 'Banded Wobbegong',
   ),
   Species(
+    id: 12,
     alpha3Code: 'ORT',
     taxonomicCode: '1070200202',
     englishName: 'Spotted wobbegong',
@@ -182,6 +194,7 @@ const List<Species> species = <Species>[
     australianName: 'Spotted Wobbegong',
   ),
   Species(
+    id: 13,
     alpha3Code: 'ORE',
     taxonomicCode: '1070200101',
     englishName: 'Tasselled wobbegong',
@@ -197,6 +210,7 @@ const List<Species> species = <Species>[
     australianName: 'Tasselled Wobbegong',
   ),
   Species(
+    id: 14,
     alpha3Code: 'CTU',
     taxonomicCode: '1080400701',
     englishName: 'Gummy shark',
@@ -212,6 +226,7 @@ const List<Species> species = <Species>[
     australianName: 'Gummy Shark',
   ),
   Species(
+    id: 15,
     alpha3Code: 'TFM',
     taxonomicCode: '1080402801',
     englishName: 'Whiskery shark',
@@ -227,6 +242,7 @@ const List<Species> species = <Species>[
     australianName: 'Whiskery Shark',
   ),
   Species(
+    id: 16,
     alpha3Code: 'GAG',
     taxonomicCode: '1080401103',
     englishName: 'Tope shark',
@@ -242,6 +258,7 @@ const List<Species> species = <Species>[
     australianName: 'School Shark',
   ),
   Species(
+    id: 17,
     alpha3Code: 'BRO',
     taxonomicCode: '1080201020',
     englishName: 'Copper shark',
@@ -257,6 +274,7 @@ const List<Species> species = <Species>[
     australianName: 'Bronze Whaler',
   ),
   Species(
+    id: 18,
     alpha3Code: 'DUS',
     taxonomicCode: '1080201016',
     englishName: 'Dusky shark',
@@ -272,6 +290,7 @@ const List<Species> species = <Species>[
     australianName: 'Dusky Whaler',
   ),
   Species(
+    id: 19,
     alpha3Code: 'BSH',
     taxonomicCode: '1080200401',
     englishName: 'Blue shark',
@@ -287,6 +306,7 @@ const List<Species> species = <Species>[
     australianName: 'Blue Shark',
   ),
   Species(
+    id: 20,
     alpha3Code: 'FAL',
     taxonomicCode: '1080201017',
     englishName: 'Silky shark',
@@ -302,6 +322,7 @@ const List<Species> species = <Species>[
     australianName: 'Silky Shark',
   ),
   Species(
+    id: 21,
     alpha3Code: 'CCQ',
     taxonomicCode: '1080201031',
     englishName: 'Spottail shark',
@@ -317,6 +338,7 @@ const List<Species> species = <Species>[
     australianName: 'Spot-tail Shark',
   ),
   Species(
+    id: 22,
     alpha3Code: 'CCU',
     taxonomicCode: '1080201032',
     englishName: 'Australian blacktip shark',
@@ -332,6 +354,7 @@ const List<Species> species = <Species>[
     australianName: 'Australian Blacktip Shark',
   ),
   Species(
+    id: 23,
     alpha3Code: 'CCE',
     taxonomicCode: '1080201018',
     englishName: 'Bull shark',
@@ -347,6 +370,7 @@ const List<Species> species = <Species>[
     australianName: 'Bull Shark',
   ),
   Species(
+    id: 24,
     alpha3Code: 'TIG',
     taxonomicCode: '1080201703',
     englishName: 'Tiger shark',
@@ -362,6 +386,7 @@ const List<Species> species = <Species>[
     australianName: 'Tiger Shark',
   ),
   Species(
+    id: 25,
     alpha3Code: 'CCB',
     taxonomicCode: '1080201021',
     englishName: 'Spinner shark',
@@ -377,6 +402,7 @@ const List<Species> species = <Species>[
     australianName: 'Spinner Shark',
   ),
   Species(
+    id: 26,
     alpha3Code: 'ALS',
     taxonomicCode: '1080201019',
     englishName: 'Silvertip shark',
@@ -392,6 +418,7 @@ const List<Species> species = <Species>[
     australianName: 'Silvertip Shark',
   ),
   Species(
+    id: 27,
     alpha3Code: 'NGA',
     taxonomicCode: '1080202702',
     englishName: 'Sicklefin lemon shark',
@@ -407,6 +434,7 @@ const List<Species> species = <Species>[
     australianName: 'Lemon Shark',
   ),
   Species(
+    id: 28,
     alpha3Code: 'AML',
     taxonomicCode: '1080201006',
     englishName: 'Grey reef shark',
@@ -422,6 +450,7 @@ const List<Species> species = <Species>[
     australianName: 'Grey Reef Shark',
   ),
   Species(
+    id: 29,
     alpha3Code: 'BLR',
     taxonomicCode: '1080201005',
     englishName: 'Blacktip reef shark',
@@ -437,6 +466,7 @@ const List<Species> species = <Species>[
     australianName: 'Blacktip Reef Shark',
   ),
   Species(
+    id: 30,
     alpha3Code: 'CCL',
     taxonomicCode: '1080201003',
     englishName: 'Blacktip shark',
@@ -452,6 +482,7 @@ const List<Species> species = <Species>[
     australianName: 'Common Blacktip Shark',
   ),
   Species(
+    id: 31,
     alpha3Code: 'SPL',
     taxonomicCode: '1080300506',
     englishName: 'Scalloped hammerhead',
@@ -467,6 +498,7 @@ const List<Species> species = <Species>[
     australianName: 'Scalloped Hammerhead',
   ),
   Species(
+    id: 32,
     alpha3Code: 'SPK',
     taxonomicCode: '1080300510',
     englishName: 'Great hammerhead',
@@ -482,6 +514,7 @@ const List<Species> species = <Species>[
     australianName: 'Great Hammerhead',
   ),
   Species(
+    id: 33,
     alpha3Code: 'EUB',
     taxonomicCode: '1080300401',
     englishName: 'Winghead shark',
@@ -497,6 +530,7 @@ const List<Species> species = <Species>[
     australianName: 'Winghead Shark',
   ),
   Species(
+    id: 34,
     alpha3Code: 'SPZ',
     taxonomicCode: '1080300501',
     englishName: 'Smooth hammerhead',
@@ -512,6 +546,7 @@ const List<Species> species = <Species>[
     australianName: 'Smooth Hammerhead',
   ),
   Species(
+    id: 35,
     alpha3Code: 'CEM',
     taxonomicCode: '1090100807',
     englishName: 'Smallfin gulper shark',
@@ -527,6 +562,7 @@ const List<Species> species = <Species>[
     australianName: 'Endeavour Dogfish',
   ),
   Species(
+    id: 36,
     alpha3Code: 'PPU',
     taxonomicCode: '1090200303',
     englishName: 'Shortnose sawshark',
@@ -542,6 +578,7 @@ const List<Species> species = <Species>[
     australianName: 'Southern Sawshark',
   ),
   Species(
+    id: 37,
     alpha3Code: 'PPC',
     taxonomicCode: '1090200301',
     englishName: 'Longnose sawshark',
@@ -557,6 +594,7 @@ const List<Species> species = <Species>[
     australianName: 'Common Sawshark',
   ),
   Species(
+    id: 38,
     alpha3Code: 'SUU',
     taxonomicCode: '1090300405',
     englishName: 'Australian angelshark',
@@ -572,6 +610,7 @@ const List<Species> species = <Species>[
     australianName: 'Australian Angelshark',
   ),
   Species(
+    id: 39,
     alpha3Code: 'SUE',
     taxonomicCode: '1090300412',
     englishName: 'Ornate angelshark',

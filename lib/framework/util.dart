@@ -59,3 +59,8 @@ Future<String> writeToTemp(String filename, Uint8List bytes) async {
   File('${tmpDir.path}/$filename').writeAsBytesSync(bytes);
   return fullPath;
 }
+
+void printWrapped(String text) {
+  final pattern = new RegExp('.{1,800}'); // 800 is the size of each chunk
+  pattern.allMatches(text).forEach((match) => print(match.group(0)));
+}

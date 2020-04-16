@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 
-@immutable
 class Species extends Model {
   final String englishName;
   final String scientificName;
@@ -17,20 +16,22 @@ class Species extends Model {
   final String cpcGroup;
   final String caabCode;
 
-  const Species(
-      {this.englishName,
-      this.alpha3Code,
-      this.scientificName,
-      this.taxonomicCode,
-      this.australianName,
-      this.family,
-      this.order,
-      this.majorGroup,
-      this.yearbookGroup,
-      this.isscaapGroup,
-      this.cpcClass,
-      this.cpcGroup,
-      this.caabCode});
+  const Species({
+    int id,
+    this.englishName,
+    this.alpha3Code,
+    this.scientificName,
+    this.taxonomicCode,
+    this.australianName,
+    this.family,
+    this.order,
+    this.majorGroup,
+    this.yearbookGroup,
+    this.isscaapGroup,
+    this.cpcClass,
+    this.cpcGroup,
+    this.caabCode,
+  }) : super(id: id);
 
   Species.fromMap(Map data)
       : englishName = data['englishName'],
@@ -48,21 +49,24 @@ class Species extends Model {
         caabCode = data['caabCode'],
         super.fromMap(data);
 
-  Species copyWith(
-      {String firstName,
-      String alpha3Code,
-      String scientificName,
-      String taxonomicCode,
-      String australianName,
-      String family,
-      String order,
-      String majorGroup,
-      String yearbookGroup,
-      String isscaapGroup,
-      String cpcClass,
-      String cpcGroup,
-      String caabCode}) {
+  Species copyWith({
+    int id,
+    String firstName,
+    String alpha3Code,
+    String scientificName,
+    String taxonomicCode,
+    String australianName,
+    String family,
+    String order,
+    String majorGroup,
+    String yearbookGroup,
+    String isscaapGroup,
+    String cpcClass,
+    String cpcGroup,
+    String caabCode,
+  }) {
     return Species(
+        id: id ?? this.id,
         englishName: firstName ?? this.englishName,
         alpha3Code: alpha3Code ?? this.alpha3Code,
         scientificName: scientificName ?? this.scientificName,
@@ -80,6 +84,7 @@ class Species extends Model {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'name': englishName,
       'alpha3Code': alpha3Code,
       'scientificName': scientificName,
@@ -96,5 +101,4 @@ class Species extends Model {
     };
   }
 
-  Map<String, dynamic> toDatabaseMap() => toMap();
 }

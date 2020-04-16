@@ -198,10 +198,45 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _speciesDropdown() {
     final List<Species> sortedSpecies = List.from(species);
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
+print(sortedSpecies.map((Species e) => e.alpha3Code).toList());
+
+    return Container(
+      child: ModelDropdown<Species>(
+        label: 'Species',
+        selected: _selectedSpecies,
+        items: sortedSpecies.map<DropdownMenuItem<Species>>(
+            (Species species) {
+            return DropdownMenuItem<Species>(
+              value: species,
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      species.englishName,
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SvgIcon(
+                      assetPath: SvgIcons.path(species.scientificName),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ).toList(),
+        onChanged: (Species species) {
+          setState(() => _selectedSpecies = species);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     final String titleText = widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Species' : 'Edit Species';
 
@@ -223,36 +258,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     // Select species
-                    Container(
-                      child: ModelDropdown<Species>(
-                        label: 'Species',
-                        selected: _selectedSpecies,
-                        items: sortedSpecies.map<DropdownMenuItem<Species>>(
-                          (Species species) {
-                            return DropdownMenuItem<Species>(
-                              value: species,
-                              child: Container(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Text(
-                                      species.englishName,
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                    SvgIcon(
-                                      assetPath: SvgIcons.path(species.scientificName),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ).toList(),
-                        onChanged: (Species species) {
-                          setState(() => _selectedSpecies = species);
-                        },
-                      ),
-                    ),
+                    _speciesDropdown(),
 
                     // Weight
                     Container(

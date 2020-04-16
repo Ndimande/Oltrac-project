@@ -39,6 +39,27 @@ class ProductRepository extends DatabaseRepository<Product> {
     return products;
   }
 
+  Future<List<Product>> forTrips(List<int> ids) async {
+    assert(ids != null && ids.isNotEmpty);
+    final String idList = ids.length == 1 ? ids.first.toString() : ids.join(', ');
+
+    final String sql = 'SELECT * FROM products '
+        'JOIN product_has_landings '
+        'JOIN landings JOIN hauls JOIN trips '
+        'WHERE trips.id IN ($idList)';
+
+    final List<Map<String, dynamic>> results = await database.rawQuery(sql);
+    final List<Product> products = [];
+    print(products);
+
+    for (Map result in results) {
+      final Product product = fromDatabaseMap(result);
+      products.add(product);
+    }
+
+    return products;
+  }
+
   @override
   Future<int> store(Product product) async {
     int createdId;

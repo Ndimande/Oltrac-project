@@ -16,7 +16,11 @@ Widget _drawerHeader(Profile profile) {
         'Vessel Name',
         style: TextStyle(fontSize: drawerLabelFontSize),
       ),
-      Text(profile.vesselName, style: TextStyle(fontSize: drawerTextFontSize)),
+      Text(
+        profile.vesselName,
+        style: TextStyle(fontSize: drawerTextFontSize),
+        overflow: TextOverflow.ellipsis,
+      ),
     ],
   );
 
@@ -32,6 +36,7 @@ Widget _drawerHeader(Profile profile) {
         style: TextStyle(
           fontSize: drawerTextFontSize,
         ),
+        overflow: TextOverflow.ellipsis,
       ),
     ],
   );

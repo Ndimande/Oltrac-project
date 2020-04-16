@@ -1,10 +1,14 @@
 import 'dart:convert';
 
-abstract class Model extends Object {
+import 'package:flutter/foundation.dart';
+
+@immutable
+abstract class Model {
   /// The id assigned by sqlite upon storing.
   final int id;
 
   /// Default constructor creates a uuid
+  @mustCallSuper
   const Model({this.id});
 
   /// Construct from map. The [Map] must contain id.
@@ -24,7 +28,7 @@ abstract class Model extends Object {
   String toJson() => jsonEncode(this.toMap());
 
   @override
-  bool operator ==(other) => other.hashCode == hashCode;
+  bool operator ==(other) => other.id?.hashCode == id?.hashCode;
 
   @override
   int get hashCode => id.hashCode;

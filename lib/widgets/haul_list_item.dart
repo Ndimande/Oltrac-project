@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
 import 'package:oltrace/widgets/haul_subtitle.dart';
 import 'package:oltrace/widgets/time_ago.dart';
@@ -14,8 +13,6 @@ class HaulListItem extends StatelessWidget {
   final Haul haul;
   final Function onPressed;
   final int listIndex;
-
-  final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
 
   HaulListItem({this.haul, this.onPressed, this.listIndex});
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
+import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/master_container.dart';
+import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/master_container.dart';
 import 'package:oltrace/screens/master_container_form.dart';
 import 'package:oltrace/widgets/master_container_list_item.dart';
@@ -28,10 +30,15 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
   List<MasterContainer> _masterContainers;
 
   Future<void> _onPressCreateStripButton() async {
+    final List<Trip> trips = await TripRepository().all();
+
     await Navigator.push(
       _scaffoldKey.currentContext,
-      MaterialPageRoute(builder: (_) => MasterContainerFormScreen()),
+      MaterialPageRoute(builder: (_) => MasterContainerFormScreen(sourceTripIds: trips.map((Trip t) => t.id).toList(),)),
     );
+
+    // Refresh when we return
+    setState(() {});
   }
 
   _onTapListItem(MasterContainer masterContainer) {

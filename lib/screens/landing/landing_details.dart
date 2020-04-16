@@ -14,7 +14,7 @@ class LandingDetails extends StatelessWidget {
 
   _buildRow(String key, String val, {bool italic = false}) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5),
+      margin: EdgeInsets.symmetric(horizontal: 15,vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,

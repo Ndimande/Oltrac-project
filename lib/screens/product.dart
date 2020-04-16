@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +13,10 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/widgets/SharkTrackQrImage.dart';
+import 'package:oltrace/widgets/sharktrack_qr_image.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/strip_button.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 final _productRepo = ProductRepository();
@@ -67,7 +65,7 @@ Future<List<Landing>> _getLandings(int productId) async {
 class ProductScreen extends StatefulWidget {
   final int productId;
 
-  ProductScreen({this.productId});
+  ProductScreen({this.productId}): assert(productId != null);
 
   @override
   _ProductScreenState createState() => _ProductScreenState();
@@ -122,7 +120,7 @@ class _ProductScreenState extends State<ProductScreen> {
     final String productType = _product.productType.name;
     final String quantity = _product.productUnits.toString();
 
-    return '$productType ($quantity) - $packageType';
+    return '$productType - $quantity - $packageType';
   }
 
   Widget _qrCode() {
@@ -132,11 +130,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
     final String helpText = 'This QR code may be used instead of the RFID tag for convenience '
         'if no RFID reader is available or the tags are hard to access for scanning.';
-    return ExpansionTile(
-      title: Text(
-        'QR Code',
-        style: TextStyle(color: olracBlue, fontSize: 22),
-      ),
+    return Column(
       children: <Widget>[
         SharkTrackQrImage(
           data: _product.tagCode,
@@ -246,7 +240,7 @@ class _ProductScreenState extends State<ProductScreen> {
             'RFID Tag Code',
             style: TextStyle(fontSize: 12),
           ),
-          Text(
+          SelectableText(
             _product.tagCode,
             style: TextStyle(fontSize: 32),
           ),
@@ -265,8 +259,8 @@ class _ProductScreenState extends State<ProductScreen> {
       child: Column(
         children: <Widget>[
           _details(),
-          _landingItems(),
           _qrCode(),
+          _landingItems(),
         ],
       ),
     );

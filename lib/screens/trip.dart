@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:oltrace/framework/util.dart' as util;
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
@@ -9,11 +10,13 @@ import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
+import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
@@ -26,19 +29,8 @@ final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
+final _masterContainerRepo = MasterContainerRepository();
 
-//Future<File> _writeJson(String json) async {
-//  final dir = await getApplicationDocumentsDirectory();
-//  final path = dir.path;
-//  print('write json to $path');
-//  final file = File('$path/test.json');
-//  final db = DatabaseProvider().database;
-////  await db.insert('json', {'key': 'tripeg','json':json});
-//  final sp = SharedPreferencesProvider().sharedPreferences;
-//  sp.setString('tripeg', json);
-//  // Write the file.
-//  return file.writeAsString(json);
-//}
 
 Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
@@ -53,7 +45,7 @@ Future<Trip> _getWithNested(Trip trip) async {
     hauls.add(haul.copyWith(products: landingsWithProducts));
   }
   final Trip tripWithNested = trip.copyWith(hauls: hauls);
-//  await _writeJson(tripWithNested.toJson());
+
   return tripWithNested;
 }
 
@@ -153,16 +145,34 @@ class TripScreenState extends State<TripScreen> {
       ),
     );
 
+    final Map tripMap = trip.toMap();
+    final List<MasterContainer> mcs = await _masterContainerRepo.all();
+    final List<MasterContainer> updatedMcs = [];
+    for(final MasterContainer mc in mcs) {
+      final List<Product> mcProducts = await ProductRepository().forMasterContainer(mc.id);
+      final updatedMc = mc.copyWith(products: mcProducts);
+      updatedMcs.add(updatedMc);
+    }
+
+    tripMap['masterContainers'] = updatedMcs.map((MasterContainer mc) => mc.toMap()).toList().map((Map item) {
+
+      final List<Product> productsList = item['products'];
+      final List<Map<String,String>> tagCodes = productsList.map((Product e) => {'tagCode':e.tagCode}).toList();
+      item['products'] = tagCodes;
+      return item;
+    }).toList();
+
     final Map<String, dynamic> data = {
       'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       'json': {
-        'trip': trip.toMap(),
+        'trip': tripMap,
         'user': _appStore.profile.toMap(),
       }
     };
 
     print('Data:');
-    print(data.toString());
+
+    util.printWrapped(jsonEncode(data['json']['trip']));
 
     setState(() {
       uploading = true;

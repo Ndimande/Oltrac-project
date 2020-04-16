@@ -12,7 +12,8 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/widgets/SharkTrackQrImage.dart';
+import 'package:oltrace/screens/product.dart';
+import 'package:oltrace/widgets/sharktrack_qr_image.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/framework/util.dart' as util;
@@ -24,7 +25,10 @@ class MasterContainerFormScreen extends StatefulWidget {
   final LocationProvider _locationProvider = LocationProvider();
   final TextEditingController _tagCodeController = TextEditingController();
 
-  MasterContainerFormScreen({this.initialProducts = const <Product>[]});
+  /// The trips we can choose products from
+  final List<int> sourceTripIds;
+
+  MasterContainerFormScreen({this.initialProducts = const <Product>[], this.sourceTripIds});
 
   @override
   _MasterContainerFormScreenState createState() => _MasterContainerFormScreenState();
@@ -59,6 +63,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
       MaterialPageRoute(
         builder: (_) => _AddProductsScreen(
           alreadySelectedProducts: _childProducts,
+          sourceTripIds: widget.sourceTripIds,
         ),
       ),
     );
@@ -116,7 +121,13 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: _childProducts.map<Widget>((Product product) {
-            return ProductListItem(product: product);
+            return ProductListItem(
+              product: product,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProductScreen(productId: product.id)),
+              ),
+            );
           }).toList(),
         ),
       ),
@@ -225,13 +236,15 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
 
 class _AddProductsScreen extends StatefulWidget {
   final List<Product> alreadySelectedProducts;
+  final List<int> sourceTripIds;
 
-  _AddProductsScreen({this.alreadySelectedProducts = const []});
+  _AddProductsScreen({this.alreadySelectedProducts = const [], this.sourceTripIds})
+      : assert(sourceTripIds != null && sourceTripIds.isNotEmpty);
 
   @override
   __AddProductsScreenState createState() => __AddProductsScreenState(alreadySelectedProducts);
 
-  Future<List<Product>> _load() async {
+  Future<List<Product>> _load2() async {
     final ProductRepository productRepo = ProductRepository();
     final List<int> alreadySelectedProductIds =
         alreadySelectedProducts.map<int>((Product product) => product.id).toList();
@@ -245,8 +258,14 @@ class _AddProductsScreen extends StatefulWidget {
       return await productRepo.all(where: sqlWhere);
     }
   }
+
+  Future<List<Product>> _load(List<int> sourceTripIds) async {
+    final productRepo = ProductRepository();
+    return await productRepo.forTrips(sourceTripIds);
+  }
 }
 
+// SELECT * FROM products JOIN product_has_landings JOIN landings JOIN hauls JOIN trips WHERE trips.id IN (1)
 class __AddProductsScreenState extends State<_AddProductsScreen> {
   List<Product> _products = <Product>[];
   List<Product> _selectedProducts = <Product>[];
@@ -335,7 +354,7 @@ class __AddProductsScreenState extends State<_AddProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: widget._load(),
+      future: widget._load(widget.sourceTripIds),
       builder: (BuildContext _, AsyncSnapshot snapshot) {
         if (snapshot.hasError) {
           return Scaffold(body: Text(snapshot.error.toString()));
