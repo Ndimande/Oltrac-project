@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/data/packaging_types.dart';
-import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/model.dart';
-import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
-import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
-import 'package:oltrace/models/product_type.dart';
 
 @immutable
 class MasterContainer extends Model {

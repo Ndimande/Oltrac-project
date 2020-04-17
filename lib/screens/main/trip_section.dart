@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
@@ -37,7 +37,7 @@ class TripSection extends StatelessWidget {
   Widget get cancelTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
           labelText: 'Cancel',
-          color: hasActiveHaul ? Colors.grey : olracBlue,
+          color: hasActiveHaul ? Colors.grey : OlracColours.olspsBlue,
           onPressed: () async => await onPressCancelTrip(),
           icon: Icon(
             Icons.cancel,
@@ -49,7 +49,7 @@ class TripSection extends StatelessWidget {
   Widget get editTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
           labelText: 'Edit',
-          color: olracBlue,
+          color: OlracColours.olspsBlue,
           onPressed: onPressEditTrip,
           icon: Icon(
             Icons.edit,
@@ -89,7 +89,7 @@ class TripSection extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Container(
-      color: olracBlue[50],
+      color: OlracColours.olspsBlue[50],
       child: Column(
         children: <Widget>[
           Container(

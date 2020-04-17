@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/forward_arrow.dart';
@@ -59,12 +59,12 @@ class LandingListItem extends StatelessWidget {
           : Icon(isSelected ? Icons.check_circle : Icons.lens),
       onPressed: landing.doneTagging ? null : onLongPress,
       iconSize: 30,
-      color: olracBlue,
+      color: OlracColours.olspsBlue,
     );
   }
 
   BoxDecoration get _decoration => BoxDecoration(
-        color: isSelected ? olracBlue[50] : Colors.transparent,
+        color: isSelected ? OlracColours.olspsBlue[50] : Colors.transparent,
         border: listIndex == 1
             ? Border(bottom: BorderSide(color: Colors.grey[300]), top: BorderSide(color: Colors.grey[300]))
             : Border(top: BorderSide(color: Colors.grey[300])),

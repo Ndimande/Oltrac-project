@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
-import 'package:oltrace/framework/util.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/widgets/location_button.dart';
 
 const double rowFontSize = 16;
 const TextStyle _rowFontStyle = const TextStyle(fontSize: rowFontSize);
@@ -45,7 +43,7 @@ class LandingDetails extends StatelessWidget {
       initiallyExpanded: true,
       title: Text(
         'Species Information',
-        style: TextStyle(fontSize: 22, color: olracBlue),
+        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
       ),
       children: <Widget>[
         _buildRow('Australian name', landing.species.australianName),

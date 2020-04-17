@@ -5,8 +5,8 @@ import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/util.dart' as util;
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
@@ -65,7 +65,7 @@ Future<List<Landing>> _getLandings(int productId) async {
 class ProductScreen extends StatefulWidget {
   final int productId;
 
-  ProductScreen({this.productId}): assert(productId != null);
+  ProductScreen({this.productId}) : assert(productId != null);
 
   @override
   _ProductScreenState createState() => _ProductScreenState();
@@ -93,7 +93,6 @@ class _ProductScreenState extends State<ProductScreen> {
     const String extension = 'png';
     return '${prefix}_${_product.tagCode}_$nonce.$extension';
   }
-
 
   Future<void> _onPressShareQR() async {
     final Uint8List pngBytes = await util.imageSnapshot(_renderObjectKey.currentContext.findRenderObject());
@@ -161,7 +160,7 @@ class _ProductScreenState extends State<ProductScreen> {
             labelText: 'Share',
             onPressed: _onPressShareQR,
             icon: Icon(Icons.share),
-            color: olracBlue,
+            color: OlracColours.olspsBlue,
           ),
         ),
         Expanded(
@@ -212,7 +211,7 @@ class _ProductScreenState extends State<ProductScreen> {
     return ExpansionTile(
       title: Text(
         'Source Sharks',
-        style: TextStyle(fontSize: 22, color: olracBlue),
+        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
       ),
       children: landingItems,
     );
@@ -254,15 +253,22 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
-  Widget scrollViewChild() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          _details(),
-          _qrCode(),
-          _landingItems(),
-        ],
-      ),
+  Widget _body() {
+    return Column(
+      children: <Widget>[
+        Expanded(
+            child: SingleChildScrollView(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                _details(),
+                _qrCode(),
+                _landingItems(),
+              ],
+            ),
+          ),
+        ))
+      ],
     );
   }
 
@@ -287,14 +293,7 @@ class _ProductScreenState extends State<ProductScreen> {
           appBar: AppBar(
             title: Text('Product (${_product.productType.name})'),
           ),
-          body: Column(
-            children: <Widget>[
-              Expanded(
-                  child: SingleChildScrollView(
-                child: scrollViewChild(),
-              ))
-            ],
-          ),
+          body: _body(),
         );
       },
     );

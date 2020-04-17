@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart' as util;
 
 import 'package:dio/adapter.dart';
@@ -7,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/master_container.dart';
@@ -81,7 +81,7 @@ class TripScreenState extends State<TripScreen> {
 
   Widget _buildTripInfo(Trip trip) {
     return Container(
-      color: olracBlue[50],
+      color: OlracColours.olspsBlue[50],
       padding: EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -118,7 +118,7 @@ class TripScreenState extends State<TripScreen> {
     return StripButton(
       labelText: label,
       disabled: trip.isUploaded,
-      color: olracBlue,
+      color: OlracColours.olspsBlue,
       onPressed: onPress,
       icon: Icon(
         trip.isUploaded ? Icons.check_circle_outline : Icons.cloud_upload,

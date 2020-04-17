@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 
-// Todo rename to SvgIcon
 class SvgIcon extends StatelessWidget {
   final String assetPath;
   final double width;
@@ -20,7 +19,7 @@ class SvgIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color color = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
-        : darker ? olracDarkBlue : olracBlue;
+        : darker ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue;
     if (assetPath == null) {
       return Container(
         color: Colors.red,

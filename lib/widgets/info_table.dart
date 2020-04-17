@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 
 class InfoTable extends StatelessWidget {
   final String title;
@@ -16,7 +16,7 @@ class InfoTable extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: olracBlue,
+          color: OlracColours.olspsBlue,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),

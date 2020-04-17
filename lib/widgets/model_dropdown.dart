@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 
 class ModelDropdown<T> extends StatelessWidget {
@@ -25,7 +25,7 @@ class ModelDropdown<T> extends StatelessWidget {
     @required this.selected,
     @required this.onChanged,
     @required this.items,
-  }) : this.labelStyle = labelStyle ?? TextStyle(fontSize: 20, color: olracBlue);
+  }) : this.labelStyle = labelStyle ?? TextStyle(fontSize: 20, color: OlracColours.olspsBlue);
 
   @override
   Widget build(BuildContext context) {

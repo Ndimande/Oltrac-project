@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
 
@@ -23,7 +23,7 @@ class ProductsList extends StatelessWidget {
       initiallyExpanded: true,
       title: Text(
         'Product Tags',
-        style: TextStyle(fontSize: 22, color: olracBlue),
+        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
       ),
       children: items,
     );

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 
@@ -18,7 +18,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Timer _longPressTimer;
   bool _backButtonBeingPressed = false;
   int _backButtonLongPressedSeconds = 0;
-  Color _backButtonColor = olracBlue;
+  Color _backButtonColor = OlracColours.olspsBlue;
 
   String get _version => _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber;
 
@@ -31,7 +31,7 @@ class _AboutScreenState extends State<AboutScreen> {
   void _onTimerTick(Timer timer) {
     if (_backButtonBeingPressed) {
       setState(() {
-        _backButtonColor = _backButtonColor == olracBlue ? Colors.deepOrange : olracBlue;
+        _backButtonColor = _backButtonColor == OlracColours.olspsBlue ? Colors.deepOrange : OlracColours.olspsBlue;
         _backButtonLongPressedSeconds += 1;
       });
     } else {
@@ -43,7 +43,7 @@ class _AboutScreenState extends State<AboutScreen> {
       setState(() {
         _backButtonLongPressedSeconds = 0;
         _backButtonBeingPressed = false;
-        _backButtonColor = olracBlue;
+        _backButtonColor = OlracColours.olspsBlue;
       });
       Navigator.pushNamed(_scaffoldKey.currentContext, '/developer');
       return;

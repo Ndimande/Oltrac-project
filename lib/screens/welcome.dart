@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/data/countries.dart';
 import 'package:oltrace/data/fishery_types.dart';
 import 'package:oltrace/framework/util.dart';
@@ -14,7 +14,11 @@ import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:uuid/uuid.dart';
 
-final TextStyle _sectionHeadingTextStyle = TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: olracBlue);
+final TextStyle _sectionHeadingTextStyle = TextStyle(
+  fontSize: 26,
+  fontWeight: FontWeight.bold,
+  color: OlracColours.olspsBlue,
+);
 
 class WelcomeScreen extends StatefulWidget {
   final AppStore _appStore = StoreProvider().appStore;

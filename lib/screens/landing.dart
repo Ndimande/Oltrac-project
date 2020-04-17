@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
@@ -91,7 +91,7 @@ class LandingScreenState extends State<LandingScreen> {
         child: StripButton(
           onPressed: _onPressEdit,
           labelText: 'Edit',
-          color: olracBlue,
+          color: OlracColours.olspsBlue,
           icon: Icon(
             Icons.edit,
             color: Colors.white,
@@ -136,7 +136,7 @@ class LandingScreenState extends State<LandingScreen> {
 
   Widget _doneTaggingButton() {
     return StripButton(
-      color: olracBlue,
+      color: OlracColours.olspsBlue,
       labelText: _landing.doneTagging ? 'Continue Tagging' : 'Done Tagging',
       icon: Icon(
         _landing.doneTagging ? Icons.edit : Icons.check_circle,
@@ -198,7 +198,7 @@ class LandingScreenState extends State<LandingScreen> {
               child: Column(
                 children: [
                   Container(
-                    color: olracBlue[50],
+                    color: OlracColours.olspsBlue[50],
                     child: SharkInfoCard(
                       landing: _landing,
                       listIndex: widget.listIndex,

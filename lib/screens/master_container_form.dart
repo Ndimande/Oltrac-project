@@ -242,22 +242,9 @@ class _AddProductsScreen extends StatefulWidget {
       : assert(sourceTripIds != null && sourceTripIds.isNotEmpty);
 
   @override
-  __AddProductsScreenState createState() => __AddProductsScreenState(alreadySelectedProducts);
+  _AddProductsScreenState createState() => _AddProductsScreenState(alreadySelectedProducts);
 
-  Future<List<Product>> _load2() async {
-    final ProductRepository productRepo = ProductRepository();
-    final List<int> alreadySelectedProductIds =
-        alreadySelectedProducts.map<int>((Product product) => product.id).toList();
 
-    if (alreadySelectedProductIds.length == 0) {
-      return await productRepo.all();
-    } else {
-      final String commaSeparatedIds = alreadySelectedProductIds.join(',');
-      final String sqlWhere = 'NOT id IN ($commaSeparatedIds)';
-
-      return await productRepo.all(where: sqlWhere);
-    }
-  }
 
   Future<List<Product>> _load(List<int> sourceTripIds) async {
     final productRepo = ProductRepository();
@@ -265,12 +252,11 @@ class _AddProductsScreen extends StatefulWidget {
   }
 }
 
-// SELECT * FROM products JOIN product_has_landings JOIN landings JOIN hauls JOIN trips WHERE trips.id IN (1)
-class __AddProductsScreenState extends State<_AddProductsScreen> {
+class _AddProductsScreenState extends State<_AddProductsScreen> {
   List<Product> _products = <Product>[];
   List<Product> _selectedProducts = <Product>[];
 
-  __AddProductsScreenState(this._products);
+  _AddProductsScreenState(this._products);
 
   void _onPressListItem(Product product) {
     setState(() {

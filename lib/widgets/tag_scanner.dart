@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 
 class TagScanner extends StatefulWidget {
   final Function onScan;
@@ -34,7 +34,7 @@ class TagScannerState extends State<TagScanner> {
       children: <Widget>[
         Text(
           'Tag Code',
-          style: TextStyle(color: olracBlue),
+          style: TextStyle(color: OlracColours.olspsBlue),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

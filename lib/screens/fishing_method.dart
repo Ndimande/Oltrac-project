@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
 const double iconBaseSize = 200;
-
-double _getIconSize(MediaQueryData mediaQuery) {
-  final height = mediaQuery.size.height;
-  final width = mediaQuery.size.width;
-  final orientation = mediaQuery.orientation;
-  final ratio = orientation == Orientation.portrait ? width / height : height / width;
-  return ratio * iconBaseSize;
-}
 
 class FishingMethodScreen extends StatelessWidget {
   _onCardPressed(context, method) async {
@@ -23,8 +15,7 @@ class FishingMethodScreen extends StatelessWidget {
 
   Widget _buildFishingMethodCard(FishingMethod method) {
     final Widget svg = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      print('width' + constraints.maxWidth.toString());
-      print(constraints.maxHeight);
+
       return Container(
         child: SvgIcon(
           height: constraints.maxWidth * 0.4, // we have to use height for width because height constraint is infinite
@@ -49,7 +40,7 @@ class FishingMethodScreen extends StatelessWidget {
             ),
             Text(
               '(${method.abbreviation})',
-              style: TextStyle(fontSize: 18, color: olracDarkBlue),
+              style: TextStyle(fontSize: 18, color: OlracColours.olspsDarkBlue),
             ),
           ],
         )
@@ -75,7 +66,7 @@ class FishingMethodScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Select Fishing Method')),
       body: Container(
-        color: olracBlue,
+        color: OlracColours.olspsBlue,
         padding: EdgeInsets.all(2),
         child: OrientationBuilder(
           builder: (context, orientation) {

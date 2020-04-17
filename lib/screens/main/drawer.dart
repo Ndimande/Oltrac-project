@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
@@ -46,7 +46,7 @@ Widget _drawerHeader(Profile profile) {
     margin: EdgeInsets.all(0),
     child: Container(
       padding: EdgeInsets.all(15),
-      color: olracBlue[50],
+      color: OlracColours.olspsBlue[50],
       child: Stack(
         children: <Widget>[
           Container(
@@ -84,7 +84,7 @@ class MainDrawer extends StatelessWidget {
         return ListTile(
           leading: Icon(
             iconData,
-            color: olracBlue,
+            color: OlracColours.olspsBlue,
             size: 36,
           ),
           title: Text(
@@ -110,7 +110,7 @@ class MainDrawer extends StatelessWidget {
           children: <Widget>[
             _drawerHeader(_appStore.profile),
             Divider(
-              color: olracBlue,
+              color: OlracColours.olspsBlue,
               height: 0,
               thickness: 5,
             ),

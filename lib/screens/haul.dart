@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/fishing_method_type.dart';
@@ -286,7 +286,7 @@ class HaulScreenState extends State<HaulScreen> {
           Icons.add_box,
           color: Colors.white,
         ),
-        color: olracDarkBlue,
+        color: OlracColours.olspsDarkBlue,
         labelText: 'Bulk',
         onPressed: _onPressAddBulkLanding,
       );
@@ -296,7 +296,7 @@ class HaulScreenState extends State<HaulScreen> {
           Icons.add,
           color: Colors.white,
         ),
-        color: _selectedLandings.isNotEmpty ? olracBlue : Colors.grey,
+        color: _selectedLandings.isNotEmpty ? OlracColours.olspsBlue : Colors.grey,
         labelText: 'Tag',
         onPressed: _onPressTagProduct,
       );
@@ -341,7 +341,7 @@ class HaulScreenState extends State<HaulScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: TextStyle(fontSize: 22, color: olracBlue),
+        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
       ),
     );
   }

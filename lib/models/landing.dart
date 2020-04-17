@@ -98,7 +98,6 @@ class Landing extends Model {
       'location': location.toMap(),
       'weight': weight,
       'length': length,
-      'products': products,
       'products': products.map((Product product) => product.toMap()).toList(),
       'weightUnit': weightUnit.toString(),
       'lengthUnit': lengthUnit.toString(),

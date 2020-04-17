@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
@@ -46,7 +46,7 @@ class HaulInfo extends StatelessWidget {
         Container(
           child: Text(
             listIndex.toString(),
-            style: TextStyle(fontSize: 32, color: olracDarkBlue, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 32, color: OlracColours.olspsDarkBlue, fontWeight: FontWeight.bold),
             textAlign: TextAlign.left,
           ),
         ),
@@ -92,7 +92,7 @@ class HaulInfo extends StatelessWidget {
 
   Widget _buildHaulDetails() {
     return Container(
-      color: olracBlue[50],
+      color: OlracColours.olspsBlue[50],
       padding: EdgeInsets.all(10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,7 +123,7 @@ class HaulInfo extends StatelessWidget {
           child: StripButton(
             onPressed: onPressCancelHaul,
             labelText: 'Cancel',
-            color: olracBlue,
+            color: OlracColours.olspsBlue,
             icon: Icon(
               Icons.cancel,
               color: Colors.white,

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
@@ -45,7 +45,7 @@ class GroupedHaulsList extends StatelessWidget {
           );
 
           return ExpansionTile(
-            backgroundColor: olracBlue[50],
+            backgroundColor: OlracColours.olspsBlue[50],
             initiallyExpanded: true,
             title: Row(
               children: <Widget>[
@@ -58,7 +58,7 @@ class GroupedHaulsList extends StatelessWidget {
                   child: Text(
                     fishingMethodGroup['fishingMethod'].name,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 22, color: olracDarkBlue),
+                    style: TextStyle(fontSize: 22, color: OlracColours.olspsDarkBlue),
                   ),
                 )
               ],

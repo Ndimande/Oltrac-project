@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/user_settings.dart';
 import 'package:oltrace/models/haul.dart';
@@ -57,7 +57,7 @@ void main() async {
   _setFlutterErrorHandler();
 
   final stopwatch = Stopwatch()..start();
-  print('=== OlTrace Started ===');
+  print('=== ${AppConfig.APP_TITLE} Started ===');
   print(AppConfig.debugMode ? 'Dev Mode' : 'Release Mode');
   try {
     await boot();
@@ -182,11 +182,10 @@ class OlTraceAppState extends State<OlTraceApp> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _userSettings.darkMode ? appThemes['dark'] : appThemes['light'];
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: AppConfig.APP_TITLE,
-      theme: theme,
+      theme: OlracThemes.westlake,
       initialRoute: 'splash',
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(builder: (_) {

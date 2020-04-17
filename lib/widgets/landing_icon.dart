@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
@@ -16,7 +16,7 @@ class LandingIcon extends StatelessWidget {
         margin: EdgeInsets.only(left: 5, top: 5),
         child: Text(
           listIndex.toString(),
-          style: TextStyle(fontSize: 28, color: olracBlue),
+          style: TextStyle(fontSize: 28, color: OlracColours.olspsBlue),
         ),
       );
 
@@ -29,7 +29,7 @@ class LandingIcon extends StatelessWidget {
       return landing.isBulk ? Colors.red : Colors.redAccent;
     }
 
-    return landing.isBulk ? olracDarkBlue : olracBlue;
+    return landing.isBulk ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue;
   }
 
   Widget get tagTotalIcon {

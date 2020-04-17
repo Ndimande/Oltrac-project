@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/species.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
@@ -15,7 +15,7 @@ import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
-const textFieldTextStyle = TextStyle(fontSize: 20, color: olracBlue);
+const textFieldTextStyle = TextStyle(fontSize: 20, color: OlracColours.olspsBlue);
 
 class LandingFormScreen extends StatefulWidget {
   final Haul haulArg;

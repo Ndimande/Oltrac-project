@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_picker/flutter_picker.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/haul.dart';
@@ -122,7 +122,7 @@ class EditTripScreenState extends State<EditTripScreen> {
 
         // Start DateTime
         DateTimeEditor(
-          title: Text('Date & Time', style: TextStyle(color: olracBlue, fontSize: 18)),
+          title: Text('Date & Time', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
           initialDateTime: _startDateTime,
           onChanged: (Picker picker, List<int> selectedIndices) {
             setState(() {
@@ -133,7 +133,7 @@ class EditTripScreenState extends State<EditTripScreen> {
 
         // Start Location
         LocationEditor(
-          title: Text('Location', style: TextStyle(color: olracBlue, fontSize: 18)),
+          title: Text('Location', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
           onChanged: (Location location) {
             assert(location != null);
             setState(() {
@@ -150,7 +150,7 @@ class EditTripScreenState extends State<EditTripScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Center(child: Text('End', style: TextStyle(color: olracBlue))),
+        Center(child: Text('End', style: TextStyle(color: OlracColours.olspsBlue))),
 
         LocationEditor(
           onChanged: (Location location) {

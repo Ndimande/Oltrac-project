@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_picker/flutter_picker.dart';
-import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
@@ -124,19 +122,29 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  static const String INVALID_HOURS_MESSAGE = 'Invalid hours';
+  static const String INVALID_MINUTES_MESSAGE = 'Invalid minutes';
+
+  String get _hoursError => int.tryParse(widget._soakTimeHoursController.text) == null
+      ? INVALID_HOURS_MESSAGE
+      : int.tryParse(widget._soakTimeHoursController.text) == 0 &&
+              int.tryParse(widget._soakTimeMinutesController.text) == 0
+          ? INVALID_HOURS_MESSAGE
+          : null;
+
+  String get _minutesError {
+    return int.tryParse(widget._soakTimeMinutesController.text) == null
+      ? INVALID_MINUTES_MESSAGE
+      : int.tryParse(widget._soakTimeHoursController.text) == 0 &&
+      int.tryParse(widget._soakTimeMinutesController.text) == 0
+      ? INVALID_MINUTES_MESSAGE
+      : null;
+  }
   Widget _soakTimeDialog() {
-    const String INVALID_MINUTES_MESSAGE = 'Invalid minutes';
-    const String INVALID_HOURS_MESSAGE = 'Invalid hours';
-    String hoursError = int.tryParse(widget._soakTimeHoursController.text) == null
-        ? INVALID_HOURS_MESSAGE
-        : int.tryParse(widget._soakTimeHoursController.text) == 0 && int.tryParse(widget._soakTimeMinutesController.text) == 0
-            ? INVALID_HOURS_MESSAGE
-            : null;
-    String minutesError = int.tryParse(widget._soakTimeMinutesController.text) == null
-        ? INVALID_MINUTES_MESSAGE
-        : int.tryParse(widget._soakTimeHoursController.text) == 0 && int.tryParse(widget._soakTimeMinutesController.text) == 0
-            ? INVALID_MINUTES_MESSAGE
-            : null;
+
+    // Local state
+    String hoursError = _hoursError;
+    String minutesError = _minutesError;
 
     return AlertDialog(
       title: Text('Soak Time'),
@@ -149,7 +157,6 @@ class MainScreenState extends State<MainScreen> {
                 child: TextField(
                   onChanged: (String val) {
                     final hours = int.tryParse(val);
-                    final minutes =int.tryParse(widget._soakTimeMinutesController.text);
 
                     setState(() {
                       if (hours == null) {
@@ -157,21 +164,20 @@ class MainScreenState extends State<MainScreen> {
                       } else {
                         hoursError = null;
                       }
-
                     });
                   },
                   style: TextStyle(color: Colors.white, fontSize: 26),
                   controller: widget._soakTimeHoursController,
                   keyboardType: TextInputType.numberWithOptions(signed: false),
                   onTap: () {
-                    if(int.tryParse(widget._soakTimeHoursController.text) == 0) {
+                    if (int.tryParse(widget._soakTimeHoursController.text) == 0) {
                       widget._soakTimeHoursController.clear();
                     }
                   },
                   decoration: InputDecoration(
                     errorText: hoursError,
                     contentPadding: EdgeInsets.all(0),
-                    helperText: "Hours",
+                    helperText: 'Hours',
                     helperStyle: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -195,13 +201,13 @@ class MainScreenState extends State<MainScreen> {
                   controller: widget._soakTimeMinutesController,
                   keyboardType: TextInputType.numberWithOptions(signed: false),
                   onTap: () {
-                    if(int.tryParse(widget._soakTimeMinutesController.text) == 0) {
+                    if (int.tryParse(widget._soakTimeMinutesController.text) == 0) {
                       widget._soakTimeMinutesController.clear();
                     }
                   },
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.all(0),
-                    helperText: "Minutes",
+                    helperText: 'Minutes',
                     helperStyle: TextStyle(color: Colors.white),
                     errorText: minutesError,
                   ),
@@ -263,7 +269,6 @@ class MainScreenState extends State<MainScreen> {
       Navigator.pop(context, soakDuration);
       widget._soakTimeHoursController.clear();
       widget._soakTimeMinutesController.clear();
-
     }
   }
 
@@ -422,7 +427,7 @@ class MainScreenState extends State<MainScreen> {
           Icons.apps,
           color: Colors.white,
         ),
-        color: olracBlue,
+        color: OlracColours.olspsBlue,
         onPressed: () async => await _onPressFishingMethodStripButton(),
       ),
     );
@@ -456,6 +461,41 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
+  Widget _body() {
+    return Builder(
+      builder: (_) {
+        if (activeTrip == null) {
+          return NoActiveTrip(
+            completedTrips: completedTrips,
+            onPressStartTrip: () async => await _onPressStartTripButton(),
+          );
+        }
+
+        return Column(
+          children: <Widget>[
+            TripSection(
+              trip: activeTrip,
+              hasActiveHaul: activeHaul != null,
+              onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
+              onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
+              onPressEditTrip: _onPressEditTrip,
+            ),
+            Expanded(
+              child: HaulSection(
+                hauls: activeTrip.hauls,
+                onPressHaulItem: (int id, int index) async {
+                  await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
+                  setState(() {});
+                },
+              ),
+            ),
+            _bottomButtons(),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -477,38 +517,7 @@ class MainScreenState extends State<MainScreen> {
             key: _scaffoldKey,
             appBar: _appBar(),
             drawer: MainDrawer(),
-            body: Builder(
-              builder: (_) {
-                if (activeTrip == null) {
-                  return NoActiveTrip(
-                    completedTrips: completedTrips,
-                    onPressStartTrip: () async => await _onPressStartTripButton(),
-                  );
-                }
-
-                return Column(
-                  children: <Widget>[
-                    TripSection(
-                      trip: activeTrip,
-                      hasActiveHaul: activeHaul != null,
-                      onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
-                      onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
-                      onPressEditTrip: _onPressEditTrip,
-                    ),
-                    Expanded(
-                      child: HaulSection(
-                        hauls: activeTrip.hauls,
-                        onPressHaulItem: (int id, int index) async {
-                          await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                    _bottomButtons(),
-                  ],
-                );
-              },
-            ),
+            body: _body(),
           );
         },
       ),

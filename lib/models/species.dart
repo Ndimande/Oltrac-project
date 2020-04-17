@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 
 class Species extends Model {

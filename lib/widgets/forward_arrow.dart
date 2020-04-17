@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 
 class ForwardArrow extends StatelessWidget {
   @override
@@ -10,7 +10,7 @@ class ForwardArrow extends StatelessWidget {
       angle: 90 * math.pi / 180,
       child: Icon(
         Icons.navigation,
-        color: olracBlue,
+        color: OlracColours.olspsBlue,
         size: 30,
       ),
     );

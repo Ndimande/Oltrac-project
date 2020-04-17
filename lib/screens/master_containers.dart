@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/master_container.dart';
-import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/trip.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 
 class StripButton extends StatelessWidget {
   final Function onPressed;
@@ -13,7 +13,7 @@ class StripButton extends StatelessWidget {
     @required this.icon,
     @required this.labelText,
     @required this.onPressed,
-    this.color = olracBlue,
+    this.color = OlracColours.olspsBlue,
     this.disabled = false,
   });
 

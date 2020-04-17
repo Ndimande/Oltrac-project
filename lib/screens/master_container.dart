@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart' as util;
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
@@ -7,7 +7,6 @@ import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/screens/product.dart';
 import 'package:oltrace/widgets/sharktrack_qr_image.dart';
-import 'package:oltrace/widgets/info_table.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
 
@@ -45,7 +44,7 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
 
   Widget _details() {
     return Container(
-      color: olracBlue[50],
+      color: OlracColours.olspsBlue[50],
       padding: EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

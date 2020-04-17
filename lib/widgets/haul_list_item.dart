@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_themes.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
@@ -59,7 +59,7 @@ class HaulListItem extends StatelessWidget {
           children: <Widget>[
             Text(
               listIndex.toString(),
-              style: TextStyle(fontSize: 28, color: olracBlue),
+              style: TextStyle(fontSize: 28, color: OlracColours.olspsBlue),
             ),
           ],
         ),
@@ -72,7 +72,7 @@ class HaulListItem extends StatelessWidget {
         ),
         trailing: Icon(
           Icons.add_circle,
-          color: olracBlue,
+          color: OlracColours.olspsBlue,
           size: 38,
         ),
       ),

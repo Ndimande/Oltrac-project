@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/app_themes.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/profile.dart';
@@ -13,8 +12,6 @@ import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/info_table.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-
-const _headingStyle = TextStyle(color: olracBlue, fontWeight: FontWeight.bold, fontSize: 20);
 
 final _jsonRepo = JsonRepository();
 
