@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
-import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
@@ -56,10 +55,6 @@ class HaulInfo extends StatelessWidget {
     );
   }
 
-  Text _dateTimeText({String label = 'Started '}) => Text(
-        label + friendlyDateTime(haul.startedAt),
-        style: TextStyle(fontSize: 16),
-      );
 
   Widget _detailsSection() {
     return Container(
@@ -72,9 +67,20 @@ class HaulInfo extends StatelessWidget {
             location: haul.startLocation,
           ),
           !isActiveHaul ? TimeSpace(label: 'Ended ', dateTime: haul.endedAt, location: haul.endLocation) : Container(),
-          if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime()
+          if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime(),
+          if (haul.fishingMethod.type == FishingMethodType.Static) _hooksOrTraps(),
         ],
       ),
+    );
+  }
+
+  Widget _hooksOrTraps() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('Traps/Hooks',style: TextStyle(fontSize: 13),),
+        Text(haul.hooksOrTraps.toString(),style: TextStyle(fontSize: 14),),
+      ],
     );
   }
 

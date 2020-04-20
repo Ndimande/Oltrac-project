@@ -43,21 +43,31 @@ class ProductRepository extends DatabaseRepository<Product> {
     assert(ids != null && ids.isNotEmpty);
     final String idList = ids.length == 1 ? ids.first.toString() : ids.join(', ');
 
-    final String sql = 'SELECT * FROM products '
+    final String columnNames = <String>[
+      'id',
+      'tag_code',
+      'product_type_id',
+      'packaging_type_id',
+      'product_units',
+      'created_at',
+    ].map((String column) => 'products.$column').join(', ');
+
+    final String sql =
+        'SELECT DISTINCT $columnNames FROM products '
         'JOIN product_has_landings '
         'JOIN landings JOIN hauls JOIN trips '
         'WHERE trips.id IN ($idList)';
 
     final List<Map<String, dynamic>> results = await database.rawQuery(sql);
     final List<Product> products = [];
-    print(products);
+
 
     for (Map result in results) {
       final Product product = fromDatabaseMap(result);
       products.add(product);
     }
 
-    return products;
+    return products.toList(); // make unique and return
   }
 
   @override

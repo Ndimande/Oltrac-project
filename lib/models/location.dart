@@ -31,7 +31,8 @@ class Location extends Model {
   }
 
   Location.fromPosition(Position position)
-      : latitude = position.latitude,
+      : assert(position != null),
+        latitude = position.latitude,
         longitude = position.longitude;
 
   @override

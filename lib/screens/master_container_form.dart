@@ -2,8 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/location.dart';
@@ -31,7 +33,10 @@ class MasterContainerFormScreen extends StatefulWidget {
   MasterContainerFormScreen({this.initialProducts = const <Product>[], this.sourceTripIds});
 
   @override
-  _MasterContainerFormScreenState createState() => _MasterContainerFormScreenState();
+  _MasterContainerFormScreenState createState() {
+    _tagCodeController.text = randomTagCode();
+    return _MasterContainerFormScreenState();
+  }
 }
 
 class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
@@ -67,6 +72,8 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
         ),
       ),
     );
+    print('######');
+    print(newProducts);
     if (newProducts != null) {
       setState(() {
         // todo keep old ones
@@ -75,7 +82,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     }
   }
 
-  void _onPressGenerate() {
+  void _generateAnotherUUID() {
     setState(() {
       widget._tagCodeController.text = randomTagCode();
     });
@@ -115,61 +122,57 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
 
   Widget _productList() {
     if (_childProducts.length == 0) {
-      return Text('No Source products');
+      return Text('No source tags');
     }
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Column(
-          children: _childProducts.map<Widget>((Product product) {
-            return ProductListItem(
-              product: product,
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => ProductScreen(productId: product.id)),
-              ),
-            );
-          }).toList(),
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        children: _childProducts.map<Widget>((Product product) {
+          return ProductListItem(
+            product: product,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ProductScreen(productId: product.id)),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _tagCodeInput() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Tag Code'),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 5),
-                child: TextField(
-                  autofocus: true,
-                  controller: widget._tagCodeController,
-                  onChanged: (String text) => setState(() {}),
-                ),
-              ),
-            ),
-            RaisedButton(
-              child: Text('Generate'),
-              onPressed: _onPressGenerate,
-            ),
-          ],
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text('QR Code', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 20)),
         ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 5),
+          child: TextField(
+            readOnly: true,
+            autofocus: true,
+            controller: widget._tagCodeController,
+            onChanged: (String text) => setState(() {}),
+          ),
+        ),
+        StripButton(
+          icon: Icon(Icons.refresh),
+          labelText: 'Generate',
+          onPressed: _generateAnotherUUID,
+        )
       ],
     );
   }
 
   Widget _form() {
-    return Expanded(
-      child: Column(
-        children: <Widget>[
-          _tagCodeInput(),
-          SizedBox(height: 10),
-          if (widget._tagCodeController.text != '') _qrCode(),
-          _productList(),
-        ],
-      ),
+    return Column(
+      children: <Widget>[
+        _tagCodeInput(),
+        SizedBox(height: 10),
+        if (widget._tagCodeController.text != '') _qrCode(),
+        _productList(),
+      ],
     );
   }
 
@@ -216,7 +219,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
   Widget _body() {
     return Column(
       children: <Widget>[
-        _form(),
+        Expanded(child: SingleChildScrollView(child: _form())),
         _bottomButtons(),
       ],
     );
@@ -244,8 +247,6 @@ class _AddProductsScreen extends StatefulWidget {
   @override
   _AddProductsScreenState createState() => _AddProductsScreenState(alreadySelectedProducts);
 
-
-
   Future<List<Product>> _load(List<int> sourceTripIds) async {
     final productRepo = ProductRepository();
     return await productRepo.forTrips(sourceTripIds);
@@ -253,10 +254,12 @@ class _AddProductsScreen extends StatefulWidget {
 }
 
 class _AddProductsScreenState extends State<_AddProductsScreen> {
+  final List<Product> _alreadySelectedProducts;
+
   List<Product> _products = <Product>[];
   List<Product> _selectedProducts = <Product>[];
 
-  _AddProductsScreenState(this._products);
+  _AddProductsScreenState(this._alreadySelectedProducts);
 
   void _onPressListItem(Product product) {
     setState(() {
@@ -278,10 +281,12 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
     return ListView.builder(
       itemCount: _products.length,
       itemBuilder: (_, int index) {
+        final Product product = _products[index];
         return ProductListItem(
-          onPressed: () => _onPressListItem(_products[index]),
-          product: _products[index],
-          selected: _selectedProducts.contains(_products[index]),
+          onPressed: () => _onPressListItem(product),
+          product: product,
+          selected: _selectedProducts.contains(product),
+          trailingIcon: false,
         );
       },
     );
@@ -294,8 +299,9 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
   Widget _bottomButton() {
     return StripButton(
       icon: Icon(Icons.add),
+      color: _selectedProducts.length == 0 ? Colors.grey : Colors.green,
       labelText: 'Add Selected',
-      onPressed: _onPressAddSelectedStripButton,
+      onPressed: _selectedProducts.length == 0 ? null : _onPressAddSelectedStripButton,
     );
   }
 
@@ -318,7 +324,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
 
     if (nSelected == 0) {
       return AppBar(
-        title: Text('Add Products'),
+        title: Text('Select Products'),
       );
     }
 
@@ -327,7 +333,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
         icon: Icon(Icons.cancel),
         onPressed: _clearSelected,
       ),
-      title: Text('$nSelected Selected'),
+      title: Text('$nSelected selected'),
     );
   }
 
@@ -335,6 +341,12 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
     setState(() {
       _selectedProducts = <Product>[];
     });
+  }
+
+  void _excludeAlreadySelected(List<Product> products) {
+    products.retainWhere(
+        (Product p) => _alreadySelectedProducts.singleWhere((Product asp) => asp == p, orElse: () => null) == null,
+    );
   }
 
   @override
@@ -350,6 +362,11 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
           return Scaffold();
         }
         _products = snapshot.data as List<Product>;
+
+        _excludeAlreadySelected(_products);
+//        _products.retainWhere(
+//          (Product p) => _alreadySelectedProducts.singleWhere((Product asp) => asp == p, orElse: () => null) == null,
+//        );
         return Scaffold(
           appBar: _appBar(),
           body: _body(),

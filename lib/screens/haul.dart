@@ -207,7 +207,11 @@ class HaulScreenState extends State<HaulScreen> {
     return Container(
       margin: EdgeInsets.only(right: 5),
       child: RaisedButton(
-        child: Text(_showProductList ? 'Show Species List' : 'Show Tags List'),
+        color: OlracColours.olspsDarkBlue,
+        child: Text(
+          _showProductList ? 'Show Species List' : 'Show Tags List',
+          style: TextStyle(fontSize: 18),
+        ),
         onPressed: () => _onPressShowProductListSwitch(!_showProductList),
       ),
     );

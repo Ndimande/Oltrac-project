@@ -201,14 +201,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   Widget _speciesDropdown() {
     final List<Species> sortedSpecies = List.from(species);
     sortedSpecies.sort((Species a, Species b) => a.englishName.compareTo(b.englishName));
-print(sortedSpecies.map((Species e) => e.alpha3Code).toList());
 
     return Container(
       child: ModelDropdown<Species>(
         label: 'Species',
         selected: _selectedSpecies,
         items: sortedSpecies.map<DropdownMenuItem<Species>>(
-            (Species species) {
+          (Species species) {
             return DropdownMenuItem<Species>(
               value: species,
               child: Container(
@@ -237,7 +236,6 @@ print(sortedSpecies.map((Species e) => e.alpha3Code).toList());
 
   @override
   Widget build(BuildContext context) {
-
     final String titleText = widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Species' : 'Edit Species';
 
     return Scaffold(

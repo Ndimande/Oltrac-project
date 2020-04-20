@@ -18,6 +18,7 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/screens/fishing_method.dart';
+import 'package:oltrace/screens/main/StaticHaulDetailsAlertDialog.dart';
 import 'package:oltrace/screens/main/drawer.dart';
 import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
@@ -102,7 +103,7 @@ class MainScreenState extends State<MainScreen> {
     return fm;
   }
 
-  Future<void> _startOperation({Duration soakTime}) async {
+  Future<void> _startOperation({Duration soakTime, int trapsOrHooks}) async {
     try {
       final Location location = await _locationProvider.location;
 
@@ -112,6 +113,7 @@ class MainScreenState extends State<MainScreen> {
         tripId: activeTrip.id,
         startLocation: location,
         soakTime: soakTime,
+        hooksOrTraps: trapsOrHooks,
       );
 
       await _haulRepo.store(haul);
@@ -122,165 +124,26 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  static const String INVALID_HOURS_MESSAGE = 'Invalid hours';
-  static const String INVALID_MINUTES_MESSAGE = 'Invalid minutes';
-
-  String get _hoursError => int.tryParse(widget._soakTimeHoursController.text) == null
-      ? INVALID_HOURS_MESSAGE
-      : int.tryParse(widget._soakTimeHoursController.text) == 0 &&
-              int.tryParse(widget._soakTimeMinutesController.text) == 0
-          ? INVALID_HOURS_MESSAGE
-          : null;
-
-  String get _minutesError {
-    return int.tryParse(widget._soakTimeMinutesController.text) == null
-      ? INVALID_MINUTES_MESSAGE
-      : int.tryParse(widget._soakTimeHoursController.text) == 0 &&
-      int.tryParse(widget._soakTimeMinutesController.text) == 0
-      ? INVALID_MINUTES_MESSAGE
-      : null;
-  }
   Widget _soakTimeDialog() {
-
-    // Local state
-    String hoursError = _hoursError;
-    String minutesError = _minutesError;
-
-    return AlertDialog(
-      title: Text('Soak Time'),
-      content: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Row(
-            children: <Widget>[
-              // Hours
-              Expanded(
-                child: TextField(
-                  onChanged: (String val) {
-                    final hours = int.tryParse(val);
-
-                    setState(() {
-                      if (hours == null) {
-                        hoursError = INVALID_HOURS_MESSAGE;
-                      } else {
-                        hoursError = null;
-                      }
-                    });
-                  },
-                  style: TextStyle(color: Colors.white, fontSize: 26),
-                  controller: widget._soakTimeHoursController,
-                  keyboardType: TextInputType.numberWithOptions(signed: false),
-                  onTap: () {
-                    if (int.tryParse(widget._soakTimeHoursController.text) == 0) {
-                      widget._soakTimeHoursController.clear();
-                    }
-                  },
-                  decoration: InputDecoration(
-                    errorText: hoursError,
-                    contentPadding: EdgeInsets.all(0),
-                    helperText: 'Hours',
-                    helperStyle: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-
-              // Minutes
-              Expanded(
-                child: TextField(
-                  onChanged: (String val) {
-                    final minutes = int.tryParse(val);
-
-                    setState(() {
-                      if (minutes == null) {
-                        minutesError = INVALID_MINUTES_MESSAGE;
-                      } else {
-                        minutesError = null;
-                      }
-                    });
-                  },
-                  style: TextStyle(color: Colors.white, fontSize: 26),
-                  controller: widget._soakTimeMinutesController,
-                  keyboardType: TextInputType.numberWithOptions(signed: false),
-                  onTap: () {
-                    if (int.tryParse(widget._soakTimeMinutesController.text) == 0) {
-                      widget._soakTimeMinutesController.clear();
-                    }
-                  },
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(0),
-                    helperText: 'Minutes',
-                    helperStyle: TextStyle(color: Colors.white),
-                    errorText: minutesError,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            if (minutesError != null || hoursError != null) {
-              return;
-            }
-            _onPressSoakTimeDialogDoneButton();
-          },
-          child: Text(
-            'Start',
-            style: TextStyle(fontSize: 22, color: Colors.white),
-          ),
-        ),
-        FlatButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Cancel',
-            style: TextStyle(fontSize: 22, color: Colors.white),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _onPressSoakTimeDialogDoneButton() {
-    final List<String> validationErrors = [];
-
-    final int hours = int.tryParse(widget._soakTimeHoursController.text);
-    final int minutes = int.tryParse(widget._soakTimeMinutesController.text);
-
-    if (hours == 0 && minutes == 0) {
-      validationErrors.add('You may not enter 0 minutes');
-    } else {
-      if (hours == null) {
-        validationErrors.add('You must enter valid hours and hours');
-      }
-      if (minutes == null) {
-        validationErrors.add('You must enter valid hours and minutes');
-      }
-    }
-
-    if (validationErrors.isNotEmpty) {
-      showTextSnackBar(_scaffoldKey, validationErrors.join('\n'));
-      Navigator.pop(context);
-    } else {
-      final Duration soakDuration = Duration(
-        hours: hours,
-        minutes: minutes,
-      );
-      Navigator.pop(context, soakDuration);
-      widget._soakTimeHoursController.clear();
-      widget._soakTimeMinutesController.clear();
-    }
+    return StaticHaulDetailsAlertDialog(onSuccesfulValidate: (Map<String, dynamic> formResult) {
+      Navigator.pop(context, formResult);
+    });
   }
 
   Future<void> _onPressStartStripButton() async {
     if (_fishingMethod.type == FishingMethodType.Static) {
-      final Duration soakTime = await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return _soakTimeDialog();
-          });
-      if (soakTime != null) {
-        _startOperation(soakTime: soakTime);
+      final Map<String, dynamic> formResult = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return _soakTimeDialog();
+        },
+      );
+
+
+      if (formResult != null) {
+        final Duration soakTime = formResult['soakDuration'] as Duration;
+        final int numberOfTrapsOrHooks = formResult['numberOfTrapsOrHooks'] as int;
+        _startOperation(soakTime: soakTime, trapsOrHooks: numberOfTrapsOrHooks);
       }
     } else {
       await _startOperation();
@@ -334,6 +197,12 @@ class MainScreenState extends State<MainScreen> {
 
     try {
       final Location location = await _locationProvider.location;
+      print(location);
+      if (location == null) {
+        if (!await _locationProvider.locationServiceEnabled) {
+          showTextSnackBar(_scaffoldKey, 'Location service is not enabled');
+        }
+      }
       _scaffoldKey.currentState.hideCurrentSnackBar();
       final trip = Trip(startedAt: DateTime.now(), startLocation: location);
       final int id = await _tripRepo.store(trip);
@@ -342,6 +211,7 @@ class MainScreenState extends State<MainScreen> {
     } catch (e) {
       _scaffoldKey.currentState.hideCurrentSnackBar();
       showTextSnackBar(_scaffoldKey, Messages.LOCATION_NOT_AVAILABLE);
+      rethrow;
     }
   }
 

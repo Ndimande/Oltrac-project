@@ -48,9 +48,10 @@ class Species extends Model {
         caabCode = data['caabCode'],
         super.fromMap(data);
 
+  @override
   Species copyWith({
     int id,
-    String firstName,
+    String englishName,
     String alpha3Code,
     String scientificName,
     String taxonomicCode,
@@ -66,7 +67,7 @@ class Species extends Model {
   }) {
     return Species(
         id: id ?? this.id,
-        englishName: firstName ?? this.englishName,
+        englishName: englishName ?? this.englishName,
         alpha3Code: alpha3Code ?? this.alpha3Code,
         scientificName: scientificName ?? this.scientificName,
         taxonomicCode: taxonomicCode ?? this.taxonomicCode,

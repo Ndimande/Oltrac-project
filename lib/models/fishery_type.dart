@@ -15,10 +15,10 @@ class FisheryType extends Model {
         jurisdiction = data['jurisdiction'],
         super.fromMap(data);
 
-  FisheryType copyWith({String firstName, String safsCode, String jurisdiction}) {
+  FisheryType copyWith({String englishName, String safsCode, String jurisdiction}) {
     return FisheryType(
         id: id,
-        name: firstName ?? this.name,
+        name: englishName ?? this.name,
         safsCode: safsCode ?? this.safsCode,
         jurisdiction: jurisdiction ?? this.jurisdiction);
   }

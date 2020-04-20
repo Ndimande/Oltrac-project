@@ -11,9 +11,9 @@ class PackagingType extends Model {
       : name = data['name'],
         super.fromMap(data);
 
-  PackagingType copyWith({String firstName, String id, String jurisdiction}) {
+  PackagingType copyWith({String englishName, String id, String jurisdiction}) {
     return PackagingType(
-      name: firstName ?? this.name,
+      name: englishName ?? this.name,
       id: id ?? this.id,
     );
   }

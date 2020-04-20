@@ -108,6 +108,7 @@ class HaulRepository extends DatabaseRepository<Haul> {
       soakTime: result['soak_time_minutes'] == null
           ? result['soak_time_minutes']
           : Duration(minutes: result['soak_time_minutes']),
+      hooksOrTraps: result['hooks_or_traps'] as int,
     );
   }
 
@@ -123,6 +124,7 @@ class HaulRepository extends DatabaseRepository<Haul> {
       'end_latitude': haul.endLocation?.latitude,
       'end_longitude': haul.endLocation?.longitude,
       'soak_time_minutes': haul.soakTime?.inMinutes,
+      'hooks_or_traps': haul.hooksOrTraps,
     };
   }
 }

@@ -8,8 +8,9 @@ class ProductListItem extends StatelessWidget {
   final Product product;
   final Function onPressed;
   final bool selected;
+  final bool trailingIcon;
 
-  ProductListItem({this.product, this.onPressed, this.selected = false});
+  ProductListItem({this.product, this.onPressed, this.selected = false, this.trailingIcon = true});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,7 @@ class ProductListItem extends StatelessWidget {
           ],
         ),
         subtitle: Text(friendlyDateTime(product.createdAt)),
-        trailing: ForwardArrow(),
+        trailing: trailingIcon ? ForwardArrow() : null,
       ),
     );
   }

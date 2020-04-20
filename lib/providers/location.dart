@@ -21,7 +21,7 @@ class LocationProvider {
 
   Future<bool> get locationServiceEnabled async => await _geoLocator.isLocationServiceEnabled();
 
-  startListening({LocationAccuracy accuracy = LocationAccuracy.high, int distanceFilter = 10}) {
+  void startListening({LocationAccuracy accuracy = LocationAccuracy.high, int distanceFilter = 10}) {
     final locationOptions = LocationOptions(accuracy: accuracy, distanceFilter: distanceFilter);
     if (!listening) {
       _positionStream = _geoLocator.getPositionStream(locationOptions).listen((Position position) {
@@ -32,7 +32,7 @@ class LocationProvider {
     }
   }
 
-  stopListening() {
+  void stopListening() {
     _positionStream.cancel();
     listening = false;
   }
@@ -42,19 +42,17 @@ class LocationProvider {
       return null;
     }
 
-    final Position position =
-        await _geoLocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
+    final Position position = await _geoLocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
     if (position == null) {
       return null;
     }
 
-    return Location.fromPosition(_lastPosition);
+    return Location.fromPosition(position);
   }
 
   Future<GeolocationStatus> get geolocationPermissionStatus async {
     return await _geoLocator.checkGeolocationPermissionStatus();
   }
 
-  Future<bool> get permissionGranted async =>
-      await geolocationPermissionStatus == GeolocationStatus.granted;
+  Future<bool> get permissionGranted async => await geolocationPermissionStatus == GeolocationStatus.granted;
 }

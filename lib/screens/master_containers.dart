@@ -53,7 +53,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
 
   Widget _noMasterContainers() {
     return Center(
-      child: Text('No Master Containers'),
+      child: Text('No Master Containers',style: TextStyle(fontSize: 16),),
     );
   }
 
@@ -80,7 +80,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
             icon: Icon(Icons.add),
             color: Colors.green,
             onPressed: _onPressCreateStripButton,
-            labelText: 'New',
+            labelText: 'Create Master Container',
           ),
         ),
       ],

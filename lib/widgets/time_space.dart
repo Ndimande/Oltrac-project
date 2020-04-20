@@ -32,8 +32,12 @@ class TimeSpace extends StatelessWidget {
             )
           ],
         ),
-        LocationButton(
-          location: location,
+        Container(
+          height: 0, // This seems to remove the random padding / margin they have put onto this one
+          color: Colors.red,
+          child: LocationButton(
+            location: location,
+          ),
         ),
       ],
     );

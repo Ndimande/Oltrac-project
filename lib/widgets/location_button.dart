@@ -6,7 +6,7 @@ class LocationButton extends StatelessWidget {
   final Location location;
   final double iconSize;
 
-  LocationButton({this.location, this.iconSize = 26});
+  LocationButton({@required this.location, this.iconSize = 26}): assert(location != null);
 
   Function get onPressLocation => location == null
       ? () {}
@@ -17,9 +17,7 @@ class LocationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Function onPressLocation = location == null
-        ? () {}
-        : () async => await MapsLauncher.launchCoordinates(
+    final Function onPressLocation = () async => await MapsLauncher.launchCoordinates(
               location.latitude,
               location.longitude,
             );

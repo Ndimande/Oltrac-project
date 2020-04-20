@@ -44,6 +44,7 @@ const List<Map<String, String>> appMigrations = const [
         'trip_id INTEGER NOT NULL, '
         'fishing_method_id INTEGER NOT NULL, '
         'soak_time_minutes INTEGER, '
+        'hooks_or_traps INTEGER, '
         'FOREIGN KEY (trip_id) REFERENCES trips (id) '
         ')',
     'down': 'DROP TABLE hauls'

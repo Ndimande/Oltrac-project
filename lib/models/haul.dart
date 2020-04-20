@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishing_method.dart';
+import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
@@ -21,18 +22,26 @@ class Haul extends Model {
   final int tripId;
 
   final Location startLocation;
+
   final Location endLocation;
+
+  /// The duration the gear was in the water
   final Duration soakTime;
+
+  /// The number of traps or hooks on the line
+  final int hooksOrTraps;
 
   List<Product> get products {
     final List<Product> uniqueProducts = <Product>[];
-    landings.forEach((Landing landing) => landing.products.forEach((Product product) {
-          final Product existingProduct = uniqueProducts
-              .singleWhere((Product p) => p.id == product.id && p.createdAt == product.createdAt, orElse: () => null);
-          if (existingProduct == null) {
-            uniqueProducts.add(product);
-          }
-        }));
+    landings.forEach(
+      (Landing landing) => landing.products.forEach((Product product) {
+        final Product existingProduct = uniqueProducts
+            .singleWhere((Product p) => p.id == product.id && p.createdAt == product.createdAt, orElse: () => null);
+        if (existingProduct == null) {
+          uniqueProducts.add(product);
+        }
+      }),
+    );
     return uniqueProducts;
   }
 
@@ -48,6 +57,7 @@ class Haul extends Model {
     @required this.startLocation,
     this.endLocation,
     this.soakTime,
+    this.hooksOrTraps,
   })  : assert(tripId != null),
         assert(startedAt != null),
         assert(fishingMethod != null),
@@ -64,6 +74,7 @@ class Haul extends Model {
     Location startLocation,
     Location endLocation,
     Duration soakTime,
+    int trapsOrHooks,
   }) {
     return Haul(
       id: id ?? this.id,
@@ -75,6 +86,7 @@ class Haul extends Model {
       startLocation: startLocation ?? this.startLocation,
       endLocation: endLocation ?? this.endLocation,
       soakTime: soakTime ?? this.soakTime,
+      hooksOrTraps: trapsOrHooks ?? this.hooksOrTraps,
     );
   }
 
@@ -87,6 +99,7 @@ class Haul extends Model {
         startLocation = Location.fromMap(data['startLocation']),
         endLocation = Location.fromMap(data['endLocation']),
         soakTime = Duration(minutes: data['soakTime']),
+        hooksOrTraps = data['traps_or_hooks'] as int,
         super.fromMap(data);
 
   Map<String, dynamic> toMap() {
@@ -99,7 +112,8 @@ class Haul extends Model {
       'landings': landings.map((l) => l.toMap()).toList(),
       'startLocation': startLocation.toMap(),
       'endLocation': endLocation?.toMap(),
-      'soakTime': soakTime.inMinutes,
+      'soakTime': soakTime?.inMinutes,
+      'trapsOrHooks': hooksOrTraps
     };
   }
 }

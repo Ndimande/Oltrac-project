@@ -15,7 +15,7 @@ class MasterContainer extends Model {
   final List<Product> products;
 
   const MasterContainer({
-    id,
+    int id,
     @required this.tagCode,
     @required this.createdAt,
     @required this.location,

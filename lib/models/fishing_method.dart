@@ -25,10 +25,10 @@ class FishingMethod extends Model {
         type = data['type'],
         super.fromMap(data);
 
-  FishingMethod copyWith({String firstName, String abbreviation, FishingMethodType type}) {
+  FishingMethod copyWith({String englishName, String abbreviation, FishingMethodType type}) {
     return FishingMethod(
       id: id ?? this.id,
-      name: firstName ?? this.name,
+      name: englishName ?? this.name,
       abbreviation: abbreviation ?? this.abbreviation,
       type: type ?? this.type,
     );

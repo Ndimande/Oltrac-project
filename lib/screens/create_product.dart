@@ -63,6 +63,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     FlutterNfcReader.onTagDiscovered().listen(onTagDiscovered);
   }
 
+  @override
+  void dispose() {
+    FlutterNfcReader.stop();
+    super.dispose();
+  }
+
   void onTagDiscovered(NfcData data) {
     print('Tag scanned!');
     print(data.id);
@@ -175,7 +181,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       bool confirmed = await showDialog<bool>(
         context: _scaffoldKey.currentContext,
         builder: (_) => ConfirmDialog(
-            'Cancel', 'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?'),
+          'Cancel',
+          'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?',
+        ),
       );
 
       if (confirmed != true) {
@@ -213,28 +221,30 @@ class CreateProductScreenState extends State<CreateProductScreen> {
             ),
           ),
         ],
-        content: Container(
-          height: 250,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                Icons.check_circle_outline,
-                size: 50,
-                color: Colors.white,
-              ),
-              Text(
-                '${product.productType.name} Tag\n${product.tagCode}\nsaved!',
-                style: TextStyle(fontSize: 26),
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                'Do you want to create another product?',
-                style: TextStyle(fontSize: 20),
-                textAlign: TextAlign.center,
-              ),
-            ],
+        content: SingleChildScrollView(
+          child: Container(
+            height: 250,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 50,
+                  color: Colors.white,
+                ),
+                Text(
+                  '${product.productType.name} Tag\n${product.tagCode}\nsaved!',
+                  style: TextStyle(fontSize: 26),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  'Do you want to create another product?',
+                  style: TextStyle(fontSize: 20),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       ),
