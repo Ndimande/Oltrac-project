@@ -1,25 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-const TextStyle _h2 = TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'RobotoLight');
-const TextStyle _h3 = TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'RobotoLight');
-const TextStyle _h4 = TextStyle(color: Colors.white, fontSize: 13, fontFamily: 'RobotoLight');
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
 
-const Image _sharkTrackLogo = Image(image: AssetImage('assets/images/SharkTrack_Logo_White.png'), width: 200);
-const Image _olspsLogo = Image(image: AssetImage('assets/images/olsps_logo_white.png'), width: 160);
-const Image _sharkConservationFundLogo =
-    Image(image: AssetImage('assets/images/shark_conservation_fund_logo_white.png'), width: 100);
-const Image _fishwellLogo = Image(image: AssetImage('assets/images/fishwell_logo_white.png'), width: 100);
-const Image _trafficLogo = Image(image: AssetImage('assets/images/traffic_logo_white.png'), width: 100);
+class _SplashScreenState extends State<SplashScreen> {
+  double _screenWidth;
 
-class SplashScreen extends StatelessWidget {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+  }
+
+  @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
+
+  double _scale(double fontSize, double ratio) {
+    final scaledFontSize = _screenWidth / ratio * fontSize;
+    return scaledFontSize;
+  }
+
+  double _scaleText(double fontSize) {
+    return _scale(fontSize, 250);
+  }
+
+  double _scaleImage(double imageSize) {
+    return _scale(imageSize, 500);
+  }
+
+  TextStyle _fontStyle(double fontSize) =>
+      TextStyle(color: Colors.white, fontSize: _scaleText(fontSize), fontFamily: 'RobotoLight');
+
+  Image _sharkTrackLogo(double imageWidth) => Image(
+        image: AssetImage('assets/images/SharkTrack_Logo_White.png'),
+        width: _scaleImage(imageWidth),
+      );
+
+  Image _olspsLogo(double imageWidth) => Image(
+        image: AssetImage('assets/images/olsps_logo_white.png'),
+        width: _scaleImage(imageWidth),
+      );
+
+  Image _sharkConservationFundLogo(double imageWidth) => Image(
+        image: AssetImage('assets/images/shark_conservation_fund_logo_white.png'),
+        width: _scaleImage(imageWidth),
+      );
+
+  Image _fishwellLogo(double imageWidth) => Image(
+        image: AssetImage('assets/images/fishwell_logo_white.png'),
+        width: _scaleImage(imageWidth),
+      );
+
+  Image _trafficLogo(double imageWidth) => Image(
+        image: AssetImage('assets/images/traffic_logo_white.png'),
+        width: _scaleImage(imageWidth),
+      );
+
   Widget _appLogo() => Container(
         margin: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         child: Column(
           children: <Widget>[
-            _sharkTrackLogo,
-            Text('Vessel application'.toUpperCase(), style: _h2, textAlign: TextAlign.center),
-            Divider(color: Colors.white,thickness: 1),
-            Text('Mobile Shark-Product Tracing Application', style: _h3, textAlign: TextAlign.center),
+            _sharkTrackLogo(200),
+            Text('Onboard'.toUpperCase(), style: _fontStyle(16), textAlign: TextAlign.center),
+            Divider(color: Colors.white, thickness: 1),
+            Text('Mobile Shark-Product Tracing Application', style: _fontStyle(10), textAlign: TextAlign.center),
           ],
         ),
       );
@@ -28,9 +85,9 @@ class SplashScreen extends StatelessWidget {
         margin: EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
-            Text('Developed By', style: _h3),
+            Text('Developed By', style: _fontStyle(10)),
             SizedBox(height: 15),
-            _olspsLogo,
+            _olspsLogo(160),
           ],
         ),
       );
@@ -39,14 +96,14 @@ class SplashScreen extends StatelessWidget {
         margin: EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
-            Text('Supported By', style: _h3),
+            Text('Supported By', style: _fontStyle(10)),
             SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                _sharkConservationFundLogo,
-                _fishwellLogo,
-                _trafficLogo,
+                _sharkConservationFundLogo(100),
+                _fishwellLogo(100),
+                _trafficLogo(100),
               ],
             )
           ],
@@ -55,6 +112,8 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    _screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: MaterialColor(0xFF086178, {}),
       body: Column(
