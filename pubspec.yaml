@@ -4,7 +4,7 @@ description: An app for tracking shark fins and other products.
 version: 1.5.0+1
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.7.2 <3.0.0"
 
 dependencies:
   flutter:
