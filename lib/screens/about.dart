@@ -6,6 +6,7 @@ import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
   @override
@@ -87,15 +88,25 @@ class _AboutScreenState extends State<AboutScreen> {
     super.dispose();
   }
 
+  Future<void> _launchOLSPSSite() async {
+    const url = 'https://marine.olsps.com';
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
+  }
+
   Widget _olspsLogo() {
     const Image logo = Image(
       image: AssetImage('assets/images/olsps-logo.png'),
       width: 120,
     );
-    return Container(
-      padding: EdgeInsets.all(5),
-      child: logo,
-      alignment: Alignment.bottomCenter,
+    return FlatButton(
+      onPressed: _launchOLSPSSite,
+      child: Container(
+        padding: EdgeInsets.all(5),
+        child: logo,
+        alignment: Alignment.bottomCenter,
+      ),
     );
   }
 
@@ -120,6 +131,7 @@ class _AboutScreenState extends State<AboutScreen> {
           children: <Widget>[
             _sharkTrackLogo(),
             Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: TextStyle(fontSize: 30)),
+            Text('Vessel App', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
             Text(_version),
             Text(_copyright, textAlign: TextAlign.center),
             _backButton(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:oltrace/app_config.dart';
 
 class SvgIcon extends StatelessWidget {
   final String assetPath;
@@ -13,18 +14,37 @@ class SvgIcon extends StatelessWidget {
     this.width = 64,
     this.height = 64,
     this.darker = false,
-  }) : assert(assetPath != null);
+  });
+
+  Widget _notFound() {
+    if(!AppConfig.debugMode) {
+      return Container();
+    }
+    return Stack(
+      children: <Widget>[
+        Container(
+          width: width - 10,
+          height: height - 10,
+          color: Colors.red,
+        ),
+        Text(
+          'SVG missing\n(path $assetPath)',
+          style: TextStyle(fontSize: 8, color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (assetPath == null) {
+      return _notFound();
+    }
     final Color color = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : darker ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue;
-    if (assetPath == null) {
-      return Container(
-        color: Colors.red,
-      );
-    }
+
     return SvgPicture.asset(
       assetPath,
       width: width,

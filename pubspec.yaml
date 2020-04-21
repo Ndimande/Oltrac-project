@@ -1,7 +1,7 @@
 name: oltrace
 description: An app for tracking shark fins and other products.
 
-version: 1.5.0+1
+version: 1.5.1+1
 
 environment:
   sdk: ">=2.7.2 <3.0.0"
@@ -31,6 +31,7 @@ dependencies:
   gallery_saver: ^2.0.1
   olrac_themes:
     git: git@ssh.dev.azure.com:v3/Olrac/olrac_themes/olrac_themes
+  url_launcher: ^5.4.5
 
 dev_dependencies:
   flutter_test:

@@ -18,7 +18,7 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/screens/fishing_method.dart';
-import 'package:oltrace/screens/main/StaticHaulDetailsAlertDialog.dart';
+import 'package:oltrace/screens/main/static_haul_details_alert_dialog.dart';
 import 'package:oltrace/screens/main/drawer.dart';
 import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
@@ -289,7 +289,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _fishingMethodStripButton(FishingMethod fishingMethod) {
-    final String title = fishingMethod == null ? 'Fishing Method' : 'Change Method';
+    final String title = fishingMethod == null ? 'Fishing Method' : 'Change Gear';
     return Expanded(
       child: StripButton(
         labelText: title,
@@ -304,9 +304,8 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _haulStripButton(FishingMethod fishingMethod) {
-    final String actionType = (fishingMethod.type == FishingMethodType.Dynamic ? 'Fishing' : 'Hauling');
-    final String actionVerb = activeHaul != null ? 'End' : 'Start';
-    final String labelText = "$actionVerb $actionType";
+
+    final String labelText = fishingMethod.type == FishingMethodType.Dynamic ? 'Start Fishing' : 'Haul ${fishingMethod.name}';
     return Expanded(
       child: StripButton(
         labelText: labelText,

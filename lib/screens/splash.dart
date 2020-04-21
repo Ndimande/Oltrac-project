@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-const TextStyle _h1 = TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'RobotoLight');
-const TextStyle _h2 = TextStyle(color: Colors.white, fontSize: 18, fontFamily: 'RobotoLight');
+const TextStyle _h2 = TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'RobotoLight');
+const TextStyle _h3 = TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'RobotoLight');
+const TextStyle _h4 = TextStyle(color: Colors.white, fontSize: 13, fontFamily: 'RobotoLight');
 
 const Image _sharkTrackLogo = Image(image: AssetImage('assets/images/SharkTrack_Logo_White.png'), width: 200);
 const Image _olspsLogo = Image(image: AssetImage('assets/images/olsps_logo_white.png'), width: 160);
@@ -16,7 +17,9 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           children: <Widget>[
             _sharkTrackLogo,
-            Text('Mobile Shark-Product Tracing Application'.toUpperCase(), style: _h1, textAlign: TextAlign.center),
+            Text('Vessel application'.toUpperCase(), style: _h2, textAlign: TextAlign.center),
+            Divider(color: Colors.white,thickness: 1),
+            Text('Mobile Shark-Product Tracing Application', style: _h3, textAlign: TextAlign.center),
           ],
         ),
       );
@@ -25,7 +28,7 @@ class SplashScreen extends StatelessWidget {
         margin: EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
-            Text('Developed by'.toUpperCase(), style: _h2),
+            Text('Developed By', style: _h3),
             SizedBox(height: 15),
             _olspsLogo,
           ],
@@ -36,7 +39,7 @@ class SplashScreen extends StatelessWidget {
         margin: EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
-            Text('Supported by'.toUpperCase(), style: _h2),
+            Text('Supported By', style: _h3),
             SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -13,19 +13,33 @@ class TagScanner extends StatefulWidget {
 
 class TagScannerState extends State<TagScanner> {
   String _tagCode;
-  bool _enableScanning = false;
+  bool _nfcReaderEnabled = false;
 
   @override
   void initState() {
     super.initState();
-    FlutterNfcReader.onTagDiscovered().listen((NfcData onData) {
-      if (_enableScanning) {
-        setState(() {
-          _tagCode = onData.id;
-          widget.onScan(_tagCode);
-        });
-      }
-    });
+    try {
+      FlutterNfcReader.onTagDiscovered().listen((NfcData onData) {
+        if (_nfcReaderEnabled) {
+          setState(() {
+            _tagCode = onData.id;
+            widget.onScan(_tagCode);
+          });
+        }
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void dispose() {
+    try {
+      FlutterNfcReader.stop();
+    } catch (e) {
+      print(e);
+    }
+    super.dispose();
   }
 
   @override
@@ -41,10 +55,10 @@ class TagScannerState extends State<TagScanner> {
           children: <Widget>[
             Text(_tagCode ?? '-'),
             FlatButton.icon(
-              color: _enableScanning ? Colors.green : null,
+              color: _nfcReaderEnabled ? Colors.green : null,
               label: Text('Scan'),
               icon: Icon(Icons.nfc),
-              onPressed: () => setState(() => _enableScanning = !_enableScanning),
+              onPressed: () => setState(() => _nfcReaderEnabled = !_nfcReaderEnabled),
             )
           ],
         )

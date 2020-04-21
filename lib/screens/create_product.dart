@@ -60,12 +60,21 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   @override
   void initState() {
     super.initState();
-    FlutterNfcReader.onTagDiscovered().listen(onTagDiscovered);
+    try {
+      FlutterNfcReader.onTagDiscovered().listen(onTagDiscovered);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   void dispose() {
-    FlutterNfcReader.stop();
+    try {
+      FlutterNfcReader.stop();
+    } catch (e) {
+      print(e);
+    }
+
     super.dispose();
   }
 

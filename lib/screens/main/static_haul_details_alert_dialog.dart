@@ -29,6 +29,8 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
     int intVal = int.tryParse(value);
     if (intVal == null) {
       return 'Invalid number';
+    } else if(intVal < 0 ||  intVal > 59) {
+      return 'Max 59 minutes';
     }
     return null;
   }
@@ -57,6 +59,7 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
         Row(
           children: <Widget>[
             Expanded(child: hours),
+            SizedBox(width: 10),
             Expanded(child: minutes),
           ],
         ),
@@ -125,6 +128,7 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      title: Text('Haul Gear'),
       scrollable: true,
       content: _content(),
       actions: _actions(),

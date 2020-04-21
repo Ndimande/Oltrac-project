@@ -1,11 +1,5 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-# https://docs.microsoft.com/azure/devops/pipelines/ecosystems/android
 pool:
-  vmImage: 'macOS-10.13'
+  vmImage: 'macOS-10.14'
 
 steps:
 
