@@ -1,9 +1,5 @@
 # Starter pipeline
-- task: InstallSSHKey@0
-  inputs:
-    knownHostsEntry: '|1|UZ0DOqZ+KuXHz26zX6nbm7hbBpA=|AwkZSG8vA570MCEOykibCgvWse4= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H'
-    sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvGf07gmKPy2EiUqbzZSfU12blQhkl0VTBOskABp+1bLo49t8s9/XCmehhZjmR6g3AEpJSb3R8i0b/9l5AmmDli8da2c93k4O6YWJmatCibab+r/DD4vfCSFqDgkh0q2IA9PDncQOJlDgrftcn4n4MGq3LYV2/HAZDI+/T3l9mQZfZ9iRX0Lg6w4Dhs+gt/tRe4ydZ3eEc5DXrwAovfc2VlVfmG3p4Ak4op/uXnufuTHPOJRmWiIJHGKVVooaB7mw0qAILn1egfYt5VR5IOcFjX8U9UHRDaqABylhUaZ/GcoTjzjAcHP89SfNCEoWqp9XMLZKP++fuFHHN/C3CLqO5 werner@home'
-    sshKeySecureFile: 'azure_repos_key'
+
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
@@ -13,7 +9,11 @@ pool:
   vmImage: 'macOS-10.13'
 
 steps:
-
+- task: InstallSSHKey@0
+  inputs:
+    knownHostsEntry: '|1|UZ0DOqZ+KuXHz26zX6nbm7hbBpA=|AwkZSG8vA570MCEOykibCgvWse4= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H'
+    sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvGf07gmKPy2EiUqbzZSfU12blQhkl0VTBOskABp+1bLo49t8s9/XCmehhZjmR6g3AEpJSb3R8i0b/9l5AmmDli8da2c93k4O6YWJmatCibab+r/DD4vfCSFqDgkh0q2IA9PDncQOJlDgrftcn4n4MGq3LYV2/HAZDI+/T3l9mQZfZ9iRX0Lg6w4Dhs+gt/tRe4ydZ3eEc5DXrwAovfc2VlVfmG3p4Ak4op/uXnufuTHPOJRmWiIJHGKVVooaB7mw0qAILn1egfYt5VR5IOcFjX8U9UHRDaqABylhUaZ/GcoTjzjAcHP89SfNCEoWqp9XMLZKP++fuFHHN/C3CLqO5 werner@home'
+    sshKeySecureFile: 'azure_repos_key'
 - task: FlutterInstall@0
   inputs:
     channel: 'stable'
