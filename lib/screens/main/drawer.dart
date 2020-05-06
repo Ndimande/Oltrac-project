@@ -120,11 +120,6 @@ class MainDrawer extends StatelessWidget {
               onTap: () => Navigator.pushNamed(context, '/trip_history'),
             ),
             _listTile(
-              iconData: Icons.inbox,
-              text: 'Master Containers',
-              onTap: () => Navigator.pushNamed(context, '/master_containers'),
-            ),
-            _listTile(
               iconData: Icons.settings,
               text: 'Settings',
               onTap: () => Navigator.pushNamed(context, '/settings'),

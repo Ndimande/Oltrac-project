@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/models/master_container.dart';
-import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/master_container.dart';
-import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/master_container.dart';
 import 'package:oltrace/screens/master_container_form.dart';
 import 'package:oltrace/widgets/master_container_list_item.dart';
@@ -10,15 +8,16 @@ import 'package:oltrace/widgets/strip_button.dart';
 
 final MasterContainerRepository _masterContainerRepo = MasterContainerRepository();
 
-Future<Map<String, dynamic>> _load() async {
-  final List<MasterContainer> masterContainers = await _masterContainerRepo.all();
+Future<Map<String, dynamic>> _load(int tripId) async {
+  final List<MasterContainer> masterContainers = await _masterContainerRepo.all(where: 'trip_id = $tripId');
   return <String, dynamic>{
     'masterContainers': masterContainers.reversed.toList(),
   };
 }
 
 class MasterContainersScreen extends StatefulWidget {
-  MasterContainersScreen();
+  final int sourceTripId;
+  MasterContainersScreen(this.sourceTripId);
 
   @override
   _MasterContainersScreenState createState() => _MasterContainersScreenState();
@@ -29,12 +28,11 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
   List<MasterContainer> _masterContainers;
 
   Future<void> _onPressCreateStripButton() async {
-    final List<Trip> trips = await TripRepository().all();
 
     await Navigator.push(
       _scaffoldKey.currentContext,
-      MaterialPageRoute(builder: (_) => MasterContainerFormScreen(sourceTripIds: trips.map((Trip t) => t.id).toList(),)),
-    );
+      MaterialPageRoute(builder: (_) => MasterContainerFormScreen(sourceTripId: widget.sourceTripId),
+    ));
 
     // Refresh when we return
     setState(() {});
@@ -80,7 +78,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
             icon: Icon(Icons.add),
             color: Colors.green,
             onPressed: _onPressCreateStripButton,
-            labelText: 'Create Master Container',
+            labelText: 'New Master Container',
           ),
         ),
       ],
@@ -90,7 +88,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _load(),
+      future: _load(widget.sourceTripId),
       initialData: null,
       builder: (BuildContext buildContext, AsyncSnapshot snapshot) {
         if (snapshot.hasError) {

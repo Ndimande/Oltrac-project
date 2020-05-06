@@ -267,9 +267,6 @@ class OlTraceAppState extends State<OlTraceApp> {
               final List<Landing> landings = settings.arguments as List<Landing>;
               return AddSourceLandingsScreen(alreadySelectedLandings: landings);
 
-            case '/master_containers':
-              return MasterContainersScreen();
-
             case '/developer':
               return DiagnosticsScreen();
 

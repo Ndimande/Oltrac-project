@@ -23,6 +23,8 @@ import 'package:oltrace/screens/main/drawer.dart';
 import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
 import 'package:oltrace/screens/main/trip_section.dart';
+import 'package:oltrace/screens/master_container.dart';
+import 'package:oltrace/screens/master_containers.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -139,7 +141,6 @@ class MainScreenState extends State<MainScreen> {
         },
       );
 
-
       if (formResult != null) {
         final Duration soakTime = formResult['soakDuration'] as Duration;
         final int numberOfTrapsOrHooks = formResult['numberOfTrapsOrHooks'] as int;
@@ -246,7 +247,7 @@ class MainScreenState extends State<MainScreen> {
       final Location location = await _locationProvider.location;
       final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
       await _tripRepo.store(endedTrip);
-      showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} has been ended');
+      showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} ended');
       setState(() {});
     }
   }
@@ -266,6 +267,12 @@ class MainScreenState extends State<MainScreen> {
     return false;
   }
 
+  Future<void> _onPressMasterContainerButton() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => MasterContainersScreen(activeTrip.id)),
+    );
+  }
+
   Text _appBarTitle() {
     final String verb =
         activeHaul != null && activeHaul.fishingMethod.type == FishingMethodType.Dynamic ? 'Fishing...' : 'Hauling...';
@@ -275,8 +282,19 @@ class MainScreenState extends State<MainScreen> {
 
   Widget _appBar() {
     return AppBar(
-      actions: <Widget>[_appBarDate],
+      actions: <Widget>[
+        _appBarDate,
+        if(activeTrip != null && activeTrip.hauls.isNotEmpty)
+        _masterContainerButton(),
+      ],
       title: _appBarTitle(),
+    );
+  }
+
+  Widget _masterContainerButton() {
+    return IconButton(
+      icon: Icon(Icons.inbox),
+      onPressed: _onPressMasterContainerButton,
     );
   }
 
@@ -304,8 +322,8 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _haulStripButton(FishingMethod fishingMethod) {
-
-    final String labelText = fishingMethod.type == FishingMethodType.Dynamic ? 'Start Fishing' : 'Haul ${fishingMethod.name}';
+    final String labelText =
+        fishingMethod.type == FishingMethodType.Dynamic ? 'Start Fishing' : 'Haul ${fishingMethod.name}';
     return Expanded(
       child: StripButton(
         labelText: labelText,
