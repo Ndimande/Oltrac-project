@@ -308,8 +308,8 @@ class HaulScreenState extends State<HaulScreen> {
   Widget _bottomButtons() {
     return Row(
       children: <Widget>[
-        Expanded(child: _addSingleLandingButton()),
-        Expanded(child: _addBulkLandingButton()),
+        if (_selectedLandings.isEmpty) Expanded(child: _addSingleLandingButton()),
+        if (_selectedLandings.isEmpty) Expanded(child: _addBulkLandingButton()),
         if (!_showProductList) Expanded(child: _tagProductButton()),
       ],
     );

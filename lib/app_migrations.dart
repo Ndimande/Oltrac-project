@@ -101,7 +101,8 @@ const List<Map<String, String>> appMigrations = const [
         'tag_code TEXT NOT NULL, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'latitude REAL NOT NULL, '
-        'longitude REAL NOT NULL '
+        'longitude REAL NOT NULL, '
+        'trip_id INTEGER NOT NULL '
         ')'
   },
   {

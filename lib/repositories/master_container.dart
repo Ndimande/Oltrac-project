@@ -53,6 +53,7 @@ class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
         'longitude': result['longitude'],
       }),
       products: products,
+      tripId: result['trip_id'],
     );
   }
 
@@ -63,6 +64,7 @@ class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
       'tag_code': mc.tagCode,
       'latitude': mc.location.latitude,
       'longitude': mc.location.longitude,
+      'trip_id': mc.tripId
     };
   }
 }

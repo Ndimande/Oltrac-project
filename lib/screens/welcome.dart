@@ -31,8 +31,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
 
-  FisheryType _selectedFisheryType;
-  Country _selectedCountry;
+  FisheryType _selectedFisheryType = AppConfig.debugMode ? fisheries.first : null;
+  Country _selectedCountry = AppConfig.debugMode ? countries.first : null;
   String _vesselName;
   String _vesselId;
   String _skipperFirstName;
@@ -44,6 +44,19 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   final _vesselIdFocusNode = FocusNode();
   final _skipperFirstNameFocusNode = FocusNode();
   final _skipperLastNameFocusNode = FocusNode();
+
+  Widget _countryDropdown() => ModelDropdown(
+        label: 'Country',
+        labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+        selected: _selectedCountry,
+        onChanged: (_country) => setState(() => _selectedCountry = _country),
+        items: countries.map<DropdownMenuItem<Country>>((Country country) {
+          return DropdownMenuItem<Country>(
+            value: country,
+            child: Text(country.name),
+          );
+        }).toList(),
+      );
 
   Widget _buildForm() {
     return Form(
@@ -68,18 +81,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
           // Country
           Container(
             padding: EdgeInsets.all(15),
-            child: ModelDropdown(
-              label: 'Country',
-              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
-              selected: _selectedCountry,
-              onChanged: (_country) => setState(() => _selectedCountry = _country),
-              items: countries.map<DropdownMenuItem<Country>>((Country country) {
-                return DropdownMenuItem<Country>(
-                  value: country,
-                  child: Text(country.name),
-                );
-              }).toList(),
-            ),
+            child: _countryDropdown(),
           ),
 
           // todo State / Province
