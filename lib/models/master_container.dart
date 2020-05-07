@@ -14,13 +14,20 @@ class MasterContainer extends Model {
 
   final List<Product> products;
 
+  final int tripId;
+
   const MasterContainer({
     int id,
     @required this.tagCode,
     @required this.createdAt,
     @required this.location,
     @required this.products,
+    @required this.tripId,
   })  : assert(tagCode != null),
+        assert(createdAt != null),
+        assert(location != null),
+        assert(products != null),
+        assert(tripId != null),
         super(id: id);
 
   MasterContainer.fromMap(Map data)
@@ -28,21 +35,18 @@ class MasterContainer extends Model {
         createdAt = data['createdAt'],
         location = Location.fromMap({'latitude': data['latitude'], 'longitude': data['longitude']}),
         products = data['products'],
+        tripId = data['tripId'],
         super.fromMap(data);
 
-  MasterContainer copyWith({
-    int id,
-    String tagId,
-    DateTime createdAt,
-    Location location,
-    List<Product> products,
-  }) {
+  MasterContainer copyWith(
+      {int id, String tagId, DateTime createdAt, Location location, List<Product> products, int tripId}) {
     return MasterContainer(
       id: id ?? this.id,
       tagCode: tagId ?? this.tagCode,
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
       products: products ?? this.products,
+      tripId: tripId ?? this.tripId,
     );
   }
 
@@ -53,6 +57,7 @@ class MasterContainer extends Model {
       'createdAt': createdAt.toIso8601String(),
       'location': location.toMap(),
       'products': products,
+      'tripId': tripId,
     };
   }
 }

@@ -5,7 +5,6 @@ import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/location.dart';
@@ -25,16 +24,14 @@ final MasterContainerRepository _masterContainerRepo = MasterContainerRepository
 class MasterContainerFormScreen extends StatefulWidget {
   final List<Product> initialProducts;
   final LocationProvider _locationProvider = LocationProvider();
-  final TextEditingController _tagCodeController = TextEditingController();
 
   /// The trips we can choose products from
-  final List<int> sourceTripIds;
+  final int sourceTripId;
 
-  MasterContainerFormScreen({this.initialProducts = const <Product>[], this.sourceTripIds});
+  MasterContainerFormScreen({this.initialProducts = const <Product>[], this.sourceTripId});
 
   @override
   _MasterContainerFormScreenState createState() {
-    _tagCodeController.text = randomTagCode();
     return _MasterContainerFormScreenState();
   }
 }
@@ -44,17 +41,28 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
   final _renderObjectKey = GlobalKey();
 
   List<Product> _childProducts = <Product>[];
-
+  String _tagCode;
   String _qrLabel() => 'Master Container (${_childProducts.length} tags)';
 
+  @override
+  initState() {
+    super.initState();
+    _tagCode = randomTagCode();
+  }
+
   Future<void> _onPressSave() async {
+    if (_childProducts.isEmpty) {
+      showTextSnackBar(_scaffoldKey, 'You must add at least one source Tag.');
+      return;
+    }
     final Location location = await widget._locationProvider.location;
 
     final MasterContainer masterContainer = MasterContainer(
-      tagCode: widget._tagCodeController.text,
+      tagCode: _tagCode,
       createdAt: DateTime.now(),
       location: location,
       products: _childProducts,
+      tripId: widget.sourceTripId
     );
 
     await _masterContainerRepo.store(masterContainer);
@@ -68,32 +76,23 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
       MaterialPageRoute(
         builder: (_) => _AddProductsScreen(
           alreadySelectedProducts: _childProducts,
-          sourceTripIds: widget.sourceTripIds,
+          sourceTripId: widget.sourceTripId,
         ),
       ),
     );
-    print('######');
-    print(newProducts);
+
     if (newProducts != null) {
       setState(() {
-        // todo keep old ones
         _childProducts.addAll(newProducts);
       });
     }
-  }
-
-  void _generateAnotherUUID() {
-    setState(() {
-      widget._tagCodeController.text = randomTagCode();
-    });
   }
 
   String _getImageFilename() {
     const String prefix = 'st';
     final String nonce = (DateTime.now().millisecondsSinceEpoch % 100).toString();
     const String extension = 'png';
-    final String tagCode = widget._tagCodeController.text;
-    return '${prefix}_${tagCode}_$nonce.$extension';
+    return '${prefix}_${_tagCode}_$nonce.$extension';
   }
 
   Future<void> _shareQR() async {
@@ -139,43 +138,6 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     );
   }
 
-  Widget _tagCodeInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text('QR Code', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 20)),
-        ),
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 5),
-          child: TextField(
-            readOnly: true,
-            autofocus: true,
-            controller: widget._tagCodeController,
-            onChanged: (String text) => setState(() {}),
-          ),
-        ),
-        StripButton(
-          icon: Icon(Icons.refresh),
-          labelText: 'Generate',
-          onPressed: _generateAnotherUUID,
-        )
-      ],
-    );
-  }
-
-  Widget _form() {
-    return Column(
-      children: <Widget>[
-        _tagCodeInput(),
-        SizedBox(height: 10),
-        if (widget._tagCodeController.text != '') _qrCode(),
-        _productList(),
-      ],
-    );
-  }
-
   Widget _bottomButtons() {
     return Row(
       children: <Widget>[
@@ -183,7 +145,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
           child: StripButton(
             color: Colors.green,
             onPressed: _onPressSave,
-            disabled: _childProducts.length == 0 || widget._tagCodeController.text == '',
+            disabled: _childProducts.length == 0 || _tagCode == '',
             labelText: 'Save',
             icon: Icon(
               Icons.save,
@@ -209,10 +171,21 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     return SharkTrackQrImage(
       onPressed: _shareQR,
       onLongPress: _onLongPressQrCode,
-      data: widget._tagCodeController.text,
-      title: widget._tagCodeController.text,
+      data: _tagCode,
+      title: _tagCode,
       subtitle: _qrLabel(),
       renderKey: _renderObjectKey,
+    );
+  }
+
+  Widget _form() {
+    return Column(
+      children: <Widget>[
+//        _tagCodeInput(),
+//        SizedBox(height: 10),
+        if (_tagCode != '') _qrCode(),
+        _productList(),
+      ],
     );
   }
 
@@ -230,7 +203,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Create Master Container'),
+        title: Text('New Master Container'),
       ),
       body: _body(),
     );
@@ -239,17 +212,16 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
 
 class _AddProductsScreen extends StatefulWidget {
   final List<Product> alreadySelectedProducts;
-  final List<int> sourceTripIds;
+  final int sourceTripId;
 
-  _AddProductsScreen({this.alreadySelectedProducts = const [], this.sourceTripIds})
-      : assert(sourceTripIds != null && sourceTripIds.isNotEmpty);
+  _AddProductsScreen({this.alreadySelectedProducts = const [], this.sourceTripId}) : assert(sourceTripId != null);
 
   @override
   _AddProductsScreenState createState() => _AddProductsScreenState(alreadySelectedProducts);
 
-  Future<List<Product>> _load(List<int> sourceTripIds) async {
+  Future<List<Product>> _load(int sourceTripId) async {
     final productRepo = ProductRepository();
-    return await productRepo.forTrips(sourceTripIds);
+    return await productRepo.forTrips([sourceTripId]);
   }
 }
 
@@ -273,7 +245,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
 
   Widget _noProducts() {
     return Center(
-      child: Text('No products available'),
+      child: Text('No eligble tags in this Trip'),
     );
   }
 
@@ -345,14 +317,14 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
 
   void _excludeAlreadySelected(List<Product> products) {
     products.retainWhere(
-        (Product p) => _alreadySelectedProducts.singleWhere((Product asp) => asp == p, orElse: () => null) == null,
+      (Product p) => _alreadySelectedProducts.singleWhere((Product asp) => asp == p, orElse: () => null) == null,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: widget._load(widget.sourceTripIds),
+      future: widget._load(widget.sourceTripId),
       builder: (BuildContext _, AsyncSnapshot snapshot) {
         if (snapshot.hasError) {
           return Scaffold(body: Text(snapshot.error.toString()));

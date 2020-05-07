@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:oltrace/app_config.dart';
@@ -71,8 +72,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   void dispose() {
     try {
       FlutterNfcReader.stop();
-    } catch (e) {
-      print(e);
+    } on PlatformException {
+      print('NFC reader could not be stopped.');
     }
 
     super.dispose();
