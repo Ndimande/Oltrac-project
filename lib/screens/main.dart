@@ -246,7 +246,7 @@ class MainScreenState extends State<MainScreen> {
       final Location location = await _locationProvider.location;
       final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
       await _tripRepo.store(endedTrip);
-      showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} has been ended');
+      showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} ended');
       setState(() {});
     }
   }

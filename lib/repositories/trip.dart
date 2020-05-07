@@ -1,8 +1,12 @@
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/master_container.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/haul.dart';
+import 'package:oltrace/repositories/master_container.dart';
+import 'package:oltrace/repositories/product.dart';
 
 class TripRepository extends DatabaseRepository<Trip> {
   /// The name of the database table
@@ -33,18 +37,27 @@ class TripRepository extends DatabaseRepository<Trip> {
     return trip;
   }
 
+  Future<List<MasterContainer>> masterContainers(int tripId) async {
+    final List<MasterContainer> mcs = await MasterContainerRepository().all(where: 'trip_id = $tripId');
+    final List<MasterContainer> updatedMcs = [];
+    for (final MasterContainer mc in mcs) {
+      final List<Product> mcProducts = await ProductRepository().forMasterContainer(mc.id);
+      final updatedMc = mc.copyWith(products: mcProducts);
+      updatedMcs.add(updatedMc);
+    }
+    return updatedMcs;
+  }
+
   /// Get all trips in the database with hauls.
   Future<List<Trip>> all({String where}) async {
-    final List<Map<String, dynamic>> tripResults = await _database.query(tableName);
+    final List<Map<String, dynamic>> tripResults = await _database.query(tableName, where: where);
 
-    final trips =
-        tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
+    final trips = tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
 
     final tripsWithHaulsFutures = trips.map((trip) async {
       final haulResults = await _database.query('hauls', where: 'trip_id = ${trip.id}');
 
-      final hauls =
-          haulResults.map((Map result) => HaulRepository().fromDatabaseMap(result)).toList();
+      final hauls = haulResults.map((Map result) => HaulRepository().fromDatabaseMap(result)).toList();
       return trip.copyWith(hauls: hauls);
     }).toList();
 
@@ -71,7 +84,6 @@ class TripRepository extends DatabaseRepository<Trip> {
     for (Map result in results) {
       trips.add(fromDatabaseMap(result));
     }
-
 
     return trips;
   }

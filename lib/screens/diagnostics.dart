@@ -1,13 +1,18 @@
+import 'dart:async';
+
+import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/profile.dart';
+import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/json.dart';
+import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/info_table.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,8 +23,10 @@ final _jsonRepo = JsonRepository();
 Future<Map> _load() async {
   final Map result = await _jsonRepo.get('profile');
   final Profile profile = Profile.fromMap(result);
+  final int backgroundFetchStatus = await BackgroundFetch.status;
   return {
     'profile': profile,
+    'backgroundFetchStatus': backgroundFetchStatus,
   };
 }
 
@@ -36,6 +43,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
   final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Profile _profile;
+  int _backgroundFetchStatus;
 
   Widget _version() => Container(
       margin: EdgeInsets.only(top: 10),
@@ -103,6 +111,15 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
     );
   }
 
+  Widget _backgroundFetch() {
+    return InfoTable(
+      title: 'BackgroundFetch',
+      data: [
+        ['status', _backgroundFetchStatus.toString()]
+      ],
+    );
+  }
+
   Widget _resetApp() {
     return Container(
       padding: EdgeInsets.all(10),
@@ -140,7 +157,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
             return Container();
           }
           _profile = snapshot.data['profile'];
-
+          _backgroundFetchStatus = snapshot.data['backgroundFetchStatus'] as int;
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -148,12 +165,63 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
                 _buildProfile(),
                 _sharedPrefs(),
                 _environment(),
+                _backgroundFetch(),
+                _TripUploadQueue(),
                 _resetApp(),
               ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _TripUploadQueue extends StatefulWidget {
+  @override
+  _TripUploadQueueState createState() => _TripUploadQueueState();
+}
+
+class _TripUploadQueueState extends State<_TripUploadQueue> {
+  int seconds = 0;
+  List<Trip> _trips = [];
+  Timer _timer;
+  Future<List<Trip>> _getTrips() async {
+    final tripRepo = TripRepository();
+    return await tripRepo.all();
+  }
+
+  _getTripsAndRefresh() {
+    _getTrips().then((List<Trip> trips) {
+      setState(() {
+        _trips = trips;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getTripsAndRefresh();
+
+    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+      _getTripsAndRefresh();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<List> dataRows =
+        _trips.map((Trip t) => [t.id.toString(), t.isUploaded ? 'Uploaded' : 'Not Uploaded']).toList();
+    return InfoTable(
+      title: 'Trip Upload Status',
+      data: dataRows,
     );
   }
 }

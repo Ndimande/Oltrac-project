@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/background_fetch.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/user_settings.dart';
 import 'package:oltrace/models/haul.dart';
@@ -36,6 +37,7 @@ import 'package:package_info/package_info.dart';
 import 'package:sentry/sentry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:background_fetch/background_fetch.dart';
 
 /// MobX [Store] holds the global ephemeral state.
 final AppStore _appStore = StoreProvider().appStore;
@@ -92,7 +94,10 @@ Future<void> boot() async {
 
   // Run the Flutter app
   runZoned(
-    () => runApp(OlTraceApp(userSettings)),
+    () {
+      runApp(OlTraceApp(userSettings));
+      BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+    },
     onError: (Object error, StackTrace stackTrace) {
       _handleError(error, stackTrace);
     },
@@ -151,15 +156,25 @@ class OlTraceAppState extends State<OlTraceApp> {
 
   OlTraceAppState(this._userSettings);
 
+  Future<void> initBackgroundFetch() async {
+    final config = BackgroundFetchConfig(
+      minimumFetchInterval: 15,
+      enableHeadless: true,
+      requiredNetworkType: NetworkType.ANY,
+      stopOnTerminate: false,
+    );
+    final int status = await BackgroundFetch.configure(config, backgroundFetchCallback);
+    print('BackgroundFetch configured status:$status');
+  }
+
   @override
   void initState() {
     super.initState();
     final stopwatch = Stopwatch()..start();
-
     // Do startup logic
     _initApp().then((AppStore appStore) async {
       print('State restored in ${stopwatch.elapsed}');
-
+      await initBackgroundFetch();
       // Delay to show logos
       if (!AppConfig.debugMode) await Future.delayed(Duration(seconds: 5) - stopwatch.elapsed);
 
@@ -327,3 +342,8 @@ Future<void> _handleError(Object exception, StackTrace stack) async {
 
   _sendSentryReport(exception, stack);
 }
+
+//void backgroundFetchHeadlessTask(String taskId) async {
+//  print('[BackgroundFetch] Headless event received.');
+//  BackgroundFetch.finish(taskId);
+//}

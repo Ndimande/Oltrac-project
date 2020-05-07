@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/master_container.dart';
@@ -30,7 +31,6 @@ final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
 final _masterContainerRepo = MasterContainerRepository();
-
 
 Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
@@ -74,8 +74,7 @@ class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final AppStore _appStore = StoreProvider().appStore;
 
-  Dio dio = Dio();
-  bool uploading = false;
+  bool _uploading = false;
   Trip _trip;
   bool isActiveTrip;
 
@@ -133,7 +132,7 @@ class TripScreenState extends State<TripScreen> {
     // You may not upload active trip
     assert(!isActiveTrip);
 
-    if (uploading) {
+    if (_uploading) {
       print('Already uploading');
       return;
     }
@@ -145,61 +144,30 @@ class TripScreenState extends State<TripScreen> {
       ),
     );
 
-    final Map tripMap = trip.toMap();
-    final List<MasterContainer> mcs = await _masterContainerRepo.all();
-    final List<MasterContainer> updatedMcs = [];
-    for(final MasterContainer mc in mcs) {
-      final List<Product> mcProducts = await ProductRepository().forMasterContainer(mc.id);
-      final updatedMc = mc.copyWith(products: mcProducts);
-      updatedMcs.add(updatedMc);
-    }
-
-    tripMap['masterContainers'] = updatedMcs.map((MasterContainer mc) => mc.toMap()).toList().map((Map item) {
-
-      final List<Product> productsList = item['products'];
-      final List<Map<String,String>> tagCodes = productsList.map((Product e) => {'tagCode':e.tagCode}).toList();
-      item['products'] = tagCodes;
-      return item;
-    }).toList();
-
-    final Map<String, dynamic> data = {
-      'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-      'json': {
-        'trip': tripMap,
-        'user': _appStore.profile.toMap(),
-      }
-    };
-
-    print('Data:');
-
-    util.printWrapped(jsonEncode(data['json']['trip']));
+    final List<MasterContainer> mcs = await _tripRepo.masterContainers(trip.id);
+    final data = UploadTripData(
+      json: UploadTripDataJson(
+        trip: UploadTripDataJsonTrip(
+          masterContainers: mcs,
+        ),
+        user: _appStore.profile.toMap(),
+      ),
+    );
 
     setState(() {
-      uploading = true;
+      _uploading = true;
     });
+
     try {
-      // Accept self signed cert
-      (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client) {
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-        return client;
-      };
-      final String json = jsonEncode(data);
-      Response response = await dio.post(
-        AppConfig.TRIP_UPLOAD_URL,
-        data: json,
-        options: RequestOptions(headers: {'Content-Type': 'application/json'}),
-      );
-      print('Response:');
-      print(response.toString());
+
+      await DdmApi.uploadTrip(data);
 
       await _tripRepo.store(trip.copyWith(isUploaded: true));
 
       print('Trip uploaded');
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Trip upload complete'),
-        ),
+        SnackBar(content: Text('Trip upload complete')),
       );
     } catch (e) {
       print('Error:');
@@ -213,7 +181,7 @@ class TripScreenState extends State<TripScreen> {
     }
 
     setState(() {
-      uploading = false;
+      _uploading = false;
     });
   }
 

@@ -45,14 +45,15 @@ class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
     final List<Product> products = <Product>[];
 
     return MasterContainer(
-        id: result['id'],
-        createdAt: createdAt,
-        tagCode: result['tag_code'],
-        location: Location.fromMap({
-          'latitude': result['latitude'],
-          'longitude': result['longitude'],
-        }),
-        products: products);
+      id: result['id'],
+      createdAt: createdAt,
+      tagCode: result['tag_code'],
+      location: Location.fromMap({
+        'latitude': result['latitude'],
+        'longitude': result['longitude'],
+      }),
+      products: products,
+    );
   }
 
   @override
