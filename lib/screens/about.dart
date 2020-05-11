@@ -96,18 +96,18 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 
   Widget _olspsLogo() {
-    const Image logo = Image(
-      image: AssetImage('assets/images/olsps-logo.png'),
-      width: 120,
-    );
-    return FlatButton(
-      onPressed: _launchOLSPSSite,
-      child: Container(
-        padding: EdgeInsets.all(5),
-        child: logo,
-        alignment: Alignment.bottomCenter,
+    return Container(
+      child: FlatButton(
+        padding: EdgeInsets.all(15),
+        onPressed: _launchOLSPSSite,
+        child: Image(
+          image: AssetImage('assets/images/olsps-logo.png'),
+          width: 120,
+        ),
       ),
+      alignment: Alignment.bottomCenter,
     );
+
   }
 
   Widget _sharkTrackLogo() {
@@ -131,7 +131,7 @@ class _AboutScreenState extends State<AboutScreen> {
           children: <Widget>[
             _sharkTrackLogo(),
             Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: TextStyle(fontSize: 30)),
-            Text('Vessel App', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
+            Text('Onboard', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
             Text(_version),
             Text(_copyright, textAlign: TextAlign.center),
             _backButton(),
