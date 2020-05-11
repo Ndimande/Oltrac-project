@@ -5,7 +5,7 @@ import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/stores/app_store.dart';
 
 final double _drawerItemFontSize = 22;
-const double drawerLabelFontSize = 18;
+const double drawerLabelFontSize = 20;
 const double drawerTextFontSize = 26;
 
 Widget _drawerHeader(Profile profile) {
@@ -14,7 +14,7 @@ Widget _drawerHeader(Profile profile) {
     children: <Widget>[
       Text(
         'Vessel Name',
-        style: TextStyle(fontSize: drawerLabelFontSize),
+        style: TextStyle(fontSize: drawerLabelFontSize,fontWeight: FontWeight.bold),
       ),
       Text(
         profile.vesselName,
@@ -29,7 +29,7 @@ Widget _drawerHeader(Profile profile) {
     children: <Widget>[
       Text(
         'Skipper Name',
-        style: TextStyle(fontSize: drawerLabelFontSize),
+        style: TextStyle(fontSize: drawerLabelFontSize,fontWeight: FontWeight.bold),
       ),
       Text(
         profile.skipper.firstName + ' ' + profile.skipper.lastName,
@@ -64,6 +64,7 @@ Widget _drawerHeader(Profile profile) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   vesselName,
+                  SizedBox(height: 15),
                   skipperName,
                 ],
               ),
