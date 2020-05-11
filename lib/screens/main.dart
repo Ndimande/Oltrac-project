@@ -73,8 +73,6 @@ Future<Map> _load() async {
 
 class MainScreen extends StatefulWidget {
   final SharedPreferences sharedPrefs = SharedPreferencesProvider().sharedPreferences;
-  final TextEditingController _soakTimeHoursController = TextEditingController(text: '0');
-  final TextEditingController _soakTimeMinutesController = TextEditingController(text: '0');
 
   MainScreen();
 
@@ -284,8 +282,6 @@ class MainScreenState extends State<MainScreen> {
     return AppBar(
       actions: <Widget>[
         _appBarDate,
-        if(activeTrip != null && activeTrip.hauls.isNotEmpty)
-        _masterContainerButton(),
       ],
       title: _appBarTitle(),
     );
@@ -366,6 +362,7 @@ class MainScreenState extends State<MainScreen> {
               onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
               onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
               onPressEditTrip: _onPressEditTrip,
+              onPressMasterContainerButton: () async => await _onPressMasterContainerButton(),
             ),
             Expanded(
               child: HaulSection(
