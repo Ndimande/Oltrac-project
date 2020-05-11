@@ -11,6 +11,7 @@ class LandingListItem extends StatelessWidget {
   final Function onLongPress;
   final bool isSelected;
   final int listIndex;
+  final bool selectable;
 
   LandingListItem({
     @required this.landing,
@@ -18,6 +19,7 @@ class LandingListItem extends StatelessWidget {
     @required this.listIndex,
     this.onLongPress,
     this.isSelected = false,
+    this.selectable = true,
   })  : assert(landing != null),
         assert(onPressed != null),
         assert(listIndex != null);
@@ -53,10 +55,16 @@ class LandingListItem extends StatelessWidget {
       );
 
   Widget get _icon {
+    if (!selectable) {
+      return ForwardArrow();
+    }
+
+    final icon = onLongPress == null || landing.doneTagging
+        ? ForwardArrow()
+        : Icon(isSelected ? Icons.check_box : Icons.check_box_outline_blank);
+
     return IconButton(
-      icon: onLongPress == null || landing.doneTagging
-          ? ForwardArrow()
-          : Icon(isSelected ? Icons.check_circle : Icons.lens),
+      icon: icon,
       onPressed: landing.doneTagging ? null : onLongPress,
       iconSize: 30,
       color: OlracColours.olspsBlue,
@@ -75,7 +83,7 @@ class LandingListItem extends StatelessWidget {
     return Container(
       decoration: _decoration,
       child: ListTile(
-        onLongPress: landing.doneTagging ? null : onLongPress,
+        onLongPress: landing.doneTagging || !selectable ? null : onLongPress,
         onTap: () => onPressed(listIndex),
         leading: LandingIcon(
           landing: landing,

@@ -248,6 +248,7 @@ class TripScreenState extends State<TripScreen> {
                 Expanded(
                   child: _trip.hauls.length > 0
                       ? GroupedHaulsList(
+                    isActiveTrip: isActiveTrip,
                           hauls: _trip.hauls.reversed.toList(),
                           onPressHaulItem: (int id, int index) async {
                             await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});

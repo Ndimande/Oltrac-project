@@ -25,7 +25,7 @@ class HaulSection extends StatelessWidget {
           child: Container(
             child: reversedHauls.length == 0
                 ? _buildNoHauls()
-                : GroupedHaulsList(hauls: reversedHauls, onPressHaulItem: onPressHaulItem),
+                : GroupedHaulsList(hauls: reversedHauls, onPressHaulItem: onPressHaulItem, isActiveTrip: true),
           ),
         )
       ],

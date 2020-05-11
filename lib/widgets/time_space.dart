@@ -23,11 +23,11 @@ class TimeSpace extends StatelessWidget {
           children: <Widget>[
             Text(
               label ?? '',
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),
             ),
             Text(
               dateTimeLabel,
-              style: TextStyle(fontSize: 15),
+              style: TextStyle(fontSize: 18),
               textAlign: TextAlign.left,
             )
           ],
