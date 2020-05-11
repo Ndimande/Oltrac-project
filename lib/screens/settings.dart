@@ -1,20 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/framework/user_settings.dart';
+import 'package:oltrace/providers/shared_preferences.dart';
+import 'package:oltrace/providers/user_prefs.dart';
 
-final double _fontSize = 20;
+const double _fontSize = 20;
+const String UPLOAD_AUTOMATICALLY_KEY = 'uploadAutomatically';
+const String MOBILE_DATA_KEY = 'mobileData';
 
 class SettingsScreen extends StatefulWidget {
-  final UserSettings userSettings;
-  final Function updateSettings;
+  final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
+  final userPrefs = UserPrefsProvider().userPrefs;
 
-  SettingsScreen(this.userSettings, this.updateSettings);
+  SettingsScreen();
 
   @override
-  State<StatefulWidget> createState() => SettingsScreenState(userSettings);
+  State<StatefulWidget> createState() {
+    return SettingsScreenState(
+      mobileData: userPrefs.mobileData,
+      uploadAutomatically: userPrefs.uploadAutomatically,
+    );
+  }
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  SettingsScreenState(UserSettings userSettings);
+  SettingsScreenState({this.mobileData, this.uploadAutomatically});
+
+  bool mobileData;
+  bool uploadAutomatically;
+
+  void _toggleUploadAutomatically() {
+    setState(() {
+      widget.userPrefs.toggleUploadAutomatically();
+      uploadAutomatically = !uploadAutomatically;
+    });
+  }
+
+  void _toggleMobileData() {
+    setState(() {
+      widget.userPrefs.toggleMobileData();
+      mobileData = !mobileData;
+    });
+  }
 
   Widget _buildAllowMobile() {
     final title = 'Use Mobile Data';
@@ -26,9 +51,9 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: true, //widget.userSettings.allowMobileData,
+      value: mobileData,
       onChanged: (state) {
-        widget.updateSettings(widget.userSettings.copyWith(allowMobileData: state));
+        _toggleMobileData();
       },
     );
   }
@@ -43,9 +68,9 @@ class SettingsScreenState extends State<SettingsScreen> {
         title,
         style: TextStyle(fontSize: _fontSize),
       ),
-      value: false, // widget.userSettings.uploadAutomatically,
+      value: uploadAutomatically,
       onChanged: (state) {
-        widget.updateSettings(widget.userSettings.copyWith(uploadAutomatically: state));
+        _toggleUploadAutomatically();
       },
     );
   }
@@ -53,26 +78,18 @@ class SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Settings'),
+      appBar: AppBar(
+        title: Text('Settings'),
+      ),
+      body: Container(
+        margin: EdgeInsets.only(left: 10),
+        child: Column(
+          children: <Widget>[
+            _buildAllowMobile(),
+            _buildAutoUpload(),
+          ],
         ),
-        body: Container(
-          margin: EdgeInsets.only(left: 10),
-          child: Column(
-            children: <Widget>[
-              _buildAllowMobile(),
-              _buildAutoUpload(),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: Text(
-                  'These settings can not be changed in this version. They will become available in a future version.',
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }

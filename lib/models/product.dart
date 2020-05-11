@@ -84,7 +84,7 @@ class Product extends Model {
     return {
       'id': id,
       'tagCode': tagCode,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
       'location': location.toMap(),
       'productType': productType.toMap(),
       'packagingType': packagingType.toMap(),

@@ -1,23 +1,16 @@
-import 'dart:convert';
-import 'dart:io';
+import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
-import 'package:oltrace/framework/util.dart' as util;
 
-import 'package:dio/adapter.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/models/trip_upload.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
-import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
@@ -30,7 +23,6 @@ final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
-final _masterContainerRepo = MasterContainerRepository();
 
 Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
@@ -59,7 +51,6 @@ Future<Map<String, dynamic>> _load(int tripId) async {
 }
 
 class TripScreen extends StatefulWidget {
-  final Dio dio = Dio();
   final int tripId;
 
   TripScreen({this.tripId});
@@ -87,6 +78,7 @@ class TripScreenState extends State<TripScreen> {
         children: <Widget>[
           NumberedBoat(
             number: trip.id,
+            color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
           ),
           SizedBox(width: 15),
           Expanded(
@@ -106,10 +98,8 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
-  Widget get noHauls => Container(
-        alignment: Alignment.center,
-        child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
-      );
+  Widget get noHauls =>
+      Container(alignment: Alignment.center, child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)));
 
   Widget uploadButton(Trip trip) {
     final label = trip.isUploaded ? 'Uploaded' : 'Upload Trip';
@@ -126,6 +116,7 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
+  /// Upload the trip to the DDM.
   Future<void> onPressUpload(Trip trip) async {
     print('Uploading trip');
 
@@ -137,55 +128,67 @@ class TripScreenState extends State<TripScreen> {
       return;
     }
 
+    if (trip.isUploaded) {
+      print('Trip was already uploaded');
+      // Refresh so user can see
+      setState(() {});
+      return;
+    }
+
     _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        content: Text('Uploading Trip...'),
-        duration: Duration(minutes: 20), // keep open
-      ),
+      SnackBar(content: Text('Uploading Trip...'), duration: Duration(minutes: 20)),
     );
-
-    final List<MasterContainer> mcs = await _tripRepo.masterContainers(trip.id);
-    final data = UploadTripData(
-      json: UploadTripDataJson(
-        trip: UploadTripDataJsonTrip(
-          masterContainers: mcs,
-        ),
-        user: _appStore.profile.toMap(),
-      ),
-    );
-
     setState(() {
       _uploading = true;
     });
 
-    try {
+    final data = TripUploadData(
+      imei: await ImeiPlugin.getImei(),
+      trip: trip,
+      userProfile: _appStore.profile,
+    );
 
+    String snackBarMessage;
+    try {
       await DdmApi.uploadTrip(data);
 
       await _tripRepo.store(trip.copyWith(isUploaded: true));
 
       print('Trip uploaded');
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(content: Text('Trip upload complete')),
-      );
+      snackBarMessage = 'Trip upload complete';
     } catch (e) {
+      snackBarMessage = 'Trip upload failed.\n' + e.toString();
       print('Error:');
       print(e.toString());
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Trip upload failed.\n' + e.toString()),
-        ),
-      );
     }
+
+    _scaffoldKey.currentState.hideCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(snackBarMessage)));
 
     setState(() {
       _uploading = false;
     });
   }
 
-  Text get title => Text(isActiveTrip ? 'Active Trip' : 'Completed Trip');
+  Text get title {
+    String text;
+    text = isActiveTrip ? 'Active Trip' : 'Completed Trip';
+
+    if (_trip.isUploaded) {
+      text += ' (Uploaded)';
+    }
+    return Text(text);
+  }
+
+  Widget _groupedHaulsList() {
+    return GroupedHaulsList(
+      hauls: _trip.hauls.reversed.toList(),
+      onPressHaulItem: (int id, int index) async {
+        await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
+        setState(() {});
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,17 +216,7 @@ class TripScreenState extends State<TripScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _buildTripInfo(_trip),
-                Expanded(
-                  child: _trip.hauls.length > 0
-                      ? GroupedHaulsList(
-                          hauls: _trip.hauls.reversed.toList(),
-                          onPressHaulItem: (int id, int index) async {
-                            await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
-                            setState(() {});
-                          },
-                        )
-                      : noHauls,
-                ),
+                Expanded(child: _trip.hauls.length > 0 ? _groupedHaulsList() : noHauls),
                 mainButton
               ],
             ),

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
 class NumberedBoat extends StatelessWidget {
   final int number;
   final double size;
-
-  NumberedBoat({this.number, this.size = 64});
+  final Color color;
+  NumberedBoat({this.number, this.size = 64, this.color = OlracColours.olspsBlue});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class NumberedBoat extends StatelessWidget {
           width: size,
           height: size,
           child: SvgIcon(
+            color: color,
             assetPath: SvgIcons.path('Boat'),
           ),
         ),

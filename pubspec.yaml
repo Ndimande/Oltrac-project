@@ -33,6 +33,8 @@ dependencies:
     git: git@ssh.dev.azure.com:v3/Olrac/olrac_themes/olrac_themes
   url_launcher: ^5.4.5
   background_fetch: ^0.5.1
+  connectivity: ^0.4.8+5
+  imei_plugin: ^1.1.6
 
 dev_dependencies:
   flutter_test:

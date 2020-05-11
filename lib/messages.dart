@@ -8,7 +8,7 @@ class Messages {
   static const HAUL_CONFIRM_END = 'Are you sure you want to end the haul?';
 
   static const String LANDING_FIRST_END_DYNAMIC_HAUL =
-      'For dynamic fishing methods you must first end the operation before adding species.';
+      'You must first end the operation before adding species.';
   static const String LANDING_FIRST_SELECT_SPECIES = 'You must first select one or more species to be tagged';
 
   static const WAITING_FOR_GPS = 'Waiting for GPS. Please be patient.';
