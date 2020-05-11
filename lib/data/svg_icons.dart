@@ -77,6 +77,7 @@ class SvgIcons {
     'Orectolobus maculatus': '$sharksPath/Wobbegong_Sharks_FAMILY_ORECTOLOBIDAE.svg',
     'Eucrossorhinus dasypogon': '$sharksPath/Wobbegong_Sharks_FAMILY_ORECTOLOBIDAE.svg',
     'STEGOSTOMA FASCIATUM': '$sharksPath/Zebra_Shark_STEGOSTOMA_FASCIATUM.svg',
+    'Sawsharks Mixed': '$sharksPath/SwordSharkMixed.svg',
   };
 
   static String path(String name) => !_icons.containsKey(name) ? null : _icons[name];
