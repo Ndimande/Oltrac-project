@@ -1,3 +1,4 @@
+import 'package:background_fetch/background_fetch.dart';
 import 'package:oltrace/app_migrations.dart';
 
 class AppConfig {
@@ -39,4 +40,12 @@ class AppConfig {
   static const String DATABASE_FILENAME = 'sharktrack.db';
 
   static final migrations = appMigrations;
+
+  static final backgroundFetchConfig = BackgroundFetchConfig(
+    minimumFetchInterval: 15,
+    enableHeadless: true,
+    requiredNetworkType: NetworkType.ANY,
+    stopOnTerminate: false,
+    startOnBoot: true,
+  );
 }

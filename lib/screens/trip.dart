@@ -2,18 +2,17 @@ import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 
 import 'package:flutter/material.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/trip_upload.dart';
-import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -63,7 +62,6 @@ class TripScreen extends StatefulWidget {
 
 class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final AppStore _appStore = StoreProvider().appStore;
 
   bool _uploading = false;
   Trip _trip;
@@ -138,6 +136,7 @@ class TripScreenState extends State<TripScreen> {
     _scaffoldKey.currentState.showSnackBar(
       SnackBar(content: Text('Uploading Trip...'), duration: Duration(minutes: 20)),
     );
+
     setState(() {
       _uploading = true;
     });
@@ -145,7 +144,7 @@ class TripScreenState extends State<TripScreen> {
     final data = TripUploadData(
       imei: await ImeiPlugin.getImei(),
       trip: trip,
-      userProfile: _appStore.profile,
+      userProfile: AppData.profile,
     );
 
     String snackBarMessage;
@@ -155,7 +154,7 @@ class TripScreenState extends State<TripScreen> {
       await _tripRepo.store(trip.copyWith(isUploaded: true));
 
       print('Trip uploaded');
-      snackBarMessage = 'Trip upload complete';
+      snackBarMessage = 'Trip upload complete.';
     } catch (e) {
       snackBarMessage = 'Trip upload failed.\n' + e.toString();
       print('Error:');
@@ -170,7 +169,7 @@ class TripScreenState extends State<TripScreen> {
     });
   }
 
-  Text get title {
+  Text get _title {
     String text;
     text = isActiveTrip ? 'Active Trip' : 'Completed Trip';
 
@@ -182,6 +181,7 @@ class TripScreenState extends State<TripScreen> {
 
   Widget _groupedHaulsList() {
     return GroupedHaulsList(
+      isActiveTrip: isActiveTrip,
       hauls: _trip.hauls.reversed.toList(),
       onPressHaulItem: (int id, int index) async {
         await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
@@ -210,7 +210,7 @@ class TripScreenState extends State<TripScreen> {
         final mainButton = isActiveTrip ? Container() : uploadButton(_trip);
         return Scaffold(
           key: _scaffoldKey,
-          appBar: AppBar(title: title),
+          appBar: AppBar(title: _title),
           body: Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,14 +218,7 @@ class TripScreenState extends State<TripScreen> {
                 _buildTripInfo(_trip),
                 Expanded(
                   child: _trip.hauls.length > 0
-                      ? GroupedHaulsList(
-                    isActiveTrip: isActiveTrip,
-                          hauls: _trip.hauls.reversed.toList(),
-                          onPressHaulItem: (int id, int index) async {
-                            await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
-                            setState(() {});
-                          },
-                        )
+                      ? _groupedHaulsList()
                       : noHauls,
                 ),
                 mainButton

@@ -409,19 +409,12 @@ packages:
     source: hosted
     version: "0.9.6+3"
   mobx:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: mobx
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.10"
-  mobx_codegen:
-    dependency: "direct dev"
-    description:
-      name: mobx_codegen
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.11"
   node_interop:
     dependency: transitive
     description:
@@ -625,13 +618,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  source_gen:
-    dependency: transitive
-    description:
-      name: source_gen
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.9.5"
   source_span:
     dependency: transitive
     description:

@@ -7,7 +7,7 @@ abstract class DatabaseRepository<T extends Model> {
   final database = DatabaseProvider().database;
 
   // Override this to specify table name
-  var tableName;
+  String tableName;
 
   /// Get all items from the database.
   Future<List<T>> all({String where}) async {

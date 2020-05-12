@@ -37,7 +37,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
-  final geolocator = Geolocator();
+  final _geolocator = Geolocator();
 
   final TextEditingController _weightController;
   final TextEditingController _lengthController;
@@ -137,7 +137,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     } else {
       showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
       // TODO get from location provider
-      var position = await geolocator.getCurrentPosition();
+      var position = await _geolocator.getCurrentPosition();
       _scaffoldKey.currentState.hideCurrentSnackBar();
 
       final landing = Landing(
@@ -164,6 +164,50 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     }
   }
 
+  String _validateIndividuals(String value) {
+    if (value.isEmpty) {
+      return 'Please enter number of individuals';
+    }
+
+    // check if valid float
+    if (int.tryParse(value) == null) {
+      return 'Please enter a valid number of individuals';
+    }
+    return null;
+  }
+
+  String _validateWeight(String value) {
+    if (value.isEmpty) {
+      return 'Please enter a weight';
+    }
+
+    // check if valid float
+    if (double.tryParse(value) == null) {
+      return 'Please enter a valid weight';
+    }
+
+    if (double.tryParse(value) == 0) {
+      return 'The weight may not be 0';
+    }
+    return null;
+  }
+
+  String _validateLength(String value) {
+    if (value.isEmpty) {
+      return 'Please enter a length';
+    }
+
+    // check if valid float
+    if (double.tryParse(value) == null) {
+      return 'Please enter a valid length';
+    }
+
+    if (double.tryParse(value) == 0) {
+      return 'The length may not be 0';
+    }
+    return null;
+  }
+
   Widget _individualsTextInput() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 15),
@@ -181,17 +225,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
             style: TextStyle(fontSize: 30),
             keyboardType: TextInputType.number,
             controller: _individualsController,
-            validator: (value) {
-              if (value.isEmpty) {
-                return 'Please enter number of individuals';
-              }
-
-              // check if valid float
-              if (int.tryParse(value) == null) {
-                return 'Please enter a valid number of individuals';
-              }
-              return null;
-            },
+            validator: _validateIndividuals,
           ),
         ],
       ),
@@ -234,6 +268,60 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     );
   }
 
+  Widget _weightInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.only(bottom: 15),
+          child: Text(
+            _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
+            style: textFieldTextStyle,
+          ),
+        ),
+        TextFormField(
+          style: TextStyle(fontSize: 30),
+          keyboardType: TextInputType.number,
+          controller: _weightController,
+          validator: _validateWeight,
+        ),
+      ],
+    );
+  }
+
+  Widget _lengthInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.only(bottom: 15),
+          child: Text(
+            _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
+            style: textFieldTextStyle,
+          ),
+        ),
+        TextFormField(
+          style: TextStyle(fontSize: 30),
+          keyboardType: TextInputType.number,
+          controller: _lengthController,
+          validator: _validateLength,
+        ),
+      ],
+    );
+  }
+
+  Widget _saveStripButton() {
+    return StripButton(
+      icon: Icon(
+        Icons.save,
+        color: Colors.white,
+      ),
+      labelText: 'Save',
+      color: Colors.green,
+      onPressed: () async => await _onPressSaveButton(haul, context),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final String titleText = widget.landingArg == null ? _bulkMode ? 'Add Bulk' : 'Add Species' : 'Edit Species';
@@ -261,67 +349,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                     // Weight
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 5),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(bottom: 15),
-                            child: Text(
-                              _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
-                              style: textFieldTextStyle,
-                            ),
-                          ),
-                          TextFormField(
-                            style: TextStyle(fontSize: 30),
-                            keyboardType: TextInputType.number,
-                            controller: _weightController,
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter a weight';
-                              }
-
-                              // check if valid float
-                              if (double.tryParse(value) == null) {
-                                return 'Please enter a valid weight';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
+                      child: _weightInput(),
                     ),
 
                     // Length
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(bottom: 15),
-                            child: Text(
-                              _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
-                              style: textFieldTextStyle,
-                            ),
-                          ),
-                          TextFormField(
-                            style: TextStyle(fontSize: 30),
-                            keyboardType: TextInputType.number,
-                            controller: _lengthController,
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter a length';
-                              }
-
-                              // check if valid float
-                              if (double.tryParse(value) == null) {
-                                return 'Please enter a valid length';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
+                      child: _lengthInput(),
                     ),
 
                     // Individuals
@@ -331,15 +365,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
               ),
             ),
           ),
-          StripButton(
-            icon: Icon(
-              Icons.save,
-              color: Colors.white,
-            ),
-            labelText: 'Save',
-            color: Colors.green,
-            onPressed: () async => await _onPressSaveButton(haul, context),
-          ),
+          _saveStripButton(),
         ],
       ),
     );

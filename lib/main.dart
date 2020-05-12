@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/background_fetch.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/util.dart';
@@ -15,7 +16,6 @@ import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/providers/dio.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
-import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/providers/user_prefs.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/screens/about.dart';
@@ -33,13 +33,9 @@ import 'package:oltrace/screens/splash.dart';
 import 'package:oltrace/screens/trip.dart';
 import 'package:oltrace/screens/trip_history.dart';
 import 'package:oltrace/screens/welcome.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:package_info/package_info.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:background_fetch/background_fetch.dart';
-
-/// MobX [Store] holds the global ephemeral state.
-final AppStore _appStore = StoreProvider().appStore;
 
 /// A connection to SQLite through sqlflite.
 Database _database;
@@ -94,7 +90,7 @@ Future<void> boot() async {
 }
 
 /// Run things once the app has started and the splash screen is showing.
-Future<AppStore> _initApp() async {
+Future<void> _initApp() async {
   UserPrefsProvider().init();
 
   await requestPhonecallPermission();
@@ -104,12 +100,11 @@ Future<AppStore> _initApp() async {
   final migrator = Migrator(_database, AppConfig.migrations);
   await migrator.run(AppConfig.RESET_DATABASE);
 
-
   // Dio HTTP client
   DioProvider().init();
 
   // Get the app version and some other info
-  _appStore.packageInfo = await PackageInfo.fromPlatform();
+  AppData.packageInfo = await PackageInfo.fromPlatform();
 
   // Prompt for location access until the user accepts.
   while (await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
@@ -117,32 +112,18 @@ Future<AppStore> _initApp() async {
     _locationProvider.startListening();
   }
 
-  await initBackgroundFetch();
+  await _initBackgroundFetch();
 
   // Restore persisted data into app state
-  return await _restoreState();
-}
-
-Future<void> initBackgroundFetch() async {
-  final config = BackgroundFetchConfig(
-    minimumFetchInterval: 15,
-    enableHeadless: true,
-    requiredNetworkType: NetworkType.ANY,
-    stopOnTerminate: false,
-    startOnBoot: true,
-  );
-  final int status = await BackgroundFetch.configure(config, backgroundFetchCallback);
-  print('BackgroundFetch configured status:$status');
-}
-
-/// Restore the saved state from the database and elsewhere.
-Future<AppStore> _restoreState() async {
-  // Profile
   final Map profile = await _jsonRepo.get('profile');
   if (profile != null) {
-    _appStore.profile = Profile.fromMap(profile);
+    AppData.profile = Profile.fromMap(profile);
   }
-  return _appStore;
+}
+
+Future<void> _initBackgroundFetch() async {
+  final int status = await BackgroundFetch.configure(AppConfig.backgroundFetchConfig, backgroundFetchCallback);
+  print('BackgroundFetch configured status:$status');
 }
 
 /// The main widget of the app
@@ -168,14 +149,14 @@ class OlTraceAppState extends State<OlTraceApp> {
     super.initState();
     final stopwatch = Stopwatch()..start();
     // Do startup logic
-    _initApp().then((AppStore appStore) async {
+    _initApp().then((_) async {
       print('App init in ${stopwatch.elapsed}');
 
       // Delay to show logos
       if (!AppConfig.debugMode) await Future.delayed(Duration(seconds: 5) - stopwatch.elapsed);
 
       // If profile is not already setup, show welcome screen
-      await _navigatorKey.currentState.pushReplacementNamed(appStore.profileConfigured ? '/' : '/welcome');
+      await _navigatorKey.currentState.pushReplacementNamed(AppData.profile == null ? '/' : '/welcome');
     });
   }
 
@@ -199,7 +180,7 @@ class OlTraceAppState extends State<OlTraceApp> {
               return AboutScreen();
 
             case '/trip':
-              final Trip trip = settings.arguments;
+              final Trip trip = settings.arguments as Trip;
 
               return TripScreen(tripId: trip.id);
 
@@ -236,11 +217,11 @@ class OlTraceAppState extends State<OlTraceApp> {
               return LandingScreen(landingId: landingId, listIndex: listIndex);
 
             case '/create_landing':
-              final Haul haul = settings.arguments;
+              final Haul haul = settings.arguments as Haul;
               return LandingFormScreen(haulArg: haul);
 
             case '/edit_landing':
-              final Landing landing = settings.arguments;
+              final Landing landing = settings.arguments as Landing;
               return LandingFormScreen(landingArg: landing);
 
             case '/create_product':
@@ -248,7 +229,7 @@ class OlTraceAppState extends State<OlTraceApp> {
               assert(args.containsKey('landings'));
               assert(args.containsKey('haul'));
               final List<Landing> sourceLandings = args['landings'] as List<Landing>;
-              final Haul sourceHaul = args['haul'];
+              final Haul sourceHaul = args['haul'] as Haul;
 
               return CreateProductScreen(
                 initialSourceLandings: sourceLandings,
@@ -270,7 +251,7 @@ class OlTraceAppState extends State<OlTraceApp> {
               return DiagnosticsScreen();
 
             default:
-              throw ('No such route: ${settings.name}');
+              throw 'No such route: ${settings.name}';
           }
         });
       },

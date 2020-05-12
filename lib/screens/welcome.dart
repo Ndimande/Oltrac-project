@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/data/countries.dart';
 import 'package:oltrace/data/fishery_types.dart';
 import 'package:oltrace/framework/util.dart';
@@ -8,8 +9,7 @@ import 'package:oltrace/models/country.dart';
 import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/skipper.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:uuid/uuid.dart';
@@ -21,8 +21,6 @@ final TextStyle _sectionHeadingTextStyle = TextStyle(
 );
 
 class WelcomeScreen extends StatefulWidget {
-  final AppStore _appStore = StoreProvider().appStore;
-
   @override
   State<StatefulWidget> createState() => WelcomeScreenState();
 }
@@ -49,7 +47,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         label: 'Country',
         labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
         selected: _selectedCountry,
-        onChanged: (_country) => setState(() => _selectedCountry = _country),
+        onChanged: (Country _country) => setState(() => _selectedCountry = _country),
         items: countries.map<DropdownMenuItem<Country>>((Country country) {
           return DropdownMenuItem<Country>(
             value: country,
@@ -65,14 +63,14 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            child: Image(
+            child: const Image(
               image: AssetImage('assets/images/olsps-logo.png'),
               width: 100,
             ),
             alignment: Alignment.topRight,
           ),
           Container(
-            padding: EdgeInsets.only(left: 15),
+            padding: const EdgeInsets.only(left: 15),
             child: Text(
               'General',
               style: _sectionHeadingTextStyle,
@@ -80,20 +78,18 @@ class WelcomeScreenState extends State<WelcomeScreen> {
           ),
           // Country
           Container(
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             child: _countryDropdown(),
           ),
 
-          // todo State / Province
-
           // Fishery
           Container(
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             child: ModelDropdown(
               label: 'Fishery',
               labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[600]),
               selected: _selectedFisheryType,
-              onChanged: (_fishery) {
+              onChanged: (FisheryType _fishery) {
                 setState(() => _selectedFisheryType = _fishery);
               },
               items: fisheries
@@ -109,8 +105,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
           // Vessel
           Container(
-            padding: EdgeInsets.all(15),
-            margin: EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.all(15),
+            margin: const EdgeInsets.symmetric(vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -126,8 +122,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
           // Skipper
           Container(
-            padding: EdgeInsets.all(15),
-            margin: EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.all(15),
+            margin: const EdgeInsets.symmetric(vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -153,7 +149,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _vesselNameFocusNode.unfocus();
         FocusScope.of(context).requestFocus(_vesselIdFocusNode);
       },
-      validator: (value) {
+      validator: (String value) {
         if (value.isEmpty) {
           return 'Please enter a vessel name.';
         }
@@ -171,7 +167,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _vesselIdFocusNode.unfocus();
         FocusScope.of(context).requestFocus(_skipperFirstNameFocusNode);
       },
-      validator: (value) {
+      validator: (String value) {
         if (value.isEmpty) {
           return 'Please enter a vessel ID.';
         }
@@ -189,7 +185,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _skipperFirstNameFocusNode.unfocus();
         FocusScope.of(context).requestFocus(_skipperLastNameFocusNode);
       },
-      validator: (value) {
+      validator: (String value) {
         if (value.isEmpty) {
           return 'Please enter a skipper first name.';
         }
@@ -208,7 +204,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _skipperLastNameFocusNode.unfocus();
         await _onPressSave(context);
       },
-      validator: (value) {
+      validator: (String value) {
         if (value.isEmpty) {
           return 'Please enter a skipper last name.';
         }
@@ -265,11 +261,12 @@ class WelcomeScreenState extends State<WelcomeScreen> {
       uuid: Uuid().v4(),
     );
 
-    await widget._appStore.saveProfile(profile);
+    AppData.profile = profile;
+    await JsonRepository().set('profile', profile);
 
     showTextSnackBar(_scaffoldKey, 'Profile saved');
     // Give them time to see the SnackBar
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
 
     await Navigator.pushReplacementNamed(context, '/');
   }
@@ -278,7 +275,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign Up'),
+        title: const Text('Sign Up'),
         centerTitle: true,
       ),
       key: _scaffoldKey,
@@ -286,7 +283,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: _buildForm(),
             ),
           ),
@@ -310,8 +307,8 @@ Widget _welcomeTextFormField({
   String helperText,
   FocusNode focusNode,
   TextInputAction textInputAction = TextInputAction.next,
-  Function onFieldSubmitted,
-  Function validator,
+  void Function(String) onFieldSubmitted,
+  String Function(String) validator,
 }) {
   return Container(
     child: TextFormField(
@@ -320,7 +317,7 @@ Widget _welcomeTextFormField({
       textCapitalization: TextCapitalization.words,
       autocorrect: false,
       textInputAction: textInputAction,
-      style: TextStyle(fontSize: 30),
+      style: const TextStyle(fontSize: 30),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),

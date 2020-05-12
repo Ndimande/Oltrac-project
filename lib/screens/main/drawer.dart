@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/models/profile.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
 
 final double _drawerItemFontSize = 22;
 const double drawerLabelFontSize = 20;
@@ -77,7 +76,6 @@ Widget _drawerHeader(Profile profile) {
 }
 
 class MainDrawer extends StatelessWidget {
-  final AppStore _appStore = StoreProvider().appStore;
 
   Widget _listTile({IconData iconData, String text, Function onTap}) {
     return Builder(
@@ -109,7 +107,7 @@ class MainDrawer extends StatelessWidget {
           // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: <Widget>[
-            _drawerHeader(_appStore.profile),
+            _drawerHeader(AppData.profile),
             Divider(
               color: OlracColours.olspsBlue,
               height: 0,

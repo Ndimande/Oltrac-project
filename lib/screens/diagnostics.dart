@@ -4,16 +4,15 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/framework/migrator.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
-import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:oltrace/widgets/info_table.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -40,7 +39,6 @@ class DiagnosticsScreen extends StatefulWidget {
 }
 
 class DiagnosticsScreenState extends State<DiagnosticsScreen> {
-  final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Profile _profile;
   int _backgroundFetchStatus;
@@ -48,11 +46,10 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
   Widget _version() => Container(
       margin: EdgeInsets.only(top: 10),
       child: Text(
-          AppConfig.APP_TITLE + ' ' + _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber));
+          AppConfig.APP_TITLE + ' ' + AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber));
 
   Future _resetDatabase() async {
-    await widget.sharedPreferences.remove('darkMode');
-    await widget.sharedPreferences.remove('allowMobileData');
+    await widget.sharedPreferences.remove('mobileData');
     await widget.sharedPreferences.remove('uploadAutomatically');
     await widget.sharedPreferences.remove('fishingMethod');
     final Database database = DatabaseProvider().database;
@@ -78,15 +75,13 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
   }
 
   Widget _sharedPrefs() {
-    final String darkMode = widget.sharedPreferences.getBool('darkMode').toString();
-    final String allowMobileData = widget.sharedPreferences.getBool('allowMobileData').toString();
+    final String mobileData = widget.sharedPreferences.getBool('mobileData').toString();
     final String uploadAutomatically = widget.sharedPreferences.getBool('uploadAutomatically').toString();
     final String fishingMethod = widget.sharedPreferences.getString('fishingMethod').toString();
     return InfoTable(
       title: 'SharedPrefs',
       data: [
-        ['darkMode', darkMode],
-        ['allowMobileData', allowMobileData],
+        ['mobileData', mobileData],
         ['uploadAutomatically', uploadAutomatically],
         ['fishingMethod', fishingMethod],
       ],

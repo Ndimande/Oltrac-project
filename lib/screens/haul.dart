@@ -243,14 +243,16 @@ class HaulScreenState extends State<HaulScreen> {
       child: Container(
         child: Column(
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
-                if (_selectedLandings.isNotEmpty) _clearSelectedButton(),
-                if (_products.length != 0 && _selectedLandings.isEmpty) _toggleListButton(),
-              ],
+            Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
+                  if (_selectedLandings.isNotEmpty) _clearSelectedButton(),
+                  if (_products.length != 0 && _selectedLandings.isEmpty) _toggleListButton(),
+                ],
+              ),
             ),
             _showProductList ? _productList() : _landingsList(landings),
           ],
@@ -364,7 +366,7 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _listsLabel(String text) {
     return Container(
-      padding: EdgeInsets.only(left: 10, top: 10),
+      padding: EdgeInsets.only(left: 10),
       alignment: Alignment.centerLeft,
       child: Text(
         text,

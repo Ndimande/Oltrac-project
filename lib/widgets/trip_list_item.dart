@@ -7,9 +7,9 @@ import 'package:oltrace/widgets/numbered_boat.dart';
 
 class TripListItem extends StatelessWidget {
   final Trip _trip;
-  final Function onPressed;
+  final VoidCallback onPressed;
 
-  TripListItem(this._trip, this.onPressed);
+  const TripListItem(this._trip, this.onPressed);
 
   String _haulsText(int length) {
     String text;
@@ -27,7 +27,7 @@ class TripListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlatButton(
       child: ListTile(
-        contentPadding: EdgeInsets.all(0),
+        contentPadding: const EdgeInsets.all(0),
         leading: NumberedBoat(
           color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
           number: _trip.id,

@@ -1,13 +1,12 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:imei_plugin/imei_plugin.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/trip_upload.dart';
-import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/providers/user_prefs.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/stores/app_store.dart';
 
 // Todo: Headless uploads
 Future<void> backgroundFetchHeadlessTask(String taskId) async {
@@ -42,7 +41,6 @@ Future<void> _uploadCompletedTrips() async {
     return;
   }
 
-  final AppStore appStore = StoreProvider().appStore;
   final tripRepo = TripRepository();
 
   // Get completed Trips that have not been uploaded
@@ -58,7 +56,7 @@ Future<void> _uploadCompletedTrips() async {
     final data = TripUploadData(
       imei: await ImeiPlugin.getImei(),
       trip: tripToUpload,
-      userProfile: appStore.profile,
+      userProfile: AppData.profile,
     );
 
     await DdmApi.uploadTrip(data);

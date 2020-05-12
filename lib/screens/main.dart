@@ -1,3 +1,5 @@
+import 'package:connectivity/connectivity.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/fishing_methods.dart';
@@ -247,8 +249,8 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _onPressEndTrip(bool hasActiveHaul) async {
-    if (hasActiveHaul) {
+  Future<void> _onPressEndTrip() async {
+    if (activeHaul != null) {
       _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('You must first end hauling/fishing')));
       return;
     }
@@ -265,7 +267,17 @@ class MainScreenState extends State<MainScreen> {
       await _tripRepo.store(endedTrip);
 
       if (widget.userPrefs.uploadAutomatically) {
-        await TripUploadService.uploadTrip(endedTrip);
+        try {
+          final connectivity = await Connectivity().checkConnectivity();
+          if (connectivity != ConnectivityResult.none) {
+            await TripUploadService.uploadTrip(endedTrip);
+          } else {
+            print('No internet connection. Trip must be uploaded later');
+          }
+        } on DioError catch (e){
+          print('Upload Failed');
+          print(e.error);
+        }
       }
       showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} ended');
 
@@ -303,18 +315,8 @@ class MainScreenState extends State<MainScreen> {
 
   Widget _appBar() {
     return AppBar(
-      actions: <Widget>[
-        _appBarDate,
-        if (activeTrip != null && activeTrip.hauls.isNotEmpty) _masterContainerButton(),
-      ],
+      actions: <Widget>[_appBarDate],
       title: _appBarTitle(),
-    );
-  }
-
-  Widget _masterContainerButton() {
-    return IconButton(
-      icon: Icon(Icons.inbox),
-      onPressed: _onPressMasterContainerButton,
     );
   }
 
@@ -392,7 +394,7 @@ class MainScreenState extends State<MainScreen> {
             TripSection(
               trip: activeTrip,
               hasActiveHaul: activeHaul != null,
-              onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
+              onPressEndTrip: () async => await _onPressEndTrip(),
               onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
               onPressEditTrip: _onPressEditTrip,
               onPressMasterContainerButton: () async => await _onPressMasterContainerButton(),

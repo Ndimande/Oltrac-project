@@ -4,8 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/app_data.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -14,14 +14,13 @@ class AboutScreen extends StatefulWidget {
 }
 
 class _AboutScreenState extends State<AboutScreen> {
-  final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer _longPressTimer;
   bool _backButtonBeingPressed = false;
   int _backButtonLongPressedSeconds = 0;
   Color _backButtonColor = OlracColours.olspsBlue;
 
-  String get _version => _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber;
+  String get _version => AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber;
 
   @override
   void initState() {
