@@ -20,7 +20,12 @@ Future<Map> _load() async {
 }
 
 
-class TripHistoryScreen extends StatelessWidget {
+class TripHistoryScreen extends StatefulWidget {
+  @override
+  _TripHistoryScreenState createState() => _TripHistoryScreenState();
+}
+
+class _TripHistoryScreenState extends State<TripHistoryScreen> {
   List<Trip> _completedTrips;
 
   Widget _buildBottomSection() {

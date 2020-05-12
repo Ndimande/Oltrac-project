@@ -54,7 +54,7 @@ class MasterContainer extends Model {
     return {
       'id': id,
       'tagCode': tagCode,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
       'location': location.toMap(),
       'products': products,
       'tripId': tripId,

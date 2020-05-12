@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/profile.dart';
 
 @immutable
@@ -21,7 +22,10 @@ class Trip extends Model {
   /// GPS End Location
   final Location endLocation;
 
+  /// Has the trip been uploaded?
   final bool isUploaded;
+
+  final List<MasterContainer> masterContainers;
 
   const Trip({
     id,
@@ -31,6 +35,7 @@ class Trip extends Model {
     @required this.startLocation,
     this.endLocation,
     this.isUploaded = false,
+    this.masterContainers = const [],
   }) : super(id: id);
 
   Trip.fromMap(Map data)
@@ -40,36 +45,42 @@ class Trip extends Model {
         startLocation = Location.fromMap(data['startLocation']),
         endLocation = Location.fromMap(data['endLocation']),
         isUploaded = data['isUploaded'],
+        masterContainers = (data['masterContainers'] as List).map((mc) => MasterContainer.fromMap(mc)).toList(),
         super.fromMap(data);
 
-  Trip copyWith(
-      {int id,
-      Profile vessel,
-      DateTime startedAt,
-      DateTime endedAt,
-      List<Haul> hauls,
-      Location startLocation,
-      Location endLocation,
-      bool isUploaded}) {
+  Trip copyWith({
+    int id,
+    Profile vessel,
+    DateTime startedAt,
+    DateTime endedAt,
+    List<Haul> hauls,
+    Location startLocation,
+    Location endLocation,
+    bool isUploaded,
+    List<MasterContainer> masterContainers,
+  }) {
     return Trip(
-        id: id ?? this.id,
-        startedAt: startedAt ?? this.startedAt,
-        endedAt: endedAt ?? this.endedAt,
-        hauls: hauls ?? this.hauls,
-        startLocation: startLocation ?? this.startLocation,
-        endLocation: endLocation ?? this.endLocation,
-        isUploaded: isUploaded ?? this.isUploaded);
+      id: id ?? this.id,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      hauls: hauls ?? this.hauls,
+      startLocation: startLocation ?? this.startLocation,
+      endLocation: endLocation ?? this.endLocation,
+      isUploaded: isUploaded ?? this.isUploaded,
+      masterContainers: masterContainers ?? this.masterContainers,
+    );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
-      'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
+      'startedAt': startedAt == null ? null : startedAt.toUtc().toIso8601String(),
+      'endedAt': endedAt == null ? null : endedAt.toUtc().toIso8601String(),
       'hauls': hauls.map((Haul haul) => haul.toMap()).toList(),
       'startLocation': startLocation.toMap(),
       'endLocation': endLocation?.toMap(),
       'isUploaded': isUploaded,
+      'masterContainers': masterContainers.map((MasterContainer mc) => mc.toMap()).toList(),
     };
   }
 }

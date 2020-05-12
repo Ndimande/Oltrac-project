@@ -8,12 +8,14 @@ class SvgIcon extends StatelessWidget {
   final double width;
   final double height;
   final bool darker;
+  final Color color;
 
   SvgIcon({
     @required this.assetPath,
     this.width = 64,
     this.height = 64,
     this.darker = false,
+    this.color = OlracColours.olspsBlue,
   });
 
   Widget _notFound() {
@@ -41,10 +43,6 @@ class SvgIcon extends StatelessWidget {
     if (assetPath == null) {
       return _notFound();
     }
-    final Color color = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : darker ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue;
-
     return SvgPicture.asset(
       assetPath,
       width: width,

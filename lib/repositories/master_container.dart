@@ -2,9 +2,22 @@ import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
+import 'package:oltrace/repositories/product.dart';
 
 class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
   var tableName = 'master_containers';
+
+
+  Future<List<MasterContainer>> forTrip(int tripId) async {
+    final List<MasterContainer> mcs = await MasterContainerRepository().all(where: 'trip_id = $tripId');
+    final List<MasterContainer> updatedMcs = [];
+    for (final MasterContainer mc in mcs) {
+      final List<Product> mcProducts = await ProductRepository().forMasterContainer(mc.id);
+      final updatedMc = mc.copyWith(products: mcProducts);
+      updatedMcs.add(updatedMc);
+    }
+    return updatedMcs;
+  }
 
   @override
   Future<int> store(MasterContainer masterContainer) async {

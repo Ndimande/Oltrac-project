@@ -145,7 +145,7 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
       await _haulRepo.store(endedHaul);
-      showTextSnackBar(_scaffoldKey, 'Haul was ended', duration: Duration(seconds: 1));
+      showTextSnackBar(_scaffoldKey, 'Haul ended', duration: Duration(seconds: 1));
       setState(() {});
     }
   }

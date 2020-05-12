@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
-import 'package:oltrace/app_config.dart';
-import 'package:oltrace/providers/shared_preferences.dart';
 
 class ModelDropdown<T> extends StatelessWidget {
-  final sharedPrefs = SharedPreferencesProvider().sharedPreferences;
-
   final T selected;
 
   final Function onChanged;
@@ -29,8 +25,6 @@ class ModelDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool darkMode =
-        sharedPrefs.getBool('darkMode') ?? AppConfig.defaultUserSettings['darkMode'];
 
     return Container(
       child: Column(
@@ -46,7 +40,7 @@ class ModelDropdown<T> extends StatelessWidget {
               style: TextStyle(fontSize: 22),
             ),
             isExpanded: true,
-            style: TextStyle(fontSize: 22, color: darkMode ? Colors.white : Colors.black),
+            style: TextStyle(fontSize: 22, color: Colors.black),
             value: selected,
             onChanged: onChanged,
             items: items,

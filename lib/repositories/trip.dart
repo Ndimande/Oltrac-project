@@ -1,8 +1,11 @@
 import 'package:oltrace/framework/database_repository.dart';
+import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/haul.dart';
+import 'package:oltrace/repositories/master_container.dart';
 
 class TripRepository extends DatabaseRepository<Trip> {
   /// The name of the database table
@@ -35,20 +38,11 @@ class TripRepository extends DatabaseRepository<Trip> {
 
   /// Get all trips in the database with hauls.
   Future<List<Trip>> all({String where}) async {
-    final List<Map<String, dynamic>> tripResults = await _database.query(tableName);
+    final List<Map<String, dynamic>> tripResults = await _database.query(tableName, where: where);
 
-    final trips =
-        tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
+    final trips = tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
 
-    final tripsWithHaulsFutures = trips.map((trip) async {
-      final haulResults = await _database.query('hauls', where: 'trip_id = ${trip.id}');
-
-      final hauls =
-          haulResults.map((Map result) => HaulRepository().fromDatabaseMap(result)).toList();
-      return trip.copyWith(hauls: hauls);
-    }).toList();
-
-    return Future.wait(tripsWithHaulsFutures);
+    return Future.wait(trips.map((Trip trip) => _withNested(trip)).toList());
   }
 
   /// Get the active Trip. The active trip is the trip
@@ -71,7 +65,6 @@ class TripRepository extends DatabaseRepository<Trip> {
     for (Map result in results) {
       trips.add(fromDatabaseMap(result));
     }
-
 
     return trips;
   }
@@ -109,5 +102,15 @@ class TripRepository extends DatabaseRepository<Trip> {
       'end_longitude': trip.endLocation?.longitude,
       'is_uploaded': trip.isUploaded
     };
+  }
+
+
+  Future<Trip> _withNested(Trip trip) async {
+    final List<Haul> hauls = await HaulRepository().forTripId(trip.id);
+    final List<MasterContainer> masterContainers = await MasterContainerRepository().forTrip(trip.id);
+    return trip.copyWith(
+      hauls:   hauls,
+      masterContainers: masterContainers,
+    );
   }
 }

@@ -1,22 +1,16 @@
-import 'dart:convert';
-import 'dart:io';
+import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
-import 'package:oltrace/framework/util.dart' as util;
 
-import 'package:dio/adapter.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:oltrace/app_config.dart';
+import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
+import 'package:oltrace/models/trip_upload.dart';
 import 'package:oltrace/providers/store.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
-import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/stores/app_store.dart';
@@ -29,8 +23,6 @@ final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
 final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
-final _masterContainerRepo = MasterContainerRepository();
-
 
 Future<Trip> _getWithNested(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
@@ -59,7 +51,6 @@ Future<Map<String, dynamic>> _load(int tripId) async {
 }
 
 class TripScreen extends StatefulWidget {
-  final Dio dio = Dio();
   final int tripId;
 
   TripScreen({this.tripId});
@@ -74,8 +65,7 @@ class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final AppStore _appStore = StoreProvider().appStore;
 
-  Dio dio = Dio();
-  bool uploading = false;
+  bool _uploading = false;
   Trip _trip;
   bool isActiveTrip;
 
@@ -88,6 +78,7 @@ class TripScreenState extends State<TripScreen> {
         children: <Widget>[
           NumberedBoat(
             number: trip.id,
+            color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
           ),
           SizedBox(width: 15),
           Expanded(
@@ -107,10 +98,8 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
-  Widget get noHauls => Container(
-        alignment: Alignment.center,
-        child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
-      );
+  Widget get noHauls =>
+      Container(alignment: Alignment.center, child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)));
 
   Widget uploadButton(Trip trip) {
     final label = trip.isUploaded ? 'Uploaded' : 'Upload Trip';
@@ -127,97 +116,79 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
+  /// Upload the trip to the DDM.
   Future<void> onPressUpload(Trip trip) async {
     print('Uploading trip');
 
     // You may not upload active trip
     assert(!isActiveTrip);
 
-    if (uploading) {
+    if (_uploading) {
       print('Already uploading');
       return;
     }
 
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        content: Text('Uploading Trip...'),
-        duration: Duration(minutes: 20), // keep open
-      ),
-    );
-
-    final Map tripMap = trip.toMap();
-    final List<MasterContainer> mcs = await _masterContainerRepo.all();
-    final List<MasterContainer> updatedMcs = [];
-    for(final MasterContainer mc in mcs) {
-      final List<Product> mcProducts = await ProductRepository().forMasterContainer(mc.id);
-      final updatedMc = mc.copyWith(products: mcProducts);
-      updatedMcs.add(updatedMc);
+    if (trip.isUploaded) {
+      print('Trip was already uploaded');
+      // Refresh so user can see
+      setState(() {});
+      return;
     }
 
-    tripMap['masterContainers'] = updatedMcs.map((MasterContainer mc) => mc.toMap()).toList().map((Map item) {
-
-      final List<Product> productsList = item['products'];
-      final List<Map<String,String>> tagCodes = productsList.map((Product e) => {'tagCode':e.tagCode}).toList();
-      item['products'] = tagCodes;
-      return item;
-    }).toList();
-
-    final Map<String, dynamic> data = {
-      'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
-      'json': {
-        'trip': tripMap,
-        'user': _appStore.profile.toMap(),
-      }
-    };
-
-    print('Data:');
-
-    util.printWrapped(jsonEncode(data['json']['trip']));
-
+    _scaffoldKey.currentState.showSnackBar(
+      SnackBar(content: Text('Uploading Trip...'), duration: Duration(minutes: 20)),
+    );
     setState(() {
-      uploading = true;
+      _uploading = true;
     });
+
+    final data = TripUploadData(
+      imei: await ImeiPlugin.getImei(),
+      trip: trip,
+      userProfile: _appStore.profile,
+    );
+
+    String snackBarMessage;
     try {
-      // Accept self signed cert
-      (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client) {
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-        return client;
-      };
-      final String json = jsonEncode(data);
-      Response response = await dio.post(
-        AppConfig.TRIP_UPLOAD_URL,
-        data: json,
-        options: RequestOptions(headers: {'Content-Type': 'application/json'}),
-      );
-      print('Response:');
-      print(response.toString());
+      await DdmApi.uploadTrip(data);
 
       await _tripRepo.store(trip.copyWith(isUploaded: true));
 
       print('Trip uploaded');
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Trip upload complete'),
-        ),
-      );
+      snackBarMessage = 'Trip upload complete';
     } catch (e) {
+      snackBarMessage = 'Trip upload failed.\n' + e.toString();
       print('Error:');
       print(e.toString());
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text('Trip upload failed.\n' + e.toString()),
-        ),
-      );
     }
 
+    _scaffoldKey.currentState.hideCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(snackBarMessage)));
+
     setState(() {
-      uploading = false;
+      _uploading = false;
     });
   }
 
-  Text get title => Text(isActiveTrip ? 'Active Trip' : 'Completed Trip');
+  Text get title {
+    String text;
+    text = isActiveTrip ? 'Active Trip' : 'Completed Trip';
+
+    if (_trip.isUploaded) {
+      text += ' (Uploaded)';
+    }
+    return Text(text);
+  }
+
+  Widget _groupedHaulsList() {
+    return GroupedHaulsList(
+      hauls: _trip.hauls.reversed.toList(),
+      onPressHaulItem: (int id, int index) async {
+        await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
+        setState(() {});
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

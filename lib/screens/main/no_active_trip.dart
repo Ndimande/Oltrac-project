@@ -5,11 +5,13 @@ import 'package:oltrace/widgets/trip_list_item.dart';
 
 class NoActiveTrip extends StatelessWidget {
   final Function onPressStartTrip;
+  final Function onPressCompletedTrip;
   final List<Trip> completedTrips;
 
-  NoActiveTrip({@required this.completedTrips, @required this.onPressStartTrip})
+  NoActiveTrip({@required this.completedTrips, @required this.onPressStartTrip, @required this.onPressCompletedTrip})
       : assert(completedTrips != null),
-        assert(onPressStartTrip != null);
+        assert(onPressStartTrip != null),
+        assert(onPressCompletedTrip != null);
 
   Widget _completedTripList() {
     final List reversedCompletedTrips = completedTrips.reversed.toList();
@@ -26,9 +28,8 @@ class NoActiveTrip extends StatelessWidget {
     return ListView.builder(
       itemCount: reversedCompletedTrips.length,
       itemBuilder: (context, index) {
-        return TripListItem(reversedCompletedTrips[index], () async {
-          await Navigator.pushNamed(context, '/trip', arguments: reversedCompletedTrips[index]);
-        });
+        return TripListItem(
+            reversedCompletedTrips[index], () async => await onPressCompletedTrip(reversedCompletedTrips[index]));
       },
     );
   }
