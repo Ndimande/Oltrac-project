@@ -66,6 +66,7 @@ class HaulInfo extends StatelessWidget {
             dateTime: haul.startedAt,
             location: haul.startLocation,
           ),
+          SizedBox(height: 10),
           !isActiveHaul ? TimeSpace(label: 'Ended ', dateTime: haul.endedAt, location: haul.endLocation) : Container(),
           if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime(),
           if (haul.fishingMethod.type == FishingMethodType.Static) _hooksOrTraps(),

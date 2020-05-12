@@ -4,6 +4,7 @@ import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
+import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/haul_subtitle.dart';
 import 'package:oltrace/widgets/time_ago.dart';
 
@@ -13,8 +14,9 @@ class HaulListItem extends StatelessWidget {
   final Haul haul;
   final Function onPressed;
   final int listIndex;
+  final bool usePlusIcon;
 
-  HaulListItem({this.haul, this.onPressed, this.listIndex});
+  HaulListItem({this.haul, this.onPressed, this.listIndex, this.usePlusIcon = false});
 
   Widget get temporal => haul.endedAt == null ? durationCounter : endedAgo;
 
@@ -48,6 +50,10 @@ class HaulListItem extends StatelessWidget {
 
   bool get isActiveHaul => haul.endedAt == null;
 
+  Widget _trailing() {
+    return usePlusIcon ? Icon(Icons.add_circle, color: OlracColours.olspsBlue, size: 38) : ForwardArrow();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -70,11 +76,7 @@ class HaulListItem extends StatelessWidget {
           totalWeight: haul.totalLandingWeight,
           totalProducts: haul.products.length,
         ),
-        trailing: Icon(
-          Icons.add_circle,
-          color: OlracColours.olspsBlue,
-          size: 38,
-        ),
+        trailing: _trailing(),
       ),
     );
   }

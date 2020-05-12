@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
+import 'package:oltrace/app_data.dart';
+import 'package:oltrace/background_fetch.dart';
 import 'package:oltrace/framework/migrator.dart';
-import 'package:oltrace/framework/user_settings.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
+import 'package:oltrace/providers/dio.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
-import 'package:oltrace/providers/store.dart';
+import 'package:oltrace/providers/user_prefs.dart';
 import 'package:oltrace/repositories/json.dart';
 import 'package:oltrace/screens/about.dart';
 import 'package:oltrace/screens/add_source_landing.dart';
@@ -24,29 +27,18 @@ import 'package:oltrace/screens/haul.dart';
 import 'package:oltrace/screens/landing.dart';
 import 'package:oltrace/screens/landing_form.dart';
 import 'package:oltrace/screens/main.dart';
-import 'package:oltrace/screens/master_containers.dart';
 import 'package:oltrace/screens/product.dart';
 import 'package:oltrace/screens/settings.dart';
 import 'package:oltrace/screens/splash.dart';
 import 'package:oltrace/screens/trip.dart';
 import 'package:oltrace/screens/trip_history.dart';
 import 'package:oltrace/screens/welcome.dart';
-import 'package:oltrace/stores/app_store.dart';
 import 'package:package_info/package_info.dart';
-import 'package:sentry/sentry.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-
-/// MobX [Store] holds the global ephemeral state.
-final AppStore _appStore = StoreProvider().appStore;
+import 'package:background_fetch/background_fetch.dart';
 
 /// A connection to SQLite through sqlflite.
 Database _database;
-
-/// A connection to SharedPreferences / NSUserDefaults
-SharedPreferences _sharedPreferences;
-
-final sentry = SentryClient(dsn: AppConfig.SENTRY_DSN);
 
 final JsonRepository _jsonRepo = JsonRepository();
 
@@ -54,7 +46,7 @@ final LocationProvider _locationProvider = LocationProvider();
 
 /// The app entry point. Execution starts here.
 void main() async {
-  _setFlutterErrorHandler();
+  setFlutterErrorHandler();
 
   final stopwatch = Stopwatch()..start();
   print('=== ${AppConfig.APP_TITLE} Started ===');
@@ -63,7 +55,7 @@ void main() async {
     await boot();
     print('Booted in ${stopwatch.elapsed}');
   } catch (exception, stack) {
-    await _handleError(exception, stack);
+    await handleError(exception, stack);
   }
 }
 
@@ -78,66 +70,71 @@ Future<void> boot() async {
   // (Was not required in 1.9 but is in 1.12)
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Connect our persistent storages.
-  //
   // SharedPreferences is used for basic non-critical data such
   // as the user's preferences.
-  _sharedPreferences = await SharedPreferencesProvider().connect();
+  await SharedPreferencesProvider().connect();
 
   // Sqlflite database for trip data.
   _database = await DatabaseProvider().connect();
 
-  // Get the user's app preferences from SharedPreferences.
-  final UserSettings userSettings = _getUserSettings();
-
   // Run the Flutter app
   runZoned(
-    () => runApp(OlTraceApp(userSettings)),
+    () {
+      runApp(OlTraceApp());
+      BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+    },
     onError: (Object error, StackTrace stackTrace) {
-      _handleError(error, stackTrace);
+      handleError(error, stackTrace);
     },
   );
 }
 
 /// Run things once the app has started and the splash screen is showing.
-Future<AppStore> _initApp() async {
+Future<void> _initApp() async {
+  UserPrefsProvider().init();
+
+  await requestPhonecallPermission();
+
   // Run the migrator every time to ensure
   // tables are in the latest state.
   final migrator = Migrator(_database, AppConfig.migrations);
   await migrator.run(AppConfig.RESET_DATABASE);
 
+  // Dio HTTP client
+  DioProvider().init();
+
   // Get the app version and some other info
-  _appStore.packageInfo = await PackageInfo.fromPlatform();
+  AppData.packageInfo = await PackageInfo.fromPlatform();
 
   // Prompt for location access until the user accepts.
   while (await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
     // Begin listening to location stream.
     _locationProvider.startListening();
   }
-  // Restore persisted data into app state
-  return await _restoreState();
-}
 
-/// Restore the saved state from the database and elsewhere.
-Future<AppStore> _restoreState() async {
-  // Profile
+  await _initBackgroundFetch();
+
+  // Restore persisted data into app state
   final Map profile = await _jsonRepo.get('profile');
   if (profile != null) {
-    _appStore.profile = Profile.fromMap(profile);
+    AppData.profile = Profile.fromMap(profile);
   }
-  return _appStore;
+}
+
+Future<void> _initBackgroundFetch() async {
+  final int status = await BackgroundFetch.configure(AppConfig.backgroundFetchConfig, backgroundFetchCallback);
+  print('BackgroundFetch configured status:$status');
 }
 
 /// The main widget of the app
 class OlTraceApp extends StatefulWidget {
   final Database database = DatabaseProvider().database;
-  final UserSettings userSettings;
 
-  OlTraceApp(this.userSettings);
+  OlTraceApp();
 
   @override
   State<StatefulWidget> createState() {
-    return OlTraceAppState(userSettings);
+    return OlTraceAppState();
   }
 }
 
@@ -145,39 +142,22 @@ class OlTraceAppState extends State<OlTraceApp> {
   // Used to reference the navigator outside the widget context.
   final _navigatorKey = GlobalKey<NavigatorState>();
 
-  /// The current [UserSettings] as selected by
-  /// the user on the [SettingsScreen].
-  UserSettings _userSettings;
-
-  OlTraceAppState(this._userSettings);
+  OlTraceAppState();
 
   @override
   void initState() {
     super.initState();
     final stopwatch = Stopwatch()..start();
-
     // Do startup logic
-    _initApp().then((AppStore appStore) async {
-      print('State restored in ${stopwatch.elapsed}');
+    _initApp().then((_) async {
+      print('App init in ${stopwatch.elapsed}');
 
       // Delay to show logos
       if (!AppConfig.debugMode) await Future.delayed(Duration(seconds: 5) - stopwatch.elapsed);
 
       // If profile is not already setup, show welcome screen
-      if (appStore.profileConfigured) {
-        await _navigatorKey.currentState.pushReplacementNamed('/');
-      } else {
-        await _navigatorKey.currentState.pushReplacementNamed('/welcome');
-      }
+      await _navigatorKey.currentState.pushReplacementNamed(AppData.profile == null ? '/' : '/welcome');
     });
-  }
-
-  /// Change the user preferences and redraw the app
-  void _updateUserSettings(UserSettings userSettings) {
-    _sharedPreferences.setBool('darkMode', userSettings.darkMode);
-    _sharedPreferences.setBool('allowMobileData', userSettings.allowMobileData);
-    _sharedPreferences.setBool('uploadAutomatically', userSettings.uploadAutomatically);
-    setState(() => _userSettings = userSettings);
   }
 
   @override
@@ -200,7 +180,7 @@ class OlTraceAppState extends State<OlTraceApp> {
               return AboutScreen();
 
             case '/trip':
-              final Trip trip = settings.arguments;
+              final Trip trip = settings.arguments as Trip;
 
               return TripScreen(tripId: trip.id);
 
@@ -224,7 +204,7 @@ class OlTraceAppState extends State<OlTraceApp> {
               return TripHistoryScreen();
 
             case '/settings':
-              return SettingsScreen(_userSettings, (UserSettings us) => _updateUserSettings(us));
+              return SettingsScreen();
 
             case '/landing':
               final Map args = settings.arguments as Map<String, dynamic>;
@@ -237,11 +217,11 @@ class OlTraceAppState extends State<OlTraceApp> {
               return LandingScreen(landingId: landingId, listIndex: listIndex);
 
             case '/create_landing':
-              final Haul haul = settings.arguments;
+              final Haul haul = settings.arguments as Haul;
               return LandingFormScreen(haulArg: haul);
 
             case '/edit_landing':
-              final Landing landing = settings.arguments;
+              final Landing landing = settings.arguments as Landing;
               return LandingFormScreen(landingArg: landing);
 
             case '/create_product':
@@ -249,7 +229,7 @@ class OlTraceAppState extends State<OlTraceApp> {
               assert(args.containsKey('landings'));
               assert(args.containsKey('haul'));
               final List<Landing> sourceLandings = args['landings'] as List<Landing>;
-              final Haul sourceHaul = args['haul'];
+              final Haul sourceHaul = args['haul'] as Haul;
 
               return CreateProductScreen(
                 initialSourceLandings: sourceLandings,
@@ -271,56 +251,10 @@ class OlTraceAppState extends State<OlTraceApp> {
               return DiagnosticsScreen();
 
             default:
-              throw ('No such route: ${settings.name}');
+              throw 'No such route: ${settings.name}';
           }
         });
       },
     );
   }
-}
-
-/// Restore the user defined preferences for the app.
-/// These can be modified by the user in the SettingsScreen.
-UserSettings _getUserSettings() {
-  final defaults = AppConfig.defaultUserSettings;
-
-  final bool darkMode = _sharedPreferences.getBool('darkMode') ?? defaults['darkMode'];
-  final bool allowMobileData = _sharedPreferences.getBool('allowMobileData') ?? defaults['uploadAutomatically'];
-  final bool uploadAutomatically = _sharedPreferences.getBool('uploadAutomatically') ?? defaults['uploadAutomatically'];
-
-  return UserSettings(
-    darkMode: darkMode,
-    allowMobileData: allowMobileData,
-    uploadAutomatically: uploadAutomatically,
-  );
-}
-
-void _setFlutterErrorHandler() {
-  FlutterError.onError = (details, {bool forceReport = false}) {
-    _handleError(details.exception, details.stack);
-    FlutterError.dumpErrorToConsole(details, forceReport: forceReport);
-  };
-}
-
-Future<void> _sendSentryReport(Object exception, StackTrace stack) async {
-  print('Sending report to Sentry.io...');
-  try {
-    await sentry.captureException(
-      exception: exception,
-      stackTrace: stack,
-    );
-    print('Sentry report sent');
-  } catch (e) {
-    print('Sending report to sentry.io failed: $e');
-  }
-}
-
-Future<void> _handleError(Object exception, StackTrace stack) async {
-  print(exception);
-  print(stack);
-  if (AppConfig.debugMode) {
-    return;
-  }
-
-  _sendSentryReport(exception, stack);
 }

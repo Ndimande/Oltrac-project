@@ -8,12 +8,17 @@ import 'package:oltrace/widgets/haul_list_item.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
 class GroupedHaulsList extends StatelessWidget {
+  final bool isActiveTrip;
   final List<Haul> hauls;
   final Function onPressHaul;
   final Function(int, int) onPressHaulItem;
 
-  GroupedHaulsList({this.hauls, this.onPressHaul, this.onPressHaulItem})
-      : assert(hauls != null),
+  GroupedHaulsList({
+    this.hauls,
+    this.onPressHaul,
+    this.onPressHaulItem,
+    this.isActiveTrip = false,
+  })  : assert(hauls != null),
         assert(onPressHaulItem != null);
 
   @override
@@ -68,6 +73,7 @@ class GroupedHaulsList extends StatelessWidget {
                       haul: haul,
                       onPressed: (int pressedIndex) async => await onPressHaulItem(haul.id, pressedIndex),
                       listIndex: haulIndex--,
+                      usePlusIcon: isActiveTrip,
                     ))
                 .toList(),
           );

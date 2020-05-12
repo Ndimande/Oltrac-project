@@ -4,8 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
+import 'package:oltrace/app_data.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -14,14 +14,13 @@ class AboutScreen extends StatefulWidget {
 }
 
 class _AboutScreenState extends State<AboutScreen> {
-  final AppStore _appStore = StoreProvider().appStore;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer _longPressTimer;
   bool _backButtonBeingPressed = false;
   int _backButtonLongPressedSeconds = 0;
   Color _backButtonColor = OlracColours.olspsBlue;
 
-  String get _version => _appStore.packageInfo.version + ' build ' + _appStore.packageInfo.buildNumber;
+  String get _version => AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber;
 
   @override
   void initState() {
@@ -96,18 +95,18 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 
   Widget _olspsLogo() {
-    const Image logo = Image(
-      image: AssetImage('assets/images/olsps-logo.png'),
-      width: 120,
-    );
-    return FlatButton(
-      onPressed: _launchOLSPSSite,
-      child: Container(
-        padding: EdgeInsets.all(5),
-        child: logo,
-        alignment: Alignment.bottomCenter,
+    return Container(
+      child: FlatButton(
+        padding: EdgeInsets.all(15),
+        onPressed: _launchOLSPSSite,
+        child: Image(
+          image: AssetImage('assets/images/olsps-logo.png'),
+          width: 120,
+        ),
       ),
+      alignment: Alignment.bottomCenter,
     );
+
   }
 
   Widget _sharkTrackLogo() {
@@ -131,7 +130,7 @@ class _AboutScreenState extends State<AboutScreen> {
           children: <Widget>[
             _sharkTrackLogo(),
             Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: TextStyle(fontSize: 30)),
-            Text('Vessel App', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
+            Text('Onboard', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
             Text(_version),
             Text(_copyright, textAlign: TextAlign.center),
             _backButton(),

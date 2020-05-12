@@ -1,3 +1,5 @@
+import 'package:connectivity/connectivity.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/data/fishing_methods.dart';
@@ -12,6 +14,7 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
+import 'package:oltrace/providers/user_prefs.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
@@ -23,8 +26,8 @@ import 'package:oltrace/screens/main/drawer.dart';
 import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
 import 'package:oltrace/screens/main/trip_section.dart';
-import 'package:oltrace/screens/master_container.dart';
 import 'package:oltrace/screens/master_containers.dart';
+import 'package:oltrace/services/trip_upload.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,7 +38,7 @@ final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
 final _locationProvider = LocationProvider();
 
-Future<Trip> _getWithNested(Trip trip) async {
+Future<Trip> _addNestedData(Trip trip) async {
   List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
   final List<Haul> hauls = [];
   for (Haul haul in activeTripHauls) {
@@ -54,13 +57,13 @@ Future<Map> _load() async {
   final Haul activeHaul = await _haulRepo.getActiveHaul();
   Trip activeTrip = await _tripRepo.getActive();
   if (activeTrip != null) {
-    activeTrip = await _getWithNested(activeTrip);
+    activeTrip = await _addNestedData(activeTrip);
   }
 
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
   final List<Trip> tripsWithHauls = [];
   for (Trip trip in completedTrips) {
-    final Trip withNested = await _getWithNested(trip);
+    final Trip withNested = await _addNestedData(trip);
     tripsWithHauls.add(withNested);
   }
 
@@ -73,8 +76,7 @@ Future<Map> _load() async {
 
 class MainScreen extends StatefulWidget {
   final SharedPreferences sharedPrefs = SharedPreferencesProvider().sharedPreferences;
-  final TextEditingController _soakTimeHoursController = TextEditingController(text: '0');
-  final TextEditingController _soakTimeMinutesController = TextEditingController(text: '0');
+  final userPrefs = UserPrefsProvider().userPrefs;
 
   MainScreen();
 
@@ -85,18 +87,28 @@ class MainScreen extends StatefulWidget {
 class MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// The [Trip] that is currently ongoing.
+  /// null when no trip is active.
   Trip activeTrip;
+
+  /// The [Haul] that is in progress.
+  /// null when no haul is active.
   Haul activeHaul;
+
+  /// List of [Trip]s that have ended.
   List<Trip> completedTrips;
 
-  FishingMethod get _fishingMethod {
+  /// Get the currently selected [FishingMethod].
+  FishingMethod get _currentFishingMethod {
     final String fmCode = widget.sharedPrefs.getString('fishingMethod').toString();
     return fishingMethods.singleWhere(
-        (FishingMethod element) => element.abbreviation.toLowerCase() == fmCode.toLowerCase(),
-        orElse: () => null);
+      (FishingMethod fm) => fm.abbreviation.toLowerCase() == fmCode.toLowerCase(),
+      orElse: () => null,
+    );
   }
 
-  Future<FishingMethod> _selectFishingMethod() async {
+  /// Select or change the current [FishingMethod]
+  Future<FishingMethod> _selectCurrentFishingMethod() async {
     final fm = await Navigator.push<FishingMethod>(
       context,
       MaterialPageRoute(builder: (context) => FishingMethodScreen()),
@@ -105,12 +117,13 @@ class MainScreenState extends State<MainScreen> {
     return fm;
   }
 
+  /// Being a new [Haul]
   Future<void> _startOperation({Duration soakTime, int trapsOrHooks}) async {
     try {
       final Location location = await _locationProvider.location;
 
       final haul = Haul(
-        fishingMethod: _fishingMethod,
+        fishingMethod: _currentFishingMethod,
         startedAt: DateTime.now(),
         tripId: activeTrip.id,
         startLocation: location,
@@ -126,14 +139,16 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  /// Dialog to select soak time.
   Widget _soakTimeDialog() {
     return StaticHaulDetailsAlertDialog(onSuccesfulValidate: (Map<String, dynamic> formResult) {
       Navigator.pop(context, formResult);
     });
   }
 
+  /// When the "Start Operation" bottom button is pressed.
   Future<void> _onPressStartStripButton() async {
-    if (_fishingMethod.type == FishingMethodType.Static) {
+    if (_currentFishingMethod.type == FishingMethodType.Static) {
       final Map<String, dynamic> formResult = await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -151,7 +166,8 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _onPressEndEndStripButton() async {
+  /// When the "End Haul" bottom button is pressed.
+  Future<void> _onPressEndStripButton() async {
     bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -178,15 +194,16 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  /// Either the start or end haul button is pressed.
   Future<void> _onPressHaulStripButton() async {
     if (activeHaul != null)
-      await _onPressEndEndStripButton();
+      await _onPressEndStripButton();
     else
       await _onPressStartStripButton();
   }
 
   Future<void> _onPressFishingMethodStripButton() async {
-    final FishingMethod method = await _selectFishingMethod();
+    final FishingMethod method = await _selectCurrentFishingMethod();
     if (method != null) {
       widget.sharedPrefs.setString('fishingMethod', method.abbreviation);
       setState(() {});
@@ -208,7 +225,7 @@ class MainScreenState extends State<MainScreen> {
       final trip = Trip(startedAt: DateTime.now(), startLocation: location);
       final int id = await _tripRepo.store(trip);
       setState(() {});
-      showTextSnackBar(_scaffoldKey, 'Trip $id has started');
+      showTextSnackBar(_scaffoldKey, 'Trip $id started');
     } catch (e) {
       _scaffoldKey.currentState.hideCurrentSnackBar();
       showTextSnackBar(_scaffoldKey, Messages.LOCATION_NOT_AVAILABLE);
@@ -232,8 +249,8 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _onPressEndTrip(bool hasActiveHaul) async {
-    if (hasActiveHaul) {
+  Future<void> _onPressEndTrip() async {
+    if (activeHaul != null) {
       _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('You must first end hauling/fishing')));
       return;
     }
@@ -243,11 +260,27 @@ class MainScreenState extends State<MainScreen> {
       barrierDismissible: false,
       builder: (_) => ConfirmDialog('End Trip', Messages.TRIP_CONFIRM_END),
     );
+
     if (confirmed == true) {
       final Location location = await _locationProvider.location;
       final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
       await _tripRepo.store(endedTrip);
+
+      if (widget.userPrefs.uploadAutomatically) {
+        try {
+          final connectivity = await Connectivity().checkConnectivity();
+          if (connectivity != ConnectivityResult.none) {
+            await TripUploadService.uploadTrip(endedTrip);
+          } else {
+            print('No internet connection. Trip must be uploaded later');
+          }
+        } on DioError catch (e){
+          print('Upload Failed');
+          print(e.error);
+        }
+      }
       showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} ended');
+
       setState(() {});
     }
   }
@@ -282,19 +315,8 @@ class MainScreenState extends State<MainScreen> {
 
   Widget _appBar() {
     return AppBar(
-      actions: <Widget>[
-        _appBarDate,
-        if(activeTrip != null && activeTrip.hauls.isNotEmpty)
-        _masterContainerButton(),
-      ],
+      actions: <Widget>[_appBarDate],
       title: _appBarTitle(),
-    );
-  }
-
-  Widget _masterContainerButton() {
-    return IconButton(
-      icon: Icon(Icons.inbox),
-      onPressed: _onPressMasterContainerButton,
     );
   }
 
@@ -322,8 +344,13 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _haulStripButton(FishingMethod fishingMethod) {
-    final String labelText =
-        fishingMethod.type == FishingMethodType.Dynamic ? 'Start Fishing' : 'Haul ${fishingMethod.name}';
+    String labelText;
+    if (fishingMethod.type == FishingMethodType.Dynamic) {
+      labelText = activeHaul == null ? 'Start Fishing' : 'End Fishing';
+    } else {
+      labelText = 'Haul ${fishingMethod.name}';
+    }
+
     return Expanded(
       child: StripButton(
         labelText: labelText,
@@ -338,7 +365,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _bottomButtons() {
-    final FishingMethod fishingMethod = _fishingMethod;
+    final FishingMethod fishingMethod = _currentFishingMethod;
 
     return Row(
       children: <Widget>[
@@ -355,6 +382,10 @@ class MainScreenState extends State<MainScreen> {
           return NoActiveTrip(
             completedTrips: completedTrips,
             onPressStartTrip: () async => await _onPressStartTripButton(),
+            onPressCompletedTrip: (Trip trip) async {
+              await Navigator.pushNamed(context, '/trip', arguments: trip);
+              setState(() {});
+            },
           );
         }
 
@@ -363,9 +394,10 @@ class MainScreenState extends State<MainScreen> {
             TripSection(
               trip: activeTrip,
               hasActiveHaul: activeHaul != null,
-              onPressEndTrip: () async => await _onPressEndTrip(activeHaul != null),
+              onPressEndTrip: () async => await _onPressEndTrip(),
               onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
               onPressEditTrip: _onPressEditTrip,
+              onPressMasterContainerButton: () async => await _onPressMasterContainerButton(),
             ),
             Expanded(
               child: HaulSection(

@@ -9,7 +9,7 @@ import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/screens/landing/landing_details.dart';
+import 'package:oltrace/screens/landing/species_information.dart';
 import 'package:oltrace/screens/landing/products_list.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
@@ -206,7 +206,7 @@ class LandingScreenState extends State<LandingScreen> {
                   ),
                   _landingButtons(),
                   ProductsList(products: _landing.products),
-                  LandingDetails(landing: _landing),
+                  SpeciesInformation(landing: _landing),
                 ],
               ),
             ),

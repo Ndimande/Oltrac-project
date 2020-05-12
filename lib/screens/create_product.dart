@@ -63,19 +63,18 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     super.initState();
     try {
       FlutterNfcReader.onTagDiscovered().listen(onTagDiscovered);
-    } catch (e) {
-      print(e);
+    } on Exception {
+      print('NFC reader could not be started.');
     }
   }
 
   @override
   void dispose() {
-    try {
-      FlutterNfcReader.stop();
-    } on PlatformException {
+    FlutterNfcReader.stop().then((NfcData data){
+      print('NFC reader stopped');
+    }).catchError((e){
       print('NFC reader could not be stopped.');
-    }
-
+    });
     super.dispose();
   }
 

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/models/profile.dart';
-import 'package:oltrace/providers/store.dart';
-import 'package:oltrace/stores/app_store.dart';
 
 final double _drawerItemFontSize = 22;
-const double drawerLabelFontSize = 18;
+const double drawerLabelFontSize = 20;
 const double drawerTextFontSize = 26;
 
 Widget _drawerHeader(Profile profile) {
@@ -14,7 +13,7 @@ Widget _drawerHeader(Profile profile) {
     children: <Widget>[
       Text(
         'Vessel Name',
-        style: TextStyle(fontSize: drawerLabelFontSize),
+        style: TextStyle(fontSize: drawerLabelFontSize,fontWeight: FontWeight.bold),
       ),
       Text(
         profile.vesselName,
@@ -29,7 +28,7 @@ Widget _drawerHeader(Profile profile) {
     children: <Widget>[
       Text(
         'Skipper Name',
-        style: TextStyle(fontSize: drawerLabelFontSize),
+        style: TextStyle(fontSize: drawerLabelFontSize,fontWeight: FontWeight.bold),
       ),
       Text(
         profile.skipper.firstName + ' ' + profile.skipper.lastName,
@@ -64,6 +63,7 @@ Widget _drawerHeader(Profile profile) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   vesselName,
+                  SizedBox(height: 15),
                   skipperName,
                 ],
               ),
@@ -76,7 +76,6 @@ Widget _drawerHeader(Profile profile) {
 }
 
 class MainDrawer extends StatelessWidget {
-  final AppStore _appStore = StoreProvider().appStore;
 
   Widget _listTile({IconData iconData, String text, Function onTap}) {
     return Builder(
@@ -108,7 +107,7 @@ class MainDrawer extends StatelessWidget {
           // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: <Widget>[
-            _drawerHeader(_appStore.profile),
+            _drawerHeader(AppData.profile),
             Divider(
               color: OlracColours.olspsBlue,
               height: 0,

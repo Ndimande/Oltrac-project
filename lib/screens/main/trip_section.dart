@@ -13,6 +13,7 @@ class TripSection extends StatelessWidget {
   final Function onPressEndTrip;
   final Function onPressCancelTrip;
   final Function onPressEditTrip;
+  final Function onPressMasterContainerButton;
 
   TripSection({
     this.trip,
@@ -20,7 +21,8 @@ class TripSection extends StatelessWidget {
     this.onPressEndTrip,
     this.onPressCancelTrip,
     this.onPressEditTrip,
-  });
+    this.onPressMasterContainerButton,
+  }) : assert(onPressMasterContainerButton != null);
 
   Widget get endTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
@@ -62,9 +64,7 @@ class TripSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        LocationButton(
-          location: trip.startLocation,
-        ),
+        LocationButton(location: trip.startLocation),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -82,7 +82,34 @@ class TripSection extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
+      ],
+    );
+  }
+
+  Widget _masterContainerButton() {
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        IconButton(
+          onPressed: (){},
+          iconSize: 40,
+          icon: Icon(
+            Icons.inbox,
+            color: OlracColours.olspsBlue,
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(bottom: 5),
+          child: IconButton(
+            onPressed: onPressMasterContainerButton,
+            iconSize: 22,
+            icon: Icon(
+              Icons.add,
+              color: OlracColours.olspsBlue,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -93,9 +120,19 @@ class TripSection extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(5),
             child: Row(
-              children: <Widget>[NumberedBoat(number: trip.id), SizedBox(width: 5), tripInfo],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    NumberedBoat(number: trip.id),
+                    SizedBox(width: 5),
+                    tripInfo,
+                  ],
+                ),
+                _masterContainerButton(),
+              ],
             ),
           ),
           Row(

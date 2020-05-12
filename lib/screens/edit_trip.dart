@@ -52,7 +52,7 @@ class EditTripScreenState extends State<EditTripScreen> {
 
   get title => Text('Edit Trip ${widget._trip.id}');
 
-  Future<void> _onPressCancel() async {
+  Future<void> _onPressDeleteTrip() async {
     if (_hasActiveHaul) {
       showTextSnackBar(_scaffoldKey, 'You must first end the active haul');
       return;
@@ -60,12 +60,16 @@ class EditTripScreenState extends State<EditTripScreen> {
 
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => ConfirmDialog('Cancel Trip', Messages.TRIP_CONFIRM_CANCEL),
+      builder: (_) => ConfirmDialog('Delete Trip', 'Are you sure you want to delete the trip?'),
     );
     if (confirmed == true) {
       await widget._tripRepo.delete(widget._trip.id);
       Navigator.pop(_scaffoldKey.currentContext, EditTripResult.TripCanceled);
     }
+  }
+
+  void _onPressCancel() {
+    Navigator.pop(context);
   }
 
   Future<void> _onPressSave() async {
@@ -90,15 +94,25 @@ class EditTripScreenState extends State<EditTripScreen> {
     Navigator.of(_scaffoldKey.currentContext).pop(EditTripResult.Updated);
   }
 
-  Widget get _cancelTripButton => StripButton(
-        onPressed: _onPressCancel,
-        labelText: 'Cancel',
+  Widget get _deleteTripButton => StripButton(
+        onPressed: _onPressDeleteTrip,
+        labelText: 'Delete Trip',
         icon: Icon(
-          Icons.cancel,
+          Icons.delete,
           color: Colors.white,
         ),
         color: Colors.red,
       );
+
+  Widget get _cancelButton => StripButton(
+    onPressed: _onPressCancel,
+    labelText: 'Cancel',
+    icon: Icon(
+      Icons.cancel,
+      color: Colors.white,
+    ),
+    color: OlracColours.olspsBlue,
+  );
 
   Widget get _saveButton => StripButton(
         onPressed: _onPressSave,
@@ -116,10 +130,9 @@ class EditTripScreenState extends State<EditTripScreen> {
       children: <Widget>[
         //Section heading
         Container(
-          alignment: Alignment.center,
-          child: Text('Start', style: TextStyle(color: Colors.black, fontSize: 22)),
+          child: Text('Trip Start', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 28)),
         ),
-
+        SizedBox(height: 15),
         // Start DateTime
         DateTimeEditor(
           title: Text('Date & Time', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
@@ -182,7 +195,10 @@ class EditTripScreenState extends State<EditTripScreen> {
           child: _saveButton,
         ),
         Expanded(
-          child: _cancelTripButton,
+          child: _cancelButton,
+        ),
+        Expanded(
+          child: _deleteTripButton,
         )
       ],
     );

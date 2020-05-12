@@ -79,6 +79,7 @@ class HaulScreenState extends State<HaulScreen> {
   List<Product> _products;
   List<Landing> _selectedLandings = [];
   bool _showProductList = false;
+  bool _isActiveTrip;
 
   void _onPressShowProductListSwitch(bool value) {
     setState(() {
@@ -144,7 +145,7 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
       await _haulRepo.store(endedHaul);
-      showTextSnackBar(_scaffoldKey, 'Haul was ended', duration: Duration(seconds: 1));
+      showTextSnackBar(_scaffoldKey, 'Haul ended', duration: Duration(seconds: 1));
       setState(() {});
     }
   }
@@ -203,6 +204,12 @@ class HaulScreenState extends State<HaulScreen> {
     });
   }
 
+  void _onPressClearAllButton() {
+    setState(() {
+      _selectedLandings = [];
+    });
+  }
+
   Widget _toggleListButton() {
     return Container(
       margin: EdgeInsets.only(right: 5),
@@ -217,18 +224,35 @@ class HaulScreenState extends State<HaulScreen> {
     );
   }
 
+  Widget _clearSelectedButton() {
+    return Container(
+      margin: EdgeInsets.only(right: 5),
+      child: RaisedButton(
+        color: Colors.red,
+        child: Text(
+          'Clear All',
+          style: TextStyle(fontSize: 18),
+        ),
+        onPressed: _onPressClearAllButton,
+      ),
+    );
+  }
+
   Widget _listsSection(List<Landing> landings) {
     return Expanded(
       child: Container(
         child: Column(
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
-                if (_products.length != 0) _toggleListButton(),
-              ],
+            Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
+                  if (_selectedLandings.isNotEmpty) _clearSelectedButton(),
+                  if (_products.length != 0 && _selectedLandings.isEmpty) _toggleListButton(),
+                ],
+              ),
             ),
             _showProductList ? _productList() : _landingsList(landings),
           ],
@@ -259,6 +283,7 @@ class HaulScreenState extends State<HaulScreen> {
     final List<LandingListItem> listLandings = landings.reversed
         .map(
           (Landing landing) => LandingListItem(
+            selectable: _isActiveTrip,
             isSelected: _landingIsSelected(landing),
             landing: landing,
             onLongPress: () => _onLongPressLanding(landing.id),
@@ -287,7 +312,7 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _addBulkLandingButton() => StripButton(
         icon: Icon(
-          Icons.add_box,
+          Icons.add_circle,
           color: Colors.white,
         ),
         color: OlracColours.olspsDarkBlue,
@@ -297,7 +322,7 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _tagProductButton() => StripButton(
         icon: Icon(
-          Icons.add,
+          Icons.add_circle,
           color: Colors.white,
         ),
         color: _selectedLandings.isNotEmpty ? OlracColours.olspsBlue : Colors.grey,
@@ -341,7 +366,7 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _listsLabel(String text) {
     return Container(
-      padding: EdgeInsets.only(left: 10, top: 10),
+      padding: EdgeInsets.only(left: 10),
       alignment: Alignment.centerLeft,
       child: Text(
         text,
@@ -360,20 +385,11 @@ class HaulScreenState extends State<HaulScreen> {
     return Text('$numberSelected selected');
   }
 
-  Widget _appBarLeading() => _selectedLandings.length != 0
-      ? IconButton(
-          onPressed: () {
-            setState(() {
-              _selectedLandings = [];
-            });
-          },
-          icon: Icon(Icons.cancel, color: Colors.white),
-        )
-      : BackButton(
-          onPressed: () {
-            Navigator.pop(_scaffoldKey.currentContext);
-          },
-        );
+  Widget _appBarLeading() => BackButton(
+        onPressed: () {
+          Navigator.pop(_scaffoldKey.currentContext);
+        },
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -391,8 +407,7 @@ class HaulScreenState extends State<HaulScreen> {
 
         _haul = snapshot.data['haul'];
         _products = snapshot.data['products'];
-
-        final bool isActiveTrip = snapshot.data['isActiveTrip'];
+        _isActiveTrip = snapshot.data['isActiveTrip'];
 
         return Scaffold(
           key: _scaffoldKey,
@@ -411,7 +426,7 @@ class HaulScreenState extends State<HaulScreen> {
                   isActiveHaul: _haul.endedAt == null,
                 ),
                 _listsSection(_haul.landings),
-                isActiveTrip ? _bottomButtons() : Container(),
+                if(_isActiveTrip) _bottomButtons(),
               ],
             ),
           ),

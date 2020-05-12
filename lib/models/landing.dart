@@ -94,7 +94,7 @@ class Landing extends Model {
       'id': id,
       'haulId': haulId,
       'species': species.toMap(),
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
       'location': location.toMap(),
       'weight': weight,
       'length': length,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oltrace/framework/model.dart';
 import 'package:oltrace/models/fishing_method.dart';
-import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
@@ -106,8 +105,8 @@ class Haul extends Model {
     return {
       'id': id,
       'tripId': tripId,
-      'startedAt': startedAt == null ? null : startedAt.toIso8601String(),
-      'endedAt': endedAt == null ? null : endedAt.toIso8601String(),
+      'startedAt': startedAt == null ? null : startedAt.toUtc().toIso8601String(),
+      'endedAt': endedAt == null ? null : endedAt.toUtc().toIso8601String(),
       'fishingMethod': fishingMethod.toMap(),
       'landings': landings.map((l) => l.toMap()).toList(),
       'startLocation': startLocation.toMap(),
