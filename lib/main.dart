@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mobx/mobx.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_data.dart';
@@ -45,7 +44,7 @@ final JsonRepository _jsonRepo = JsonRepository();
 final LocationProvider _locationProvider = LocationProvider();
 
 /// The app entry point. Execution starts here.
-void main() async {
+Future<void> main() async {
   setFlutterErrorHandler();
 
   final stopwatch = Stopwatch()..start();
@@ -77,6 +76,15 @@ Future<void> boot() async {
   // Sqlflite database for trip data.
   _database = await DatabaseProvider().connect();
 
+
+  // Run the migrator every time to ensure
+  // tables are in the latest state.
+  final migrator = Migrator(_database, AppConfig.migrations);
+  await migrator.run(AppConfig.RESET_DATABASE);
+
+  // Dio HTTP client
+  DioProvider().init();
+
   // Run the Flutter app
   runZoned(
     () {
@@ -90,18 +98,11 @@ Future<void> boot() async {
 }
 
 /// Run things once the app has started and the splash screen is showing.
-Future<void> _initApp() async {
+Future<void> _onAppRunning() async {
   UserPrefsProvider().init();
 
+  // For IMEI access
   await requestPhonecallPermission();
-
-  // Run the migrator every time to ensure
-  // tables are in the latest state.
-  final migrator = Migrator(_database, AppConfig.migrations);
-  await migrator.run(AppConfig.RESET_DATABASE);
-
-  // Dio HTTP client
-  DioProvider().init();
 
   // Get the app version and some other info
   AppData.packageInfo = await PackageInfo.fromPlatform();
@@ -149,11 +150,11 @@ class OlTraceAppState extends State<OlTraceApp> {
     super.initState();
     final stopwatch = Stopwatch()..start();
     // Do startup logic
-    _initApp().then((_) async {
+    _onAppRunning().then((_) async {
       print('App init in ${stopwatch.elapsed}');
 
       // Delay to show logos
-      if (!AppConfig.debugMode) await Future.delayed(Duration(seconds: 5) - stopwatch.elapsed);
+      if (!AppConfig.debugMode) await Future.delayed(const Duration(seconds: 5) - stopwatch.elapsed);
 
       // If profile is not already setup, show welcome screen
       await _navigatorKey.currentState.pushReplacementNamed(AppData.profile == null ? '/' : '/welcome');
