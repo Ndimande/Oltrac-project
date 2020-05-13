@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:imei_plugin/imei_plugin.dart';
@@ -20,6 +21,8 @@ class DdmApi {
       'SharkTrack-ID': AppData.packageInfo.packageName,
       'SharkTrack-Debug': AppConfig.debugMode.toString(),
       'SharkTrack-IMEI': imei,
+      'SharkTrack-Locale': Platform.localeName,
+
     };
 
     final String json = jsonEncode(data.toMap());

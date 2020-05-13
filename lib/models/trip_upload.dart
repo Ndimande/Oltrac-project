@@ -1,13 +1,10 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_data.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
-import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/trip.dart';
 
 class TripUploadData {
@@ -46,7 +43,6 @@ class TripUploadData {
     return {
       'datetimereceived': DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now().toUtc()),
       'json': _json(),
-      'locale': Platform.localeName,
     };
   }
 
