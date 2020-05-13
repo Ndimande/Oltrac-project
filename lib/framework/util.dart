@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:intl/intl.dart';
 import 'package:oltrace/app_config.dart';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
+
 
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry/sentry.dart';
@@ -59,7 +61,7 @@ Future<String> writeToTemp(String filename, Uint8List bytes) async {
 }
 
 void printWrapped(String text) {
-  final pattern = new RegExp('.{1,800}'); // 800 is the size of each chunk
+  final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
   pattern.allMatches(text).forEach((match) => print(match.group(0)));
 }
 
@@ -97,4 +99,14 @@ Future<void> handleError(Object exception, StackTrace stack) async {
 /// Get the IMEI to force the permissions prompt
 Future<void> requestPhonecallPermission() async {
   await ImeiPlugin.getImei();
+}
+
+String prettyJson(Map<String, dynamic> json, {int indent = 2}) {
+  var spaces = ' ' * indent;
+  var encoder = JsonEncoder.withIndent(spaces);
+  return encoder.convert(json);
+}
+
+void printPrettyJson(Map<String, dynamic> json, {int indent = 2}) {
+  print(prettyJson(json, indent: indent));
 }

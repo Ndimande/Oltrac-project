@@ -27,51 +27,51 @@ class SettingsScreenState extends State<SettingsScreen> {
   bool mobileData;
   bool uploadAutomatically;
 
-  void _toggleUploadAutomatically() {
+  void _toggleUploadAutomatically(bool state) {
     setState(() {
       widget.userPrefs.toggleUploadAutomatically();
       uploadAutomatically = !uploadAutomatically;
     });
   }
 
-  void _toggleMobileData() {
+  void _toggleMobileData(bool state) {
     setState(() {
       widget.userPrefs.toggleMobileData();
       mobileData = !mobileData;
     });
   }
 
-  Widget _buildAllowMobile() {
-    final title = 'Use Mobile Data';
-    final subtitle = 'Allow uploading data with a cellular connection';
-
+  Widget _booleanOption({String title, String subtitle, bool value, Function(bool) onChanged}) {
     return SwitchListTile(
-      subtitle: Text(subtitle),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: _fontSize),
-      ),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      title: Text(title, style: const TextStyle(fontSize: 20)),
+      value: value,
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildAllowMobile() {
+    const title = 'Use Mobile Data';
+    final subtitle = mobileData ? 'On. Allow using a mobile connection.' : 'Off. Only WiFi connections will be used.';
+    return _booleanOption(
+      title: title,
+      subtitle: subtitle,
       value: mobileData,
-      onChanged: (state) {
-        _toggleMobileData();
-      },
+      onChanged: _toggleMobileData,
     );
   }
 
   Widget _buildAutoUpload() {
-    final title = 'Upload Automatically';
-    final subtitle = 'Upload data as soon as the internet becomes available';
+    const title = 'Upload Automatically';
+    final subtitle = uploadAutomatically
+        ? 'On. Data will be uploaded automatically.'
+        : 'Off. Data will not be uploaded automatically.';
 
-    return SwitchListTile(
-      subtitle: Text(subtitle),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: _fontSize),
-      ),
+    return _booleanOption(
+      title: title,
+      subtitle: subtitle,
       value: uploadAutomatically,
-      onChanged: (state) {
-        _toggleUploadAutomatically();
-      },
+      onChanged: _toggleUploadAutomatically,
     );
   }
 

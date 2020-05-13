@@ -45,7 +45,7 @@ class GroupedHaulsList extends StatelessWidget {
             height: 36,
             child: SvgIcon(
               assetPath: SvgIcons.path(fishingMethod.abbreviation),
-              darker: true,
+              color: OlracColours.olspsDarkBlue,
             ),
           );
 

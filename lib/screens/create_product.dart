@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
@@ -383,7 +384,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   StripButton get saveButton => StripButton(
         icon: Icon(Icons.save, color: Colors.white),
         labelText: 'Save',
-        color: Colors.green,
+        color: OlracColours.ninetiesGreen,
         onPressed: _onPressSaveButton,
       );
 

@@ -27,6 +27,8 @@ class Trip extends Model {
 
   final List<MasterContainer> masterContainers;
 
+  bool get isActive => endedAt == null;
+
   const Trip({
     id,
     @required this.startedAt,

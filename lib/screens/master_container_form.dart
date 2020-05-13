@@ -5,6 +5,7 @@ import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/location.dart';
@@ -143,7 +144,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
       children: <Widget>[
         Expanded(
           child: StripButton(
-            color: Colors.green,
+            color: OlracColours.ninetiesGreen,
             onPressed: _onPressSave,
             disabled: _childProducts.length == 0 || _tagCode == '',
             labelText: 'Save',
@@ -271,7 +272,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
   Widget _bottomButton() {
     return StripButton(
       icon: Icon(Icons.add),
-      color: _selectedProducts.length == 0 ? Colors.grey : Colors.green,
+      color: _selectedProducts.length == 0 ? Colors.grey : OlracColours.ninetiesGreen,
       labelText: 'Add Selected',
       onPressed: _selectedProducts.length == 0 ? null : _onPressAddSelectedStripButton,
     );

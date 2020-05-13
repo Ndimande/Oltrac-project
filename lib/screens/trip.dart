@@ -1,3 +1,4 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 
@@ -8,12 +9,12 @@ import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/models/trip_upload.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/services/trip_upload.dart';
+import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -115,8 +116,23 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
+  Future<bool> _confirmUseMobileData() async => await showDialog<bool>(
+        context: context,
+        builder: (_) =>
+            ConfirmDialog('Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
+      );
+
   /// Upload the trip to the DDM.
   Future<void> onPressUpload(Trip trip) async {
+    final ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.mobile) {
+      final bool confirmed = await _confirmUseMobileData();
+      if (!confirmed) {
+        return;
+      }
+    }
+
     print('Uploading trip');
 
     // You may not upload active trip

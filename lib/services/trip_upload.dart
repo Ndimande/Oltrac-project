@@ -30,19 +30,13 @@ class TripUploadService {
       return;
     }
 
-    for(final Trip trip in pendingTrips) {
+    for (final Trip trip in pendingTrips) {
       await uploadTrip(trip);
     }
-
   }
 
   static Future<void> uploadTrip(Trip trip) async {
-
-    final data = TripUploadData(
-      trip: trip,
-      imei: await ImeiPlugin.getImei(),
-      userProfile: AppData.profile,
-    );
+    final data = TripUploadData(trip: trip);
 
     await DdmApi.uploadTrip(data);
 

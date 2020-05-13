@@ -77,10 +77,6 @@ Future<void> boot() async {
   _database = await DatabaseProvider().connect();
 
 
-  // Run the migrator every time to ensure
-  // tables are in the latest state.
-  final migrator = Migrator(_database, AppConfig.migrations);
-  await migrator.run(AppConfig.RESET_DATABASE);
 
   // Dio HTTP client
   DioProvider().init();
@@ -100,6 +96,12 @@ Future<void> boot() async {
 /// Run things once the app has started and the splash screen is showing.
 Future<void> _onAppRunning() async {
   UserPrefsProvider().init();
+
+
+  // Run the migrator every time to ensure
+  // tables are in the latest state.
+  final migrator = Migrator(_database, AppConfig.migrations);
+  await migrator.run(AppConfig.RESET_DATABASE);
 
   // For IMEI access
   await requestPhonecallPermission();
@@ -157,7 +159,7 @@ class OlTraceAppState extends State<OlTraceApp> {
       if (!AppConfig.debugMode) await Future.delayed(const Duration(seconds: 5) - stopwatch.elapsed);
 
       // If profile is not already setup, show welcome screen
-      await _navigatorKey.currentState.pushReplacementNamed(AppData.profile == null ? '/' : '/welcome');
+      await _navigatorKey.currentState.pushReplacementNamed(AppData.profile != null ? '/' : '/welcome');
     });
   }
 

@@ -79,7 +79,7 @@ class LandingScreenState extends State<LandingScreen> {
         child: StripButton(
           onPressed: _onPressDelete,
           labelText: 'Delete',
-          color: Colors.red,
+          color: OlracColours.ninetiesRed,
           icon: Icon(
             Icons.delete,
             color: Colors.white,
@@ -152,7 +152,7 @@ class LandingScreenState extends State<LandingScreen> {
     }
 
     return StripButton(
-      color: Colors.green,
+      color: OlracColours.ninetiesGreen,
       labelText: 'Tag Product',
       icon: Icon(
         Icons.local_offer,

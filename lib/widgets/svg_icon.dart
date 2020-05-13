@@ -7,14 +7,12 @@ class SvgIcon extends StatelessWidget {
   final String assetPath;
   final double width;
   final double height;
-  final bool darker;
   final Color color;
 
   SvgIcon({
     @required this.assetPath,
     this.width = 64,
     this.height = 64,
-    this.darker = false,
     this.color = OlracColours.olspsBlue,
   });
 
@@ -27,7 +25,7 @@ class SvgIcon extends StatelessWidget {
         Container(
           width: width - 10,
           height: height - 10,
-          color: Colors.red,
+          color: OlracColours.ninetiesRed,
         ),
         Text(
           'SVG missing\n(path $assetPath)',

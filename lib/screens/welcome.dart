@@ -156,6 +156,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _vesselName = value;
         return null;
       },
+      onChanged: (String value) => setState((){}),
     );
   }
 
@@ -174,6 +175,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _vesselId = value;
         return null;
       },
+      onChanged: (String value) => setState((){}),
     );
   }
 
@@ -192,6 +194,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _skipperFirstName = value;
         return null;
       },
+      onChanged: (String value) => setState((){}),
     );
   }
 
@@ -211,6 +214,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _skipperLastName = value;
         return null;
       },
+      onChanged: (String value) => setState((){}),
     );
   }
 
@@ -271,6 +275,20 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     await Navigator.pushReplacementNamed(context, '/');
   }
 
+  Widget _saveButton() {
+    final bool allValid = _formKey?.currentState?.validate() == true && _selectedCountry != null && _selectedFisheryType != null;
+
+    return StripButton(
+      labelText: 'Save',
+      color: allValid ? OlracColours.ninetiesGreen : Colors.grey,
+      icon: Icon(
+        Icons.save,
+        color: Colors.white,
+      ),
+      onPressed: () async => _onPressSave(context),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -287,15 +305,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
               child: _buildForm(),
             ),
           ),
-          StripButton(
-            labelText: 'Save',
-            color: Colors.green,
-            icon: Icon(
-              Icons.save,
-              color: Colors.white,
-            ),
-            onPressed: () async => _onPressSave(context),
-          ),
+          _saveButton(),
         ],
       ),
     );
@@ -309,6 +319,7 @@ Widget _welcomeTextFormField({
   TextInputAction textInputAction = TextInputAction.next,
   void Function(String) onFieldSubmitted,
   String Function(String) validator,
+  Function(String) onChanged,
 }) {
   return Container(
     child: TextFormField(
@@ -325,6 +336,7 @@ Widget _welcomeTextFormField({
       ),
       onFieldSubmitted: onFieldSubmitted,
       validator: validator,
+      onChanged: onChanged,
     ),
   );
 }

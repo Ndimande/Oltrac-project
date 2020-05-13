@@ -22,11 +22,11 @@ class LandingIcon extends StatelessWidget {
 
   Color get _tagColor {
     if (landing.doneTagging == true) {
-      return landing.isBulk ? Colors.green : Colors.lightGreen;
+      return landing.isBulk ? OlracColours.ninetiesGreen : Colors.lightGreen;
     }
 
     if (landing.products.isEmpty) {
-      return landing.isBulk ? Colors.red : Colors.redAccent;
+      return landing.isBulk ? OlracColours.ninetiesRed : Colors.red;
     }
 
     return landing.isBulk ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue;

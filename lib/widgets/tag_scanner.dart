@@ -55,7 +55,7 @@ class TagScannerState extends State<TagScanner> {
           children: <Widget>[
             Text(_tagCode ?? '-'),
             FlatButton.icon(
-              color: _nfcReaderEnabled ? Colors.green : null,
+              color: _nfcReaderEnabled ? OlracColours.ninetiesGreen : null,
               label: Text('Scan'),
               icon: Icon(Icons.nfc),
               onPressed: () => setState(() => _nfcReaderEnabled = !_nfcReaderEnabled),

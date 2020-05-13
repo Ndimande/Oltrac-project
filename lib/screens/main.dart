@@ -358,7 +358,7 @@ class MainScreenState extends State<MainScreen> {
           activeHaul != null ? Icons.stop : Icons.play_arrow,
           color: Colors.white,
         ),
-        color: activeHaul != null ? Colors.red : Colors.green,
+        color: activeHaul != null ? OlracColours.ninetiesRed : OlracColours.ninetiesGreen,
         onPressed: () async => await _onPressHaulStripButton(),
       ),
     );

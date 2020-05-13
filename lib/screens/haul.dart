@@ -228,7 +228,7 @@ class HaulScreenState extends State<HaulScreen> {
     return Container(
       margin: EdgeInsets.only(right: 5),
       child: RaisedButton(
-        color: Colors.red,
+        color: OlracColours.ninetiesRed,
         child: Text(
           'Clear All',
           style: TextStyle(fontSize: 18),
@@ -305,7 +305,7 @@ class HaulScreenState extends State<HaulScreen> {
           Icons.add_circle,
           color: Colors.white,
         ),
-        color: Colors.green,
+        color: OlracColours.ninetiesGreen,
         labelText: 'Single',
         onPressed: _onPressAddLandingButton,
       );
