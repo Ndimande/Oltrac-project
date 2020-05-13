@@ -10,7 +10,7 @@ import 'package:oltrace/repositories/trip.dart';
 class TripUploadService {
   static final _userPrefs = UserPrefsProvider().userPrefs;
 
-  static Future<void> uploadPendingTrip(int tripId) async {
+  static Future<void> uploadPendingTrips() async {
     final ConnectivityResult connectivity = await Connectivity().checkConnectivity();
 
     if (connectivity == ConnectivityResult.none) {
