@@ -95,6 +95,6 @@ Future<void> handleError(Object exception, StackTrace stack) async {
 }
 
 /// Get the IMEI to force the permissions prompt
-requestPhonecallPermission() async {
+Future<void> requestPhonecallPermission() async {
   await ImeiPlugin.getImei();
 }
