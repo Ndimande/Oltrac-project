@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:connectivity/connectivity.dart';
+import 'package:dio/dio.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 
 import 'package:flutter/material.dart';
 import 'package:oltrace/app_data.dart';
+import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
@@ -13,6 +17,7 @@ import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/services/trip_upload.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
@@ -69,32 +74,66 @@ class TripScreenState extends State<TripScreen> {
   Trip _trip;
   bool isActiveTrip;
 
+  Future<void> _onPressEditTrip() async {
+    final EditTripResult result = await Navigator.push(
+      _scaffoldKey.currentContext,
+      MaterialPageRoute(builder: (_) => EditTripScreen(_trip)),
+    );
+    setState(() {});
+    if (result == EditTripResult.TripCanceled && _trip.isComplete) {
+      Navigator.pop(context);
+    } else if (EditTripResult.Updated == result) {
+      showTextSnackBar(_scaffoldKey, 'Trip updated');
+    }
+  }
+
   Widget _buildTripInfo(Trip trip) {
-    return Container(
-      color: OlracColours.olspsBlue[50],
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          NumberedBoat(
-            number: trip.id,
-            color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
+    return Column(
+      children: <Widget>[
+        Container(
+          color: OlracColours.olspsBlue[50],
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              NumberedBoat(
+                number: trip.id,
+                color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    TimeSpace(label: 'Start', location: trip.startLocation, dateTime: trip.startedAt),
+                    const SizedBox(height: 5),
+                    if (trip.endedAt != null)
+                      TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt),
+                  ],
+                ),
+              )
+            ],
           ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                TimeSpace(label: 'Start', location: trip.startLocation, dateTime: trip.startedAt),
-                const SizedBox(height: 5),
-                if (trip.endedAt != null) TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt),
-              ],
-            ),
-          )
-        ],
-      ),
+        ),
+        if (!_trip.isUploaded)
+          Row(
+            children: <Widget>[Expanded(child: editTripButton)],
+          ),
+      ],
     );
   }
+
+  Widget get editTripButton => Builder(builder: (BuildContext context) {
+        return StripButton(
+          labelText: 'Edit',
+          color: OlracColours.olspsBlue,
+          onPressed: _onPressEditTrip,
+          icon: Icon(
+            Icons.edit,
+            color: Colors.white,
+          ),
+        );
+      });
 
   Widget get noHauls => Container(
         alignment: Alignment.center,
@@ -118,13 +157,18 @@ class TripScreenState extends State<TripScreen> {
 
   Future<bool> _confirmUseMobileData() async => await showDialog<bool>(
         context: context,
-        builder: (_) =>
-            ConfirmDialog('Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
+        builder: (_) => ConfirmDialog(
+            'Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
       );
 
   /// Upload the trip to the DDM.
   Future<void> onPressUpload(Trip trip) async {
     final ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
+
+    if(connectivityResult == ConnectivityResult.none) {
+      showTextSnackBar(_scaffoldKey, 'No internet connection. Upload failed.');
+      return;
+    }
 
     if (connectivityResult == ConnectivityResult.mobile) {
       final bool confirmed = await _confirmUseMobileData();
@@ -164,8 +208,11 @@ class TripScreenState extends State<TripScreen> {
 
       print('Trip uploaded');
       snackBarMessage = 'Trip upload complete.';
+    } on DioError {
+      snackBarMessage = 'C';
     } catch (e) {
-      snackBarMessage = 'Trip upload failed.\n' + e.toString();
+      snackBarMessage = 'Trip upload failed. Something unexpected went wrong.';
+      handleError(e,null);
       print('Error:');
       print(e.toString());
     }

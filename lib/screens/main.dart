@@ -2,6 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:oltrace/app_data.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
@@ -255,7 +256,7 @@ class MainScreenState extends State<MainScreen> {
       return;
     }
 
-    bool confirmed = await showDialog<bool>(
+    final bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (_) => ConfirmDialog('End Trip', Messages.TRIP_CONFIRM_END),
@@ -270,15 +271,24 @@ class MainScreenState extends State<MainScreen> {
         try {
           final connectivity = await Connectivity().checkConnectivity();
           if (connectivity != ConnectivityResult.none) {
-            await TripUploadService.uploadTrip(endedTrip);
+            if (connectivity == ConnectivityResult.mobile) {
+              if (widget.userPrefs.mobileData) {
+                await TripUploadService.uploadTrip(endedTrip);
+              } else {
+                print('Allow mobile disabled. Trip must be uploaded later');
+              }
+            } else {
+              await TripUploadService.uploadTrip(endedTrip);
+            }
           } else {
             print('No internet connection. Trip must be uploaded later');
           }
-        } on DioError catch (e){
+        } on DioError catch (e) {
           print('Upload Failed');
           print(e.error);
         }
       }
+
       showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} ended');
 
       setState(() {});

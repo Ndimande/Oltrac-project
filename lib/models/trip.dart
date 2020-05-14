@@ -29,6 +29,8 @@ class Trip extends Model {
 
   bool get isActive => endedAt == null;
 
+  bool get isComplete => !isActive;
+
   const Trip({
     id,
     @required this.startedAt,
