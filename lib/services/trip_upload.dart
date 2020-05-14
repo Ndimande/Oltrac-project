@@ -10,7 +10,7 @@ import 'package:oltrace/repositories/trip.dart';
 class TripUploadService {
   static final _userPrefs = UserPrefsProvider().userPrefs;
 
-  static Future<void> uploadPendingTrip(int tripId) async {
+  static Future<void> uploadPendingTrips() async {
     final ConnectivityResult connectivity = await Connectivity().checkConnectivity();
 
     if (connectivity == ConnectivityResult.none) {
@@ -30,19 +30,13 @@ class TripUploadService {
       return;
     }
 
-    for(final Trip trip in pendingTrips) {
+    for (final Trip trip in pendingTrips) {
       await uploadTrip(trip);
     }
-
   }
 
   static Future<void> uploadTrip(Trip trip) async {
-
-    final data = TripUploadData(
-      trip: trip,
-      imei: await ImeiPlugin.getImei(),
-      userProfile: AppData.profile,
-    );
+    final data = TripUploadData(trip: trip);
 
     await DdmApi.uploadTrip(data);
 

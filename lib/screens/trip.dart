@@ -1,3 +1,4 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 
@@ -8,11 +9,12 @@ import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/models/trip_upload.dart';
 import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/services/trip_upload.dart';
+import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 import 'package:oltrace/widgets/strip_button.dart';
@@ -24,12 +26,12 @@ final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
 
 Future<Trip> _getWithNested(Trip trip) async {
-  List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
+  final List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
   final List<Haul> hauls = [];
-  for (Haul haul in activeTripHauls) {
+  for (final Haul haul in activeTripHauls) {
     final List<Landing> landings = await _landingRepo.forHaul(haul);
     final List<Landing> landingsWithProducts = [];
-    for (Landing landing in landings) {
+    for (final Landing landing in landings) {
       final List<Product> products = await _productRepo.forLanding(landing.id);
       landingsWithProducts.add(landing.copyWith(products: products));
     }
@@ -52,7 +54,7 @@ Future<Map<String, dynamic>> _load(int tripId) async {
 class TripScreen extends StatefulWidget {
   final int tripId;
 
-  TripScreen({this.tripId});
+  const TripScreen({this.tripId});
 
   @override
   State<StatefulWidget> createState() {
@@ -70,7 +72,7 @@ class TripScreenState extends State<TripScreen> {
   Widget _buildTripInfo(Trip trip) {
     return Container(
       color: OlracColours.olspsBlue[50],
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
@@ -78,16 +80,14 @@ class TripScreenState extends State<TripScreen> {
             number: trip.id,
             color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
           ),
-          SizedBox(width: 15),
+          const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 TimeSpace(label: 'Start', location: trip.startLocation, dateTime: trip.startedAt),
-                SizedBox(height: 5),
-                trip.endedAt != null
-                    ? TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt)
-                    : Container(),
+                const SizedBox(height: 5),
+                if (trip.endedAt != null) TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt),
               ],
             ),
           )
@@ -96,8 +96,10 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
-  Widget get noHauls =>
-      Container(alignment: Alignment.center, child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)));
+  Widget get noHauls => Container(
+        alignment: Alignment.center,
+        child: const Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
+      );
 
   Widget uploadButton(Trip trip) {
     final label = trip.isUploaded ? 'Uploaded' : 'Upload Trip';
@@ -114,8 +116,23 @@ class TripScreenState extends State<TripScreen> {
     );
   }
 
+  Future<bool> _confirmUseMobileData() async => await showDialog<bool>(
+        context: context,
+        builder: (_) =>
+            ConfirmDialog('Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
+      );
+
   /// Upload the trip to the DDM.
   Future<void> onPressUpload(Trip trip) async {
+    final ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.mobile) {
+      final bool confirmed = await _confirmUseMobileData();
+      if (!confirmed) {
+        return;
+      }
+    }
+
     print('Uploading trip');
 
     // You may not upload active trip
@@ -134,24 +151,16 @@ class TripScreenState extends State<TripScreen> {
     }
 
     _scaffoldKey.currentState.showSnackBar(
-      SnackBar(content: Text('Uploading Trip...'), duration: Duration(minutes: 20)),
+      const SnackBar(content: Text('Uploading Trip...'), duration: Duration(minutes: 20)),
     );
 
     setState(() {
       _uploading = true;
     });
 
-    final data = TripUploadData(
-      imei: await ImeiPlugin.getImei(),
-      trip: trip,
-      userProfile: AppData.profile,
-    );
-
     String snackBarMessage;
     try {
-      await DdmApi.uploadTrip(data);
-
-      await _tripRepo.store(trip.copyWith(isUploaded: true));
+      await TripUploadService.uploadTrip(trip);
 
       print('Trip uploaded');
       snackBarMessage = 'Trip upload complete.';
@@ -201,7 +210,7 @@ class TripScreenState extends State<TripScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
 
         _trip = snapshot.data['trip'];
@@ -217,9 +226,7 @@ class TripScreenState extends State<TripScreen> {
               children: <Widget>[
                 _buildTripInfo(_trip),
                 Expanded(
-                  child: _trip.hauls.length > 0
-                      ? _groupedHaulsList()
-                      : noHauls,
+                  child: _trip.hauls.isNotEmpty ? _groupedHaulsList() : noHauls,
                 ),
                 mainButton
               ],

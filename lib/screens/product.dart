@@ -168,7 +168,7 @@ class _ProductScreenState extends State<ProductScreen> {
             labelText: 'Save',
             onPressed: _onPressExportQR,
             icon: Icon(Icons.save_alt),
-            color: Colors.green,
+            color: OlracColours.ninetiesGreen,
           ),
         ),
       ],

@@ -19,7 +19,7 @@ class FishingMethodScreen extends StatelessWidget {
       return Container(
         child: SvgIcon(
           height: constraints.maxWidth * 0.4, // we have to use height for width because height constraint is infinite
-          darker: true,
+          color: OlracColours.olspsDarkBlue,
           assetPath: SvgIcons.path(method.abbreviation),
         ),
       );

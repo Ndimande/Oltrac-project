@@ -34,7 +34,7 @@ class HaulInfo extends StatelessWidget {
         height: 64,
         child: SvgIcon(
           assetPath: SvgIcons.path(haul.fishingMethod.abbreviation),
-          darker: true,
+          color: OlracColours.olspsDarkBlue,
         ),
       );
     });
@@ -49,7 +49,7 @@ class HaulInfo extends StatelessWidget {
             textAlign: TextAlign.left,
           ),
         ),
-        SizedBox(width: 5),
+        const SizedBox(width: 5),
         svg,
       ],
     );
@@ -66,8 +66,8 @@ class HaulInfo extends StatelessWidget {
             dateTime: haul.startedAt,
             location: haul.startLocation,
           ),
-          SizedBox(height: 10),
-          !isActiveHaul ? TimeSpace(label: 'Ended ', dateTime: haul.endedAt, location: haul.endLocation) : Container(),
+          const SizedBox(height: 10),
+          if (!isActiveHaul) TimeSpace(label: 'Ended ', dateTime: haul.endedAt, location: haul.endLocation),
           if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime(),
           if (haul.fishingMethod.type == FishingMethodType.Static) _hooksOrTraps(),
         ],
@@ -119,7 +119,7 @@ class HaulInfo extends StatelessWidget {
           child: StripButton(
             onPressed: onPressEndHaul,
             labelText: Messages.endHaulTitle(haul),
-            color: Colors.red,
+            color: OlracColours.ninetiesRed,
             icon: Icon(
               Icons.stop,
               color: Colors.white,

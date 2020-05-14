@@ -52,12 +52,7 @@ Future<void> _uploadCompletedTrips() async {
   }
 
   for (final Trip tripToUpload in pendingTrips) {
-
-    final data = TripUploadData(
-      imei: await ImeiPlugin.getImei(),
-      trip: tripToUpload,
-      userProfile: AppData.profile,
-    );
+    final data = TripUploadData(trip: tripToUpload);
 
     await DdmApi.uploadTrip(data);
 

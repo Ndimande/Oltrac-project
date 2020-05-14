@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/screens/master_container.dart';
@@ -76,7 +77,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
         Container(
           child: StripButton(
             icon: Icon(Icons.add),
-            color: Colors.green,
+            color: OlracColours.ninetiesGreen,
             onPressed: _onPressCreateStripButton,
             labelText: 'New Master Container',
           ),

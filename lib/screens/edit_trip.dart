@@ -101,7 +101,7 @@ class EditTripScreenState extends State<EditTripScreen> {
           Icons.delete,
           color: Colors.white,
         ),
-        color: Colors.red,
+        color: OlracColours.ninetiesRed,
       );
 
   Widget get _cancelButton => StripButton(
@@ -121,7 +121,7 @@ class EditTripScreenState extends State<EditTripScreen> {
           Icons.save,
           color: Colors.white,
         ),
-        color: Colors.green,
+        color: OlracColours.ninetiesGreen,
       );
 
   Widget get _startSection {

@@ -32,7 +32,7 @@ class AppConfig {
     'bulkMode': false, //todo remove this everywhere
   };
 
-  static const Duration MAX_HISTORY_SELECTABLE = const Duration(days: 100);
+  static const Duration MAX_HISTORY_SELECTABLE = Duration(days: 100);
 
   static const int MAX_SOAK_HOURS_SELECTABLE = 500;
 

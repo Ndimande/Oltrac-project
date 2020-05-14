@@ -27,7 +27,7 @@ class TripSection extends StatelessWidget {
   Widget get endTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
           labelText: 'End Trip',
-          color: hasActiveHaul ? Colors.grey : Colors.red,
+          color: hasActiveHaul ? Colors.grey : OlracColours.ninetiesRed,
           onPressed: () async => await onPressEndTrip(),
           icon: Icon(
             Icons.stop,

@@ -1,4 +1,4 @@
-const List<Map<String, String>> appMigrations = const [
+const List<Map<String, String>> appMigrations = [
   {
     'name': 'create_json_table',
     'up': 'CREATE TABLE json ( '
