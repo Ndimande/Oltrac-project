@@ -49,6 +49,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
 
           return TripListItem(trip, () async {
             await Navigator.pushNamed(context, '/trip', arguments: trip);
+            setState(() {});
           });
         });
   }

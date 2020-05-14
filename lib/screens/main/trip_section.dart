@@ -15,13 +15,13 @@ class TripSection extends StatelessWidget {
   final Function onPressEditTrip;
   final Function onPressMasterContainerButton;
 
-  TripSection({
-    this.trip,
-    this.hasActiveHaul,
-    this.onPressEndTrip,
-    this.onPressCancelTrip,
-    this.onPressEditTrip,
-    this.onPressMasterContainerButton,
+  const TripSection({
+    @required this.trip,
+    @required this.hasActiveHaul,
+    @required this.onPressEndTrip,
+    @required this.onPressCancelTrip,
+    @required this.onPressEditTrip,
+    @required this.onPressMasterContainerButton,
   }) : assert(onPressMasterContainerButton != null);
 
   Widget get endTripButton => Builder(builder: (BuildContext context) {

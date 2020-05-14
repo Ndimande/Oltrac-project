@@ -247,7 +247,7 @@ class _TripUploadListItem extends StatelessWidget {
     return ExpansionTile(
       title: _title,
       children: <Widget>[
-        Text(
+        SelectableText(
           _json(),
           style: TextStyle(fontSize: 12),
         )

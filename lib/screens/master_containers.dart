@@ -18,7 +18,7 @@ Future<Map<String, dynamic>> _load(int tripId) async {
 
 class MasterContainersScreen extends StatefulWidget {
   final int sourceTripId;
-  MasterContainersScreen(this.sourceTripId);
+  const MasterContainersScreen(this.sourceTripId);
 
   @override
   _MasterContainersScreenState createState() => _MasterContainersScreenState();
@@ -39,7 +39,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
     setState(() {});
   }
 
-  _onTapListItem(MasterContainer masterContainer) {
+  void _onTapListItem(MasterContainer masterContainer) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -48,11 +48,12 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
         ),
       ),
     );
+    setState(() {});
   }
 
   Widget _noMasterContainers() {
-    return Center(
-      child: Text('No Master Containers',style: TextStyle(fontSize: 16),),
+    return const Center(
+      child: Text('No Master Containers',style: TextStyle(fontSize: 20),),
     );
   }
 
@@ -72,7 +73,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
     return Column(
       children: <Widget>[
         Expanded(
-          child: _masterContainers.length > 0 ? _masterContainerList() : _noMasterContainers(),
+          child: _masterContainers.isNotEmpty ? _masterContainerList() : _noMasterContainers(),
         ),
         Container(
           child: StripButton(
@@ -105,7 +106,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
         return Scaffold(
           key: _scaffoldKey,
           appBar: AppBar(
-            title: Text('Master Containers'),
+            title: const Text('Master Containers'),
           ),
           body: _body(),
         );

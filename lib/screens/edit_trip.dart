@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
@@ -24,8 +23,7 @@ class EditTripScreen extends StatefulWidget {
   final bool _hasActiveHaul;
 
   EditTripScreen(this._trip)
-      : _hasActiveHaul =
-            _trip.hauls.singleWhere((Haul h) => h.endedAt == null, orElse: () => null) == null ? false : true;
+      : _hasActiveHaul = !(_trip.hauls.singleWhere((Haul h) => h.endedAt == null, orElse: () => null) == null);
 
   @override
   State<StatefulWidget> createState() => EditTripScreenState(
@@ -50,7 +48,7 @@ class EditTripScreenState extends State<EditTripScreen> {
       : assert(_startDateTime != null),
         assert(_startLocation != null);
 
-  get title => Text('Edit Trip ${widget._trip.id}');
+  Text get title => Text('Edit Trip ${widget._trip.id}');
 
   Future<void> _onPressDeleteTrip() async {
     if (_hasActiveHaul) {
@@ -73,6 +71,15 @@ class EditTripScreenState extends State<EditTripScreen> {
   }
 
   Future<void> _onPressSave() async {
+    final bool confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => ConfirmDialog('Update Trip', 'Are you sure you want to update the trip?'),
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     final List<String> validationErrors = [];
     // check that started time is not in future
     if (_startDateTime.isAfter(DateTime.now())) {
@@ -87,6 +94,7 @@ class EditTripScreenState extends State<EditTripScreen> {
     final updatedTrip = widget._trip.copyWith(
       startedAt: _startDateTime,
       startLocation: _startLocation,
+      endedAt: _endDateTime,
       endLocation: _endLocation,
     );
     await widget._tripRepo.store(updatedTrip);
@@ -96,7 +104,7 @@ class EditTripScreenState extends State<EditTripScreen> {
 
   Widget get _deleteTripButton => StripButton(
         onPressed: _onPressDeleteTrip,
-        labelText: 'Delete Trip',
+        labelText: 'Delete',
         icon: Icon(
           Icons.delete,
           color: Colors.white,
@@ -105,14 +113,14 @@ class EditTripScreenState extends State<EditTripScreen> {
       );
 
   Widget get _cancelButton => StripButton(
-    onPressed: _onPressCancel,
-    labelText: 'Cancel',
-    icon: Icon(
-      Icons.cancel,
-      color: Colors.white,
-    ),
-    color: OlracColours.olspsBlue,
-  );
+        onPressed: _onPressCancel,
+        labelText: 'Cancel',
+        icon: Icon(
+          Icons.cancel,
+          color: Colors.white,
+        ),
+        color: OlracColours.olspsBlue,
+      );
 
   Widget get _saveButton => StripButton(
         onPressed: _onPressSave,
@@ -124,69 +132,74 @@ class EditTripScreenState extends State<EditTripScreen> {
         color: OlracColours.ninetiesGreen,
       );
 
-  Widget get _startSection {
+  Widget _section({
+    String heading,
+    DateTime dateTime,
+    Location location,
+    Function(Picker, List<int>) onDateTimeChanged,
+    Function(Location) onLocationChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         //Section heading
         Container(
-          child: Text('Trip Start', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 28)),
+          child: Text(heading, style: TextStyle(color: OlracColours.olspsBlue, fontSize: 28)),
         ),
-        SizedBox(height: 15),
+        const SizedBox(height: 15),
         // Start DateTime
         DateTimeEditor(
           title: Text('Date & Time', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
-          initialDateTime: _startDateTime,
-          onChanged: (Picker picker, List<int> selectedIndices) {
-            setState(() {
-              _startDateTime = DateTime.parse(picker.adapter.toString());
-            });
-          },
+          initialDateTime: dateTime,
+          onChanged: onDateTimeChanged,
         ),
 
         // Start Location
         LocationEditor(
           title: Text('Location', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
-          onChanged: (Location location) {
-            assert(location != null);
-            setState(() {
-              _startLocation = location;
-            });
-          },
-          location: _startLocation,
+          onChanged: onLocationChanged,
+          location: location,
         ),
       ],
     );
+  }
+
+  Widget get _startSection {
+    return _section(
+        heading: 'Trip Start',
+        dateTime: _startDateTime,
+        location: _startLocation,
+        onDateTimeChanged: (Picker picker, List<int> selectedIndices) {
+          setState(() {
+            _startDateTime = DateTime.parse(picker.adapter.toString());
+          });
+        },
+        onLocationChanged: (Location location) {
+          assert(location != null);
+          setState(() {
+            _startLocation = location;
+          });
+        });
   }
 
   Widget get _endSection {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Center(child: Text('End', style: TextStyle(color: OlracColours.olspsBlue))),
-
-        LocationEditor(
-          onChanged: (Location location) {
-            setState(() {
-              _endLocation = location;
-            });
-          },
-          location: _endLocation,
-          title: Text('End Location', style: TextStyle(fontSize: 18)),
-        ),
-        // End DateTime
-        DateTimeEditor(
-          title: Text('End'),
-          initialDateTime: _endDateTime,
-          onChanged: (Picker picker, List<int> selectedIndices) {
-            setState(() {
-              _endDateTime = DateTime.parse(picker.adapter.toString());
-            });
-          },
-        ),
-      ],
+    return _section(
+      heading: 'Trip End',
+      dateTime: _endDateTime,
+      location: _endLocation,
+      onDateTimeChanged: (Picker picker, List<int> selectedIndices) {
+        setState(() {
+          _endDateTime = DateTime.parse(picker.adapter.toString());
+        });
+      },
+      onLocationChanged: (Location location) {
+        setState(() {
+          _endLocation = location;
+        });
+      }
     );
   }
+
 
   Widget get _bottomButtons {
     return Row(
@@ -195,11 +208,11 @@ class EditTripScreenState extends State<EditTripScreen> {
           child: _saveButton,
         ),
         Expanded(
-          child: _cancelButton,
+          child: _deleteTripButton,
         ),
         Expanded(
-          child: _deleteTripButton,
-        )
+          child: _cancelButton,
+        ),
       ],
     );
   }
@@ -215,11 +228,13 @@ class EditTripScreenState extends State<EditTripScreen> {
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(15),
+              padding: const EdgeInsets.all(15),
               child: Column(
                 children: <Widget>[
                   _startSection,
-                  _endLocation == null ? Container() : _endSection,
+                  const SizedBox(height: 20),
+                  if(widget._trip.isComplete)
+                    _endSection,
                 ],
               ),
             ),
