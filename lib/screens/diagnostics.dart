@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_data.dart';
@@ -25,9 +27,15 @@ Future<Map> _load() async {
   final Map result = await _jsonRepo.get('profile');
   final Profile profile = Profile.fromMap(result);
   final int backgroundFetchStatus = await BackgroundFetch.status;
+  final String imei = await ImeiPlugin.getImei();
+
+  final AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
+
   return {
     'profile': profile,
     'backgroundFetchStatus': backgroundFetchStatus,
+    'imei': imei,
+    'androidDeviceInfo': androidDeviceInfo,
   };
 }
 
@@ -44,9 +52,11 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   Profile _profile;
   int _backgroundFetchStatus;
+  String _imei;
+  AndroidDeviceInfo _androidDeviceInfo;
 
   Widget _version() => Container(
-      margin: EdgeInsets.only(top: 10),
+      margin: const EdgeInsets.only(top: 10),
       child:
           Text(AppConfig.APP_TITLE + ' ' + AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber));
 
@@ -57,6 +67,19 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
     final Database database = DatabaseProvider().database;
     final Migrator migrator = Migrator(database, AppConfig.migrations);
     await migrator.run(true);
+  }
+
+  Widget _device() {
+    return InfoTable(
+      title: 'Device',
+      data: [
+        ['IMEI', _imei],
+        ['Android Version', _androidDeviceInfo.version.release],
+        ['Android SDK', _androidDeviceInfo.version.sdkInt.toString()],
+        ['Manufacturer', _androidDeviceInfo.manufacturer],
+        ['Model', _androidDeviceInfo.model],
+      ],
+    );
   }
 
   Widget _buildProfile() {
@@ -122,6 +145,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
       padding: EdgeInsets.all(10),
       child: Column(
         children: <Widget>[
+          const Text('Reset App Data', style: TextStyle(color: OlracColours.ninetiesRed, fontSize: 24)),
           const Text(
             'Tap and hold the button to reset the app.\nWarning! All data will be deleted!',
             textAlign: TextAlign.center,
@@ -146,7 +170,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(title: Text('Diagnostics')),
+      appBar: AppBar(title: const Text('Diagnostics')),
       body: FutureBuilder(
         future: _load(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -155,10 +179,14 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
           }
           _profile = snapshot.data['profile'];
           _backgroundFetchStatus = snapshot.data['backgroundFetchStatus'] as int;
+          _imei = snapshot.data['imei'] as String;
+          _androidDeviceInfo = snapshot.data['androidDeviceInfo'] as AndroidDeviceInfo;
+
           return SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 _version(),
+                _device(),
                 _buildProfile(),
                 _sharedPrefs(),
                 _environment(),
@@ -182,25 +210,35 @@ class _TripUploadQueue extends StatefulWidget {
 class _TripUploadListItem extends StatelessWidget {
   final Trip trip;
   static const _titleStyle = TextStyle(color: OlracColours.olspsDarkBlue);
+
   const _TripUploadListItem(this.trip);
 
-  Text get _completeText => Text('Trip ${trip.id}',style: _titleStyle,);
+  Text get _completeText => Text(
+        'Trip ${trip.id}',
+        style: _titleStyle,
+      );
 
-  Text get _uploadedText => Text('Trip ${trip.id} (Uploaded)',style: _titleStyle,);
+  Text get _uploadedText => Text(
+        'Trip ${trip.id} (Uploaded)',
+        style: _titleStyle,
+      );
 
-  Text get _activeText => Text('Trip ${trip.id} (Active)',style: _titleStyle,);
+  Text get _activeText => Text(
+        'Trip ${trip.id} (Active)',
+        style: _titleStyle,
+      );
 
   Widget get _title {
     if (trip.isActive) {
       return _activeText;
-    } else if (trip.isUploaded) {
-      return _uploadedText;
-    } else {
-      return _completeText;
     }
-  }
 
-//  => trip.isUploaded ?  Text('Trip ${trip.id} (Uploaded)'): Text('Trip ${trip.id}');
+    if (trip.isUploaded) {
+      return _uploadedText;
+    }
+
+    return _completeText;
+  }
 
   String _json() => TripUploadData(trip: trip).toJson(pretty: true);
 
@@ -256,7 +294,7 @@ class _TripUploadQueueState extends State<_TripUploadQueue> {
     return Container(
       margin: const EdgeInsets.only(left: 5),
       child: Text(
-        'Trip JSON',
+        'Trip Upload JSON Preview',
         style: TextStyle(
           color: OlracColours.olspsBlue,
           fontWeight: FontWeight.bold,

@@ -34,6 +34,7 @@ dependencies:
   background_fetch: ^0.5.1
   connectivity: ^0.4.8+5
   imei_plugin: ^1.1.6
+  device_info: ^0.4.2+4
 
 dev_dependencies:
   flutter_test:
