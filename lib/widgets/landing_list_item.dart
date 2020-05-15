@@ -13,7 +13,7 @@ class LandingListItem extends StatelessWidget {
   final int listIndex;
   final bool selectable;
 
-  LandingListItem({
+  const LandingListItem({
     @required this.landing,
     @required this.onPressed,
     @required this.listIndex,
@@ -32,29 +32,22 @@ class LandingListItem extends StatelessWidget {
 
   Text get individuals => Text(' (${landing.individuals})');
 
-  Widget get _title {
-    final firstRow = <Widget>[
-      Flexible(
-        child: _speciesName,
-      )
-    ];
 
-    if (landing.isBulk) {
-      firstRow.add(individuals);
+  Widget get _subtitle {
+    String lengthWeight = landing.weightKilograms;
+    if(landing.length != null) {
+      lengthWeight += ', ' + landing.lengthCentimeters;
     }
-
-    return Row(children: firstRow);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(lengthWeight),
+        Text(friendlyDateTime(landing.createdAt)),
+      ],
+    );
   }
 
-  Widget get _subtitle => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
-          Text(friendlyDateTime(landing.createdAt)),
-        ],
-      );
-
-  Widget get _icon {
+  Widget get _trailingIcon {
     if (!selectable) {
       return ForwardArrow();
     }
@@ -89,10 +82,10 @@ class LandingListItem extends StatelessWidget {
           landing: landing,
           listIndex: listIndex,
         ),
-        title: _title,
+        title: _speciesName,
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[_subtitle, _icon],
+          children: <Widget>[_subtitle, _trailingIcon],
         ),
       ),
     );

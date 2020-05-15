@@ -55,7 +55,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   /// Is bulk mode enabled?
   /// Bulk mode changes the form to allow entry of no. of individuals
   /// in the event of a bulk bin of animals.
-  bool _bulkMode;
+  final bool _bulkMode;
 
   LandingFormScreenState({this.haul, this.landingArg})
       : _weightController =
@@ -66,7 +66,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
             TextEditingController(text: landingArg != null ? landingArg?.individuals.toString() : null),
         _selectedSpecies = landingArg?.species,
         _bulkMode =
-            landingArg != null ? landingArg.individuals > 1 ? true : false : sharedPrefs.getBool('bulkMode') ?? false;
+            landingArg != null ? landingArg.individuals > 1 : sharedPrefs.getBool('bulkMode') ?? false;
 
   bool get isEditMode => landingArg != null;
 
@@ -106,14 +106,14 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     }
 
     final int weightGrams = _parseWeightInput();
-    final int lengthMicrometers = _parseLengthInput();
+    final int lengthMicrometers = _lengthController.value.text == '' ? null: _parseLengthInput();
 
     final int individuals = _parseIndividualsInput();
 
-    if (individuals == null) {
-      showTextSnackBar(_scaffoldKey, 'Please enter 2 or higher for individuals');
-      return;
-    }
+//    if (individuals == null) {
+//      showTextSnackBar(_scaffoldKey, 'Please enter 2 or higher for individuals');
+//      return;
+//    }
 
     if (isEditMode) {
       final updatedLanding = landingArg.copyWith(
@@ -127,7 +127,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
       _scaffoldKey.currentState.showSnackBar(
         SnackBar(
-          content: Text('Shark updated.'),
+          content: const Text('Shark updated.'),
           onVisible: () async {
             await Future.delayed(Duration(seconds: 1));
             Navigator.pop(context);
@@ -137,7 +137,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     } else {
       showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
       // TODO get from location provider
-      var position = await _geolocator.getCurrentPosition();
+      final position = await _geolocator.getCurrentPosition();
       _scaffoldKey.currentState.hideCurrentSnackBar();
 
       final landing = Landing(
@@ -148,7 +148,8 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         weight: weightGrams,
         length: lengthMicrometers,
         haulId: haul.id,
-        individuals: _bulkMode ? int.parse(_individualsController.value.text) : 1,
+        individuals: _bulkMode ? int.tryParse(_individualsController.value.text) : 1,
+        isBulk: _bulkMode,
       );
 
       await _landingRepo.store(landing);
@@ -165,8 +166,9 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   }
 
   String _validateIndividuals(String value) {
+    // Optional
     if (value.isEmpty) {
-      return 'Please enter number of individuals';
+      return null;
     }
 
     // check if valid float
@@ -193,8 +195,9 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   }
 
   String _validateLength(String value) {
+    // Length is optional
     if (value.isEmpty) {
-      return 'Please enter a length';
+      return null;
     }
 
     // check if valid float

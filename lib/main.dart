@@ -76,7 +76,8 @@ Future<void> boot() async {
   // Sqlflite database for trip data.
   _database = await DatabaseProvider().connect();
 
-
+  // Get the app version and some other info
+  AppData.packageInfo = await PackageInfo.fromPlatform();
 
   // Dio HTTP client
   DioProvider().init();
@@ -106,8 +107,6 @@ Future<void> _onAppRunning() async {
   // For IMEI access
   await requestPhonecallPermission();
 
-  // Get the app version and some other info
-  AppData.packageInfo = await PackageInfo.fromPlatform();
 
   // Prompt for location access until the user accepts.
   while (await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {

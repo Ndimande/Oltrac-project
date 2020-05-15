@@ -100,7 +100,7 @@ class LandingScreenState extends State<LandingScreen> {
       );
 
   Future<void> _onPressDelete() async {
-    bool confirmed = await showDialog<bool>(
+    final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
       builder: (_) => ConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
     );
@@ -111,9 +111,9 @@ class LandingScreenState extends State<LandingScreen> {
 
     showTextSnackBar(_scaffoldKey, 'Species deleted');
 
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     Navigator.pop(_scaffoldKey.currentContext);
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   Future<void> _onPressEdit() async {
@@ -122,7 +122,7 @@ class LandingScreenState extends State<LandingScreen> {
   }
 
   Future<void> _onPressDoneTagging() async {
-    if (_landing.products.length == 0) {
+    if (_landing.products.isEmpty) {
       showTextSnackBar(_scaffoldKey, 'You must tag at least one');
       return;
     }
@@ -182,7 +182,7 @@ class LandingScreenState extends State<LandingScreen> {
       items.add(_tagProductButton());
     }
 
-    if (_landing.products.length != 0) {
+    if (_landing.products.isNotEmpty) {
       items.add(_doneTaggingButton());
     }
 
@@ -217,6 +217,13 @@ class LandingScreenState extends State<LandingScreen> {
     );
   }
 
+  Widget _appBar() {
+    return AppBar(
+      title:
+          Text(_landing.isBulk ? '${_landing.species.englishName} (Bulk bin)' : _landing.species.englishName),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -230,15 +237,14 @@ class LandingScreenState extends State<LandingScreen> {
         if (!snapshot.hasData) {
           return Scaffold();
         }
+
         final Map data = snapshot.data;
         _isActiveTrip = data['isActiveTrip'];
         _landing = data['landing'];
 
         return Scaffold(
           key: _scaffoldKey,
-          appBar: AppBar(
-            title: Text(_landing.individuals > 1 ? 'Bulk bin (${_landing.species.englishName})': _landing.species.englishName),
-          ),
+          appBar: _appBar(),
           body: _body(),
         );
       },

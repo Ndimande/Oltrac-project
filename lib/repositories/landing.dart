@@ -95,7 +95,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
       weightUnit: weightUnit,
       individuals: result['individuals'],
       species: speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
-      doneTagging: result['done_tagging'] == 1 ? true : false,
+      doneTagging: result['done_tagging'] == 1,
+      isBulk: result['is_bulk'] == 1
     );
   }
 
@@ -112,7 +113,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
       'weight': landing.weight,
       'length': landing.length,
       'individuals': landing.individuals,
-      'done_tagging': landing.doneTagging == true ? 1 : 0
+      'done_tagging': landing.doneTagging ? 1 : 0,
+      'is_bulk': landing.isBulk ? 1 : 0
     };
   }
 }
