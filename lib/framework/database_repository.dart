@@ -11,13 +11,13 @@ abstract class DatabaseRepository<T extends Model> {
 
   /// Get all items from the database.
   Future<List<T>> all({String where}) async {
-    List<Map<String, dynamic>> results = await database.query(tableName, where: where);
+    final List<Map<String, dynamic>> results = await database.query(tableName, where: where);
     return results.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
   }
 
   /// Get item by id.
   Future<T> find(int id) async {
-    List<Map> results = await database.query(tableName, where: 'id = $id');
+    final List<Map> results = await database.query(tableName, where: 'id = $id');
     return fromDatabaseMap(results.first);
   }
 

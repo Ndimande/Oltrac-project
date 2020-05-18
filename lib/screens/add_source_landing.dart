@@ -9,7 +9,7 @@ class AddSourceLandingsScreen extends StatelessWidget {
   final SpeciesSelectMode selectionMode;
   final Haul sourceHaul;
 
-  AddSourceLandingsScreen({this.alreadySelectedLandings, this.selectionMode, this.sourceHaul});
+  const AddSourceLandingsScreen({this.alreadySelectedLandings, this.selectionMode, this.sourceHaul});
 
   Widget _buildLandingsList(List<Landing> landings) {
     final landingsNotAlreadySelected = landings
@@ -20,7 +20,7 @@ class AddSourceLandingsScreen extends StatelessWidget {
     return Builder(
       builder: (context) {
         int listIndex = 1;
-        return landingsNotAlreadySelected.length == 0
+        return landingsNotAlreadySelected.isEmpty
             ? _noUnselectedLandings()
             : Column(
                 children: landingsNotAlreadySelected.map((Landing l) {
@@ -37,7 +37,7 @@ class AddSourceLandingsScreen extends StatelessWidget {
   }
 
   Widget _noUnselectedLandings() {
-    return Center(
+    return const Center(
       child: Text('No unselected species in this haul', style: TextStyle(fontSize: 20)),
     );
   }
@@ -46,7 +46,7 @@ class AddSourceLandingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Source Species'),
+        title: const Text('Add Source Species'),
       ),
       body: _buildLandingsList(sourceHaul.landings),
     );

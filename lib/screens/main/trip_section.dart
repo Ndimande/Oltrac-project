@@ -71,12 +71,12 @@ class TripSection extends StatelessWidget {
             Container(
               child: Text(
                 'Start: ' + friendlyDateTime(trip.startedAt),
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
               ),
             ),
             Container(
               child: ElapsedCounter(
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
                 prefix: 'Duration: ',
                 startedDateTime: trip.startedAt,
               ),
@@ -100,7 +100,7 @@ class TripSection extends StatelessWidget {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(bottom: 5),
+          margin: const EdgeInsets.only(bottom: 5),
           child: IconButton(
             onPressed: onPressMasterContainerButton,
             iconSize: 22,
@@ -114,20 +114,21 @@ class TripSection extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: OlracColours.olspsBlue[50],
       child: Column(
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Row(
                   children: <Widget>[
                     NumberedBoat(number: trip.id),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     tripInfo,
                   ],
                 ),

@@ -21,6 +21,6 @@ class JsonRepository<T extends Model> {
 
   Future<Map<String, dynamic>> get(String key) async {
     final results = await _database.query(_tableName, where: "key = '$key'", limit: 1);
-    return results.length != 0 ? jsonDecode(results[0]['json']) : null;
+    return results.isNotEmpty ? jsonDecode(results[0]['json']) : null;
   }
 }

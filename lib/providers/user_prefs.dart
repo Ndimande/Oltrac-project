@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefsProvider {
   static final UserPrefsProvider _userPrefsProvider = UserPrefsProvider._();
-  SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
+  final SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
 
   UserPrefs _userPrefs;
 
@@ -48,7 +48,7 @@ class UserPrefs {
   static const String MOBILE_DATA = 'mobileData';
   static const String UPLOAD_AUTOMATICALLY = 'uploadAutomatically';
 
-  SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
+  final SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
 
   bool get mobileData => _sharedPreferences.getBool(MOBILE_DATA);
 

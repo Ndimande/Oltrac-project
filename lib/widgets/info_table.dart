@@ -5,14 +5,14 @@ class InfoTable extends StatelessWidget {
   final String title;
   final List<List<String>> data;
 
-  InfoTable({
+  const InfoTable({
     @required this.title,
     this.data = const [],
   });
 
   Widget _heading(String text) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       child: Text(
         text,
         style: TextStyle(
@@ -38,7 +38,7 @@ class InfoTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

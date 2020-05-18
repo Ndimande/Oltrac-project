@@ -9,7 +9,7 @@ class SvgIcon extends StatelessWidget {
   final double height;
   final Color color;
 
-  SvgIcon({
+  const SvgIcon({
     @required this.assetPath,
     this.width = 64,
     this.height = 64,

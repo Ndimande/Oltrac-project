@@ -21,7 +21,7 @@ class LandingFormScreen extends StatefulWidget {
   final Haul haulArg;
   final Landing landingArg;
 
-  LandingFormScreen({this.haulArg, this.landingArg});
+  const LandingFormScreen({this.haulArg, this.landingArg});
 
   @override
   State<StatefulWidget> createState() {
@@ -65,8 +65,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         _individualsController =
             TextEditingController(text: landingArg != null ? landingArg?.individuals.toString() : null),
         _selectedSpecies = landingArg?.species,
-        _bulkMode =
-            landingArg != null ? landingArg.individuals > 1 : sharedPrefs.getBool('bulkMode') ?? false;
+        _bulkMode = landingArg != null ? landingArg.individuals > 1 : sharedPrefs.getBool('bulkMode') ?? false;
 
   bool get isEditMode => landingArg != null;
 
@@ -86,7 +85,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       return 1;
     }
 
-    int individuals = int.tryParse(_individualsController.value.text);
+    final int individuals = int.tryParse(_individualsController.value.text);
 
     if (individuals == null || individuals < 2) {
       // invalid input
@@ -106,14 +105,9 @@ class LandingFormScreenState extends State<LandingFormScreen> {
     }
 
     final int weightGrams = _parseWeightInput();
-    final int lengthMicrometers = _lengthController.value.text == '' ? null: _parseLengthInput();
+    final int lengthMicrometers = _lengthController.value.text == '' ? null : _parseLengthInput();
 
     final int individuals = _parseIndividualsInput();
-
-//    if (individuals == null) {
-//      showTextSnackBar(_scaffoldKey, 'Please enter 2 or higher for individuals');
-//      return;
-//    }
 
     if (isEditMode) {
       final updatedLanding = landingArg.copyWith(
@@ -129,7 +123,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         SnackBar(
           content: const Text('Shark updated.'),
           onVisible: () async {
-            await Future.delayed(Duration(seconds: 1));
+            await Future.delayed(const Duration(seconds: 1));
             Navigator.pop(context);
           },
         ),
@@ -213,19 +207,19 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
   Widget _individualsTextInput() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.symmetric(vertical: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            margin: EdgeInsets.only(bottom: 15),
-            child: Text(
+            margin: const EdgeInsets.only(bottom: 15),
+            child: const Text(
               'Number of Individuals',
               style: textFieldTextStyle,
             ),
           ),
           TextFormField(
-            style: TextStyle(fontSize: 30),
+            style: const TextStyle(fontSize: 30),
             keyboardType: TextInputType.number,
             controller: _individualsController,
             validator: _validateIndividuals,
@@ -253,7 +247,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                   children: <Widget>[
                     Text(
                       species.englishName,
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
                     SvgIcon(
                       assetPath: SvgIcons.path(species.scientificName),
@@ -276,14 +270,14 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(bottom: 15),
+          margin: const EdgeInsets.only(bottom: 15),
           child: Text(
             _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
             style: textFieldTextStyle,
           ),
         ),
         TextFormField(
-          style: TextStyle(fontSize: 30),
+          style: const TextStyle(fontSize: 30),
           keyboardType: TextInputType.number,
           controller: _weightController,
           validator: _validateWeight,
@@ -297,14 +291,14 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          margin: EdgeInsets.only(bottom: 15),
+          margin: const EdgeInsets.only(bottom: 15),
           child: Text(
             _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
             style: textFieldTextStyle,
           ),
         ),
         TextFormField(
-          style: TextStyle(fontSize: 30),
+          style: const TextStyle(fontSize: 30),
           keyboardType: TextInputType.number,
           controller: _lengthController,
           validator: _validateLength,
@@ -339,7 +333,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -351,18 +345,21 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
                     // Weight
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 5),
+                      padding: const EdgeInsets.symmetric(vertical: 5),
                       child: _weightInput(),
                     ),
 
                     // Length
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                       child: _lengthInput(),
                     ),
 
                     // Individuals
-                    _bulkMode ? _individualsTextInput() : Container(),
+                    if (_bulkMode)
+                      _individualsTextInput()
+                    else
+                      Container(),
                   ],
                 ),
               ),

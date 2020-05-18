@@ -16,7 +16,7 @@ class LandingIcon extends StatelessWidget {
         margin: const EdgeInsets.only(left: 5, top: 5),
         child: Text(
           listIndex.toString(),
-          style: TextStyle(fontSize: 28, color: OlracColours.olspsBlue),
+          style: const TextStyle(fontSize: 28, color: OlracColours.olspsBlue),
         ),
       );
 
@@ -33,7 +33,6 @@ class LandingIcon extends StatelessWidget {
   }
 
   Widget get tagTotalIcon {
-
     final stackChildren = <Widget>[
       Container(
         child: Icon(
@@ -42,12 +41,14 @@ class LandingIcon extends StatelessWidget {
           color: _tagColor,
         ),
       ),
-      if(landing.isBulk)
+      if (landing.isBulk)
         Container(
-          margin: EdgeInsets.only(top: 25),
-          child: Text('B',style: TextStyle(color: OlracColours.olspsDarkBlue),),
+          margin: const EdgeInsets.only(top: 28),
+          child: Text(
+            'BB',
+            style: TextStyle(color: OlracColours.olspsDarkBlue,fontSize: 12),
+          ),
         ),
-
       Container(
         margin: const EdgeInsets.only(left: 8, top: 11),
         child: Container(

@@ -9,11 +9,12 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
 
 class ProductRepository extends DatabaseRepository<Product> {
-  var tableName = 'products';
+  @override
+  final String tableName = 'products';
 
   @override
   Future<Product> find(int id) async {
-    List<Map> results = await database.query(tableName, where: 'id = $id');
+    final List<Map> results = await database.query(tableName, where: 'id = $id');
     return fromDatabaseMap(results.first);
   }
 
@@ -21,7 +22,7 @@ class ProductRepository extends DatabaseRepository<Product> {
     final List<Map> results = await database.query('product_has_landings', where: 'landing_id = $landingId');
     final List products = <Product>[];
 
-    for (Map result in results) {
+    for (final Map result in results) {
       final Product product = await find(result['product_id']);
       products.add(product);
     }
@@ -32,7 +33,7 @@ class ProductRepository extends DatabaseRepository<Product> {
     final List<Map> results =
         await database.query('master_container_has_products', where: 'master_container_id = $masterContainerId');
     final List products = <Product>[];
-    for (Map result in results) {
+    for (final Map result in results) {
       final Product product = await find(result['product_id']);
       products.add(product);
     }
@@ -89,7 +90,7 @@ class ProductRepository extends DatabaseRepository<Product> {
     for (var landing in storedProduct.landings) {
       final String where = 'product_id = $createdId AND landing_id = ${landing.id}';
       final List<Map<String, dynamic>> res = await database.query('product_has_landings', where: where);
-      if (res.length == 0) {
+      if (res.isEmpty) {
         await database.insert(
           'product_has_landings',
           {'product_id': createdId, 'landing_id': landing.id},
@@ -104,7 +105,7 @@ class ProductRepository extends DatabaseRepository<Product> {
 
   Future<void> _storeLandingRelations(Product product) async {
     await _removeOldRelations(product);
-    for (Landing landing in product.landings) {
+    for (final Landing landing in product.landings) {
       await database.insert('product_has_landings', {
         'landing_id': landing.id,
         'product_id': product.id,
@@ -123,7 +124,7 @@ class ProductRepository extends DatabaseRepository<Product> {
     final List<Landing> landings = <Landing>[];
 
     final weightUnitResult = result['weight_unit'];
-    var weightUnit;
+    WeightUnit weightUnit;
     if (weightUnitResult == WeightUnit.GRAMS.toString()) {
       weightUnit = WeightUnit.GRAMS;
     } else if (weightUnitResult == WeightUnit.OUNCES.toString()) {

@@ -1,14 +1,8 @@
-import 'dart:io';
-
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
-import 'package:imei_plugin/imei_plugin.dart';
-import 'package:olrac_themes/olrac_themes.dart';
-
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_data.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
@@ -31,16 +25,16 @@ final _landingRepo = LandingRepository();
 final _productRepo = ProductRepository();
 
 Future<Trip> _getWithNested(Trip trip) async {
-  final List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
+  final List<Haul> activeTripHauls = await _haulRepo.forTrip(trip.id);
   final List<Haul> hauls = [];
   for (final Haul haul in activeTripHauls) {
-    final List<Landing> landings = await _landingRepo.forHaul(haul);
+    final List<Landing> landings = await _landingRepo.forHaul(haul.id);
     final List<Landing> landingsWithProducts = [];
     for (final Landing landing in landings) {
       final List<Product> products = await _productRepo.forLanding(landing.id);
-      landingsWithProducts.add(landing.copyWith(products: products));
+      landingsWithProducts.add(landing.copyWith(landings: products));
     }
-    hauls.add(haul.copyWith(products: landingsWithProducts));
+    hauls.add(haul.copyWith(landings: landingsWithProducts));
   }
   final Trip tripWithNested = trip.copyWith(hauls: hauls);
 
@@ -157,7 +151,7 @@ class TripScreenState extends State<TripScreen> {
 
   Future<bool> _confirmUseMobileData() async => await showDialog<bool>(
         context: context,
-        builder: (_) => ConfirmDialog(
+        builder: (_) => const ConfirmDialog(
             'Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
       );
 

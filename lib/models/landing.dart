@@ -65,7 +65,6 @@ class Landing extends Model {
 
   @override
   Landing copyWith({
-    int id,
     String tagId,
     int haulId,
     Species species,
@@ -73,7 +72,7 @@ class Landing extends Model {
     Location location,
     int weight,
     int length,
-    List<Product> products,
+    List<Product> landings,
     WeightUnit weightUnit,
     LengthUnit lengthUnit,
     int individuals,
@@ -81,14 +80,13 @@ class Landing extends Model {
     bool isBulk,
   }) {
     return Landing(
-      id: id ?? this.id,
       haulId: haulId ?? this.haulId,
       species: species ?? this.species,
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
       weight: weight ?? this.weight,
       length: length ?? this.length,
-      products: products ?? this.products,
+      products: landings ?? this.products,
       weightUnit: weightUnit ?? this.weightUnit,
       lengthUnit: lengthUnit ?? this.lengthUnit,
       individuals: individuals ?? this.individuals,
@@ -97,6 +95,7 @@ class Landing extends Model {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

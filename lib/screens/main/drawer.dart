@@ -3,7 +3,7 @@ import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_data.dart';
 import 'package:oltrace/models/profile.dart';
 
-final double _drawerItemFontSize = 22;
+const double _drawerItemFontSize = 22;
 const double drawerLabelFontSize = 20;
 const double drawerTextFontSize = 26;
 
@@ -17,7 +17,7 @@ Widget _drawerHeader(Profile profile) {
       ),
       Text(
         profile.vesselName,
-        style: TextStyle(fontSize: drawerTextFontSize),
+        style: const TextStyle(fontSize: drawerTextFontSize),
         overflow: TextOverflow.ellipsis,
       ),
     ],
@@ -32,7 +32,7 @@ Widget _drawerHeader(Profile profile) {
       ),
       Text(
         profile.skipper.firstName + ' ' + profile.skipper.lastName,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: drawerTextFontSize,
         ),
         overflow: TextOverflow.ellipsis,
@@ -41,15 +41,15 @@ Widget _drawerHeader(Profile profile) {
   );
 
   return DrawerHeader(
-    padding: EdgeInsets.all(0),
-    margin: EdgeInsets.all(0),
+    padding: const EdgeInsets.all(0),
+    margin: const EdgeInsets.all(0),
     child: Container(
-      padding: EdgeInsets.all(15),
+      padding: const EdgeInsets.all(15),
       color: OlracColours.olspsBlue[50],
       child: Stack(
         children: <Widget>[
           Container(
-            child: Image(
+            child: const Image(
               image: AssetImage('assets/images/olsps-logo.png'),
               width: 100,
             ),
@@ -63,7 +63,7 @@ Widget _drawerHeader(Profile profile) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   vesselName,
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   skipperName,
                 ],
               ),

@@ -1,6 +1,4 @@
 import 'package:connectivity/connectivity.dart';
-import 'package:imei_plugin/imei_plugin.dart';
-import 'package:oltrace/app_data.dart';
 import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/trip_upload.dart';

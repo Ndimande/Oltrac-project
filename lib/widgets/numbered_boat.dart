@@ -7,7 +7,8 @@ class NumberedBoat extends StatelessWidget {
   final int number;
   final double size;
   final Color color;
-  NumberedBoat({this.number, this.size = 64, this.color = OlracColours.olspsBlue});
+
+  const NumberedBoat({this.number, this.size = 64, this.color = OlracColours.olspsBlue});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class NumberedBoat extends StatelessWidget {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 10),
+          margin: const EdgeInsets.only(top: 10),
           child: Text(
             number.toString(),
             style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),

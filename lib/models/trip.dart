@@ -52,6 +52,7 @@ class Trip extends Model {
         masterContainers = (data['masterContainers'] as List).map((mc) => MasterContainer.fromMap(mc)).toList(),
         super.fromMap(data);
 
+  @override
   Trip copyWith({
     int id,
     Profile vessel,
@@ -75,6 +76,7 @@ class Trip extends Model {
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

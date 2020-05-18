@@ -22,10 +22,10 @@ abstract class Model {
 
   /// Get the model as a string.
   @override
-  String toString() => this.toMap().toString();
+  String toString() => toMap().toString();
 
   /// Convert the model to a json string.
-  String toJson() => jsonEncode(this.toMap());
+  String toJson() => jsonEncode(toMap());
 
   @override
   bool operator ==(other) => other.id?.hashCode == id?.hashCode;

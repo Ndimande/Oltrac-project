@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
@@ -117,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
     _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: MaterialColor(0xFF086178, {}),
+      backgroundColor: const MaterialColor(0xFF086178, {}),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[

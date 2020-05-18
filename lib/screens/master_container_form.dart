@@ -41,12 +41,12 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _renderObjectKey = GlobalKey();
 
-  List<Product> _childProducts = <Product>[];
+  final List<Product> _childProducts = <Product>[];
   String _tagCode;
   String _qrLabel() => 'Master Container (${_childProducts.length} tags)';
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     _tagCode = randomTagCode();
   }
@@ -114,15 +114,15 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
   }
 
   Future<void> _onLongPressQrCode() async {
-    bool success = await _exportQR();
+    final bool success = await _exportQR();
     if (success) {
       util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
     }
   }
 
   Widget _productList() {
-    if (_childProducts.length == 0) {
-      return Text('No source tags');
+    if (_childProducts.isEmpty) {
+      return const Text('No source tags');
     }
     return SingleChildScrollView(
       child: Column(
@@ -146,7 +146,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
           child: StripButton(
             color: OlracColours.ninetiesGreen,
             onPressed: _onPressSave,
-            disabled: _childProducts.length == 0 || _tagCode == '',
+            disabled: _childProducts.isEmpty || _tagCode == '',
             labelText: 'Save',
             icon: Icon(
               Icons.save,
@@ -204,7 +204,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('New Master Container'),
+        title: const Text('New Master Container'),
       ),
       body: _body(),
     );
@@ -215,7 +215,7 @@ class _AddProductsScreen extends StatefulWidget {
   final List<Product> alreadySelectedProducts;
   final int sourceTripId;
 
-  _AddProductsScreen({this.alreadySelectedProducts = const [], this.sourceTripId}) : assert(sourceTripId != null);
+  const _AddProductsScreen({this.alreadySelectedProducts = const [], @required this.sourceTripId}) : assert(sourceTripId != null);
 
   @override
   _AddProductsScreenState createState() => _AddProductsScreenState(alreadySelectedProducts);
@@ -245,7 +245,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
   }
 
   Widget _noProducts() {
-    return Center(
+    return const Center(
       child: Text('No eligble tags in this Trip'),
     );
   }
@@ -272,14 +272,14 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
   Widget _bottomButton() {
     return StripButton(
       icon: Icon(Icons.add),
-      color: _selectedProducts.length == 0 ? Colors.grey : OlracColours.ninetiesGreen,
+      color: _selectedProducts.isEmpty ? Colors.grey : OlracColours.ninetiesGreen,
       labelText: 'Add Selected',
-      onPressed: _selectedProducts.length == 0 ? null : _onPressAddSelectedStripButton,
+      onPressed: _selectedProducts.isEmpty ? null : _onPressAddSelectedStripButton,
     );
   }
 
   Widget _body() {
-    if (_products.length == 0) {
+    if (_products.isEmpty) {
       return _noProducts();
     }
     return Column(
@@ -297,7 +297,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
 
     if (nSelected == 0) {
       return AppBar(
-        title: Text('Select Products'),
+        title: const Text('Select Products'),
       );
     }
 
@@ -332,7 +332,7 @@ class _AddProductsScreenState extends State<_AddProductsScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
         _products = snapshot.data as List<Product>;
 

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_data.dart';
-import 'package:oltrace/app_data.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -24,7 +23,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   void initState() {
-    _longPressTimer = Timer.periodic(Duration(seconds: 1), _onTimerTick);
+    _longPressTimer = Timer.periodic(const Duration(seconds: 1), _onTimerTick);
     super.initState();
   }
 
@@ -97,9 +96,9 @@ class _AboutScreenState extends State<AboutScreen> {
   Widget _olspsLogo() {
     return Container(
       child: FlatButton(
-        padding: EdgeInsets.all(15),
+        padding: const EdgeInsets.all(15),
         onPressed: _launchOLSPSSite,
-        child: Image(
+        child: const Image(
           image: AssetImage('assets/images/olsps-logo.png'),
           width: 120,
         ),
@@ -115,7 +114,7 @@ class _AboutScreenState extends State<AboutScreen> {
       width: 120,
     );
     return Container(
-      padding: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       child: logo,
       alignment: Alignment.bottomCenter,
     );
@@ -129,8 +128,8 @@ class _AboutScreenState extends State<AboutScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             _sharkTrackLogo(),
-            Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: TextStyle(fontSize: 30)),
-            Text('Onboard', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
+            Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: const TextStyle(fontSize: 30)),
+            const Text('Onboard', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
             Text(_version),
             Text(_copyright, textAlign: TextAlign.center),
             _backButton(),

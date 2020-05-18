@@ -82,6 +82,7 @@ class Species extends Model {
         caabCode: caabCode ?? this.caabCode);
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

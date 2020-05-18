@@ -25,15 +25,17 @@ class FishingMethod extends Model {
         type = data['type'],
         super.fromMap(data);
 
-  FishingMethod copyWith({String englishName, String abbreviation, FishingMethodType type}) {
+  @override
+  FishingMethod copyWith({String name, String abbreviation, FishingMethodType type}) {
     return FishingMethod(
       id: id ?? this.id,
-      name: englishName ?? this.name,
+      name: name ?? this.name,
       abbreviation: abbreviation ?? this.abbreviation,
       type: type ?? this.type,
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

@@ -8,7 +8,7 @@ class DateTimeEditor extends StatelessWidget {
   final Function onChanged;
   final Text title;
 
-  DateTimeEditor({
+  const DateTimeEditor({
     @required this.title,
     @required this.initialDateTime,
     @required this.onChanged,
@@ -16,7 +16,7 @@ class DateTimeEditor extends StatelessWidget {
         assert(initialDateTime != null),
         assert(onChanged != null);
 
-  _onPressEditStartDateTime(BuildContext context) {
+  void _onPressEditStartDateTime(BuildContext context) {
     final adapter = DateTimePickerAdapter(
       type: PickerDateTimeType.kYMDHM,
       value: initialDateTime,
@@ -44,10 +44,10 @@ class DateTimeEditor extends StatelessWidget {
           Row(
             children: <Widget>[
               FlatButton(
-                padding: EdgeInsets.all(0),
+                padding: const EdgeInsets.all(0),
                 child: Text(
                   friendlyDateTime(initialDateTime),
-                  style: TextStyle(fontSize: 28),
+                  style: const TextStyle(fontSize: 28),
                 ),
                 onPressed: () => _onPressEditStartDateTime(context),
               )

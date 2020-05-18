@@ -1,6 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:dio/adapter.dart';
 import 'dart:io';
+
+import 'package:dio/adapter.dart';
+import 'package:dio/dio.dart';
 
 class DioProvider {
   static final DioProvider _provider = DioProvider._();

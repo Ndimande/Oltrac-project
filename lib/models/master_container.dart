@@ -38,18 +38,20 @@ class MasterContainer extends Model {
         tripId = data['tripId'],
         super.fromMap(data);
 
+  @override
   MasterContainer copyWith(
-      {int id, String tagId, DateTime createdAt, Location location, List<Product> products, int tripId}) {
+      {int id, String tagId, DateTime createdAt, Location location, List<Product> landings, int tripId}) {
     return MasterContainer(
       id: id ?? this.id,
-      tagCode: tagId ?? this.tagCode,
+      tagCode: tagId ?? tagCode,
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
-      products: products ?? this.products,
+      products: landings ?? this.products,
       tripId: tripId ?? this.tripId,
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

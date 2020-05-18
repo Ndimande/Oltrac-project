@@ -142,7 +142,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
 
   Widget _resetApp() {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Column(
         children: <Widget>[
           const Text('Reset App Data', style: TextStyle(color: OlracColours.ninetiesRed, fontSize: 24)),
@@ -159,7 +159,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
               await _resetDatabase();
               await Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (Route<dynamic> route) => false);
             },
-            child: Text('Reset App'),
+            child: const Text('Reset App'),
           ),
         ],
       ),
@@ -249,7 +249,7 @@ class _TripUploadListItem extends StatelessWidget {
       children: <Widget>[
         SelectableText(
           _json(),
-          style: TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 12),
         )
       ],
     );

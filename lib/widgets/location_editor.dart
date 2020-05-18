@@ -10,7 +10,7 @@ class LocationEditor extends StatelessWidget {
   final Text title;
   final Function(Location) onChanged;
 
-  LocationEditor({
+  const LocationEditor({
     this.location,
     this.title,
     this.onChanged,
@@ -39,7 +39,7 @@ class LocationEditor extends StatelessWidget {
         children: <Widget>[
           Container(
             child: title,
-            padding: EdgeInsets.symmetric(vertical: 5),
+            padding: const EdgeInsets.symmetric(vertical: 5),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,7 +65,7 @@ class _CoordinatePicker extends StatelessWidget {
   final CoordinateOrientation orientation;
   final Function(double) onPressConfirm;
 
-  _CoordinatePicker({@required this.orientation, this.onPressConfirm, @required this.decimalValue})
+  const _CoordinatePicker({@required this.orientation, @required this.onPressConfirm, @required this.decimalValue})
       : assert(orientation != null),
         assert(onPressConfirm != null),
         assert(decimalValue != null);
@@ -108,7 +108,7 @@ class _CoordinatePicker extends StatelessWidget {
       degreeIndex,
       minuteIndex,
       secondsIndex,
-      decimalValue < 0 ? 1 : 0,
+      if (decimalValue < 0) 1 else 0,
     ];
 
     return Picker(
@@ -133,7 +133,7 @@ class _CoordinatePicker extends StatelessWidget {
           decoration: decoration,
           width: 220,
           child: FlatButton(
-            padding: EdgeInsets.symmetric(vertical: 5),
+            padding: const EdgeInsets.symmetric(vertical: 5),
             onPressed: () {
               _picker().showModal(context);
             },
@@ -141,7 +141,7 @@ class _CoordinatePicker extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _title,
-                Text(coordinate.sexagesimalString, style: TextStyle(fontSize: 28)),
+                Text(coordinate.sexagesimalString, style: const TextStyle(fontSize: 28)),
               ],
             ),
           ),
@@ -191,5 +191,5 @@ List<List<String>> _pickerData(CoordinateOrientation orientation) => [
       _addSymbol(_degreesRange(orientation), '°'),
       _addSymbol(_minutesRange, "'"),
       _addSymbol(_secondsRange, "''"),
-      orientation == CoordinateOrientation.Latitude ? ['N', 'S'] : ['E', 'W']
+      if (orientation == CoordinateOrientation.Latitude) ['N', 'S'] else ['E', 'W']
     ];

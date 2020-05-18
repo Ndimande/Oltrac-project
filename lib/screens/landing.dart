@@ -26,10 +26,9 @@ Future<Map<String, dynamic>> _load(int landingId) async {
 
   final Trip activeTrip = await _tripRepository.getActive();
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
-  final List<Product> products = await _productRepository.forLanding(landingId);
 
   return {
-    'landing': landing.copyWith(products: products),
+    'landing': landing,
     'isActiveTrip': isActiveTrip,
   };
 }
@@ -38,7 +37,7 @@ class LandingScreen extends StatefulWidget {
   final int landingId;
   final int listIndex;
 
-  LandingScreen({
+  const LandingScreen({
     @required this.landingId,
     @required this.listIndex,
   })  : assert(landingId != null),
@@ -61,48 +60,24 @@ class LandingScreenState extends State<LandingScreen> {
   Future<void> _onPressTagProduct() async {
     final Haul haul = await HaulRepository().find(_landing.haulId);
 
-    final List<Landing> landings = await _landingRepository.forHaul(haul);
+    final List<Landing> landings = await _landingRepository.forHaul(haul.id);
     final List<Landing> withProducts = [];
-    for (Landing landing in landings) {
+    for (final Landing landing in landings) {
       final List<Product> products = await _productRepository.forLanding(landing.id);
-      withProducts.add(landing.copyWith(products: products));
+      withProducts.add(landing.copyWith(landings: products));
     }
     // add prods
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: {
       'landings': [_landing],
-      'haul': haul.copyWith(products: withProducts),
+      'haul': haul.copyWith(landings: withProducts),
     });
     setState(() {});
   }
 
-  Widget get deleteButton => Expanded(
-        child: StripButton(
-          onPressed: _onPressDelete,
-          labelText: 'Delete',
-          color: OlracColours.ninetiesRed,
-          icon: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
-        ),
-      );
-
-  Widget get editButton => Expanded(
-        child: StripButton(
-          onPressed: _onPressEdit,
-          labelText: 'Edit',
-          color: OlracColours.olspsBlue,
-          icon: Icon(
-            Icons.edit,
-            color: Colors.white,
-          ),
-        ),
-      );
-
   Future<void> _onPressDelete() async {
     final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
-      builder: (_) => ConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
+      builder: (_) => const ConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
     );
     if (!confirmed) {
       return;
@@ -167,7 +142,7 @@ class LandingScreenState extends State<LandingScreen> {
       return Container();
     }
     return Row(
-      children: <Widget>[deleteButton, editButton],
+      children: <Widget>[_deleteButton(_onPressDelete), _editButton(_onPressEdit)],
     );
   }
 
@@ -219,8 +194,7 @@ class LandingScreenState extends State<LandingScreen> {
 
   Widget _appBar() {
     return AppBar(
-      title:
-          Text(_landing.isBulk ? '${_landing.species.englishName} (Bulk bin)' : _landing.species.englishName),
+      title: Text(_landing.isBulk ? '${_landing.species.englishName} (Bulk bin)' : _landing.species.englishName),
     );
   }
 
@@ -235,7 +209,7 @@ class LandingScreenState extends State<LandingScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
 
         final Map data = snapshot.data;
@@ -251,3 +225,27 @@ class LandingScreenState extends State<LandingScreen> {
     );
   }
 }
+
+Widget _deleteButton(onPressed) => Expanded(
+      child: StripButton(
+        onPressed: onPressed,
+        labelText: 'Delete',
+        color: OlracColours.ninetiesRed,
+        icon: Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
+      ),
+    );
+
+Widget _editButton(onPressed) => Expanded(
+      child: StripButton(
+        onPressed: onPressed,
+        labelText: 'Edit',
+        color: OlracColours.olspsBlue,
+        icon: Icon(
+          Icons.edit,
+          color: Colors.white,
+        ),
+      ),
+    );

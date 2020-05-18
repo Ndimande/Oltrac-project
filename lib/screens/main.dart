@@ -2,7 +2,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
-import 'package:oltrace/app_data.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
@@ -22,10 +21,10 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/screens/fishing_method.dart';
-import 'package:oltrace/screens/main/static_haul_details_alert_dialog.dart';
 import 'package:oltrace/screens/main/drawer.dart';
 import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
+import 'package:oltrace/screens/main/static_haul_details_alert_dialog.dart';
 import 'package:oltrace/screens/main/trip_section.dart';
 import 'package:oltrace/screens/master_containers.dart';
 import 'package:oltrace/services/trip_upload.dart';
@@ -40,16 +39,16 @@ final _productRepo = ProductRepository();
 final _locationProvider = LocationProvider();
 
 Future<Trip> _addNestedData(Trip trip) async {
-  List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
+  final List<Haul> activeTripHauls = await _haulRepo.forTrip(trip.id);
   final List<Haul> hauls = [];
   for (Haul haul in activeTripHauls) {
-    final List<Landing> landings = await _landingRepo.forHaul(haul);
+    final List<Landing> landings = await _landingRepo.forHaul(haul.id);
     final List<Landing> landingWithProducts = [];
     for (Landing landing in landings) {
       final List<Product> products = await _productRepo.forLanding(landing.id);
-      landingWithProducts.add(landing.copyWith(products: products));
+      landingWithProducts.add(landing.copyWith(landings: products));
     }
-    hauls.add(haul.copyWith(products: landingWithProducts));
+    hauls.add(haul.copyWith(landings: landingWithProducts));
   }
   return trip.copyWith(hauls: hauls);
 }
@@ -169,7 +168,7 @@ class MainScreenState extends State<MainScreen> {
 
   /// When the "End Haul" bottom button is pressed.
   Future<void> _onPressEndStripButton() async {
-    bool confirmed = await showDialog<bool>(
+    final bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (_) => ConfirmDialog(Messages.endHaulTitle(activeHaul), Messages.endHaulDialogContent(activeHaul)),
@@ -252,7 +251,7 @@ class MainScreenState extends State<MainScreen> {
 
   Future<void> _onPressEndTrip() async {
     if (activeHaul != null) {
-      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('You must first end hauling/fishing')));
+      _scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('You must first end hauling/fishing')));
       return;
     }
 
@@ -332,7 +331,7 @@ class MainScreenState extends State<MainScreen> {
 
   Widget get _appBarDate {
     return Container(
-      margin: EdgeInsets.only(right: 10),
+      margin: const EdgeInsets.only(right: 10),
       alignment: Alignment.center,
       child: Text(friendlyDate(DateTime.now())),
     );
@@ -436,7 +435,7 @@ class MainScreenState extends State<MainScreen> {
           if (snapshot.hasError) throw Exception(snapshot.error.toString());
 
           // Show blank screen until ready
-          if (!snapshot.hasData) return Scaffold();
+          if (!snapshot.hasData) return const Scaffold();
 
           activeTrip = snapshot.data['activeTrip'] as Trip;
           activeHaul = snapshot.data['activeHaul'] as Haul;

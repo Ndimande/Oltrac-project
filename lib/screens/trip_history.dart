@@ -12,13 +12,12 @@ Future<Map> _load() async {
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
 
   final List<Trip> tripsWithHauls = [];
-  for(Trip trip in completedTrips) {
-    List<Haul> hauls = await _haulRepo.forTripId(trip.id);
+  for (Trip trip in completedTrips) {
+    final List<Haul> hauls = await _haulRepo.forTrip(trip.id);
     tripsWithHauls.add(trip.copyWith(hauls: hauls));
   }
-  return {'completedTrips':tripsWithHauls};
+  return {'completedTrips': tripsWithHauls};
 }
-
 
 class TripHistoryScreen extends StatefulWidget {
   @override
@@ -29,15 +28,11 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
   List<Trip> _completedTrips;
 
   Widget _buildBottomSection() {
-    final List<Trip> trips =
-        _completedTrips.reversed.where((Trip trip) => trip.endedAt != null).toList();
+    final List<Trip> trips = _completedTrips.reversed.where((Trip trip) => trip.endedAt != null).toList();
 
-    if (trips.length == 0) {
+    if (trips.isEmpty) {
       return Container(
-        child: Text(
-          'No completed trips',
-          style: TextStyle(fontSize: 18),
-        ),
+        child: const Text('No completed trips', style: TextStyle(fontSize: 18)),
         alignment: Alignment.center,
       );
     }
@@ -56,7 +51,6 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder(
       future: _load(),
       initialData: null,
@@ -66,22 +60,19 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
 
         _completedTrips = snapshot.data['completedTrips'] as List<Trip>;
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text('Trip History'),
-          ),
-          body: Container(
-            child: _buildBottomSection(),
-          ));
-
+            appBar: AppBar(
+              title: const Text('Trip History'),
+            ),
+            body: Container(
+              child: _buildBottomSection(),
+            ));
       },
     );
-
-
   }
 }

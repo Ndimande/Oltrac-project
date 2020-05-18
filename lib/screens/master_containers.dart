@@ -98,7 +98,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
         final Map data = snapshot.data;
         _masterContainers = data['masterContainers'];

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-final _updateInterval = Duration(milliseconds: 1000);
+const _updateInterval = Duration(milliseconds: 1000);
 
 class HaulSubtitle extends StatefulWidget {
   final DateTime startedAt;
@@ -11,7 +11,7 @@ class HaulSubtitle extends StatefulWidget {
   final int totalProducts;
   final int totalWeight;
 
-  HaulSubtitle({
+  const HaulSubtitle({
     @required this.totalProducts,
     @required this.totalWeight,
     @required this.startedAt,

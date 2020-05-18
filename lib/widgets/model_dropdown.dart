@@ -37,7 +37,7 @@ class ModelDropdown<T> extends StatelessWidget {
           DropdownButton<T>(
             hint: Text(
               hint ?? 'Tap to select',
-              style: TextStyle(fontSize: 22),
+              style: const TextStyle(fontSize: 22),
             ),
             isExpanded: true,
             style: TextStyle(fontSize: 22, color: Colors.black),

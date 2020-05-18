@@ -13,10 +13,10 @@ class GroupedHaulsList extends StatelessWidget {
   final Function onPressHaul;
   final Function(int, int) onPressHaulItem;
 
-  GroupedHaulsList({
-    this.hauls,
+  const GroupedHaulsList({
+    @required this.hauls,
     this.onPressHaul,
-    this.onPressHaulItem,
+    @required this.onPressHaulItem,
     this.isActiveTrip = false,
   })  : assert(hauls != null),
         assert(onPressHaulItem != null);
@@ -55,9 +55,7 @@ class GroupedHaulsList extends StatelessWidget {
             title: Row(
               children: <Widget>[
                 svg,
-                SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10),
                 Container(
                   width: 220,
                   child: Text(

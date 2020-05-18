@@ -57,7 +57,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   final TextEditingController _tagCodeController = TextEditingController();
 
   CreateProductScreenState(List<Landing> initialSourceLandings)
-      : this._sourceLandings = initialSourceLandings != null ? initialSourceLandings : [];
+      : _sourceLandings = initialSourceLandings ?? [];
 
   @override
   void initState() {
@@ -92,7 +92,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   List<String> getValidationErrors() {
-    List<String> errorMessages = [];
+    final List<String> errorMessages = [];
     if (_productUnitsController.value == null || _productUnitsController.value.text == '') {
       errorMessages.add('Invalid quantity.');
     }
@@ -101,7 +101,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       errorMessages.add('No RFID tag has been scanned.');
     }
 
-    if (_sourceLandings.length == 0) {
+    if (_sourceLandings.isEmpty) {
       errorMessages.add('You must select at least one source tag.');
     }
 
@@ -120,12 +120,12 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       errorMessages.add('Invalid Quantity');
     }
 
-    if (errorMessages.length != 0) {
-      showTextSnackBar(_scaffoldKey, errorMessages.join("\n"));
+    if (errorMessages.isNotEmpty) {
+      showTextSnackBar(_scaffoldKey, errorMessages.join('\n'));
       return;
     }
 
-    Position position = await widget.geoLocator.getCurrentPosition();
+    final Position position = await widget.geoLocator.getCurrentPosition();
 
     final product = Product(
       tagCode: _tagCode,
@@ -138,7 +138,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
 
     // Create a product
-    final int savedProductId = await widget._productRepository.store(product.copyWith(products: _sourceLandings));
+    final int savedProductId = await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
     final Product savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {
@@ -149,7 +149,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       _tagCodeController.clear();
     });
 
-    DialogResult result = await _showProductSavedDialog(savedProduct);
+    final DialogResult result = await _showProductSavedDialog(savedProduct);
     if (result == DialogResult.Yes) {
       return;
     }
@@ -159,7 +159,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       return;
     } else if (result == DialogResult.DoneTagging) {
       // mark all source landings done
-      for (Landing landing in _sourceLandings) {
+      for (final Landing landing in _sourceLandings) {
         await _landingRepo.store(landing.copyWith(doneTagging: true));
       }
     }
@@ -188,9 +188,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
     // If there are changes warn the user before navigating away
     if (changed) {
-      bool confirmed = await showDialog<bool>(
+      final bool confirmed = await showDialog<bool>(
         context: _scaffoldKey.currentContext,
-        builder: (_) => ConfirmDialog(
+        builder: (_) => const ConfirmDialog(
           'Cancel',
           'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?',
         ),
@@ -210,23 +210,23 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        contentPadding: EdgeInsets.all(15),
+        contentPadding: const EdgeInsets.all(15),
         actions: <Widget>[
           Container(
             child: FlatButton(
-              child: Text('Yes', style: actionStyle),
+              child: const Text('Yes', style: actionStyle),
               onPressed: _onPressDialogYes,
             ),
           ),
           Container(
             child: FlatButton(
-              child: Text('Not now', style: actionStyle),
+              child: const Text('Not now', style: actionStyle),
               onPressed: _onPressDialogNo,
             ),
           ),
           Container(
             child: FlatButton(
-              child: Text('Completed', style: actionStyle),
+              child: const Text('Completed', style: actionStyle),
               onPressed: _onPressDialogDone,
             ),
           ),
@@ -245,10 +245,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 ),
                 Text(
                   '${product.productType.name} Tag\n${product.tagCode}\nsaved!',
-                  style: TextStyle(fontSize: 26),
+                  style: const TextStyle(fontSize: 26),
                   textAlign: TextAlign.center,
                 ),
-                Text(
+                const Text(
                   'Do you want to create another product?',
                   style: TextStyle(fontSize: 20),
                   textAlign: TextAlign.center,
@@ -272,7 +272,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
               labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               helperText: 'The total number of products associated with the tag',
             ),
-            style: TextStyle(fontSize: 30),
+            style: const TextStyle(fontSize: 30),
             keyboardType: TextInputType.number,
             controller: _productUnitsController,
             validator: (value) {
@@ -297,7 +297,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       children: _sourceLandings
           .map<Widget>(
             (Landing sl) => Container(
-              decoration: new BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
+              decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
               child: SharkInfoCard(showIndex: false, landing: sl, listIndex: 1),
               height: 80,
             ),
@@ -309,7 +309,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   Widget _tagCodeInput() {
     return Container(
       alignment: Alignment.centerLeft,
-      padding: EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -317,7 +317,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
             controller: _tagCodeController,
             textCapitalization: TextCapitalization.words,
             autocorrect: false,
-            style: TextStyle(fontSize: 30),
+            style: const TextStyle(fontSize: 30),
             decoration: InputDecoration(
               labelText: 'Tag code',
               labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -394,7 +394,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       onWillPop: () async => await onWillPop,
       child: Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(title: Text('Tag Product')),
+        appBar: AppBar(title: const Text('Tag Product')),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -406,19 +406,19 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                     _sourceLandingsList(),
                     //Product Type
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                       child: _productTypeDropdown(),
                     ),
 
                     // Packaging
-                    Container(padding: EdgeInsets.symmetric(horizontal: 15), child: _packagingTypeDropdown()),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), child: _packagingTypeDropdown()),
 
                     // Quantity
-                    Container(padding: EdgeInsets.symmetric(horizontal: 15), child: _productUnitsTextInput()),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), child: _productUnitsTextInput()),
 
                     // Tag code
-                    _productType == null || _packagingType == null ? Container() : _tagCodeInput(),
-                    SizedBox(height: 10),
+                    if (_productType == null || _packagingType == null) Container() else _tagCodeInput(),
+                    const SizedBox(height: 10),
                     // Space for FAB
                   ],
                 ),

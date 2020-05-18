@@ -9,7 +9,7 @@ class MasterContainerListItem extends StatelessWidget {
   final Function(int) onTap;
   final bool selected;
 
-  MasterContainerListItem({
+  const MasterContainerListItem({
     this.masterContainer,
     this.onTap,
     this.selected = false,

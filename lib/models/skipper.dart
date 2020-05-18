@@ -8,9 +8,10 @@ class Skipper extends Model {
 
   const Skipper({@required this.firstName, @required this.lastName});
 
-  Skipper copyWith({String englishName, String lastName}) {
+  @override
+  Skipper copyWith({String firstName, String lastName}) {
     return Skipper(
-      firstName: englishName ?? this.firstName,
+      firstName: firstName ?? firstName,
       lastName: lastName ?? this.lastName,
     );
   }
@@ -20,6 +21,7 @@ class Skipper extends Model {
         lastName = data['lastName'],
         super.fromMap(data);
 
+  @override
   Map<String, dynamic> toMap() {
     return {'firstName': firstName, 'lastName': lastName};
   }

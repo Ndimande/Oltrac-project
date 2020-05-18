@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// How frequently the text is updated
-final _updateInterval = Duration(milliseconds: 1000);
+const _updateInterval = Duration(milliseconds: 1000);
 
 class ElapsedCounter extends StatefulWidget {
   final DateTime startedDateTime;
@@ -11,7 +11,7 @@ class ElapsedCounter extends StatefulWidget {
   final String prefix;
   final String suffix;
 
-  ElapsedCounter({
+  const ElapsedCounter({
     this.startedDateTime,
     this.style,
     this.prefix = '',

@@ -17,13 +17,13 @@ Future<MasterContainer> _load(int id) async {
   final MasterContainer masterContainer = await _masterContainerRepo.find(id);
 
   final List<Product> products = await _productRepository.forMasterContainer(id);
-  return masterContainer.copyWith(products: products);
+  return masterContainer.copyWith(landings: products);
 }
 
 class MasterContainerScreen extends StatefulWidget {
   final int masterContainerId;
 
-  MasterContainerScreen({@required this.masterContainerId}) : assert(masterContainerId != null);
+  const MasterContainerScreen({@required this.masterContainerId}) : assert(masterContainerId != null);
 
   @override
   _MasterContainerScreenState createState() => _MasterContainerScreenState();
@@ -45,20 +45,20 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
   Widget _details() {
     return Container(
       color: OlracColours.olspsBlue[50],
-      padding: EdgeInsets.all(15),
+      padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             masterContainer.tagCode,
-            style: TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 20),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 util.friendlyDateTime(masterContainer.createdAt),
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
               ),
               LocationButton(location: masterContainer.location),
             ],
@@ -69,8 +69,8 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
   }
 
   Widget _productList() {
-    if (masterContainer.products.length == 0) {
-      return Text('No Source products');
+    if (masterContainer.products.isEmpty) {
+      return const Text('No Source products');
     }
     return Column(
       children: masterContainer.products.map<Widget>((Product product) {
@@ -107,12 +107,12 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
         masterContainer = snapshot.data;
         return Scaffold(
           appBar: AppBar(
-            title: Text('Master Container'),
+            title: const Text('Master Container'),
           ),
           body: _body(),
         );
