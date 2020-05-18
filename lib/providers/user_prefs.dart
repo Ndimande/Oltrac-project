@@ -22,6 +22,7 @@ class UserPrefsProvider {
   }
 
   void init() {
+    // todo improve
     if (_userPrefs == null) {
       final Map defaults = AppConfig.defaultUserSettings;
       String key;

@@ -30,7 +30,7 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   final Trip activeTrip = await _tripRepo.getActive();
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
   final List<Landing> landings = await _landingRepo.forHaul(haul.id);
-  final List<Landing> landingsWithProducts = [];
+
 
   final List<Product> flatProducts = [];
 
@@ -42,11 +42,10 @@ Future<Map<String, dynamic>> _load(int haulId) async {
         flatProducts.add(product);
       }
     }
-    landingsWithProducts.add(landing.copyWith(landings: products));
   }
 
   return {
-    'haul': haul.copyWith(landings: landingsWithProducts),
+    'haul': haul,
     'products': flatProducts,
     'isActiveTrip': isActiveTrip,
   };
@@ -191,7 +190,7 @@ class HaulScreenState extends State<HaulScreen> {
 
   bool _landingIsSelected(Landing landing) {
     final Landing found = _selectedLandings.singleWhere((l) => l.id == landing.id, orElse: () => null);
-    return found == null ? false : true;
+    return found != null;
   }
 
   void _onLongPressLanding(int indexPressed) {

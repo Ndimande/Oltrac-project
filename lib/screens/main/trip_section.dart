@@ -11,7 +11,6 @@ class TripSection extends StatelessWidget {
   final Trip trip;
   final bool hasActiveHaul;
   final Function onPressEndTrip;
-  final Function onPressCancelTrip;
   final Function onPressEditTrip;
   final Function onPressMasterContainerButton;
 
@@ -19,7 +18,6 @@ class TripSection extends StatelessWidget {
     @required this.trip,
     @required this.hasActiveHaul,
     @required this.onPressEndTrip,
-    @required this.onPressCancelTrip,
     @required this.onPressEditTrip,
     @required this.onPressMasterContainerButton,
   }) : assert(onPressMasterContainerButton != null);
@@ -31,18 +29,6 @@ class TripSection extends StatelessWidget {
           onPressed: () async => await onPressEndTrip(),
           icon: Icon(
             Icons.stop,
-            color: Colors.white,
-          ),
-        );
-      });
-
-  Widget get cancelTripButton => Builder(builder: (BuildContext context) {
-        return StripButton(
-          labelText: 'Cancel',
-          color: hasActiveHaul ? Colors.grey : OlracColours.olspsBlue,
-          onPressed: () async => await onPressCancelTrip(),
-          icon: Icon(
-            Icons.cancel,
             color: Colors.white,
           ),
         );

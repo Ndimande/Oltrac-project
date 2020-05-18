@@ -27,7 +27,7 @@ class LandingRepository extends DatabaseRepository<Landing> {
     final List<Map> results = await database.query(tableName, where: 'id = $id');
     final Landing landing = fromDatabaseMap(results.first);
     final List<Product> products = await ProductRepository().forLanding(landing.id);
-    return landing.copyWith(landings: products);
+    return landing.copyWith(products: products);
   }
 
   @override
@@ -46,8 +46,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
     return landings;
   }
 
-  Future<List<Landing>> forProduct(Product product) async {
-    final List<Map> results = await database.query('product_has_landings', where: 'product_id = ${product.id}');
+  Future<List<Landing>> forProduct(int productId) async {
+    final List<Map> results = await database.query('product_has_landings', where: 'product_id = $productId');
 
     final List landings = <Landing>[];
     for (final Map<String, dynamic> result in results) {

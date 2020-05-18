@@ -19,6 +19,7 @@ import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
+import 'package:oltrace/widgets/source_landing_info.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
@@ -52,12 +53,11 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   ProductType _productType;
   PackagingType _packagingType;
 
-  String _tagCode = AppConfig.debugMode ? randomTagCode() : null;
+  String _tagCode;
   final TextEditingController _productUnitsController = TextEditingController();
   final TextEditingController _tagCodeController = TextEditingController();
 
-  CreateProductScreenState(List<Landing> initialSourceLandings)
-      : _sourceLandings = initialSourceLandings ?? [];
+  CreateProductScreenState(List<Landing> initialSourceLandings) : _sourceLandings = initialSourceLandings ?? [];
 
   @override
   void initState() {
@@ -71,9 +71,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
   @override
   void dispose() {
-    FlutterNfcReader.stop().then((NfcData data){
+    FlutterNfcReader.stop().then((NfcData data) {
       print('NFC reader stopped');
-    }).catchError((e){
+    }).catchError((e) {
       print('NFC reader could not be stopped.');
     });
     super.dispose();
@@ -91,10 +91,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     });
   }
 
-  List<String> getValidationErrors() {
+  List<String> _getValidationErrors() {
     final List<String> errorMessages = [];
     if (_productUnitsController.value == null || _productUnitsController.value.text == '') {
-      errorMessages.add('Invalid quantity.');
+      errorMessages.add('Invalid Quantity.');
     }
 
     if (_tagCode == null) {
@@ -113,12 +113,9 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   Future<void> _onPressSaveButton() async {
-    final List<String> errorMessages = getValidationErrors();
+    final List<String> errorMessages = _getValidationErrors();
 
     final int productUnits = int.tryParse(_productUnitsController.text);
-    if (productUnits == null) {
-      errorMessages.add('Invalid Quantity');
-    }
 
     if (errorMessages.isNotEmpty) {
       showTextSnackBar(_scaffoldKey, errorMessages.join('\n'));
@@ -138,7 +135,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
 
     // Create a product
-    final int savedProductId = await widget._productRepository.store(product.copyWith(landings: _sourceLandings));
+    final int savedProductId = await widget._productRepository.store(product);
     final Product savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {
@@ -178,13 +175,13 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     Navigator.of(context).pop(DialogResult.DoneTagging);
   }
 
-  bool hasChanged() {
+  bool _hasChanged() {
     return _tagCode != null;
   }
 
   Future<bool> get onWillPop async {
     // Have things changed since the initial state?
-    final bool changed = hasChanged();
+    final bool changed = _hasChanged();
 
     // If there are changes warn the user before navigating away
     if (changed) {
@@ -261,7 +258,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  Widget _productUnitsTextInput() {
+  Widget _quantityTextInput() {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,16 +290,28 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   Widget _sourceLandingsList() {
-    return Column(
-      children: _sourceLandings
-          .map<Widget>(
-            (Landing sl) => Container(
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey[300]))),
-              child: SharkInfoCard(showIndex: false, landing: sl, listIndex: 1),
-              height: 80,
-            ),
-          )
-          .toList(),
+    return Container(
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Text(
+            'Sources',
+            style: TextStyle(fontSize: 20, color: OlracColours.olspsBlue),
+          ),
+          Column(
+            children: _sourceLandings
+                .map<Widget>(
+                  (Landing sl) => Container(
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: OlracColours.olspsBlue[300]))),
+                    child: SourceLandingInfo(landing: sl),
+                    height: 80,
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -366,7 +375,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                   Container(
                     child: SvgIcon(
                       assetPath: SvgIcons.path(packagingType.name.toLowerCase()),
-                      height: packagingType.name.toLowerCase() == 'ring' ? 25 : 40,
+                      height: packagingType.name.toLowerCase() == 'ring' ? 20 : 30,
                     ),
                   )
                 ],
@@ -381,7 +390,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  StripButton get saveButton => StripButton(
+  StripButton get _saveButton => StripButton(
         icon: Icon(Icons.save, color: Colors.white),
         labelText: 'Save',
         color: OlracColours.ninetiesGreen,
@@ -414,17 +423,18 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                     Container(padding: const EdgeInsets.symmetric(horizontal: 15), child: _packagingTypeDropdown()),
 
                     // Quantity
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), child: _productUnitsTextInput()),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), child: _quantityTextInput()),
 
                     // Tag code
-                    if (_productType == null || _packagingType == null) Container() else _tagCodeInput(),
+                    if (_productType != null && _packagingType != null)
+                      _tagCodeInput(),
                     const SizedBox(height: 10),
                     // Space for FAB
                   ],
                 ),
               ),
             ),
-            saveButton
+            _saveButton
           ],
         ),
       ),

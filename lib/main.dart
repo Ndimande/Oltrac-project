@@ -98,7 +98,6 @@ Future<void> boot() async {
 Future<void> _onAppRunning() async {
   UserPrefsProvider().init();
 
-
   // Run the migrator every time to ensure
   // tables are in the latest state.
   final migrator = Migrator(_database, AppConfig.migrations);
@@ -106,7 +105,6 @@ Future<void> _onAppRunning() async {
 
   // For IMEI access
   await requestPhonecallPermission();
-
 
   // Prompt for location access until the user accepts.
   while (await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
@@ -231,6 +229,11 @@ class OlTraceAppState extends State<OlTraceApp> {
               assert(args.containsKey('landings'));
               assert(args.containsKey('haul'));
               final List<Landing> sourceLandings = args['landings'] as List<Landing>;
+
+              sourceLandings.forEach((Landing element) {
+                assert(element.id != null);
+              });
+
               final Haul sourceHaul = args['haul'] as Haul;
 
               return CreateProductScreen(

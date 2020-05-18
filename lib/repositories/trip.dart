@@ -49,13 +49,17 @@ class TripRepository extends DatabaseRepository<Trip> {
   /// that has ended_at = null.
   Future<Trip> getActive() async {
     final List results = await _database.query(tableName, where: 'ended_at is null');
-    if (results.length > 1) {
-      throw Exception('More than one active Trip is not allowed');
-    } else if (results.isEmpty) {
+
+    assert(results.length <= 1);
+
+    if (results.isEmpty) {
       return null;
     }
 
-    return fromDatabaseMap(results.first);
+    final Trip trip = fromDatabaseMap(results.first);
+    final List<Haul> hauls = await HaulRepository().forTrip(trip.id);
+
+    return trip.copyWith(hauls: hauls);
   }
 
   /// Get all trips that have been ended.

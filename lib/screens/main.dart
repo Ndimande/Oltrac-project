@@ -8,16 +8,12 @@ import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
-import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/user_prefs.dart';
 import 'package:oltrace/repositories/haul.dart';
-import 'package:oltrace/repositories/landing.dart';
-import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/screens/fishing_method.dart';
@@ -34,43 +30,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
-final _landingRepo = LandingRepository();
-final _productRepo = ProductRepository();
 final _locationProvider = LocationProvider();
-
-Future<Trip> _addNestedData(Trip trip) async {
-  final List<Haul> activeTripHauls = await _haulRepo.forTrip(trip.id);
-  final List<Haul> hauls = [];
-  for (Haul haul in activeTripHauls) {
-    final List<Landing> landings = await _landingRepo.forHaul(haul.id);
-    final List<Landing> landingWithProducts = [];
-    for (Landing landing in landings) {
-      final List<Product> products = await _productRepo.forLanding(landing.id);
-      landingWithProducts.add(landing.copyWith(landings: products));
-    }
-    hauls.add(haul.copyWith(landings: landingWithProducts));
-  }
-  return trip.copyWith(hauls: hauls);
-}
 
 Future<Map> _load() async {
   final Haul activeHaul = await _haulRepo.getActiveHaul();
-  Trip activeTrip = await _tripRepo.getActive();
-  if (activeTrip != null) {
-    activeTrip = await _addNestedData(activeTrip);
-  }
+  final Trip activeTrip = await _tripRepo.getActive();
 
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
-  final List<Trip> tripsWithHauls = [];
-  for (Trip trip in completedTrips) {
-    final Trip withNested = await _addNestedData(trip);
-    tripsWithHauls.add(withNested);
-  }
 
   return {
     'activeTrip': activeTrip,
     'activeHaul': activeHaul,
-    'completedTrips': tripsWithHauls,
+    'completedTrips': completedTrips,
   };
 }
 
@@ -147,7 +118,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   /// When the "Start Operation" bottom button is pressed.
-  Future<void> _onPressStartStripButton() async {
+  Future<void> _onPressStartFishing() async {
     if (_currentFishingMethod.type == FishingMethodType.Static) {
       final Map<String, dynamic> formResult = await showDialog(
         context: context,
@@ -167,7 +138,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   /// When the "End Haul" bottom button is pressed.
-  Future<void> _onPressEndStripButton() async {
+  Future<void> _onPressEndFishing() async {
     final bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -197,9 +168,9 @@ class MainScreenState extends State<MainScreen> {
   /// Either the start or end haul button is pressed.
   Future<void> _onPressHaulStripButton() async {
     if (activeHaul != null)
-      await _onPressEndStripButton();
+      await _onPressEndFishing();
     else
-      await _onPressStartStripButton();
+      await _onPressStartFishing();
   }
 
   Future<void> _onPressFishingMethodStripButton() async {
@@ -233,22 +204,6 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _onPressCancelTrip(bool hasActiveHaul) async {
-    if (hasActiveHaul) {
-      showTextSnackBar(_scaffoldKey, 'You must first end the haul');
-      return;
-    }
-
-    final bool confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => ConfirmDialog('Cancel Trip', Messages.TRIP_CONFIRM_CANCEL),
-    );
-    if (confirmed == true) {
-      await _tripRepo.delete(activeTrip.id);
-      setState(() {});
-    }
-  }
-
   Future<void> _onPressEndTrip() async {
     if (activeHaul != null) {
       _scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('You must first end hauling/fishing')));
@@ -272,12 +227,12 @@ class MainScreenState extends State<MainScreen> {
           if (connectivity != ConnectivityResult.none) {
             if (connectivity == ConnectivityResult.mobile) {
               if (widget.userPrefs.mobileData) {
-                await TripUploadService.uploadTrip(endedTrip);
+                TripUploadService.uploadTrip(endedTrip);
               } else {
                 print('Allow mobile disabled. Trip must be uploaded later');
               }
             } else {
-              await TripUploadService.uploadTrip(endedTrip);
+              TripUploadService.uploadTrip(endedTrip);
             }
           } else {
             print('No internet connection. Trip must be uploaded later');
@@ -404,7 +359,6 @@ class MainScreenState extends State<MainScreen> {
               trip: activeTrip,
               hasActiveHaul: activeHaul != null,
               onPressEndTrip: () async => await _onPressEndTrip(),
-              onPressCancelTrip: () async => await _onPressCancelTrip(activeHaul != null),
               onPressEditTrip: _onPressEditTrip,
               onPressMasterContainerButton: () async => await _onPressMasterContainerButton(),
             ),

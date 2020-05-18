@@ -37,13 +37,8 @@ Future<Product> _load(int productId) async {
   }
   assert(results.length == 1);
   final Product product = _productRepo.fromDatabaseMap(results.first);
-  final List<Landing> landings = await _getLandings(productId);
-  final List<Landing> landingsWithProducts = [];
-  for (Landing landing in landings) {
-    final List<Product> products = await _productRepo.forLanding(landing.id);
-    landingsWithProducts.add(landing.copyWith(landings: products));
-  }
-  return product.copyWith(landings: landingsWithProducts);
+  final List<Landing> landings = await LandingRepository().forProduct(productId);
+  return product.copyWith(landings: landings);
 }
 
 Future<List<Landing>> _getLandings(int productId) async {

@@ -20,29 +20,9 @@ import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
 final _tripRepo = TripRepository();
-final _haulRepo = HaulRepository();
-final _landingRepo = LandingRepository();
-final _productRepo = ProductRepository();
-
-Future<Trip> _getWithNested(Trip trip) async {
-  final List<Haul> activeTripHauls = await _haulRepo.forTrip(trip.id);
-  final List<Haul> hauls = [];
-  for (final Haul haul in activeTripHauls) {
-    final List<Landing> landings = await _landingRepo.forHaul(haul.id);
-    final List<Landing> landingsWithProducts = [];
-    for (final Landing landing in landings) {
-      final List<Product> products = await _productRepo.forLanding(landing.id);
-      landingsWithProducts.add(landing.copyWith(landings: products));
-    }
-    hauls.add(haul.copyWith(landings: landingsWithProducts));
-  }
-  final Trip tripWithNested = trip.copyWith(hauls: hauls);
-
-  return tripWithNested;
-}
 
 Future<Map<String, dynamic>> _load(int tripId) async {
-  final Trip trip = await _getWithNested(await _tripRepo.find(tripId));
+  final Trip trip = await _tripRepo.find(tripId);
   final Trip activeTrip = await _tripRepo.getActive();
   return {
     'trip': trip,

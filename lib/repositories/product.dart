@@ -79,26 +79,27 @@ class ProductRepository extends DatabaseRepository<Product> {
     if (product.id == null) {
       createdId = await database.insert(tableName, toDatabaseMap(product));
     } else {
-      // We remove this item completely or sqlite will try
-      // to set id = null
+      //Remove id or SQLite will try to set id = null
       final withoutId = toDatabaseMap(product)..remove('id');
 
       createdId = await database.update(tableName, withoutId, where: 'id = ${product.id}');
     }
-    final storedProduct = product.copyWith(id: createdId);
-    // We need to store in the pivot table
-    for (var landing in storedProduct.landings) {
-      final String where = 'product_id = $createdId AND landing_id = ${landing.id}';
-      final List<Map<String, dynamic>> res = await database.query('product_has_landings', where: where);
-      if (res.isEmpty) {
-        await database.insert(
-          'product_has_landings',
-          {'product_id': createdId, 'landing_id': landing.id},
-        );
-      }
-    }
 
-    await _storeLandingRelations(product.copyWith(id: createdId));
+    final Product storedProduct = product.copyWith(id: createdId);
+
+    // We need to store in the pivot table
+//    for (final Landing landing in storedProduct.landings) {
+//      final String where = 'product_id = $createdId AND landing_id = ${landing.id}';
+//      final List<Map<String, dynamic>> res = await database.query('product_has_landings', where: where);
+//      if (res.isEmpty) {
+//        await database.insert(
+//          'product_has_landings',
+//          {'product_id': createdId, 'landing_id': landing.id},
+//        );
+//      }
+//    }
+
+    await _storeLandingRelations(storedProduct);
 
     return createdId;
   }

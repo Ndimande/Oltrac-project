@@ -26,20 +26,20 @@ class StripButton extends StatelessWidget {
       child: FlatButton(
         color: buttonColor,
         padding: const EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if(icon != null) icon,
-            const SizedBox(width: 5),
-            Expanded(
-              child: Text(
+        child: Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if(icon != null) icon,
+              if(icon != null) const SizedBox(width: 5),
+              Text(
                 labelText,
                 style: TextStyle(fontSize: 20, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.start,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         onPressed: onPressed,
       ),

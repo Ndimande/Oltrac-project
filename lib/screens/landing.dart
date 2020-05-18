@@ -64,7 +64,7 @@ class LandingScreenState extends State<LandingScreen> {
     final List<Landing> withProducts = [];
     for (final Landing landing in landings) {
       final List<Product> products = await _productRepository.forLanding(landing.id);
-      withProducts.add(landing.copyWith(landings: products));
+      withProducts.add(landing.copyWith(products: products));
     }
     // add prods
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: {
