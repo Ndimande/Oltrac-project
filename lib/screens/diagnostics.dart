@@ -60,10 +60,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
       child:
           Text(AppConfig.APP_TITLE + ' ' + AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber));
 
-  Future _resetDatabase() async {
-    await widget.sharedPreferences.remove('mobileData');
-    await widget.sharedPreferences.remove('uploadAutomatically');
-    await widget.sharedPreferences.remove('fishingMethod');
+  Future<void> _resetDatabase() async {
     final Database database = DatabaseProvider().database;
     final Migrator migrator = Migrator(database, AppConfig.migrations);
     await migrator.run(true);
@@ -140,7 +137,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
     );
   }
 
-  Widget _resetApp() {
+  Widget _resetAppSection() {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Column(
@@ -192,7 +189,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
                 _environment(),
                 _backgroundFetch(),
                 _TripUploadQueue(),
-                _resetApp(),
+                _resetAppSection(),
               ],
             ),
           );

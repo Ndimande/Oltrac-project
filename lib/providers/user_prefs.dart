@@ -22,26 +22,24 @@ class UserPrefsProvider {
   }
 
   void init() {
-    // todo improve
-    if (_userPrefs == null) {
-      final Map defaults = AppConfig.defaultUserSettings;
-      String key;
-      key = 'uploadAutomatically';
-      if (_sharedPreferences.getBool(key) == null) {
-        _sharedPreferences.setBool(key, defaults[key]);
-      }
-
-      key = 'mobileData';
-      if (_sharedPreferences.getBool(key) == null) {
-        _sharedPreferences.setBool(key, defaults[key]);
-      }
-
-      key = 'bulkMode';
-      if (_sharedPreferences.getBool(key) == null) {
-        _sharedPreferences.setBool(key, defaults[key]);
-      }
-      _userPrefs = UserPrefs();
+    final Map defaults = AppConfig.defaultUserSettings;
+    String key;
+    key = 'uploadAutomatically';
+    if (_sharedPreferences.getBool(key) == null) {
+      _sharedPreferences.setBool(key, defaults[key]);
     }
+
+    key = 'mobileData';
+    if (_sharedPreferences.getBool(key) == null) {
+      _sharedPreferences.setBool(key, defaults[key]);
+    }
+
+    key = 'bulkMode';
+    if (_sharedPreferences.getBool(key) == null) {
+      _sharedPreferences.setBool(key, defaults[key]);
+    }
+    _userPrefs ??= UserPrefs();
+
   }
 }
 
