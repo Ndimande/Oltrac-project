@@ -39,14 +39,20 @@ class MasterContainer extends Model {
         super.fromMap(data);
 
   @override
-  MasterContainer copyWith(
-      {int id, String tagId, DateTime createdAt, Location location, List<Product> landings, int tripId}) {
+  MasterContainer copyWith({
+    int id,
+    String tagId,
+    DateTime createdAt,
+    Location location,
+    List<Product> products,
+    int tripId,
+  }) {
     return MasterContainer(
       id: id ?? this.id,
       tagCode: tagId ?? tagCode,
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
-      products: landings ?? this.products,
+      products: products ?? this.products,
       tripId: tripId ?? this.tripId,
     );
   }

@@ -39,7 +39,6 @@ class UserPrefsProvider {
       _sharedPreferences.setBool(key, defaults[key]);
     }
     _userPrefs ??= UserPrefs();
-
   }
 }
 

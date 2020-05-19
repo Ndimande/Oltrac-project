@@ -283,7 +283,7 @@ class HaulScreenState extends State<HaulScreen> {
     final List<LandingListItem> listLandings = landings.reversed
         .map(
           (Landing landing) => LandingListItem(
-            selectable: _isActiveTrip,
+            isSelectable: _isActiveTrip,
             isSelected: _landingIsSelected(landing),
             landing: landing,
             onLongPress: () => _onLongPressLanding(landing.id),

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
+import 'package:timeago/timeago.dart' as time_ago;
 
 /// How frequently the text is updated
 const _updateInterval = Duration(seconds: 5);
@@ -42,7 +42,7 @@ class TimeAgoState extends State<TimeAgo> {
     final humanDiff = DateTime.now().subtract(difference);
 
     return Text(
-      widget.prefix + timeAgo.format(humanDiff) + widget.suffix,
+      widget.prefix + time_ago.format(humanDiff) + widget.suffix,
       style: widget.textStyle,
     );
   }

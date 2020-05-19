@@ -8,13 +8,12 @@ class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
   @override
   final String tableName = 'master_containers';
 
-
   Future<List<MasterContainer>> forTrip(int tripId) async {
     final List<MasterContainer> mcs = await MasterContainerRepository().all(where: 'trip_id = $tripId');
     final List<MasterContainer> updatedMcs = [];
     for (final MasterContainer mc in mcs) {
       final List<Product> mcProducts = await ProductRepository().forMasterContainer(mc.id);
-      final updatedMc = mc.copyWith(landings: mcProducts);
+      final updatedMc = mc.copyWith(products: mcProducts);
       updatedMcs.add(updatedMc);
     }
     return updatedMcs;

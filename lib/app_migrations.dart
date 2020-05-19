@@ -99,7 +99,7 @@ const List<Map<String, String>> appMigrations = [
     'name': 'create master_containers table',
     'up': 'CREATE TABLE master_containers( '
         'id INTEGER PRIMARY KEY, '
-        'tag_code TEXT NOT NULL, '
+        'tag_code TEXT UNIQUE NOT NULL, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '

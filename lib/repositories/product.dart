@@ -63,7 +63,7 @@ class ProductRepository extends DatabaseRepository<Product> {
     final List<Product> products = [];
 
 
-    for (Map result in results) {
+    for (final Map result in results) {
       final Product product = fromDatabaseMap(result);
       products.add(product);
     }

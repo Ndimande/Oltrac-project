@@ -212,14 +212,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            margin: const EdgeInsets.only(bottom: 15),
             child: const Text(
               'Number of Individuals',
               style: textFieldTextStyle,
             ),
           ),
           TextFormField(
-            style: const TextStyle(fontSize: 30),
+            style: const TextStyle(fontSize: 20),
             keyboardType: TextInputType.number,
             controller: _individualsController,
             validator: _validateIndividuals,
@@ -270,14 +269,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          margin: const EdgeInsets.only(bottom: 15),
           child: Text(
             _bulkMode ? 'Total Weight (kg)' : 'Weight (kg)',
             style: textFieldTextStyle,
           ),
         ),
         TextFormField(
-          style: const TextStyle(fontSize: 30),
+          style: const TextStyle(fontSize: 20),
           keyboardType: TextInputType.number,
           controller: _weightController,
           validator: _validateWeight,
@@ -291,14 +289,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Container(
-          margin: const EdgeInsets.only(bottom: 15),
           child: Text(
             _bulkMode ? 'Avg. Length (cm)' : 'Length (cm)',
             style: textFieldTextStyle,
           ),
         ),
         TextFormField(
-          style: const TextStyle(fontSize: 30),
+          style: const TextStyle(fontSize: 20),
           keyboardType: TextInputType.number,
           controller: _lengthController,
           validator: _validateLength,

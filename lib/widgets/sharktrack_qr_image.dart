@@ -20,6 +20,7 @@ class SharkTrackQrImage extends StatelessWidget {
   final VoidCallback onLongPress;
   final GlobalKey renderKey;
 
+
   @override
   Widget build(BuildContext context) {
     return FlatButton(

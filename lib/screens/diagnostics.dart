@@ -29,13 +29,11 @@ Future<Map> _load() async {
   final int backgroundFetchStatus = await BackgroundFetch.status;
   final String imei = await ImeiPlugin.getImei();
 
-  final AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
-
   return {
     'profile': profile,
     'backgroundFetchStatus': backgroundFetchStatus,
     'imei': imei,
-    'androidDeviceInfo': androidDeviceInfo,
+    'androidDeviceInfo': AppData.deviceInfo,
   };
 }
 
@@ -75,6 +73,15 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
         ['Android SDK', _androidDeviceInfo.version.sdkInt.toString()],
         ['Manufacturer', _androidDeviceInfo.manufacturer],
         ['Model', _androidDeviceInfo.model],
+        ['Device ID', _androidDeviceInfo.id],
+        ['Board', _androidDeviceInfo.board],
+        ['Display', _androidDeviceInfo.display],
+        ['Product', _androidDeviceInfo.product],
+        ['Hardware', _androidDeviceInfo.hardware],
+        ['Emulator', (!_androidDeviceInfo.isPhysicalDevice).toString()],
+        ['Brand', _androidDeviceInfo.brand],
+        ['Type', _androidDeviceInfo.type],
+        ['Fingerprint', _androidDeviceInfo.version.toString()]
       ],
     );
   }
@@ -183,13 +190,13 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
             child: Column(
               children: <Widget>[
                 _version(),
-                _device(),
+                _resetAppSection(),
                 _buildProfile(),
                 _sharedPrefs(),
-                _environment(),
                 _backgroundFetch(),
                 _TripUploadQueue(),
-                _resetAppSection(),
+                _environment(),
+                _device(),
               ],
             ),
           );

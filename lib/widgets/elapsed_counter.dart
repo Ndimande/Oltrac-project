@@ -39,7 +39,7 @@ class ElapsedCounterState extends State<ElapsedCounter> {
 
     final seconds = _getSeconds(difference);
 
-    return "${widget.prefix}${hours}h ${minutes}m ${seconds}s ${widget.suffix}";
+    return '${widget.prefix}${hours}h ${minutes}m ${seconds}s ${widget.suffix}';
   }
 
   @override

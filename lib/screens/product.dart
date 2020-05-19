@@ -19,10 +19,7 @@ import 'package:oltrace/widgets/sharktrack_qr_image.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:sqflite/sqflite.dart';
 
-final _productRepo = ProductRepository();
-final _landingRepo = LandingRepository();
 
-final Database db = DatabaseProvider().database;
 
 enum Actions {
   ShareQR,
@@ -30,6 +27,10 @@ enum Actions {
 }
 
 Future<Product> _load(int productId) async {
+  final _productRepo = ProductRepository();
+
+  final Database db = DatabaseProvider().database;
+
   final List<Map<String, dynamic>> results = await db.query('products', where: 'id= $productId');
 
   if (results.isEmpty) {
@@ -39,22 +40,6 @@ Future<Product> _load(int productId) async {
   final Product product = _productRepo.fromDatabaseMap(results.first);
   final List<Landing> landings = await LandingRepository().forProduct(productId);
   return product.copyWith(landings: landings);
-}
-
-Future<List<Landing>> _getLandings(int productId) async {
-  final List<Map> results = await db.query('product_has_landings', where: 'product_id = $productId');
-
-  final List landings = <Landing>[];
-  for (Map<String, dynamic> result in results) {
-    final int landingId = result['landing_id'];
-    final List<Map> landingResults = await db.query('landings', where: 'id = $landingId');
-    if (landingResults.isNotEmpty) {
-      final Landing landing = _landingRepo.fromDatabaseMap(landingResults.first);
-      landings.add(landing);
-    }
-  }
-
-  return landings;
 }
 
 class ProductScreen extends StatefulWidget {
@@ -124,6 +109,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
     const String helpText = 'This QR code may be used instead of the RFID tag for convenience '
         'if no RFID reader is available or the tags are hard to access for scanning.';
+
     return Column(
       children: <Widget>[
         SharkTrackQrImage(
@@ -177,17 +163,14 @@ class _ProductScreenState extends State<ProductScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Expanded(
-            child: Text(
-              lhs,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
+            child: Text(lhs, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
           Expanded(
             child: Text(
               rhs,
-              style: const TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 16),
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.right
             ),
           ),
         ],
@@ -218,7 +201,7 @@ class _ProductScreenState extends State<ProductScreen> {
       children: <Widget>[
         Text(
           'Location',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         LocationButton(location: _product.location),
       ],
@@ -227,6 +210,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Widget _details() {
     return Container(
+      color: OlracColours.olspsBlue[100],
       padding: const EdgeInsets.all(15),
       child: Column(
         children: <Widget>[

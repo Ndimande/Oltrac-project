@@ -32,13 +32,13 @@ class HaulSubtitleState extends State<HaulSubtitle> {
     _timer = Timer.periodic(_updateInterval, (Timer t) => setState(() {}));
   }
 
-  double get _totalWeightKilograms => (widget.totalWeight / 1000);
+  double get _totalWeightKilograms => widget.totalWeight / 1000;
 
   Duration get _elapsed {
     final DateTime endedAt = widget.endedAt;
     final DateTime startedAt = widget.startedAt;
 
-    DateTime until = endedAt != null ? endedAt : DateTime.now();
+    final DateTime until = endedAt ?? DateTime.now();
     return until.difference(startedAt);
   }
 

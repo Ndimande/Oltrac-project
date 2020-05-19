@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
@@ -78,6 +79,7 @@ Future<void> boot() async {
 
   // Get the app version and some other info
   AppData.packageInfo = await PackageInfo.fromPlatform();
+  AppData.deviceInfo = await DeviceInfoPlugin().androidInfo;
 
   // Dio HTTP client
   DioProvider().init();

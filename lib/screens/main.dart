@@ -22,7 +22,7 @@ import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
 import 'package:oltrace/screens/main/static_haul_details_alert_dialog.dart';
 import 'package:oltrace/screens/main/trip_section.dart';
-import 'package:oltrace/screens/master_containers.dart';
+import 'package:oltrace/screens/master_container/master_containers.dart';
 import 'package:oltrace/services/trip_upload.dart';
 import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/strip_button.dart';

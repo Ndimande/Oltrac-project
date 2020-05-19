@@ -11,7 +11,7 @@ class LandingListItem extends StatelessWidget {
   final Function onLongPress;
   final bool isSelected;
   final int listIndex;
-  final bool selectable;
+  final bool isSelectable;
 
   const LandingListItem({
     @required this.landing,
@@ -19,7 +19,7 @@ class LandingListItem extends StatelessWidget {
     @required this.listIndex,
     this.onLongPress,
     this.isSelected = false,
-    this.selectable = true,
+    this.isSelectable = true,
   })  : assert(landing != null),
         assert(onPressed != null),
         assert(listIndex != null);
@@ -48,7 +48,7 @@ class LandingListItem extends StatelessWidget {
   }
 
   Widget get _trailingIcon {
-    if (!selectable) {
+    if (!isSelectable) {
       return ForwardArrow();
     }
 
@@ -76,7 +76,7 @@ class LandingListItem extends StatelessWidget {
     return Container(
       decoration: _decoration,
       child: ListTile(
-        onLongPress: landing.doneTagging || !selectable ? null : onLongPress,
+        onLongPress: landing.doneTagging || !isSelectable ? null : onLongPress,
         onTap: () => onPressed(listIndex),
         leading: LandingIcon(
           landing: landing,

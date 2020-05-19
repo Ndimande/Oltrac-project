@@ -51,7 +51,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildAllowMobile() {
     const title = 'Use Mobile Data';
-    final subtitle = mobileData ? 'On. Allow using a mobile connection.' : 'Off. Only WiFi connections will be used.';
+    const subtitle = 'Allow using a mobile connection.';
     return _booleanOption(
       title: title,
       subtitle: subtitle,
@@ -62,9 +62,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildAutoUpload() {
     const title = 'Upload Automatically';
-    final subtitle = uploadAutomatically
-        ? 'On. Data will be uploaded automatically.'
-        : 'Off. Data will not be uploaded automatically.';
+    const subtitle = 'Data will be periodically uploaded automatically.';
 
     return _booleanOption(
       title: title,

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/repositories/master_container.dart';
-import 'package:oltrace/screens/master_container.dart';
-import 'package:oltrace/screens/master_container_form.dart';
+import 'package:oltrace/screens/master_container/master_container.dart';
+import 'package:oltrace/screens/master_container/master_container_form.dart';
 import 'package:oltrace/widgets/master_container_list_item.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 
-final MasterContainerRepository _masterContainerRepo = MasterContainerRepository();
 
 Future<Map<String, dynamic>> _load(int tripId) async {
+  final MasterContainerRepository _masterContainerRepo = MasterContainerRepository();
   final List<MasterContainer> masterContainers = await _masterContainerRepo.all(where: 'trip_id = $tripId');
   return <String, dynamic>{
     'masterContainers': masterContainers.reversed.toList(),
@@ -18,6 +18,7 @@ Future<Map<String, dynamic>> _load(int tripId) async {
 
 class MasterContainersScreen extends StatefulWidget {
   final int sourceTripId;
+
   const MasterContainersScreen(this.sourceTripId);
 
   @override
@@ -29,22 +30,23 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
   List<MasterContainer> _masterContainers;
 
   Future<void> _onPressCreateStripButton() async {
-
     await Navigator.push(
-      _scaffoldKey.currentContext,
-      MaterialPageRoute(builder: (_) => MasterContainerFormScreen(sourceTripId: widget.sourceTripId),
-    ));
+        _scaffoldKey.currentContext,
+        MaterialPageRoute(
+          builder: (_) => MasterContainerFormScreen(sourceTripId: widget.sourceTripId),
+        ));
 
     // Refresh when we return
     setState(() {});
   }
 
-  void _onTapListItem(MasterContainer masterContainer) {
-    Navigator.push(
+  Future<void> _onTapListItem(int index) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MasterContainerScreen(
-          masterContainerId: masterContainer.id,
+          masterContainerId: _masterContainers[index].id,
+          masterContainerIndex: index+1,
         ),
       ),
     );
@@ -53,7 +55,11 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
 
   Widget _noMasterContainers() {
     return const Center(
-      child: Text('No Master Containers',style: TextStyle(fontSize: 20),),
+      child: Text(
+        'No Master Containers for this Trip yet.\nTap the button below to begin.',
+        style: TextStyle(fontSize: 20),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
@@ -62,8 +68,9 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
       itemCount: _masterContainers.length,
       itemBuilder: (BuildContext _, int index) {
         return MasterContainerListItem(
+          listIndex: index+1,
           masterContainer: _masterContainers[index],
-          onTap: (id) => _onTapListItem(_masterContainers[index]),
+          onTap: (id) => _onTapListItem(index),
         );
       },
     );

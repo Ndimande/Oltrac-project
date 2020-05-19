@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
-final _tripRepo = TripRepository();
-final _haulRepo = HaulRepository();
 
 Future<Map> _load() async {
+  final _tripRepo = TripRepository();
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
 
-  final List<Trip> tripsWithHauls = [];
-  for (Trip trip in completedTrips) {
-    final List<Haul> hauls = await _haulRepo.forTrip(trip.id);
-    tripsWithHauls.add(trip.copyWith(hauls: hauls));
-  }
-  return {'completedTrips': tripsWithHauls};
+
+  return {'completedTrips': completedTrips};
 }
 
 class TripHistoryScreen extends StatefulWidget {

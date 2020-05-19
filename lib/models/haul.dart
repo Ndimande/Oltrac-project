@@ -63,6 +63,7 @@ class Haul extends Model {
         assert(startLocation != null),
         super(id: id);
 
+  @override
   Haul copyWith({
     int id,
     int tripId,
