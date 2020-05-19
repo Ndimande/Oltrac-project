@@ -11,7 +11,6 @@ class TripSection extends StatelessWidget {
   final Trip trip;
   final bool hasActiveHaul;
   final Function onPressEndTrip;
-  final Function onPressCancelTrip;
   final Function onPressEditTrip;
   final Function onPressMasterContainerButton;
 
@@ -19,7 +18,6 @@ class TripSection extends StatelessWidget {
     @required this.trip,
     @required this.hasActiveHaul,
     @required this.onPressEndTrip,
-    @required this.onPressCancelTrip,
     @required this.onPressEditTrip,
     @required this.onPressMasterContainerButton,
   }) : assert(onPressMasterContainerButton != null);
@@ -31,18 +29,6 @@ class TripSection extends StatelessWidget {
           onPressed: () async => await onPressEndTrip(),
           icon: Icon(
             Icons.stop,
-            color: Colors.white,
-          ),
-        );
-      });
-
-  Widget get cancelTripButton => Builder(builder: (BuildContext context) {
-        return StripButton(
-          labelText: 'Cancel',
-          color: hasActiveHaul ? Colors.grey : OlracColours.olspsBlue,
-          onPressed: () async => await onPressCancelTrip(),
-          icon: Icon(
-            Icons.cancel,
             color: Colors.white,
           ),
         );
@@ -71,12 +57,12 @@ class TripSection extends StatelessWidget {
             Container(
               child: Text(
                 'Start: ' + friendlyDateTime(trip.startedAt),
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
               ),
             ),
             Container(
               child: ElapsedCounter(
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
                 prefix: 'Duration: ',
                 startedDateTime: trip.startedAt,
               ),
@@ -100,7 +86,7 @@ class TripSection extends StatelessWidget {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(bottom: 5),
+          margin: const EdgeInsets.only(bottom: 5),
           child: IconButton(
             onPressed: onPressMasterContainerButton,
             iconSize: 22,
@@ -114,20 +100,21 @@ class TripSection extends StatelessWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: OlracColours.olspsBlue[50],
       child: Column(
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Row(
                   children: <Widget>[
                     NumberedBoat(number: trip.id),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     tripInfo,
                   ],
                 ),

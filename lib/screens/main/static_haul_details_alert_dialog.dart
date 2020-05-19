@@ -5,7 +5,7 @@ class StaticHaulDetailsAlertDialog extends StatefulWidget {
   final Function(Map<String, dynamic>) onSuccesfulValidate;
   final Function onPressCancel;
 
-  StaticHaulDetailsAlertDialog({this.onSuccesfulValidate, this.onPressCancel});
+  const StaticHaulDetailsAlertDialog({this.onSuccesfulValidate, this.onPressCancel});
 
   @override
   _StaticHaulDetailsAlertDialogState createState() => _StaticHaulDetailsAlertDialogState();
@@ -18,7 +18,7 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
   final TextEditingController _numberOfTrapsOrHooksController = TextEditingController();
 
   String _validateSoakHours(String value) {
-    int intVal = int.tryParse(value);
+    final int intVal = int.tryParse(value);
     if (intVal == null) {
       return 'Invalid number';
     }
@@ -26,17 +26,17 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
   }
 
   String _validateSoakMinutes(String value) {
-    int intVal = int.tryParse(value);
+    final int intVal = int.tryParse(value);
     if (intVal == null) {
       return 'Invalid number';
-    } else if(intVal < 0 ||  intVal > 59) {
+    } else if (intVal < 0 || intVal > 59) {
       return 'Max 59 minutes';
     }
     return null;
   }
 
   String _validateNumberOfTrapsHooks(String value) {
-    int intVal = int.tryParse(value);
+    final int intVal = int.tryParse(value);
     if (intVal == null) {
       return 'Invalid number';
     }
@@ -44,22 +44,26 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
   }
 
   Widget _soakTime() {
-    final Widget hours = _alertInput(label: 'Hours', validate: _validateSoakHours,
+    final Widget hours = _alertInput(
+      label: 'Hours',
+      validate: _validateSoakHours,
       controller: _soakTimeHoursController,
     );
-    final Widget minutes = _alertInput(label: 'Minutes', validate: _validateSoakMinutes,
+    final Widget minutes = _alertInput(
+      label: 'Minutes',
+      validate: _validateSoakMinutes,
       controller: _soakTimeMinutesController,
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Soak Time'),
-        SizedBox(height: 5),
+        const Text('Soak Time'),
+        const SizedBox(height: 5),
         Row(
           children: <Widget>[
             Expanded(child: hours),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(child: minutes),
           ],
         ),
@@ -71,8 +75,8 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Traps / Hooks'),
-        SizedBox(height: 5),
+        const Text('Traps / Hooks'),
+        const SizedBox(height: 5),
         _alertInput(
           label: 'Total number on gear',
           validate: _validateNumberOfTrapsHooks,
@@ -88,7 +92,7 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
       child: Column(
         children: <Widget>[
           _soakTime(),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           _numberOfTrapsOrHooks(),
         ],
       ),
@@ -107,20 +111,15 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
 
             final int numberOfTrapsOrHooks = int.parse(_numberOfTrapsOrHooksController.text);
 
-            widget.onSuccesfulValidate(<String,dynamic>{'soakDuration': soakDuration, 'numberOfTrapsOrHooks': numberOfTrapsOrHooks});
+            widget.onSuccesfulValidate(
+                <String, dynamic>{'soakDuration': soakDuration, 'numberOfTrapsOrHooks': numberOfTrapsOrHooks});
           }
         },
-        child: Text(
-          'Start',
-          style: actionTextStyle,
-        ),
+        child: const Text('Start', style: actionTextStyle),
       ),
       FlatButton(
         onPressed: () => Navigator.pop(context, null),
-        child: Text(
-          'Cancel',
-          style: actionTextStyle,
-        ),
+        child: const Text('Cancel', style: actionTextStyle),
       ),
     ];
   }
@@ -128,7 +127,7 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Haul Gear'),
+      title: const Text('Haul Gear'),
       scrollable: true,
       content: _content(),
       actions: _actions(),
@@ -138,13 +137,13 @@ class _StaticHaulDetailsAlertDialogState extends State<StaticHaulDetailsAlertDia
 
 Widget _alertInput({String label, Function(String) validate, TextEditingController controller}) => TextFormField(
       controller: controller,
-      style: TextStyle(color: Colors.white, fontSize: 20),
+      style: const TextStyle(color: Colors.white, fontSize: 20),
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(0),
+        contentPadding: const EdgeInsets.all(0),
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white, fontSize: 16),
+        labelStyle: const TextStyle(color: Colors.white, fontSize: 16),
       ),
-      keyboardType: TextInputType.numberWithOptions(signed: false, decimal: false),
+      keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
       validator: validate,
       cursorColor: Colors.white,
     );

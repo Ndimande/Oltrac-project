@@ -13,16 +13,13 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/providers/database.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/widgets/sharktrack_qr_image.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/location_button.dart';
+import 'package:oltrace/widgets/sharktrack_qr_image.dart';
 import 'package:oltrace/widgets/strip_button.dart';
 import 'package:sqflite/sqflite.dart';
 
-final _productRepo = ProductRepository();
-final _landingRepo = LandingRepository();
 
-final Database db = DatabaseProvider().database;
 
 enum Actions {
   ShareQR,
@@ -30,42 +27,25 @@ enum Actions {
 }
 
 Future<Product> _load(int productId) async {
+  final _productRepo = ProductRepository();
+
+  final Database db = DatabaseProvider().database;
+
   final List<Map<String, dynamic>> results = await db.query('products', where: 'id= $productId');
 
-  if (results.length == 0) {
+  if (results.isEmpty) {
     return null;
   }
   assert(results.length == 1);
   final Product product = _productRepo.fromDatabaseMap(results.first);
-  final List<Landing> landings = await _getLandings(productId);
-  final List<Landing> landingsWithProducts = [];
-  for (Landing landing in landings) {
-    final List<Product> products = await _productRepo.forLanding(landing.id);
-    landingsWithProducts.add(landing.copyWith(products: products));
-  }
-  return product.copyWith(products: landingsWithProducts);
-}
-
-Future<List<Landing>> _getLandings(int productId) async {
-  final List<Map> results = await db.query('product_has_landings', where: 'product_id = $productId');
-
-  List landings = <Landing>[];
-  for (Map<String, dynamic> result in results) {
-    final int landingId = result['landing_id'];
-    final List<Map> landingResults = await db.query('landings', where: 'id = $landingId');
-    if (landingResults.length != 0) {
-      final Landing landing = _landingRepo.fromDatabaseMap(landingResults.first);
-      landings.add(landing);
-    }
-  }
-
-  return landings;
+  final List<Landing> landings = await LandingRepository().forProduct(productId);
+  return product.copyWith(landings: landings);
 }
 
 class ProductScreen extends StatefulWidget {
   final int productId;
 
-  ProductScreen({this.productId}) : assert(productId != null);
+  const ProductScreen({@required this.productId}) : assert(productId != null);
 
   @override
   _ProductScreenState createState() => _ProductScreenState();
@@ -127,8 +107,9 @@ class _ProductScreenState extends State<ProductScreen> {
 
     final String labelText = _qrLabel();
 
-    final String helpText = 'This QR code may be used instead of the RFID tag for convenience '
+    const String helpText = 'This QR code may be used instead of the RFID tag for convenience '
         'if no RFID reader is available or the tags are hard to access for scanning.';
+
     return Column(
       children: <Widget>[
         SharkTrackQrImage(
@@ -139,9 +120,9 @@ class _ProductScreenState extends State<ProductScreen> {
           onLongPress: _onPressExportQR,
           renderKey: _renderObjectKey,
         ),
-        SizedBox(height: 5),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        const SizedBox(height: 5),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
           child: Text(
             helpText,
             style: TextStyle(fontSize: 12),
@@ -177,22 +158,19 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Widget _detailRow(String lhs, String rhs) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 2),
+      margin: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Expanded(
-            child: Text(
-              lhs,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
+            child: Text(lhs, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
           Expanded(
             child: Text(
               rhs,
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 16),
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.right
             ),
           ),
         ],
@@ -209,7 +187,7 @@ class _ProductScreenState extends State<ProductScreen> {
         .toList();
 
     return ExpansionTile(
-      title: Text(
+      title: const Text(
         'Source Sharks',
         style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
       ),
@@ -223,7 +201,7 @@ class _ProductScreenState extends State<ProductScreen> {
       children: <Widget>[
         Text(
           'Location',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         LocationButton(location: _product.location),
       ],
@@ -232,16 +210,14 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Widget _details() {
     return Container(
-      padding: EdgeInsets.all(15),
+      color: OlracColours.olspsBlue[100],
+      padding: const EdgeInsets.all(15),
       child: Column(
         children: <Widget>[
-          Text(
-            'RFID Tag Code',
-            style: TextStyle(fontSize: 12),
-          ),
+          const Text('RFID Tag Code', style: TextStyle(fontSize: 12)),
           SelectableText(
             _product.tagCode,
-            style: TextStyle(fontSize: 32),
+            style: const TextStyle(fontSize: 32),
           ),
           _locationRow(),
           _detailRow('Packaging Type', _product.packagingType.name),
@@ -283,7 +259,7 @@ class _ProductScreenState extends State<ProductScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
 
         _product = snapshot.data;

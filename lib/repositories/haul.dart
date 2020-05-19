@@ -2,84 +2,85 @@ import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/haul.dart';
+import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
-
-/// The base select statement for hauls always
-/// includes fishing_methods.
-const String _sqlBasicSelect = '''
-SELECT
-*
-FROM
-  hauls
-''';
-
-/// Join the landings table
-/// to get all associated landings
-/// nested inside the hauls.
-const String _sqlJoinLandings = '''
-JOIN landings
-ON landings.id = hauls.haul_id''';
+import 'package:oltrace/repositories/landing.dart';
 
 class HaulRepository extends DatabaseRepository<Haul> {
-  var tableName = 'hauls';
+  @override
+  final String tableName = 'hauls';
 
-  /// Find a single [Haul] by [id]
-  /// and optionally include related data
-  /// by setting [withLandings] to true.
-  ///
-  /// Returns [null] if none found.
-  Future<Haul> find(int id, {bool withLandings = false}) async {
-    assert(id != null);
+  /// Find a single haul by id
+  @override
+  Future<Haul> find(int id) async {
+    final List<Map> results = await database.query(tableName, where: 'id = $id');
 
-    var sql = _sqlBasicSelect;
-
-    if (withLandings) {
-      sql += _sqlJoinLandings;
-    }
-
-    sql += ' WHERE id = $id';
-
-    final results = await database.rawQuery(sql);
-
-    if (results.length == 0) {
-      // Nothing found
+    if (results.isEmpty) {
       return null;
     }
 
-    return fromDatabaseMap(results[0]);
+    final Haul haul = fromDatabaseMap(results.first);
+
+    final List<Landing> landings = await LandingRepository().forHaul(haul.id);
+
+    return haul.copyWith(landings: landings);
   }
 
+  /// Get all hauls with optional condition.
+  @override
+  Future<List<Haul>> all({String where}) async {
+    final List<Map<String, dynamic>> results = await database.query(tableName, where: where);
+
+    final List<Haul> hauls = results.map((result) => fromDatabaseMap(result)).toList();
+
+    final List<Haul> withNested = [];
+
+    for (final Haul haul in hauls) {
+      final List<Landing> landings = await LandingRepository().forHaul(haul.id);
+      withNested.add(haul.copyWith(landings: landings));
+    }
+
+    return withNested;
+  }
+
+  /// Delete a haul by id.
+  /// also deletes any landings of this haul.
   @override
   Future<void> delete(int id) async {
-    // delete all landings where haul id
-    await database.delete(tableName, where: 'id = $id');
     await database.delete('landings', where: 'haul_id = $id');
+    await database.delete(tableName, where: 'id = $id');
   }
 
-  Future<List<Haul>> forTripId(int tripId) async {
-    List<Map<String, dynamic>> results = await database.query(tableName, where: 'trip_id = $tripId');
-    if (results.length == 0) {
+  Future<List<Haul>> forTrip(int tripId) async {
+    final List<Map<String, dynamic>> results = await database.query(tableName, where: 'trip_id = $tripId');
+
+    if (results.isEmpty) {
       return [];
     }
-    final hauls = <Haul>[];
-    for (Map<String, dynamic> result in results) {
-      hauls.add(fromDatabaseMap(result));
+
+    final List<Haul> hauls = [];
+    for (final Map<String, dynamic> result in results) {
+      final Haul haul = fromDatabaseMap(result);
+      final List<Landing> landings = await LandingRepository().forHaul(haul.id);
+      hauls.add(haul.copyWith(landings: landings));
     }
+
 
     return hauls;
   }
 
   Future<Haul> getActiveHaul() async {
-    List results = await database.query(tableName, where: "ended_at is null");
+    final List results = await database.query(tableName, where: 'ended_at is null');
     assert(results.length < 2);
 
-    if (results.length == 0) {
+    if (results.isEmpty) {
       return null;
     }
 
     return fromDatabaseMap(results.first);
   }
 
+  @override
   Haul fromDatabaseMap(Map<String, dynamic> result) {
     final DateTime startedAt = result['started_at'] != null ? DateTime.parse(result['started_at']) : null;
 
@@ -112,6 +113,7 @@ class HaulRepository extends DatabaseRepository<Haul> {
     );
   }
 
+  @override
   Map<String, dynamic> toDatabaseMap(Haul haul) {
     return {
       'id': haul.id,

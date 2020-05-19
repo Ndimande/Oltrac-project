@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class SharkTrackQrImage extends StatelessWidget {
-  SharkTrackQrImage({
+  const SharkTrackQrImage({
     @required this.data,
     this.size = 200,
     this.title,
@@ -20,10 +20,11 @@ class SharkTrackQrImage extends StatelessWidget {
   final VoidCallback onLongPress;
   final GlobalKey renderKey;
 
+
   @override
   Widget build(BuildContext context) {
     return FlatButton(
-      padding: EdgeInsets.all(0),
+      padding: const EdgeInsets.all(0),
       onPressed: onPressed,
       onLongPress: onLongPress,
       child: RepaintBoundary(
@@ -36,11 +37,11 @@ class SharkTrackQrImage extends StatelessWidget {
                 data: data,
                 version: QrVersions.auto,
                 size: size,
-                embeddedImage: AssetImage('assets/images/shark_track_icon_bw.png'),
-                embeddedImageStyle: QrEmbeddedImageStyle(size: Size(36, 36)),
+                embeddedImage: const AssetImage('assets/images/shark_track_icon_bw.png'),
+                embeddedImageStyle: QrEmbeddedImageStyle(size: const Size(36, 36)),
               ),
-              if (title != null) Text(title, style: TextStyle(fontSize: 12)),
-              if (subtitle != null) Text(subtitle, style: TextStyle(fontSize: 11))
+              if (title != null) Text(title, style: const TextStyle(fontSize: 12)),
+              if (subtitle != null) Text(subtitle, style: const TextStyle(fontSize: 11))
             ],
           ),
         ),

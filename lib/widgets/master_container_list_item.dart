@@ -3,17 +3,20 @@ import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/widgets/forward_arrow.dart';
+import 'package:oltrace/widgets/master_container_icon.dart';
 
 class MasterContainerListItem extends StatelessWidget {
   final MasterContainer masterContainer;
   final Function(int) onTap;
   final bool selected;
+  final int listIndex;
 
-  MasterContainerListItem({
-    this.masterContainer,
+  const MasterContainerListItem({
+    @required this.masterContainer,
     this.onTap,
     this.selected = false,
-  });
+    @required this.listIndex,
+  }): assert(listIndex != null);
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,7 @@ class MasterContainerListItem extends StatelessWidget {
             top: BorderSide(color: Colors.grey[300], width: 0.5)),
       ),
       child: ListTile(
+        leading: MasterContainerIcon(indexNumber: listIndex),
         title: Text(masterContainer.tagCode),
         subtitle: Text(friendlyDateTime(masterContainer.createdAt)),
         trailing: ForwardArrow(),

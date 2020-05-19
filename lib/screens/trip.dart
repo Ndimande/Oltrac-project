@@ -1,21 +1,9 @@
-import 'dart:io';
-
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
-import 'package:imei_plugin/imei_plugin.dart';
-import 'package:olrac_themes/olrac_themes.dart';
-
 import 'package:flutter/material.dart';
-import 'package:oltrace/app_data.dart';
+import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/http/ddm.dart';
-import 'package:oltrace/models/haul.dart';
-import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/repositories/haul.dart';
-import 'package:oltrace/repositories/landing.dart';
-import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/services/trip_upload.dart';
@@ -26,29 +14,9 @@ import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
 final _tripRepo = TripRepository();
-final _haulRepo = HaulRepository();
-final _landingRepo = LandingRepository();
-final _productRepo = ProductRepository();
-
-Future<Trip> _getWithNested(Trip trip) async {
-  final List<Haul> activeTripHauls = await _haulRepo.forTripId(trip.id);
-  final List<Haul> hauls = [];
-  for (final Haul haul in activeTripHauls) {
-    final List<Landing> landings = await _landingRepo.forHaul(haul);
-    final List<Landing> landingsWithProducts = [];
-    for (final Landing landing in landings) {
-      final List<Product> products = await _productRepo.forLanding(landing.id);
-      landingsWithProducts.add(landing.copyWith(products: products));
-    }
-    hauls.add(haul.copyWith(products: landingsWithProducts));
-  }
-  final Trip tripWithNested = trip.copyWith(hauls: hauls);
-
-  return tripWithNested;
-}
 
 Future<Map<String, dynamic>> _load(int tripId) async {
-  final Trip trip = await _getWithNested(await _tripRepo.find(tripId));
+  final Trip trip = await _tripRepo.find(tripId);
   final Trip activeTrip = await _tripRepo.getActive();
   return {
     'trip': trip,
@@ -157,7 +125,7 @@ class TripScreenState extends State<TripScreen> {
 
   Future<bool> _confirmUseMobileData() async => await showDialog<bool>(
         context: context,
-        builder: (_) => ConfirmDialog(
+        builder: (_) => const ConfirmDialog(
             'Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
       );
 

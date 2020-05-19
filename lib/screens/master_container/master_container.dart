@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:olrac_themes/olrac_themes.dart';
-import 'package:oltrace/framework/util.dart' as util;
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
+import 'package:oltrace/widgets/confirm_dialog.dart';
+import 'package:oltrace/widgets/master_container_info.dart';
 import 'package:oltrace/screens/product.dart';
-import 'package:oltrace/widgets/sharktrack_qr_image.dart';
-import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
+import 'package:oltrace/widgets/sharktrack_qr_image.dart';
 
 final MasterContainerRepository _masterContainerRepo = MasterContainerRepository();
-final ProductRepository _productRepository = ProductRepository();
 
 Future<MasterContainer> _load(int id) async {
+  final ProductRepository _productRepository = ProductRepository();
+
   final MasterContainer masterContainer = await _masterContainerRepo.find(id);
 
   final List<Product> products = await _productRepository.forMasterContainer(id);
@@ -22,8 +22,9 @@ Future<MasterContainer> _load(int id) async {
 
 class MasterContainerScreen extends StatefulWidget {
   final int masterContainerId;
+  final int masterContainerIndex;
 
-  MasterContainerScreen({@required this.masterContainerId}) : assert(masterContainerId != null);
+  const MasterContainerScreen({@required this.masterContainerId, this.masterContainerIndex}) : assert(masterContainerId != null);
 
   @override
   _MasterContainerScreenState createState() => _MasterContainerScreenState();
@@ -42,35 +43,9 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
     );
   }
 
-  Widget _details() {
-    return Container(
-      color: OlracColours.olspsBlue[50],
-      padding: EdgeInsets.all(15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            masterContainer.tagCode,
-            style: TextStyle(fontSize: 20),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                util.friendlyDateTime(masterContainer.createdAt),
-                style: TextStyle(fontSize: 18),
-              ),
-              LocationButton(location: masterContainer.location),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _productList() {
-    if (masterContainer.products.length == 0) {
-      return Text('No Source products');
+    if (masterContainer.products.isEmpty) {
+      return const Text('No Source products');
     }
     return Column(
       children: masterContainer.products.map<Widget>((Product product) {
@@ -85,11 +60,28 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
     );
   }
 
+  Future<void> _onPressDelete() async {
+    // Are you sure?
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const ConfirmDialog('Delete', 'Are you sure?'),
+    );
+
+    if(!confirmed) {
+      return;
+    }
+
+    await _masterContainerRepo.delete(masterContainer.id);
+
+    Navigator.pop(context);
+  }
+
   Widget _body() {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
-          _details(),
+          MasterContainerInfo(masterContainer: masterContainer,indexNumber: widget.masterContainerIndex,onPressDelete: _onPressDelete,),
           _qrCode(),
           _productList(),
         ],
@@ -107,12 +99,12 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
         masterContainer = snapshot.data;
         return Scaffold(
           appBar: AppBar(
-            title: Text('Master Container'),
+            title: const Text('Master Container'),
           ),
           body: _body(),
         );

@@ -15,7 +15,7 @@ class HaulInfo extends StatelessWidget {
   final int listIndex;
   final bool isActiveHaul;
 
-  HaulInfo({
+  const HaulInfo({
     @required this.haul,
     @required this.onPressEndHaul,
     @required this.onPressCancelHaul,
@@ -55,7 +55,6 @@ class HaulInfo extends StatelessWidget {
     );
   }
 
-
   Widget _detailsSection() {
     return Container(
       child: Column(
@@ -68,8 +67,6 @@ class HaulInfo extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (!isActiveHaul) TimeSpace(label: 'Ended ', dateTime: haul.endedAt, location: haul.endLocation),
-          if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime(),
-          if (haul.fishingMethod.type == FishingMethodType.Static) _hooksOrTraps(),
         ],
       ),
     );
@@ -79,8 +76,14 @@ class HaulInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Traps/Hooks',style: TextStyle(fontSize: 13),),
-        Text(haul.hooksOrTraps.toString(),style: TextStyle(fontSize: 14),),
+        Text(
+          'Traps/Hooks',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          haul.hooksOrTraps.toString(),
+          style: const TextStyle(fontSize: 16),
+        ),
       ],
     );
   }
@@ -91,22 +94,41 @@ class HaulInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('Soak Time', style: TextStyle(fontSize: 13)),
-        Text('$hours hours $minutes minutes', style: TextStyle(fontSize: 14)),
+        Text('Soak Time', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text('$hours hours $minutes minutes', style: const TextStyle(fontSize: 16)),
       ],
     );
+  }
+
+  List<Widget> _staticGearDetails() {
+    return [
+      const Divider(),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          if (haul.fishingMethod.type == FishingMethodType.Static) _soakTime(),
+          const SizedBox(width: 10),
+          if (haul.fishingMethod.type == FishingMethodType.Static) _hooksOrTraps(),
+        ],
+      ),
+    ];
   }
 
   Widget _buildHaulDetails() {
     return Container(
       color: OlracColours.olspsBlue[50],
-      padding: EdgeInsets.all(10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      padding: const EdgeInsets.all(10),
+      child: Column(
         children: <Widget>[
-          numberedIcon(),
-          SizedBox(width: 10),
-          Expanded(child: _detailsSection()),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              numberedIcon(),
+              const SizedBox(width: 10),
+              Expanded(child: _detailsSection()),
+            ],
+          ),
+          if (haul.fishingMethod.type == FishingMethodType.Static) ..._staticGearDetails()
         ],
       ),
     );

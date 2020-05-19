@@ -59,11 +59,12 @@ const List<Map<String, String>> appMigrations = [
         'weight_unit TEXT NOT NULL, '
         'length_unit TEXT NOT NULL, '
         'weight INTEGER NOT NULL, '
-        'length INTEGER NOT NULL, '
-        'individuals INTEGER NOT NULL DEFAULT 1, '
+        'length INTEGER, '
+        'individuals INTEGER, '
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '
         'done_tagging INTEGER DEFAULT 0, '
+        'is_bulk INTEGER DEFAULT 0, '
         'FOREIGN KEY (haul_id) REFERENCES hauls (id)'
         ')',
     'down': 'DROP TABLE landings'
@@ -98,7 +99,7 @@ const List<Map<String, String>> appMigrations = [
     'name': 'create master_containers table',
     'up': 'CREATE TABLE master_containers( '
         'id INTEGER PRIMARY KEY, '
-        'tag_code TEXT NOT NULL, '
+        'tag_code TEXT UNIQUE NOT NULL, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'latitude REAL NOT NULL, '
         'longitude REAL NOT NULL, '

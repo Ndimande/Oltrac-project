@@ -3,16 +3,16 @@ import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/landing.dart';
 
 const double rowFontSize = 16;
-const TextStyle _rowFontStyle = const TextStyle(fontSize: rowFontSize);
+const TextStyle _rowFontStyle = TextStyle(fontSize: rowFontSize);
 
 class SpeciesInformation extends StatelessWidget {
   final Landing landing;
 
-  SpeciesInformation({this.landing});
+  const SpeciesInformation({this.landing});
 
-  _buildRow(String key, String val, {bool italic = false}) {
+  Container _buildRow(String key, String val, {bool italic = false}) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15,vertical: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +53,7 @@ class SpeciesInformation extends StatelessWidget {
         _buildRow('3 Alpha Code', landing.species.alpha3Code),
         _buildRow('Caab Code', landing.species.caabCode),
         _buildRow('CPC Class', landing.species.cpcClass),
-        SizedBox(height: 15),
+        const SizedBox(height: 15),
       ],
     );
   }

@@ -63,17 +63,18 @@ class Haul extends Model {
         assert(startLocation != null),
         super(id: id);
 
+  @override
   Haul copyWith({
     int id,
     int tripId,
     DateTime startedAt,
     DateTime endedAt,
     FishingMethod fishingMethod,
-    List<Landing> products,
+    List<Landing> landings,
     Location startLocation,
     Location endLocation,
     Duration soakTime,
-    int trapsOrHooks,
+    int hooksOrTraps,
   }) {
     return Haul(
       id: id ?? this.id,
@@ -81,11 +82,11 @@ class Haul extends Model {
       startedAt: startedAt ?? this.startedAt,
       endedAt: endedAt ?? this.endedAt,
       fishingMethod: fishingMethod ?? this.fishingMethod,
-      landings: products ?? this.landings,
+      landings: landings ?? this.landings,
       startLocation: startLocation ?? this.startLocation,
       endLocation: endLocation ?? this.endLocation,
       soakTime: soakTime ?? this.soakTime,
-      hooksOrTraps: trapsOrHooks ?? this.hooksOrTraps,
+      hooksOrTraps: hooksOrTraps ?? this.hooksOrTraps,
     );
   }
 
@@ -101,6 +102,7 @@ class Haul extends Model {
         hooksOrTraps = data['traps_or_hooks'] as int,
         super.fromMap(data);
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

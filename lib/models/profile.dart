@@ -35,6 +35,7 @@ class Profile extends Model {
         fishingLicenseNumber = data['fishingLicenseNumber'],
         super.fromMap(data);
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'uuid': uuid,
@@ -47,6 +48,7 @@ class Profile extends Model {
     };
   }
 
+  @override
   Profile copyWith({
     String uuid,
     String vesselName,

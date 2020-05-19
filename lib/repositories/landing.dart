@@ -1,15 +1,17 @@
-import 'package:oltrace/data/species.dart' as speciesData;
+import 'package:oltrace/data/species.dart' as species_data;
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/framework/util.dart';
-import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/species.dart';
+import 'package:oltrace/repositories/product.dart';
 
 class LandingRepository extends DatabaseRepository<Landing> {
-  var tableName = 'landings';
+  @override
+  final String tableName = 'landings';
 
+  @override
   Future<int> store(Landing landing) async {
     if (landing.id == null) {
       return await database.insert(tableName, toDatabaseMap(landing));
@@ -24,8 +26,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
   Future<Landing> find(int id) async {
     final List<Map> results = await database.query(tableName, where: 'id = $id');
     final Landing landing = fromDatabaseMap(results.first);
-
-    return landing;
+    final List<Product> products = await ProductRepository().forLanding(landing.id);
+    return landing.copyWith(products: products);
   }
 
   @override
@@ -34,24 +36,24 @@ class LandingRepository extends DatabaseRepository<Landing> {
     await database.delete('product_has_landings', where: 'landing_id = $id');
   }
 
-  Future<List<Landing>> forHaul(Haul haul) async {
-    final List<Map> results = await database.query(tableName, where: 'haul_id = ${haul.id}');
-    List landings = <Landing>[];
-    for (Map<String, dynamic> result in results) {
+  Future<List<Landing>> forHaul(int id) async {
+    final List<Map> results = await database.query(tableName, where: 'haul_id = $id');
+    final List landings = <Landing>[];
+    for (final Map<String, dynamic> result in results) {
       landings.add(fromDatabaseMap(result));
     }
 
     return landings;
   }
 
-  Future<List<Landing>> forProduct(Product product) async {
-    final List<Map> results = await database.query('product_has_landings', where: 'product_id = ${product.id}');
+  Future<List<Landing>> forProduct(int productId) async {
+    final List<Map> results = await database.query('product_has_landings', where: 'product_id = $productId');
 
-    List landings = <Landing>[];
-    for (Map<String, dynamic> result in results) {
+    final List landings = <Landing>[];
+    for (final Map<String, dynamic> result in results) {
       final int landingId = result['landing_id'];
       final List<Map> landingResults = await database.query('landings', where: 'id = $landingId');
-      if (landingResults.length != 0) {
+      if (landingResults.isNotEmpty) {
         final Landing landing = fromDatabaseMap(landingResults.first);
         landings.add(landing);
       }
@@ -64,17 +66,17 @@ class LandingRepository extends DatabaseRepository<Landing> {
   Landing fromDatabaseMap(Map<String, dynamic> result) {
     final createdAt = result['created_at'] != null ? DateTime.parse(result['created_at']) : null;
 
-    final lengthUnitResult = result['length_unit'];
-    final weightUnitResult = result['weight_unit'];
+    final String lengthUnitResult = result['length_unit'];
+    final String weightUnitResult = result['weight_unit'];
 
-    var lengthUnit;
+    LengthUnit lengthUnit;
     if (lengthUnitResult == LengthUnit.MICROMETERS.toString()) {
       lengthUnit = LengthUnit.MICROMETERS;
     } else if (lengthUnitResult == LengthUnit.INCHES.toString()) {
       lengthUnit = LengthUnit.INCHES;
     }
 
-    var weightUnit;
+    WeightUnit weightUnit;
     if (weightUnitResult == WeightUnit.GRAMS.toString()) {
       weightUnit = WeightUnit.GRAMS;
     } else if (weightUnitResult == WeightUnit.OUNCES.toString()) {
@@ -82,21 +84,21 @@ class LandingRepository extends DatabaseRepository<Landing> {
     }
 
     return Landing(
-      id: result['id'],
-      createdAt: createdAt,
-      location: Location.fromMap({
-        'latitude': result['latitude'],
-        'longitude': result['longitude'],
-      }),
-      haulId: result['haul_id'],
-      length: result['length'],
-      weight: result['weight'],
-      lengthUnit: lengthUnit,
-      weightUnit: weightUnit,
-      individuals: result['individuals'],
-      species: speciesData.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
-      doneTagging: result['done_tagging'] == 1 ? true : false,
-    );
+        id: result['id'],
+        createdAt: createdAt,
+        location: Location.fromMap({
+          'latitude': result['latitude'],
+          'longitude': result['longitude'],
+        }),
+        haulId: result['haul_id'],
+        length: result['length'],
+        weight: result['weight'],
+        lengthUnit: lengthUnit,
+        weightUnit: weightUnit,
+        individuals: result['individuals'],
+        species: species_data.species.firstWhere((Species s) => s.alpha3Code == result['species_code']),
+        doneTagging: result['done_tagging'] == 1,
+        isBulk: result['is_bulk'] == 1);
   }
 
   @override
@@ -112,7 +114,8 @@ class LandingRepository extends DatabaseRepository<Landing> {
       'weight': landing.weight,
       'length': landing.length,
       'individuals': landing.individuals,
-      'done_tagging': landing.doneTagging == true ? 1 : 0
+      'done_tagging': landing.doneTagging ? 1 : 0,
+      'is_bulk': landing.isBulk ? 1 : 0
     };
   }
 }

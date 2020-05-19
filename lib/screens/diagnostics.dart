@@ -29,13 +29,11 @@ Future<Map> _load() async {
   final int backgroundFetchStatus = await BackgroundFetch.status;
   final String imei = await ImeiPlugin.getImei();
 
-  final AndroidDeviceInfo androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
-
   return {
     'profile': profile,
     'backgroundFetchStatus': backgroundFetchStatus,
     'imei': imei,
-    'androidDeviceInfo': androidDeviceInfo,
+    'androidDeviceInfo': AppData.deviceInfo,
   };
 }
 
@@ -60,10 +58,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
       child:
           Text(AppConfig.APP_TITLE + ' ' + AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber));
 
-  Future _resetDatabase() async {
-    await widget.sharedPreferences.remove('mobileData');
-    await widget.sharedPreferences.remove('uploadAutomatically');
-    await widget.sharedPreferences.remove('fishingMethod');
+  Future<void> _resetDatabase() async {
     final Database database = DatabaseProvider().database;
     final Migrator migrator = Migrator(database, AppConfig.migrations);
     await migrator.run(true);
@@ -78,6 +73,15 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
         ['Android SDK', _androidDeviceInfo.version.sdkInt.toString()],
         ['Manufacturer', _androidDeviceInfo.manufacturer],
         ['Model', _androidDeviceInfo.model],
+        ['Device ID', _androidDeviceInfo.id],
+        ['Board', _androidDeviceInfo.board],
+        ['Display', _androidDeviceInfo.display],
+        ['Product', _androidDeviceInfo.product],
+        ['Hardware', _androidDeviceInfo.hardware],
+        ['Emulator', (!_androidDeviceInfo.isPhysicalDevice).toString()],
+        ['Brand', _androidDeviceInfo.brand],
+        ['Type', _androidDeviceInfo.type],
+        ['Fingerprint', _androidDeviceInfo.version.toString()]
       ],
     );
   }
@@ -140,9 +144,9 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
     );
   }
 
-  Widget _resetApp() {
+  Widget _resetAppSection() {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Column(
         children: <Widget>[
           const Text('Reset App Data', style: TextStyle(color: OlracColours.ninetiesRed, fontSize: 24)),
@@ -159,7 +163,7 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
               await _resetDatabase();
               await Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (Route<dynamic> route) => false);
             },
-            child: Text('Reset App'),
+            child: const Text('Reset App'),
           ),
         ],
       ),
@@ -186,13 +190,13 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
             child: Column(
               children: <Widget>[
                 _version(),
-                _device(),
+                _resetAppSection(),
                 _buildProfile(),
                 _sharedPrefs(),
-                _environment(),
                 _backgroundFetch(),
                 _TripUploadQueue(),
-                _resetApp(),
+                _environment(),
+                _device(),
               ],
             ),
           );
@@ -249,7 +253,7 @@ class _TripUploadListItem extends StatelessWidget {
       children: <Widget>[
         SelectableText(
           _json(),
-          style: TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 12),
         )
       ],
     );

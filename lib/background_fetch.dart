@@ -1,7 +1,5 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:connectivity/connectivity.dart';
-import 'package:imei_plugin/imei_plugin.dart';
-import 'package:oltrace/app_data.dart';
 import 'package:oltrace/http/ddm.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/models/trip_upload.dart';
@@ -17,7 +15,7 @@ Future<void> backgroundFetchHeadlessTask(String taskId) async {
 }
 
 Future<void> backgroundFetchCallback(String taskId) async {
-  print("[BackgroundFetch] Event received $taskId");
+  print('[BackgroundFetch] Event received $taskId');
   await _uploadCompletedTrips();
 }
 

@@ -11,15 +11,15 @@ class LandingListItem extends StatelessWidget {
   final Function onLongPress;
   final bool isSelected;
   final int listIndex;
-  final bool selectable;
+  final bool isSelectable;
 
-  LandingListItem({
+  const LandingListItem({
     @required this.landing,
     @required this.onPressed,
     @required this.listIndex,
     this.onLongPress,
     this.isSelected = false,
-    this.selectable = true,
+    this.isSelectable = true,
   })  : assert(landing != null),
         assert(onPressed != null),
         assert(listIndex != null);
@@ -32,30 +32,23 @@ class LandingListItem extends StatelessWidget {
 
   Text get individuals => Text(' (${landing.individuals})');
 
-  Widget get _title {
-    final firstRow = <Widget>[
-      Flexible(
-        child: _speciesName,
-      )
-    ];
 
-    if (landing.isBulk) {
-      firstRow.add(individuals);
+  Widget get _subtitle {
+    String lengthWeight = landing.weightKilograms;
+    if(landing.length != null) {
+      lengthWeight += ', ' + landing.lengthCentimeters;
     }
-
-    return Row(children: firstRow);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(lengthWeight),
+        Text(friendlyDateTime(landing.createdAt)),
+      ],
+    );
   }
 
-  Widget get _subtitle => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text('${landing.weightKilograms}, ${landing.lengthCentimeters}'),
-          Text(friendlyDateTime(landing.createdAt)),
-        ],
-      );
-
-  Widget get _icon {
-    if (!selectable) {
+  Widget get _trailingIcon {
+    if (!isSelectable) {
       return ForwardArrow();
     }
 
@@ -83,16 +76,16 @@ class LandingListItem extends StatelessWidget {
     return Container(
       decoration: _decoration,
       child: ListTile(
-        onLongPress: landing.doneTagging || !selectable ? null : onLongPress,
+        onLongPress: landing.doneTagging || !isSelectable ? null : onLongPress,
         onTap: () => onPressed(listIndex),
         leading: LandingIcon(
           landing: landing,
           listIndex: listIndex,
         ),
-        title: _title,
+        title: _speciesName,
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[_subtitle, _icon],
+          children: <Widget>[_subtitle, _trailingIcon],
         ),
       ),
     );

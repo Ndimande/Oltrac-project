@@ -22,6 +22,7 @@ class DdmApi {
       'SharkTrack-Debug': AppConfig.debugMode.toString(),
       'SharkTrack-IMEI': imei,
       'SharkTrack-Locale': Platform.localeName,
+      'SharkTrack-Device': AppData.deviceInfo.manufacturer + ' ' + AppData.deviceInfo.model,
 
     };
 

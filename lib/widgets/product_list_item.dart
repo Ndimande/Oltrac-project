@@ -7,19 +7,44 @@ import 'package:oltrace/widgets/forward_arrow.dart';
 class ProductListItem extends StatelessWidget {
   final Product product;
   final Function onPressed;
-  final bool selected;
+  final bool isSelected;
+  final bool isSelectable;
   final bool trailingIcon;
 
-  ProductListItem({this.product, this.onPressed, this.selected = false, this.trailingIcon = true});
+  const ProductListItem({
+    this.product,
+    this.onPressed,
+    this.isSelected = false,
+    this.trailingIcon = true,
+    this.isSelectable = false,
+  });
+
+  Widget get _trailingIcon {
+    if (trailingIcon == false) {
+      return null;
+    }
+
+    if (!isSelectable) {
+      return ForwardArrow();
+    }
+
+    return Icon(
+      isSelected ? Icons.check_box : Icons.check_box_outline_blank,
+      size: 30,
+      color: OlracColours.olspsBlue,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: selected ? OlracColours.olspsBlue[50] : null,
-        border: Border(bottom: BorderSide(color: Colors.grey[300],width: 0.5), top: BorderSide(color: Colors.grey[300],width: 0.5)),
+        color: isSelected ? OlracColours.olspsBlue[50] : null,
+        border: Border(
+            bottom: BorderSide(color: Colors.grey[300], width: 0.5),
+            top: BorderSide(color: Colors.grey[300], width: 0.5)),
       ),
-      padding: EdgeInsets.all(0),
+      padding: const EdgeInsets.all(0),
       child: ListTile(
         onTap: onPressed,
         isThreeLine: true,
@@ -33,12 +58,12 @@ class ProductListItem extends StatelessWidget {
             ),
             Text(
               product.productType.name,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
         subtitle: Text(friendlyDateTime(product.createdAt)),
-        trailing: trailingIcon ? ForwardArrow() : null,
+        trailing: _trailingIcon,
       ),
     );
   }

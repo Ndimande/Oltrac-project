@@ -28,7 +28,7 @@ class AppConfig {
 
   static const Map defaultUserSettings = <String, dynamic>{
     'mobileData': true,
-    'uploadAutomatically': true,
+    'uploadAutomatically': false,
     'bulkMode': false, //todo remove this everywhere
   };
 

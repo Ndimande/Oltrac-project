@@ -13,11 +13,13 @@ class Country extends Model {
         iso3166Alpha3 = data['iso3166Alpha3'],
         super.fromMap(data);
 
-  Country copyWith({String englishName, String iso3166Alpha3}) {
+  @override
+  Country copyWith({String name, String iso3166Alpha3}) {
     return Country(
-        id: id, name: englishName ?? this.name, iso3166Alpha3: iso3166Alpha3 ?? this.iso3166Alpha3);
+        id: id, name: name ?? this.name, iso3166Alpha3: iso3166Alpha3 ?? this.iso3166Alpha3);
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {'id': id, 'name': name, 'iso3166Alpha3': iso3166Alpha3};
   }

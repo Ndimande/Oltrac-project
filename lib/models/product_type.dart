@@ -11,10 +11,12 @@ class ProductType extends Model {
       : name = data['name'],
         super.fromMap(data);
 
-  ProductType copyWith({String englishName}) {
-    return ProductType(name: englishName ?? this.name);
+  @override
+  ProductType copyWith({String name}) {
+    return ProductType(name: name ?? this.name);
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {'id': id, 'name': name};
   }

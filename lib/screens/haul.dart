@@ -29,24 +29,23 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   final Haul haul = await _haulRepo.find(haulId);
   final Trip activeTrip = await _tripRepo.getActive();
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
-  final List<Landing> landings = await _landingRepo.forHaul(haul);
-  final List<Landing> landingsWithProducts = [];
+  final List<Landing> landings = await _landingRepo.forHaul(haul.id);
 
-  List<Product> flatProducts = [];
 
-  for (Landing landing in landings) {
+  final List<Product> flatProducts = [];
+
+  for (final Landing landing in landings) {
     final List<Product> products = await _productRepo.forLanding(landing.id);
-    for (Product product in products) {
-      List foundProds = flatProducts.where((Product p) => p.id == product.id).toList();
-      if (foundProds.length == 0) {
+    for (final Product product in products) {
+      final List foundProds = flatProducts.where((Product p) => p.id == product.id).toList();
+      if (foundProds.isEmpty) {
         flatProducts.add(product);
       }
     }
-    landingsWithProducts.add(landing.copyWith(products: products));
   }
 
   return {
-    'haul': haul.copyWith(products: landingsWithProducts),
+    'haul': haul,
     'products': flatProducts,
     'isActiveTrip': isActiveTrip,
   };
@@ -113,12 +112,13 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressCancelHaul() async {
-    bool confirmed = await showDialog<bool>(
+    final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
-      builder: (_) => ConfirmDialog(
-          'Cancel Haul',
-          ('Are you sure you want to cancel the haul? The haul will be removed. '
-              'This action cannot be undone.')),
+      builder: (_) => const ConfirmDialog(
+        'Cancel Haul',
+        'Are you sure you want to cancel the haul? The haul will be removed. '
+            'This action cannot be undone.',
+      ),
     );
 
     if (confirmed != null && confirmed) {
@@ -128,7 +128,7 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Future<void> _onPressEndHaul() async {
-    bool confirmed = await showDialog<bool>(
+    final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
       builder: (_) => ConfirmDialog(
         Messages.endHaulTitle(_haul),
@@ -145,7 +145,7 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
       await _haulRepo.store(endedHaul);
-      showTextSnackBar(_scaffoldKey, 'Haul ended', duration: Duration(seconds: 1));
+      showTextSnackBar(_scaffoldKey, 'Haul ended', duration: const Duration(seconds: 1));
       setState(() {});
     }
   }
@@ -190,7 +190,7 @@ class HaulScreenState extends State<HaulScreen> {
 
   bool _landingIsSelected(Landing landing) {
     final Landing found = _selectedLandings.singleWhere((l) => l.id == landing.id, orElse: () => null);
-    return found == null ? false : true;
+    return found != null;
   }
 
   void _onLongPressLanding(int indexPressed) {
@@ -212,12 +212,12 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _toggleListButton() {
     return Container(
-      margin: EdgeInsets.only(right: 5),
+      margin: const EdgeInsets.only(right: 5),
       child: RaisedButton(
         color: OlracColours.olspsDarkBlue,
         child: Text(
           _showProductList ? 'Show Species List' : 'Show Tags List',
-          style: TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18),
         ),
         onPressed: () => _onPressShowProductListSwitch(!_showProductList),
       ),
@@ -226,10 +226,10 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _clearSelectedButton() {
     return Container(
-      margin: EdgeInsets.only(right: 5),
+      margin: const EdgeInsets.only(right: 5),
       child: RaisedButton(
         color: OlracColours.ninetiesRed,
-        child: Text(
+        child: const Text(
           'Clear All',
           style: TextStyle(fontSize: 18),
         ),
@@ -250,11 +250,11 @@ class HaulScreenState extends State<HaulScreen> {
                 children: <Widget>[
                   _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
                   if (_selectedLandings.isNotEmpty) _clearSelectedButton(),
-                  if (_products.length != 0 && _selectedLandings.isEmpty) _toggleListButton(),
+                  if (_products.isNotEmpty && _selectedLandings.isEmpty) _toggleListButton(),
                 ],
               ),
             ),
-            _showProductList ? _productList() : _landingsList(landings),
+            if (_showProductList) _productList() else _landingsList(landings),
           ],
         ),
       ),
@@ -262,7 +262,7 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _productList() {
-    if (_products.length == 0) {
+    if (_products.isEmpty) {
       return _noProducts();
     }
     final List<Widget> items = _products
@@ -275,7 +275,7 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _landingsList(List<Landing> landings) {
-    if (landings.length == 0) {
+    if (landings.isEmpty) {
       return _noLandings();
     }
     int landingIndex = landings.length;
@@ -283,7 +283,7 @@ class HaulScreenState extends State<HaulScreen> {
     final List<LandingListItem> listLandings = landings.reversed
         .map(
           (Landing landing) => LandingListItem(
-            selectable: _isActiveTrip,
+            isSelectable: _isActiveTrip,
             isSelected: _landingIsSelected(landing),
             landing: landing,
             onLongPress: () => _onLongPressLanding(landing.id),
@@ -344,7 +344,7 @@ class HaulScreenState extends State<HaulScreen> {
     return Expanded(
       child: Container(
         alignment: Alignment.center,
-        child: Text(
+        child: const Text(
           'No species in this haul',
           style: TextStyle(fontSize: 20),
         ),
@@ -356,7 +356,7 @@ class HaulScreenState extends State<HaulScreen> {
     return Expanded(
       child: Container(
         alignment: Alignment.center,
-        child: Text(
+        child: const Text(
           'No tags in this haul',
           style: TextStyle(fontSize: 20),
         ),
@@ -366,11 +366,11 @@ class HaulScreenState extends State<HaulScreen> {
 
   Widget _listsLabel(String text) {
     return Container(
-      padding: EdgeInsets.only(left: 10),
+      padding: const EdgeInsets.only(left: 10),
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
+        style: const TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
       ),
     );
   }
@@ -378,7 +378,7 @@ class HaulScreenState extends State<HaulScreen> {
   Text _title() {
     final int numberSelected = _selectedLandings.length;
 
-    if (_selectedLandings.length == 0) {
+    if (_selectedLandings.isEmpty) {
       return Text(_haul.fishingMethod.name);
     }
 
@@ -402,7 +402,7 @@ class HaulScreenState extends State<HaulScreen> {
         }
         // Show blank screen until ready
         if (!snapshot.hasData) {
-          return Scaffold();
+          return const Scaffold();
         }
 
         _haul = snapshot.data['haul'];
@@ -426,7 +426,7 @@ class HaulScreenState extends State<HaulScreen> {
                   isActiveHaul: _haul.endedAt == null,
                 ),
                 _listsSection(_haul.landings),
-                if(_isActiveTrip) _bottomButtons(),
+                if (_isActiveTrip) _bottomButtons(),
               ],
             ),
           ),

@@ -58,7 +58,7 @@ class EditTripScreenState extends State<EditTripScreen> {
 
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => ConfirmDialog('Delete Trip', 'Are you sure you want to delete the trip?'),
+      builder: (_) => const ConfirmDialog('Delete Trip', 'Are you sure you want to delete the trip?'),
     );
     if (confirmed == true) {
       await widget._tripRepo.delete(widget._trip.id);
@@ -73,7 +73,7 @@ class EditTripScreenState extends State<EditTripScreen> {
   Future<void> _onPressSave() async {
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => ConfirmDialog('Update Trip', 'Are you sure you want to update the trip?'),
+      builder: (_) => const ConfirmDialog('Update Trip', 'Are you sure you want to update the trip?'),
     );
 
     if (!confirmed) {
@@ -86,8 +86,8 @@ class EditTripScreenState extends State<EditTripScreen> {
       validationErrors.add('Start time must be in the past');
     }
 
-    if (validationErrors.length != 0) {
-      showTextSnackBar(_scaffoldKey, validationErrors.join("\n"));
+    if (validationErrors.isNotEmpty) {
+      showTextSnackBar(_scaffoldKey, validationErrors.join('\n'));
       return;
     }
 
@@ -144,19 +144,19 @@ class EditTripScreenState extends State<EditTripScreen> {
       children: <Widget>[
         //Section heading
         Container(
-          child: Text(heading, style: TextStyle(color: OlracColours.olspsBlue, fontSize: 28)),
+          child: Text(heading, style: const TextStyle(color: OlracColours.olspsBlue, fontSize: 28)),
         ),
         const SizedBox(height: 15),
         // Start DateTime
         DateTimeEditor(
-          title: Text('Date & Time', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
+          title: const Text('Date & Time', style:  TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
           initialDateTime: dateTime,
           onChanged: onDateTimeChanged,
         ),
 
         // Start Location
         LocationEditor(
-          title: Text('Location', style: TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
+          title: const Text('Location', style:  TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
           onChanged: onLocationChanged,
           location: location,
         ),

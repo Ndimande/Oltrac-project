@@ -6,12 +6,12 @@ class HaulSection extends StatelessWidget {
   final List<Haul> hauls;
   final Function(int, int) onPressHaulItem;
 
-  HaulSection({this.hauls, this.onPressHaulItem}) : assert(hauls != null);
+  const HaulSection({@required this.hauls, this.onPressHaulItem}) : assert(hauls != null);
 
   Widget _buildNoHauls() {
     return Container(
       alignment: Alignment.center,
-      child: Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
+      child: const Text('No hauls on this trip', style: TextStyle(fontSize: 20)),
     );
   }
 
@@ -23,7 +23,7 @@ class HaulSection extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Container(
-            child: reversedHauls.length == 0
+            child: reversedHauls.isEmpty
                 ? _buildNoHauls()
                 : GroupedHaulsList(hauls: reversedHauls, onPressHaulItem: onPressHaulItem, isActiveTrip: true),
           ),

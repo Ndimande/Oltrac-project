@@ -11,13 +11,15 @@ class PackagingType extends Model {
       : name = data['name'],
         super.fromMap(data);
 
+  @override
   PackagingType copyWith({String englishName, String id, String jurisdiction}) {
     return PackagingType(
-      name: englishName ?? this.name,
+      name: englishName ?? name,
       id: id ?? this.id,
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'name': name,

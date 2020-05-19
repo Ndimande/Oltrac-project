@@ -1,11 +1,11 @@
 import 'package:sqflite/sqflite.dart';
 
-final _migrationTableName = 'migrations';
+const _migrationTableName = 'migrations';
 
 class Migrator {
   final List<Map<String, String>> _migrations;
 
-  Database _database;
+  final Database _database;
 
   Migrator(this._database, this._migrations);
 
@@ -23,7 +23,7 @@ class Migrator {
     }
 
     if (reset || !await tableExists(_migrationTableName)) {
-      print("Creating migrations table");
+      print('Creating migrations table');
       await _createMigrationsTable();
     }
 
@@ -39,22 +39,22 @@ class Migrator {
     } catch (e) {
       print('Migrating failed');
       print(e);
-      throw e;
+      rethrow;
     }
   }
 
   /// Check if a table exists.
   Future<bool> tableExists(String name) async {
-    String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='$name'";
-    var result = await _database.rawQuery(sql);
+    final String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='$name'";
+    final result = await _database.rawQuery(sql);
 
-    return result.length > 0 ? true : false;
+    return result.isNotEmpty;
   }
 
   /// Create the database table that stores
   /// the list of complete migrations
   Future<void> _createMigrationsTable() async {
-    String sql = 'CREATE TABLE $_migrationTableName ( '
+    const String sql = 'CREATE TABLE $_migrationTableName ( '
         'id INTEGER PRIMARY KEY, '
         'migration TEXT'
         ')';
@@ -72,8 +72,8 @@ class Migrator {
 
   /// Run all pending migrations.
   Future<void> _migrate(Iterable pendingMigrations, {bool fresh = false}) async {
-    for (var migration in pendingMigrations) {
-      String name = migration['name'];
+    for (final migration in pendingMigrations) {
+      final String name = migration['name'];
       print('Migrating $name');
       await _database.execute(migration['up']);
       await _database.insert('migrations', {'migration': name});
@@ -92,15 +92,15 @@ class Migrator {
 
   /// Get a list of all user created tables.
   Future<List<String>> getTableNames() async {
-    List<Map> tables = await _database.rawQuery("SELECT name FROM sqlite_master"
+    final List<Map> tables = await _database.rawQuery('SELECT name FROM sqlite_master'
         " WHERE type ='table' AND name NOT LIKE 'sqlite_%' AND  name != 'android_metadata'");
     return tables.map((table) => table['name'].toString()).toList();
   }
 
   /// Drop all tables to give a clean state.
   Future<void> _reset() async {
-    List tableNames = await getTableNames();
-    for (String tableName in tableNames) {
+    final List tableNames = await getTableNames();
+    for (final String tableName in tableNames) {
       _database.execute("DROP TABLE '$tableName'");
     }
   }

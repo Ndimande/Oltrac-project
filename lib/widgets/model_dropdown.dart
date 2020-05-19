@@ -21,7 +21,7 @@ class ModelDropdown<T> extends StatelessWidget {
     @required this.selected,
     @required this.onChanged,
     @required this.items,
-  }) : this.labelStyle = labelStyle ?? TextStyle(fontSize: 20, color: OlracColours.olspsBlue);
+  }) : labelStyle = labelStyle ?? TextStyle(fontSize: 20, color: OlracColours.olspsBlue);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class ModelDropdown<T> extends StatelessWidget {
           DropdownButton<T>(
             hint: Text(
               hint ?? 'Tap to select',
-              style: TextStyle(fontSize: 22),
+              style: const TextStyle(fontSize: 22),
             ),
             isExpanded: true,
             style: TextStyle(fontSize: 22, color: Colors.black),

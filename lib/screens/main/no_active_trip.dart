@@ -9,7 +9,7 @@ class NoActiveTrip extends StatelessWidget {
   final Function onPressCompletedTrip;
   final List<Trip> completedTrips;
 
-  NoActiveTrip({@required this.completedTrips, @required this.onPressStartTrip, @required this.onPressCompletedTrip})
+  const NoActiveTrip({@required this.completedTrips, @required this.onPressStartTrip, @required this.onPressCompletedTrip})
       : assert(completedTrips != null),
         assert(onPressStartTrip != null),
         assert(onPressCompletedTrip != null);

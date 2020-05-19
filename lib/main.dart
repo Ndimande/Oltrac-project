@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_config.dart';
@@ -76,7 +77,9 @@ Future<void> boot() async {
   // Sqlflite database for trip data.
   _database = await DatabaseProvider().connect();
 
-
+  // Get the app version and some other info
+  AppData.packageInfo = await PackageInfo.fromPlatform();
+  AppData.deviceInfo = await DeviceInfoPlugin().androidInfo;
 
   // Dio HTTP client
   DioProvider().init();
@@ -97,7 +100,6 @@ Future<void> boot() async {
 Future<void> _onAppRunning() async {
   UserPrefsProvider().init();
 
-
   // Run the migrator every time to ensure
   // tables are in the latest state.
   final migrator = Migrator(_database, AppConfig.migrations);
@@ -105,9 +107,6 @@ Future<void> _onAppRunning() async {
 
   // For IMEI access
   await requestPhonecallPermission();
-
-  // Get the app version and some other info
-  AppData.packageInfo = await PackageInfo.fromPlatform();
 
   // Prompt for location access until the user accepts.
   while (await _locationProvider.permissionGranted == false || _locationProvider.listening == false) {
@@ -232,6 +231,11 @@ class OlTraceAppState extends State<OlTraceApp> {
               assert(args.containsKey('landings'));
               assert(args.containsKey('haul'));
               final List<Landing> sourceLandings = args['landings'] as List<Landing>;
+
+              sourceLandings.forEach((Landing element) {
+                assert(element.id != null);
+              });
+
               final Haul sourceHaul = args['haul'] as Haul;
 
               return CreateProductScreen(

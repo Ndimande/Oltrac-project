@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:oltrace/framework/util.dart';
 
 enum CoordinateOrientation { Latitude, Longitude }
@@ -21,13 +22,13 @@ class Coordinate {
 
   double get seconds => _seconds;
 
-  Coordinate.fromDecimal({this.decimalValue, this.coordinateOrientation})
+  Coordinate.fromDecimal({@required this.decimalValue, @required this.coordinateOrientation})
       : assert(decimalValue != null),
         assert(coordinateOrientation != null),
         compassDirection = coordinateOrientation == CoordinateOrientation.Latitude
             ? decimalValue >= 0 ? CompassDirection.N : CompassDirection.S
             : decimalValue >= 0 ? CompassDirection.E : CompassDirection.W {
-    List result = _decimal2sexagesimal(decimalValue);
+    final List result = _decimal2sexagesimal(decimalValue);
     _degrees = result[0];
     _minutes = result[1];
     _seconds = result[2];
@@ -66,7 +67,7 @@ List _decimal2sexagesimal(double decimal) {
 
   final String fractionalPart = parts[1];
 
-  final double min = double.parse("0.$fractionalPart") * 60;
+  final double min = double.parse('0.$fractionalPart') * 60;
 
   final int minutes = min.floor();
 
@@ -74,7 +75,7 @@ List _decimal2sexagesimal(double decimal) {
 
   final String minFractionalPart = minParts[1];
 
-  final double seconds = double.parse("0.$minFractionalPart") * 60;
+  final double seconds = double.parse('0.$minFractionalPart') * 60;
 
   final double secondsRounded = roundDouble(seconds, decimals: 2);
   return [degrees, minutes, secondsRounded];

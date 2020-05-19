@@ -5,7 +5,7 @@ import 'package:olrac_themes/olrac_themes.dart';
 class TagScanner extends StatefulWidget {
   final Function onScan;
 
-  TagScanner({this.onScan});
+  const TagScanner({this.onScan});
 
   @override
   State<StatefulWidget> createState() => TagScannerState();
@@ -56,7 +56,7 @@ class TagScannerState extends State<TagScanner> {
             Text(_tagCode ?? '-'),
             FlatButton.icon(
               color: _nfcReaderEnabled ? OlracColours.ninetiesGreen : null,
-              label: Text('Scan'),
+              label: const Text('Scan'),
               icon: Icon(Icons.nfc),
               onPressed: () => setState(() => _nfcReaderEnabled = !_nfcReaderEnabled),
             )

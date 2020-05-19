@@ -5,8 +5,8 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/repositories/product.dart';
 
 class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
-  var tableName = 'master_containers';
-
+  @override
+  final String tableName = 'master_containers';
 
   Future<List<MasterContainer>> forTrip(int tripId) async {
     final List<MasterContainer> mcs = await MasterContainerRepository().all(where: 'trip_id = $tripId');
@@ -43,7 +43,7 @@ class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
 
   Future<void> _storeProductRelations(MasterContainer masterContainer) async {
     await _clearProductRelations(masterContainer);
-    for (Product product in masterContainer.products) {
+    for (final Product product in masterContainer.products) {
       await database.insert('master_container_has_products', {
         'master_container_id': masterContainer.id,
         'product_id': product.id,

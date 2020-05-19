@@ -16,7 +16,7 @@ class HaulListItem extends StatelessWidget {
   final int listIndex;
   final bool usePlusIcon;
 
-  HaulListItem({this.haul, this.onPressed, this.listIndex, this.usePlusIcon = false});
+  const HaulListItem({this.haul, this.onPressed, this.listIndex, this.usePlusIcon = false});
 
   Widget get temporal => haul.endedAt == null ? durationCounter : endedAgo;
 
@@ -39,13 +39,13 @@ class HaulListItem extends StatelessWidget {
   ElapsedCounter get durationCounter => ElapsedCounter(
         prefix: 'Duration: ',
         startedDateTime: haul.startedAt,
-        style: TextStyle(fontSize: titleFontSize),
+        style: const TextStyle(fontSize: titleFontSize),
       );
 
   TimeAgo get endedAgo => TimeAgo(
         prefix: 'Ended ',
         dateTime: haul.endedAt,
-        textStyle: TextStyle(fontSize: titleFontSize),
+        textStyle: const TextStyle(fontSize: titleFontSize),
       );
 
   bool get isActiveHaul => haul.endedAt == null;
@@ -57,7 +57,7 @@ class HaulListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: new BoxDecoration(color: Colors.white, border: new Border(top: BorderSide(color: Colors.grey[300]))),
+      decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Colors.grey[300]))),
       child: ListTile(
         onTap: () => onPressed(listIndex),
         leading: Column(

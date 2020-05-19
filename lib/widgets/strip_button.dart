@@ -9,7 +9,7 @@ class StripButton extends StatelessWidget {
   final bool disabled;
   final Color color;
 
-  StripButton({
+  const StripButton({
     @required this.icon,
     @required this.labelText,
     @required this.onPressed,
@@ -30,14 +30,12 @@ class StripButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if(icon != null) icon,
-            SizedBox(width: 5),
-            Expanded(
-              child: Text(
-                labelText,
-                style: TextStyle(fontSize: 20, color: Colors.white),
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.start,
-              ),
+            if(icon != null) const SizedBox(width: 5),
+            Text(
+              labelText,
+              style: TextStyle(fontSize: 20, color: Colors.white),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.start,
             ),
           ],
         ),

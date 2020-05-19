@@ -39,7 +39,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showTextSnackBar(
     scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(text), duration: duration));
 
 /// Rounds [value] to given number of [decimals]
-double roundDouble(final double value, {final int decimals: 6}) =>
+double roundDouble(final double value, {final int decimals = 6}) =>
     (value * math.pow(10, decimals)).round() / math.pow(10, decimals);
 
 Future<Uint8List> _getPngBytes(ui.Image image) async {
@@ -102,8 +102,8 @@ Future<void> requestPhonecallPermission() async {
 }
 
 String prettyJson(Map<String, dynamic> json, {int indent = 2}) {
-  var spaces = ' ' * indent;
-  var encoder = JsonEncoder.withIndent(spaces);
+  final spaces = ' ' * indent;
+  final encoder = JsonEncoder.withIndent(spaces);
   return encoder.convert(json);
 }
 

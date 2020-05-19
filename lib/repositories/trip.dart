@@ -9,38 +9,38 @@ import 'package:oltrace/repositories/master_container.dart';
 
 class TripRepository extends DatabaseRepository<Trip> {
   /// The name of the database table
-  var tableName = 'trips';
+  @override
+  final tableName = 'trips';
+
   final _database = DatabaseProvider().database;
 
-  /// Get a Trip by [id]
-  Future<Trip> find(int id, {bool withHauls = false}) async {
+  /// Get a [Trip] by id
+  @override
+  Future<Trip> find(int id) async {
     final List results = await _database.query(tableName, where: 'id = $id');
 
     // Nothing found.
-    if (results.length == 0) {
+    if (results.isEmpty) {
       return null;
     }
 
     final trip = fromDatabaseMap(results.first);
 
-    if (withHauls) {
-      final haulRepo = HaulRepository();
+    final haulRepo = HaulRepository();
 
-      final tripHauls = await haulRepo.all(
-        where: 'trip_id = ${trip.id}',
-      );
+    final tripHauls = await haulRepo.all(
+      where: 'trip_id = ${trip.id}',
+    );
 
-      return trip.copyWith(hauls: tripHauls);
-    }
-
-    return trip;
+    return trip.copyWith(hauls: tripHauls);
   }
 
-  /// Get all trips in the database with hauls.
+  /// Get all trips.
+  @override
   Future<List<Trip>> all({String where}) async {
     final List<Map<String, dynamic>> tripResults = await _database.query(tableName, where: where);
 
-    final trips = tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
+    final List<Trip> trips = tripResults.map((Map<String, dynamic> result) => fromDatabaseMap(result)).toList();
 
     return Future.wait(trips.map((Trip trip) => _withNested(trip)).toList());
   }
@@ -48,27 +48,35 @@ class TripRepository extends DatabaseRepository<Trip> {
   /// Get the active Trip. The active trip is the trip
   /// that has ended_at = null.
   Future<Trip> getActive() async {
-    List results = await _database.query(tableName, where: "ended_at is null");
-    if (results.length > 1) {
-      throw Exception('More than one active Trip is not allowed');
-    } else if (results.length == 0) {
+    final List results = await _database.query(tableName, where: 'ended_at is null');
+
+    assert(results.length <= 1);
+
+    if (results.isEmpty) {
       return null;
     }
 
-    return fromDatabaseMap(results.first);
+    final Trip trip = fromDatabaseMap(results.first);
+    final List<Haul> hauls = await HaulRepository().forTrip(trip.id);
+
+    return trip.copyWith(hauls: hauls);
   }
 
+  /// Get all trips that have been ended.
   Future<List<Trip>> getCompleted() async {
-    final List results = await _database.query(tableName, where: "ended_at is not null");
+    final List results = await _database.query(tableName, where: 'ended_at is not null');
     final List<Trip> trips = [];
 
-    for (Map result in results) {
-      trips.add(fromDatabaseMap(result));
+    for (final Map result in results) {
+      final Trip trip = fromDatabaseMap(result);
+      final List<Haul> hauls = await HaulRepository().forTrip(trip.id);
+      trips.add(trip.copyWith(hauls: hauls));
     }
 
     return trips;
   }
 
+  @override
   Trip fromDatabaseMap(Map<String, dynamic> result) {
     final startedAt = result['started_at'] != null ? DateTime.parse(result['started_at']) : null;
 
@@ -87,10 +95,11 @@ class TripRepository extends DatabaseRepository<Trip> {
         longitude: result['start_longitude'],
       ),
       endLocation: endLocation,
-      isUploaded: result['is_uploaded'] == 1 ? true : false,
+      isUploaded: result['is_uploaded'] == 1,
     );
   }
 
+  @override
   Map<String, dynamic> toDatabaseMap(Trip trip) {
     return {
       'id': trip.id,
@@ -104,12 +113,11 @@ class TripRepository extends DatabaseRepository<Trip> {
     };
   }
 
-
   Future<Trip> _withNested(Trip trip) async {
-    final List<Haul> hauls = await HaulRepository().forTripId(trip.id);
+    final List<Haul> hauls = await HaulRepository().forTrip(trip.id);
     final List<MasterContainer> masterContainers = await MasterContainerRepository().forTrip(trip.id);
     return trip.copyWith(
-      hauls:   hauls,
+      hauls: hauls,
       masterContainers: masterContainers,
     );
   }

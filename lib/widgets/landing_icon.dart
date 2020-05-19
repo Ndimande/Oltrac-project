@@ -8,15 +8,15 @@ class LandingIcon extends StatelessWidget {
   final Landing landing;
   final int listIndex;
 
-  LandingIcon({this.landing, this.listIndex});
+  const LandingIcon({this.landing, this.listIndex});
 
   Widget get sharkIcon => SvgIcon(assetPath: SvgIcons.path('Shark'));
 
   Widget get indexNumber => Container(
-        margin: EdgeInsets.only(left: 5, top: 5),
+        margin: const EdgeInsets.only(left: 5, top: 5),
         child: Text(
           listIndex.toString(),
-          style: TextStyle(fontSize: 28, color: OlracColours.olspsBlue),
+          style: const TextStyle(fontSize: 28, color: OlracColours.olspsBlue),
         ),
       );
 
@@ -41,8 +41,16 @@ class LandingIcon extends StatelessWidget {
           color: _tagColor,
         ),
       ),
+      if (landing.isBulk)
+        Container(
+          margin: const EdgeInsets.only(top: 28),
+          child: Text(
+            'BB',
+            style: TextStyle(color: OlracColours.olspsDarkBlue,fontSize: 12),
+          ),
+        ),
       Container(
-        margin: EdgeInsets.only(left: 8, top: 11),
+        margin: const EdgeInsets.only(left: 8, top: 11),
         child: Container(
           width: 26,
           child: Text(
@@ -56,7 +64,7 @@ class LandingIcon extends StatelessWidget {
     ];
 
     return Container(
-      margin: EdgeInsets.only(left: 25),
+      margin: const EdgeInsets.only(left: 25),
       child: Stack(
         children: stackChildren,
       ),

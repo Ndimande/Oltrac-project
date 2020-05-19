@@ -9,7 +9,7 @@ import 'package:oltrace/widgets/svg_icon.dart';
 const double iconBaseSize = 200;
 
 class FishingMethodScreen extends StatelessWidget {
-  _onCardPressed(context, method) async {
+  Future<void> _onCardPressed(context, method) async {
     Navigator.pop(context, method);
   }
 
@@ -25,7 +25,7 @@ class FishingMethodScreen extends StatelessWidget {
       );
     });
 
-    final child = new Column(
+    final child = Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -48,9 +48,9 @@ class FishingMethodScreen extends StatelessWidget {
     );
     return Builder(builder: (BuildContext context) {
       return Card(
-        margin: EdgeInsets.all(2),
+        margin: const EdgeInsets.all(2),
         child: FlatButton(
-          padding: EdgeInsets.all(2),
+          padding: const EdgeInsets.all(2),
           child: child,
           onPressed: () async => _onCardPressed(context, method),
         ),
@@ -58,16 +58,16 @@ class FishingMethodScreen extends StatelessWidget {
     });
   }
 
-  chunk(list, int perChunk) =>
+  dynamic chunk(list, int perChunk) =>
       list.isEmpty ? list : ([list.take(perChunk)]..addAll(chunk(list.skip(perChunk), perChunk)));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Fishing Method')),
+      appBar: AppBar(title: const Text('Select Fishing Method')),
       body: Container(
         color: OlracColours.olspsBlue,
-        padding: EdgeInsets.all(2),
+        padding: const EdgeInsets.all(2),
         child: OrientationBuilder(
           builder: (context, orientation) {
             final int columnCount = orientation == Orientation.portrait ? 2 : 4;

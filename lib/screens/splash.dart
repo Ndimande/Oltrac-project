@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:oltrace/app_data.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -18,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
@@ -45,36 +46,37 @@ class _SplashScreenState extends State<SplashScreen> {
       TextStyle(color: Colors.white, fontSize: _scaleText(fontSize), fontFamily: 'RobotoLight');
 
   Image _sharkTrackLogo(double imageWidth) => Image(
-        image: AssetImage('assets/images/SharkTrack_Logo_White.png'),
+        image: const AssetImage('assets/images/SharkTrack_Logo_White.png'),
         width: _scaleImage(imageWidth),
       );
 
   Image _olspsLogo(double imageWidth) => Image(
-        image: AssetImage('assets/images/olsps_logo_white.png'),
+        image: const AssetImage('assets/images/olsps_logo_white.png'),
         width: _scaleImage(imageWidth),
       );
 
   Image _sharkConservationFundLogo(double imageWidth) => Image(
-        image: AssetImage('assets/images/shark_conservation_fund_logo_white.png'),
+        image: const AssetImage('assets/images/shark_conservation_fund_logo_white.png'),
         width: _scaleImage(imageWidth),
       );
 
   Image _fishwellLogo(double imageWidth) => Image(
-        image: AssetImage('assets/images/fishwell_logo_white.png'),
+        image: const AssetImage('assets/images/fishwell_logo_white.png'),
         width: _scaleImage(imageWidth),
       );
 
   Image _trafficLogo(double imageWidth) => Image(
-        image: AssetImage('assets/images/traffic_logo_white.png'),
+        image: const AssetImage('assets/images/traffic_logo_white.png'),
         width: _scaleImage(imageWidth),
       );
 
-  Widget _appLogo() => Container(
-        margin: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+  Widget _appInfo() => Container(
+        margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         child: Column(
           children: <Widget>[
             _sharkTrackLogo(200),
             Text('Onboard'.toUpperCase(), style: _fontStyle(16), textAlign: TextAlign.center),
+            Text(AppData.packageInfo?.version, style: _fontStyle(10)),
             Divider(color: Colors.white, thickness: 1),
             Text('Mobile Shark-Product Tracing Application', style: _fontStyle(10), textAlign: TextAlign.center),
           ],
@@ -82,22 +84,22 @@ class _SplashScreenState extends State<SplashScreen> {
       );
 
   Widget _developedBy() => Container(
-        margin: EdgeInsets.all(5),
+        margin: const EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
             Text('Developed By', style: _fontStyle(10)),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             _olspsLogo(160),
           ],
         ),
       );
 
   Widget _supportedBy() => Container(
-        margin: EdgeInsets.all(5),
+        margin: const EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
             Text('Supported By', style: _fontStyle(10)),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -115,16 +117,16 @@ class _SplashScreenState extends State<SplashScreen> {
     _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: MaterialColor(0xFF086178, {}),
+      backgroundColor: const MaterialColor(0xFF086178, {}),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const SizedBox(height: 10),
-          _appLogo(),
+          _appInfo(),
           Column(
             children: <Widget>[
               _developedBy(),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _supportedBy(),
             ],
           )

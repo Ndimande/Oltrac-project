@@ -55,31 +55,34 @@ class Product extends Model {
         productUnits = data['productUnits'],
         super.fromMap(data);
 
-  Product copyWith(
-      {int id,
-      String tagId,
-      DateTime createdAt,
-      Location location,
-      ProductType productType,
-      PackagingType packagingType,
-      List<Landing> products,
-      int weight,
-      WeightUnit weightUnit,
-      int productUnits}) {
+  @override
+  Product copyWith({
+    int id,
+    String tagCode,
+    DateTime createdAt,
+    Location location,
+    ProductType productType,
+    PackagingType packagingType,
+    List<Landing> landings,
+    int weight,
+    WeightUnit weightUnit,
+    int productUnits,
+  }) {
     return Product(
       id: id ?? this.id,
-      tagCode: tagId ?? this.tagCode,
+      tagCode: tagCode ?? this.tagCode,
       createdAt: createdAt ?? this.createdAt,
       location: location ?? this.location,
       productType: productType ?? this.productType,
       packagingType: packagingType ?? this.packagingType,
-      landings: products ?? this.landings,
+      landings: landings ?? this.landings,
       weight: weight ?? this.weight,
       weightUnit: weightUnit ?? this.weightUnit,
       productUnits: productUnits ?? this.productUnits,
     );
   }
 
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

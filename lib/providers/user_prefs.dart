@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPrefsProvider {
   static final UserPrefsProvider _userPrefsProvider = UserPrefsProvider._();
-  SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
+  final SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
 
   UserPrefs _userPrefs;
 
@@ -22,25 +22,23 @@ class UserPrefsProvider {
   }
 
   void init() {
-    if (_userPrefs == null) {
-      final Map defaults = AppConfig.defaultUserSettings;
-      String key;
-      key = 'uploadAutomatically';
-      if (_sharedPreferences.getBool(key) == null) {
-        _sharedPreferences.setBool(key, defaults[key]);
-      }
-
-      key = 'mobileData';
-      if (_sharedPreferences.getBool(key) == null) {
-        _sharedPreferences.setBool(key, defaults[key]);
-      }
-
-      key = 'bulkMode';
-      if (_sharedPreferences.getBool(key) == null) {
-        _sharedPreferences.setBool(key, defaults[key]);
-      }
-      _userPrefs = UserPrefs();
+    final Map defaults = AppConfig.defaultUserSettings;
+    String key;
+    key = 'uploadAutomatically';
+    if (_sharedPreferences.getBool(key) == null) {
+      _sharedPreferences.setBool(key, defaults[key]);
     }
+
+    key = 'mobileData';
+    if (_sharedPreferences.getBool(key) == null) {
+      _sharedPreferences.setBool(key, defaults[key]);
+    }
+
+    key = 'bulkMode';
+    if (_sharedPreferences.getBool(key) == null) {
+      _sharedPreferences.setBool(key, defaults[key]);
+    }
+    _userPrefs ??= UserPrefs();
   }
 }
 
@@ -48,7 +46,7 @@ class UserPrefs {
   static const String MOBILE_DATA = 'mobileData';
   static const String UPLOAD_AUTOMATICALLY = 'uploadAutomatically';
 
-  SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
+  final SharedPreferences _sharedPreferences = SharedPreferencesProvider().sharedPreferences;
 
   bool get mobileData => _sharedPreferences.getBool(MOBILE_DATA);
 
