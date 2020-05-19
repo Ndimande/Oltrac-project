@@ -16,7 +16,7 @@ steps:
     sshKeySecureFile: 'azure_repos_key'
 - task: FlutterInstall@0
   inputs:
-    channel: 'stable'
+    channel: 'beta'
     version: 'latest'
 
 - task: Bash@3
