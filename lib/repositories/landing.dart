@@ -40,7 +40,9 @@ class LandingRepository extends DatabaseRepository<Landing> {
     final List<Map> results = await database.query(tableName, where: 'haul_id = $id');
     final List landings = <Landing>[];
     for (final Map<String, dynamic> result in results) {
-      landings.add(fromDatabaseMap(result));
+      final Landing landing = fromDatabaseMap(result);
+      final List<Product> products = await ProductRepository().forLanding(landing.id);
+      landings.add(landing.copyWith(products: products));
     }
 
     return landings;
