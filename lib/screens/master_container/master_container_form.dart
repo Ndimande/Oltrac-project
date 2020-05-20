@@ -59,14 +59,18 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     final Location location = await widget._locationProvider.location;
 
     final MasterContainer masterContainer = MasterContainer(
-        tagCode: _tagCode,
-        createdAt: DateTime.now(),
-        location: location,
-        products: _childProducts,
-        tripId: widget.sourceTripId);
+      tagCode: _tagCode,
+      createdAt: DateTime.now(),
+      location: location,
+      products: _childProducts,
+      tripId: widget.sourceTripId,
+    );
 
     await widget._masterContainerRepo.store(masterContainer);
-    await _exportQR();
+    final bool success = await _exportQR();
+    if (success) {
+      util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
+    }
     Navigator.pop(context);
   }
 
@@ -95,15 +99,15 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     return '${prefix}_${_tagCode}_$nonce.$extension';
   }
 
-  Future<void> _shareQR() async {
-    final Uint8List pngBytes = await util.imageSnapshot(_renderObjectKey.currentContext.findRenderObject());
-    final String filename = _getImageFilename();
-    final String fullPath = await util.writeToTemp(filename, pngBytes);
-
-    // Write to tmp
-    File(fullPath).writeAsBytesSync(pngBytes);
-    await Share.file('Share QR Code', filename, pngBytes, 'image/png', text: _qrLabel());
-  }
+//  Future<void> _shareQR() async {
+//    final Uint8List pngBytes = await util.imageSnapshot(_renderObjectKey.currentContext.findRenderObject());
+//    final String filename = _getImageFilename();
+//    final String fullPath = await util.writeToTemp(filename, pngBytes);
+//
+//    // Write to tmp
+//    File(fullPath).writeAsBytesSync(pngBytes);
+//    await Share.file('Share QR Code', filename, pngBytes, 'image/png', text: _qrLabel());
+//  }
 
   Future<bool> _exportQR() async {
     final Uint8List bytes = await util.imageSnapshot(_renderObjectKey.currentContext.findRenderObject());
@@ -112,12 +116,12 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     return await GallerySaver.saveImage(fullPath, albumName: AppConfig.APP_TITLE);
   }
 
-  Future<void> _onLongPressQrCode() async {
-    final bool success = await _exportQR();
-    if (success) {
-      util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
-    }
-  }
+//  Future<void> _onLongPressQrCode() async {
+//    final bool success = await _exportQR();
+//    if (success) {
+//      util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
+//    }
+//  }
 
   Widget _noSourceTags() {
     return const Center(
@@ -176,8 +180,6 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
 
   Widget _qrCode() {
     return SharkTrackQrImage(
-      onPressed: _shareQR,
-      onLongPress: _onLongPressQrCode,
       data: _tagCode,
       title: _tagCode,
       subtitle: _qrLabel(),
