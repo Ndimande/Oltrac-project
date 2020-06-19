@@ -35,6 +35,7 @@ abstract class DatabaseRepository<T extends Model> {
   }
 
   Future<void> delete(int id) async {
+    // TODO delete references
     await database.delete(tableName, where: 'id = $id');
   }
 

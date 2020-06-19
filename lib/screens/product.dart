@@ -6,40 +6,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart' as util;
+import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/product.dart';
+import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/database.dart';
+import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
+import 'package:oltrace/repositories/trip.dart';
+import 'package:oltrace/screens/edit_product.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/location_button.dart';
-import 'package:oltrace/widgets/sharktrack_qr_image.dart';
-import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/sharktrace_qr_image.dart';
 import 'package:sqflite/sqflite.dart';
-
-
 
 enum Actions {
   ShareQR,
   SaveQR,
 }
 
-Future<Product> _load(int productId) async {
+Future<Map<String, dynamic>> _load(int productId) async {
   final _productRepo = ProductRepository();
-
+  final _haulRepo = HaulRepository();
+  final _tripRepo = TripRepository();
   final Database db = DatabaseProvider().database;
 
-  final List<Map<String, dynamic>> results = await db.query('products', where: 'id= $productId');
-
-  if (results.isEmpty) {
-    return null;
-  }
+  final List<Map<String, dynamic>> results = await db.query('products', where: 'id = $productId');
   assert(results.length == 1);
+
   final Product product = _productRepo.fromDatabaseMap(results.first);
   final List<Landing> landings = await LandingRepository().forProduct(productId);
-  return product.copyWith(landings: landings);
+  final int haulId = landings.first.haulId;
+  final Haul haul = await _haulRepo.find(haulId);
+  final Trip trip = await _tripRepo.find(haul.id);
+
+  return {
+    'product': product.copyWith(landings: landings),
+    'tripIsUploaded': trip.isUploaded,
+  };
 }
 
 class ProductScreen extends StatefulWidget {
@@ -56,6 +64,7 @@ class _ProductScreenState extends State<ProductScreen> {
   final _renderObjectKey = GlobalKey();
 
   Product _product;
+  bool _tripIsUploaded;
 
   Future<void> _onPressLanding(Landing landing, int landingIndex) async {
     assert(landing.id != null);
@@ -90,8 +99,12 @@ class _ProductScreenState extends State<ProductScreen> {
 
     final bool success = await GallerySaver.saveImage(fullPath, albumName: AppConfig.APP_TITLE);
     if (success) {
-      util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
+      util.showTextSnackBar(_scaffoldKey, 'QR image saved to ${AppConfig.APP_TITLE} gallery.');
     }
+  }
+
+  Future _onPressEdit() async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => EditProduct(product: _product)));
   }
 
   String _qrLabel() {
@@ -112,7 +125,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
     return Column(
       children: <Widget>[
-        SharkTrackQrImage(
+        SharkTraceQrImage(
           data: _product.tagCode,
           title: code,
           subtitle: labelText,
@@ -140,15 +153,15 @@ class _ProductScreenState extends State<ProductScreen> {
           child: StripButton(
             labelText: 'Share',
             onPressed: _onPressShareQR,
-            icon: Icon(Icons.share),
-            color: OlracColours.olspsBlue,
+            icon: const Icon(Icons.share),
+            color: OlracColours.fauxPasBlue,
           ),
         ),
         Expanded(
           child: StripButton(
             labelText: 'Save',
             onPressed: _onPressExportQR,
-            icon: Icon(Icons.save_alt),
+            icon: const Icon(Icons.save_alt),
             color: OlracColours.ninetiesGreen,
           ),
         ),
@@ -159,19 +172,19 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _detailRow(String lhs, String rhs) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Expanded(
-            child: Text(lhs, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(
+            lhs,
+            style: Theme.of(context).textTheme.caption,
           ),
-          Expanded(
-            child: Text(
-              rhs,
-              style: const TextStyle(fontSize: 16),
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.right
-            ),
+          Text(
+            rhs,
+            style: Theme.of(context).textTheme.headline6,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
           ),
         ],
       ),
@@ -189,7 +202,7 @@ class _ProductScreenState extends State<ProductScreen> {
     return ExpansionTile(
       title: const Text(
         'Source Sharks',
-        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
+        style: TextStyle(fontSize: 22, color: OlracColours.fauxPasBlue),
       ),
       children: landingItems,
     );
@@ -197,35 +210,59 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Widget _locationRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Text(
           'Location',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.headline6,
         ),
-        LocationButton(location: _product.location),
+        Container(
+          width: 100,
+          child: LocationButton(location: _product.location),
+        )
       ],
     );
   }
 
   Widget _details() {
     return Container(
-      color: OlracColours.olspsBlue[100],
+      color: OlracColours.fauxPasBlue[100],
       padding: const EdgeInsets.all(15),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('RFID Tag Code', style: TextStyle(fontSize: 12)),
-          SelectableText(
-            _product.tagCode,
-            style: const TextStyle(fontSize: 32),
+          Text('Tag Code', style: Theme.of(context).textTheme.caption),
+          SelectableText(_product.tagCode, style: Theme.of(context).primaryTextTheme.headline5),
+          Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _detailRow('Packaging Type', _product.packagingType.name),
+                  _detailRow('Product Type', _product.productType.name),
+                ],
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _detailRow('Quantity', _product.productUnits.toString()),
+                  _detailRow('Created At', util.friendlyDateTime(_product.createdAt)),
+                ],
+              )
+            ],
           ),
           _locationRow(),
-          _detailRow('Packaging Type', _product.packagingType.name),
-          _detailRow('Product Type', _product.productType.name),
-          _detailRow('Quantity', _product.productUnits.toString()),
-          _detailRow('Created At', util.friendlyDateTime(_product.createdAt)),
         ],
       ),
+    );
+  }
+
+  Widget _editStripButton() {
+    return StripButton(
+      labelText: 'Edit',
+      icon: const Icon(Icons.edit, color: Colors.white),
+      onPressed: _onPressEdit,
     );
   }
 
@@ -233,17 +270,19 @@ class _ProductScreenState extends State<ProductScreen> {
     return Column(
       children: <Widget>[
         Expanded(
-            child: SingleChildScrollView(
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                _details(),
-                _qrCode(),
-                _landingItems(),
-              ],
+          child: SingleChildScrollView(
+            child: Container(
+              child: Column(
+                children: <Widget>[
+                  _details(),
+                  if (!_tripIsUploaded) _editStripButton(),
+                  _qrCode(),
+                  _landingItems(),
+                ],
+              ),
             ),
           ),
-        ))
+        )
       ],
     );
   }
@@ -262,7 +301,8 @@ class _ProductScreenState extends State<ProductScreen> {
           return const Scaffold();
         }
 
-        _product = snapshot.data;
+        _product = snapshot.data['product'];
+        _tripIsUploaded = snapshot.data['tripIsUploaded'];
 
         return Scaffold(
           key: _scaffoldKey,

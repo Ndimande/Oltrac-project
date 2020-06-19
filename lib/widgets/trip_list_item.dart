@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/westlake/forward_arrow.dart';
+import 'package:olrac_widgets/westlake/westlake_list_item.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
 
 class TripListItem extends StatelessWidget {
@@ -10,6 +11,37 @@ class TripListItem extends StatelessWidget {
   final VoidCallback onPressed;
 
   const TripListItem(this._trip, this.onPressed);
+
+  Widget _title() {
+    return Builder(builder: (BuildContext context) {
+      return Text(_haulsText(_trip.hauls.length), style: Theme.of(context).textTheme.headline6);
+    });
+  }
+
+  Widget _subtitle() {
+    return Builder(builder: (BuildContext context) {
+      return Text(_trip.endedAt == null ? '-' : friendlyDateTime(_trip.endedAt),
+          style: Theme.of(context).textTheme.subtitle1);
+    });
+  }
+
+  Widget _leading() {
+    return Builder(
+      builder: (BuildContext context) {
+        return Hero(
+          tag: 'numbered_boat'+_trip.id.toString(),
+          child: NumberedBoat(
+            color: _trip.isUploaded ? OlracColours.olspsDarkBlue : Theme.of(context).primaryColor,
+            number: _trip.id,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _trailing() {
+    return const ForwardArrow();
+  }
 
   String _haulsText(int length) {
     String text;
@@ -25,17 +57,11 @@ class TripListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(0),
-        leading: NumberedBoat(
-          color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
-          number: _trip.id,
-        ),
-        title: Text(_haulsText(_trip.hauls.length)),
-        subtitle: Text(_trip.endedAt == null ? '-' : friendlyDateTime(_trip.endedAt)),
-        trailing: ForwardArrow(),
-      ),
+    return WestlakeListItem(
+      leading: _leading(),
+      title: _title(),
+      subtitle: _subtitle(),
+      trailing: _trailing(),
       onPressed: onPressed,
     );
   }

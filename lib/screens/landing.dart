@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
@@ -9,13 +10,10 @@ import 'package:oltrace/repositories/haul.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/screens/landing/species_information.dart';
 import 'package:oltrace/screens/landing/products_list.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
+import 'package:oltrace/screens/landing/species_information.dart';
 import 'package:oltrace/widgets/shark_info_card.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
-const double rowFontSize = 18;
 final _landingRepo = LandingRepository();
 final _tripRepository = TripRepository();
 final _productRepository = ProductRepository();
@@ -23,13 +21,14 @@ final _productRepository = ProductRepository();
 Future<Map<String, dynamic>> _load(int landingId) async {
   final Landing landing = await _landingRepo.find(landingId);
   final Haul haul = await HaulRepository().find(landing.haulId);
-
+  final Trip trip = await _tripRepository.find(haul.tripId);
   final Trip activeTrip = await _tripRepository.getActive();
   final bool isActiveTrip = activeTrip?.id == haul.tripId;
 
   return {
     'landing': landing,
     'isActiveTrip': isActiveTrip,
+    'tripUploaded': trip.isUploaded,
   };
 }
 
@@ -54,6 +53,7 @@ class LandingScreenState extends State<LandingScreen> {
 
   Landing _landing;
   bool _isActiveTrip;
+  bool _tripIsUploaded;
 
   final _landingRepository = LandingRepository();
 
@@ -70,14 +70,14 @@ class LandingScreenState extends State<LandingScreen> {
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/create_product', arguments: {
       'landings': [_landing],
       'haul': haul.copyWith(landings: withProducts),
+      'tripIsUploaded': true,
     });
-    setState(() {});
   }
 
   Future<void> _onPressDelete() async {
     final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
-      builder: (_) => const ConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
+      builder: (_) => const WestlakeConfirmDialog('Delete Species', 'Are you sure you want to delete this species?'),
     );
     if (!confirmed) {
       return;
@@ -93,7 +93,6 @@ class LandingScreenState extends State<LandingScreen> {
 
   Future<void> _onPressEdit() async {
     await Navigator.pushNamed(_scaffoldKey.currentContext, '/edit_landing', arguments: _landing);
-    setState(() {});
   }
 
   Future<void> _onPressDoneTagging() async {
@@ -111,7 +110,7 @@ class LandingScreenState extends State<LandingScreen> {
 
   Widget _doneTaggingButton() {
     return StripButton(
-      color: OlracColours.olspsBlue,
+      color: OlracColours.fauxPasBlue,
       labelText: _landing.doneTagging ? 'Continue Tagging' : 'Done Tagging',
       icon: Icon(
         _landing.doneTagging ? Icons.edit : Icons.check_circle,
@@ -129,28 +128,18 @@ class LandingScreenState extends State<LandingScreen> {
     return StripButton(
       color: OlracColours.ninetiesGreen,
       labelText: 'Tag Product',
-      icon: Icon(
-        Icons.local_offer,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.local_offer, color: Colors.white),
       onPressed: () async => await _onPressTagProduct(),
     );
   }
 
   Widget _landingButtons() {
-    if (!_isActiveTrip || _landing.doneTagging) {
-      return Container();
-    }
     return Row(
       children: <Widget>[_deleteButton(_onPressDelete), _editButton(_onPressEdit)],
     );
   }
 
   Widget _bottomButtons() {
-    if (!_isActiveTrip) {
-      return Container();
-    }
-
     final items = <Widget>[];
 
     if (!_landing.doneTagging) {
@@ -173,13 +162,10 @@ class LandingScreenState extends State<LandingScreen> {
               child: Column(
                 children: [
                   Container(
-                    color: OlracColours.olspsBlue[50],
-                    child: SharkInfoCard(
-                      landing: _landing,
-                      listIndex: widget.listIndex,
-                    ),
+                    color: OlracColours.fauxPasBlue[50],
+                    child: SharkInfoCard(landing: _landing, listIndex: widget.listIndex),
                   ),
-                  _landingButtons(),
+                  if (!_tripIsUploaded) _landingButtons(),
                   ProductsList(products: _landing.products),
                   SpeciesInformation(landing: _landing),
                 ],
@@ -187,7 +173,7 @@ class LandingScreenState extends State<LandingScreen> {
             ),
           ),
         ),
-        _bottomButtons(),
+        if (_isActiveTrip) _bottomButtons(),
       ],
     );
   }
@@ -215,7 +201,7 @@ class LandingScreenState extends State<LandingScreen> {
         final Map data = snapshot.data;
         _isActiveTrip = data['isActiveTrip'];
         _landing = data['landing'];
-
+        _tripIsUploaded = data['tripUploaded'] as bool;
         return Scaffold(
           key: _scaffoldKey,
           appBar: _appBar(),
@@ -231,10 +217,7 @@ Widget _deleteButton(onPressed) => Expanded(
         onPressed: onPressed,
         labelText: 'Delete',
         color: OlracColours.ninetiesRed,
-        icon: Icon(
-          Icons.delete,
-          color: Colors.white,
-        ),
+        icon: const Icon(Icons.delete, color: Colors.white),
       ),
     );
 
@@ -242,10 +225,7 @@ Widget _editButton(onPressed) => Expanded(
       child: StripButton(
         onPressed: onPressed,
         labelText: 'Edit',
-        color: OlracColours.olspsBlue,
-        icon: Icon(
-          Icons.edit,
-          color: Colors.white,
-        ),
+        color: OlracColours.fauxPasBlue,
+        icon: const Icon(Icons.edit, color: Colors.white),
       ),
     );

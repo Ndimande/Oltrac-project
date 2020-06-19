@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/flutter_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
+import 'package:olrac_widgets/westlake/westlake_text_input.dart';
 import 'package:oltrace/data/species.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
@@ -11,11 +14,11 @@ import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/species.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/repositories/landing.dart';
-import 'package:oltrace/widgets/model_dropdown.dart';
-import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/datetime_editor.dart';
+import 'package:oltrace/widgets/location_editor.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
-const textFieldTextStyle = TextStyle(fontSize: 20, color: OlracColours.olspsBlue);
+const textFieldTextStyle = TextStyle(fontSize: 20, color: OlracColours.fauxPasBlue);
 
 class LandingFormScreen extends StatefulWidget {
   final Haul haulArg;
@@ -52,20 +55,26 @@ class LandingFormScreenState extends State<LandingFormScreen> {
   /// Animal species to be associated with the tag.
   Species _selectedSpecies;
 
+  Location _location;
+
+  DateTime _createdAt;
+
   /// Is bulk mode enabled?
   /// Bulk mode changes the form to allow entry of no. of individuals
   /// in the event of a bulk bin of animals.
   final bool _bulkMode;
 
   LandingFormScreenState({this.haul, this.landingArg})
-      : _weightController =
-            TextEditingController(text: landingArg != null ? (landingArg.weight / 1000).toString() : null),
-        _lengthController =
-            TextEditingController(text: landingArg != null ? (landingArg.length / 10000).toString() : null),
+      : _weightController = TextEditingController(
+            text: landingArg != null && landingArg.weight != null ? (landingArg.weight / 1000).toString() : null),
+        _lengthController = TextEditingController(
+            text: landingArg != null && landingArg.length != null ? (landingArg.length / 10000).toString() : null),
         _individualsController =
             TextEditingController(text: landingArg != null ? landingArg?.individuals.toString() : null),
         _selectedSpecies = landingArg?.species,
-        _bulkMode = landingArg != null ? landingArg.individuals > 1 : sharedPrefs.getBool('bulkMode') ?? false;
+        _bulkMode = landingArg != null ? landingArg.individuals > 1 : sharedPrefs.getBool('bulkMode') ?? false,
+        _location = landingArg?.location,
+        _createdAt = landingArg?.createdAt;
 
   bool get isEditMode => landingArg != null;
 
@@ -115,6 +124,8 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         length: lengthMicrometers,
         species: _selectedSpecies,
         individuals: individuals,
+        createdAt: _createdAt,
+        location: _location,
       );
 
       await _landingRepo.store(updatedLanding);
@@ -217,8 +228,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
               style: textFieldTextStyle,
             ),
           ),
-          TextFormField(
-            style: const TextStyle(fontSize: 20),
+          WestlakeTextInput(
             keyboardType: TextInputType.number,
             controller: _individualsController,
             validator: _validateIndividuals,
@@ -244,12 +254,12 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(
-                      species.englishName,
-                      style: const TextStyle(fontSize: 18),
+                    Expanded(
+                      child: Text(species.englishName),
                     ),
                     SvgIcon(
                       assetPath: SvgIcons.path(species.scientificName),
+//                      height: 80,
                     )
                   ],
                 ),
@@ -274,8 +284,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
             style: textFieldTextStyle,
           ),
         ),
-        TextFormField(
-          style: const TextStyle(fontSize: 20),
+        WestlakeTextInput(
           keyboardType: TextInputType.number,
           controller: _weightController,
           validator: _validateWeight,
@@ -294,8 +303,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
             style: textFieldTextStyle,
           ),
         ),
-        TextFormField(
-          style: const TextStyle(fontSize: 20),
+        WestlakeTextInput(
           keyboardType: TextInputType.number,
           controller: _lengthController,
           validator: _validateLength,
@@ -306,14 +314,27 @@ class LandingFormScreenState extends State<LandingFormScreen> {
 
   Widget _saveStripButton() {
     return StripButton(
-      icon: Icon(
-        Icons.save,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.save, color: Colors.white),
       labelText: 'Save',
       color: OlracColours.ninetiesGreen,
       onPressed: () async => await _onPressSaveButton(haul, context),
     );
+  }
+
+  Widget _locationEditor() {
+    return LocationEditor(
+        location: _location, onChanged: (Location l) => setState(() => _location = l), title: 'Location');
+  }
+
+  Widget _createdAtEditor() {
+    return DateTimeEditor(
+        initialDateTime: _createdAt,
+        onChanged: (Picker picker, List<int> selectedIndices) {
+          setState(() {
+            _createdAt = DateTime.parse(picker.adapter.toString());
+          });
+        },
+        title: 'Created');
   }
 
   @override
@@ -330,7 +351,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(15),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -339,6 +360,7 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                   children: <Widget>[
                     // Select species
                     _speciesDropdown(),
+                    const SizedBox(height: 15),
 
                     // Weight
                     Container(
@@ -353,10 +375,13 @@ class LandingFormScreenState extends State<LandingFormScreen> {
                     ),
 
                     // Individuals
-                    if (_bulkMode)
-                      _individualsTextInput()
-                    else
-                      Container(),
+                    if (_bulkMode) _individualsTextInput() else Container(),
+
+                    // Location
+                    if (isEditMode) _locationEditor(),
+                    if (isEditMode) const SizedBox(height: 15),
+                    // Date / time
+                    if (isEditMode) _createdAtEditor(),
                   ],
                 ),
               ),

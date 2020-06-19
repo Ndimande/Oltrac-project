@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/master_container_info.dart';
 import 'package:oltrace/screens/product.dart';
+import 'package:oltrace/widgets/master_container_info.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-import 'package:oltrace/widgets/sharktrack_qr_image.dart';
+import 'package:oltrace/widgets/sharktrace_qr_image.dart';
 
 final MasterContainerRepository _masterContainerRepo = MasterContainerRepository();
 
@@ -36,7 +36,7 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
   Widget _qrCode() {
     final int nProducts = masterContainer.products.length;
 
-    return SharkTrackQrImage(
+    return SharkTraceQrImage(
       data: masterContainer.tagCode,
       title: masterContainer.tagCode,
       subtitle: 'Master Container ($nProducts)',
@@ -65,7 +65,7 @@ class _MasterContainerScreenState extends State<MasterContainerScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const ConfirmDialog('Delete', 'Are you sure?'),
+      builder: (_) => const WestlakeConfirmDialog('Delete', 'Are you sure?'),
     );
 
     if(!confirmed) {

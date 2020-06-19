@@ -24,10 +24,13 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
     final List<Trip> trips = _completedTrips.reversed.where((Trip trip) => trip.endedAt != null).toList();
 
     if (trips.isEmpty) {
-      return Container(
-        child: const Text('No completed trips', style: TextStyle(fontSize: 18)),
-        alignment: Alignment.center,
-      );
+      return Builder(builder: (BuildContext context){
+        return Container(
+          child: Text('No completed trips', style: Theme.of(context).textTheme.subtitle1),
+          alignment: Alignment.center,
+        );
+      });
+
     }
 
     return ListView.builder(
@@ -37,7 +40,6 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
 
           return TripListItem(trip, () async {
             await Navigator.pushNamed(context, '/trip', arguments: trip);
-            setState(() {});
           });
         });
   }
@@ -60,10 +62,10 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> {
 
         return Scaffold(
             appBar: AppBar(
-              title: const Text('Trip History'),
+              title: const Text('Trip History')
             ),
             body: Container(
-              child: _buildBottomSection(),
+              child: _buildBottomSection()
             ));
       },
     );

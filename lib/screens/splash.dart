@@ -45,8 +45,8 @@ class _SplashScreenState extends State<SplashScreen> {
   TextStyle _fontStyle(double fontSize) =>
       TextStyle(color: Colors.white, fontSize: _scaleText(fontSize), fontFamily: 'RobotoLight');
 
-  Image _sharkTrackLogo(double imageWidth) => Image(
-        image: const AssetImage('assets/images/SharkTrack_Logo_White.png'),
+  Image _sharkTraceLogo(double imageWidth) => Image(
+        image: const AssetImage('assets/images/SharkTrace_Logo_White.png'),
         width: _scaleImage(imageWidth),
       );
 
@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> {
         margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         child: Column(
           children: <Widget>[
-            _sharkTrackLogo(200),
+            _sharkTraceLogo(200),
             Text('Onboard'.toUpperCase(), style: _fontStyle(16), textAlign: TextAlign.center),
             Text(AppData.packageInfo?.version, style: _fontStyle(10)),
             Divider(color: Colors.white, thickness: 1),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/models/trip.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/trip_list_item.dart';
 
 class NoActiveTrip extends StatelessWidget {
@@ -9,7 +9,8 @@ class NoActiveTrip extends StatelessWidget {
   final Function onPressCompletedTrip;
   final List<Trip> completedTrips;
 
-  const NoActiveTrip({@required this.completedTrips, @required this.onPressStartTrip, @required this.onPressCompletedTrip})
+  const NoActiveTrip(
+      {@required this.completedTrips, @required this.onPressStartTrip, @required this.onPressCompletedTrip})
       : assert(completedTrips != null),
         assert(onPressStartTrip != null),
         assert(onPressCompletedTrip != null);
@@ -18,13 +19,16 @@ class NoActiveTrip extends StatelessWidget {
     final List reversedCompletedTrips = completedTrips.reversed.toList();
 
     if (reversedCompletedTrips.isEmpty) {
-      return Container(
-          alignment: Alignment.center,
-          child: const Text(
-            'No completed trips.\nYour trip history will be shown here.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20),
-          ));
+      return Builder(builder: (BuildContext context) {
+        return Container(
+            alignment: Alignment.center,
+            child: Text(
+              'No completed trips.\nYour trip history will be shown here.',
+              textAlign: TextAlign.center,
+//            style: TextStyle(fontSize: 20),
+              style: Theme.of(context).textTheme.subtitle1,
+            ));
+      });
     }
     return ListView.builder(
       itemCount: reversedCompletedTrips.length,

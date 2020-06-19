@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:device_info/device_info.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:olrac_themes/olrac_themes.dart';
@@ -300,7 +299,7 @@ class _TripUploadQueueState extends State<_TripUploadQueue> {
       child: Text(
         'Trip Upload JSON Preview',
         style: TextStyle(
-          color: OlracColours.olspsBlue,
+          color: OlracColours.fauxPasBlue,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),

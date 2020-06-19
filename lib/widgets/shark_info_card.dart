@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oltrace/data/svg_icons.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/widgets/landing_icon.dart';
+import 'package:oltrace/widgets/landing_list_item_icon.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
 
@@ -14,51 +14,91 @@ class SharkInfoCard extends StatelessWidget {
   const SharkInfoCard({this.landing, this.listIndex, this.showIndex = true});
 
   Widget _locationRow() {
-    return Row(
-      children: <Widget>[
-        LocationButton(location: landing.location),
-        Text(
-          landing.location.toString(),
-          style: const TextStyle(fontSize: 15),
+    return Builder(builder: (BuildContext context) {
+      return Container(
+        margin: const EdgeInsets.only(left: 8),
+        child: Row(
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Location', style: Theme.of(context).textTheme.caption),
+                Text(
+                  landing.location.toString(),
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+              ],
+            ),
+            const SizedBox(width: 5),
+            LocationButton(location: landing.location),
+          ],
         ),
-      ],
-    );
+      );
+    });
   }
 
   Widget _sharkIcon() {
     return Container(
-      margin: const EdgeInsets.only(right: 5),
-      child: SvgIcon(height: 100, assetPath: SvgIcons.path(landing.species.scientificName)),
+      margin: const EdgeInsets.only(right: 2),
+      child: SvgIcon(height: 110, assetPath: SvgIcons.path(landing.species.scientificName)),
     );
   }
 
-  Widget _sharkInfo() {
+  Widget _lengthWeightText() {
     String lengthWeight = landing.weightKilograms;
     if (landing.length != null) {
       lengthWeight += ', ' + landing.lengthCentimeters;
     }
-
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Builder(builder: (BuildContext context) {
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(lengthWeight, style: const TextStyle(fontSize: 15)),
-          Text(friendlyDateTime(landing.createdAt), style: const TextStyle(fontSize: 15)),
-          if (landing.isBulk && landing.individuals != null)
-            Text('${landing.individuals} individuals', style: const TextStyle(fontSize: 15))
+        children: [
+          Text('Weight / Length', style: Theme.of(context).textTheme.caption),
+          Text(lengthWeight, style: Theme.of(context).textTheme.headline6),
         ],
-      ),
-    );
+      );
+    });
+  }
+
+  Widget _datetimeText() {
+    return Builder(builder: (BuildContext context) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Date and Time', style: Theme.of(context).textTheme.caption),
+          Text(friendlyDateTime(landing.createdAt), style: Theme.of(context).textTheme.headline6),
+        ],
+      );
+    });
+  }
+
+  Widget _sharkInfo() {
+    return Builder(builder: (BuildContext context) {
+      return Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _lengthWeightText(),
+            const SizedBox(height: 5),
+            _datetimeText(),
+            if (landing.isBulk && landing.individuals != null)
+              Text('${landing.individuals} individuals', style: Theme.of(context).textTheme.subtitle1)
+          ],
+        ),
+      );
+    });
   }
 
   Widget _indexIcon() {
-    return showIndex == false
-        ? Container(padding: const EdgeInsets.all(5))
-        : Container(
-            padding: const EdgeInsets.all(5),
-            child: LandingIcon(landing: landing, listIndex: listIndex),
-          );
+    // TODO don't think showIndex is ever false anymore
+    if(showIndex == false ) {
+      return Container(padding: const EdgeInsets.all(5));
+    }
+    return Container(
+      padding: const EdgeInsets.all(5),
+      child: LandingListItemIcon(landing: landing, listIndex: listIndex),
+    );
   }
 
   @override
@@ -66,20 +106,20 @@ class SharkInfoCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Row(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
                 children: <Widget>[
                   _indexIcon(),
                   _sharkInfo(),
                 ],
               ),
-            ),
-            if (showIndex) _locationRow(),
-          ],
+              _locationRow(),
+            ],
+          ),
         ),
         _sharkIcon(),
       ],

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/screens/master_container/master_container.dart';
 import 'package:oltrace/screens/master_container/master_container_form.dart';
 import 'package:oltrace/widgets/master_container_list_item.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
 
 Future<Map<String, dynamic>> _load(int tripId) async {

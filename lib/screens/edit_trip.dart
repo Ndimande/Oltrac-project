@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/trip.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/datetime_editor.dart';
 import 'package:oltrace/widgets/location_editor.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
 enum EditTripResult {
   Canceled,
@@ -58,11 +57,13 @@ class EditTripScreenState extends State<EditTripScreen> {
 
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => const ConfirmDialog('Delete Trip', 'Are you sure you want to delete the trip?'),
+      builder: (_) => const WestlakeConfirmDialog('Delete Trip', 'Are you sure you want to delete the trip?'),
     );
     if (confirmed == true) {
       await widget._tripRepo.delete(widget._trip.id);
-      Navigator.pop(_scaffoldKey.currentContext, EditTripResult.TripCanceled);
+      // Pop twice because the Trip is gone now so we can't render it.
+      Navigator.pop(_scaffoldKey.currentContext);
+      Navigator.pop(_scaffoldKey.currentContext);
     }
   }
 
@@ -73,7 +74,7 @@ class EditTripScreenState extends State<EditTripScreen> {
   Future<void> _onPressSave() async {
     final bool confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => const ConfirmDialog('Update Trip', 'Are you sure you want to update the trip?'),
+      builder: (_) => const WestlakeConfirmDialog('Update Trip', 'Are you sure you want to update the trip?'),
     );
 
     if (!confirmed) {
@@ -99,13 +100,13 @@ class EditTripScreenState extends State<EditTripScreen> {
     );
     await widget._tripRepo.store(updatedTrip);
 
-    Navigator.of(_scaffoldKey.currentContext).pop(EditTripResult.Updated);
+    Navigator.of(_scaffoldKey.currentContext).pop();
   }
 
   Widget get _deleteTripButton => StripButton(
         onPressed: _onPressDeleteTrip,
         labelText: 'Delete',
-        icon: Icon(
+        icon: const Icon(
           Icons.delete,
           color: Colors.white,
         ),
@@ -115,17 +116,17 @@ class EditTripScreenState extends State<EditTripScreen> {
   Widget get _cancelButton => StripButton(
         onPressed: _onPressCancel,
         labelText: 'Cancel',
-        icon: Icon(
+        icon: const Icon(
           Icons.cancel,
           color: Colors.white,
         ),
-        color: OlracColours.olspsBlue,
+        color: OlracColours.fauxPasBlue,
       );
 
   Widget get _saveButton => StripButton(
         onPressed: _onPressSave,
         labelText: 'Save',
-        icon: Icon(
+        icon: const Icon(
           Icons.save,
           color: Colors.white,
         ),
@@ -139,50 +140,54 @@ class EditTripScreenState extends State<EditTripScreen> {
     Function(Picker, List<int>) onDateTimeChanged,
     Function(Location) onLocationChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        //Section heading
-        Container(
-          child: Text(heading, style: const TextStyle(color: OlracColours.olspsBlue, fontSize: 28)),
-        ),
-        const SizedBox(height: 15),
-        // Start DateTime
-        DateTimeEditor(
-          title: const Text('Date & Time', style:  TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
-          initialDateTime: dateTime,
-          onChanged: onDateTimeChanged,
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          //Section heading
+          Container(
+            child: Text(heading, style: Theme.of(context).accentTextTheme.headline5),
+          ),
+          const SizedBox(height: 15),
+          // Start DateTime
+          DateTimeEditor(
+            title: 'Date & Time',
+            initialDateTime: dateTime,
+            onChanged: onDateTimeChanged,
+          ),
 
-        // Start Location
-        LocationEditor(
-          title: const Text('Location', style:  TextStyle(color: OlracColours.olspsBlue, fontSize: 18)),
-          onChanged: onLocationChanged,
-          location: location,
-        ),
-      ],
+          // Start Location
+          LocationEditor(
+            title: 'Location',
+            onChanged: onLocationChanged,
+            location: location,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget get _startSection {
+  Widget _tripStartSection() {
     return _section(
-        heading: 'Trip Start',
-        dateTime: _startDateTime,
-        location: _startLocation,
-        onDateTimeChanged: (Picker picker, List<int> selectedIndices) {
-          setState(() {
-            _startDateTime = DateTime.parse(picker.adapter.toString());
-          });
-        },
-        onLocationChanged: (Location location) {
-          assert(location != null);
-          setState(() {
-            _startLocation = location;
-          });
+      heading: 'Trip Start',
+      dateTime: _startDateTime,
+      location: _startLocation,
+      onDateTimeChanged: (Picker picker, List<int> selectedIndices) {
+        setState(() {
+          _startDateTime = DateTime.parse(picker.adapter.toString());
         });
+      },
+      onLocationChanged: (Location location) {
+        assert(location != null);
+        setState(() {
+          _startLocation = location;
+        });
+      },
+    );
   }
 
-  Widget get _endSection {
+  Widget _endTripSection() {
     return _section(
       heading: 'Trip End',
       dateTime: _endDateTime,
@@ -196,23 +201,16 @@ class EditTripScreenState extends State<EditTripScreen> {
         setState(() {
           _endLocation = location;
         });
-      }
+      },
     );
   }
-
 
   Widget get _bottomButtons {
     return Row(
       children: <Widget>[
-        Expanded(
-          child: _saveButton,
-        ),
-        Expanded(
-          child: _deleteTripButton,
-        ),
-        Expanded(
-          child: _cancelButton,
-        ),
+        Expanded(child: _saveButton),
+        Expanded(child: _deleteTripButton),
+        Expanded(child: _cancelButton),
       ],
     );
   }
@@ -228,14 +226,20 @@ class EditTripScreenState extends State<EditTripScreen> {
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                children: <Widget>[
-                  _startSection,
-                  const SizedBox(height: 20),
-                  if(widget._trip.isComplete)
-                    _endSection,
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  children: <Widget>[
+                    _tripStartSection(),
+                    if (widget._trip.isComplete)
+                      Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          _endTripSection(),
+                        ],
+                      )
+                  ],
+                ),
               ),
             ),
           ),

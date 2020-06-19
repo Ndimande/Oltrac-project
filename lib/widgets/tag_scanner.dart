@@ -48,7 +48,7 @@ class TagScannerState extends State<TagScanner> {
       children: <Widget>[
         Text(
           'Tag Code',
-          style: TextStyle(color: OlracColours.olspsBlue),
+          style: TextStyle(color: OlracColours.fauxPasBlue),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

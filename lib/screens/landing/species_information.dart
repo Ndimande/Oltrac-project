@@ -1,40 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/models/landing.dart';
-
-const double rowFontSize = 16;
-const TextStyle _rowFontStyle = TextStyle(fontSize: rowFontSize);
 
 class SpeciesInformation extends StatelessWidget {
   final Landing landing;
 
   const SpeciesInformation({this.landing});
 
-  Container _buildRow(String key, String val, {bool italic = false}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Text(
-              key,
-              style: _rowFontStyle.copyWith(fontWeight: FontWeight.bold),
+  Widget _buildRow(String key, String val, {bool italic = false}) {
+    return Builder(builder: (BuildContext context) {
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 2),
+        child: Column(
+          children: [
+            // LHS
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  key,
+                  style: Theme.of(context).textTheme.caption,
+                )
+              ],
             ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Text(
-              val,
-              style: _rowFontStyle.copyWith(fontStyle: italic ? FontStyle.italic : FontStyle.normal),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
-    );
+            // RHS
+            Row(
+              children: [
+                Text(
+                  val,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headline6
+                      .copyWith(fontStyle: italic ? FontStyle.italic : FontStyle.normal),
+                )
+              ],
+            )
+          ],
+        ),
+      );
+    });
   }
 
   @override
@@ -43,7 +46,7 @@ class SpeciesInformation extends StatelessWidget {
       initiallyExpanded: true,
       title: Text(
         'Species Information',
-        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
+        style: Theme.of(context).accentTextTheme.headline5,
       ),
       children: <Widget>[
         _buildRow('Australian name', landing.species.australianName),

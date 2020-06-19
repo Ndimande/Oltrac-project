@@ -1,7 +1,7 @@
 name: oltrace
 description: An app for tracking shark fins and other products.
 
-version: 1.6.3+1
+version: 1.6.6+1
 
 environment:
   sdk: ">=2.7.2 <3.0.0"
@@ -34,6 +34,8 @@ dependencies:
   connectivity: ^0.4.8+5
   imei_plugin: ^1.1.6
   device_info: ^0.4.2+4
+  olrac_widgets:
+    git: git@ssh.dev.azure.com:v3/Olrac/olrac_widgets/olrac_widgets
 
 dev_dependencies:
   flutter_test:

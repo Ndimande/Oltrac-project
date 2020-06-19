@@ -16,15 +16,28 @@ class ProductsList extends StatelessWidget {
       .map<Widget>((Product p) => ProductListItem(product: p, onPressed: () async => await _onPressed(context, p)))
       .toList();
 
+  Widget _noProductTags() {
+    return Builder(builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Text(
+            'No product tags',
+            style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.black),
+          ),
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> items =
-        products.isNotEmpty ? _productListItems(context) : [const ListTile(title: Text('No Product Tags'))];
+    final List<Widget> items = products.isNotEmpty ? _productListItems(context) : [_noProductTags()];
     return ExpansionTile(
       initiallyExpanded: true,
       title: Text(
         'Product Tags',
-        style: TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
+        style: Theme.of(context).accentTextTheme.headline5,
       ),
       children: items,
     );

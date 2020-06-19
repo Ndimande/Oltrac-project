@@ -87,18 +87,6 @@ class ProductRepository extends DatabaseRepository<Product> {
 
     final Product storedProduct = product.copyWith(id: createdId);
 
-    // We need to store in the pivot table
-//    for (final Landing landing in storedProduct.landings) {
-//      final String where = 'product_id = $createdId AND landing_id = ${landing.id}';
-//      final List<Map<String, dynamic>> res = await database.query('product_has_landings', where: where);
-//      if (res.isEmpty) {
-//        await database.insert(
-//          'product_has_landings',
-//          {'product_id': createdId, 'landing_id': landing.id},
-//        );
-//      }
-//    }
-
     await _storeLandingRelations(storedProduct);
 
     return createdId;
@@ -160,6 +148,7 @@ class ProductRepository extends DatabaseRepository<Product> {
       'product_type_id': product.productType.id,
       'packaging_type_id': product.packagingType.id,
       'product_units': product.productUnits,
+      'created_at': product.createdAt.toIso8601String(),
     };
   }
 }

@@ -2,6 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/data/fishing_methods.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
@@ -20,12 +21,10 @@ import 'package:oltrace/screens/fishing_method.dart';
 import 'package:oltrace/screens/main/drawer.dart';
 import 'package:oltrace/screens/main/haul_section.dart';
 import 'package:oltrace/screens/main/no_active_trip.dart';
-import 'package:oltrace/screens/main/static_haul_details_alert_dialog.dart';
+import 'package:oltrace/screens/main/static_haul_details_dialog.dart';
 import 'package:oltrace/screens/main/trip_section.dart';
 import 'package:oltrace/screens/master_container/master_containers.dart';
 import 'package:oltrace/services/trip_upload.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _tripRepo = TripRepository();
@@ -69,6 +68,9 @@ class MainScreenState extends State<MainScreen> {
   /// List of [Trip]s that have ended.
   List<Trip> completedTrips;
 
+  /// Is the screen busy?
+  bool busy = false;
+
   /// Get the currently selected [FishingMethod].
   FishingMethod get _currentFishingMethod {
     final String fmCode = widget.sharedPrefs.getString('fishingMethod').toString();
@@ -84,7 +86,6 @@ class MainScreenState extends State<MainScreen> {
       context,
       MaterialPageRoute(builder: (context) => FishingMethodScreen()),
     );
-    setState(() {});
     return fm;
   }
 
@@ -112,7 +113,7 @@ class MainScreenState extends State<MainScreen> {
 
   /// Dialog to select soak time.
   Widget _soakTimeDialog() {
-    return StaticHaulDetailsAlertDialog(onSuccesfulValidate: (Map<String, dynamic> formResult) {
+    return StaticHaulDetailsDialog(onSuccesfulValidate: (Map<String, dynamic> formResult) {
       Navigator.pop(context, formResult);
     });
   }
@@ -142,7 +143,8 @@ class MainScreenState extends State<MainScreen> {
     final bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog(Messages.endHaulTitle(activeHaul), Messages.endHaulDialogContent(activeHaul)),
+      builder: (_) =>
+          WestlakeConfirmDialog(Messages.endHaulTitle(activeHaul), Messages.endHaulDialogContent(activeHaul)),
     );
 
     if (confirmed) {
@@ -177,47 +179,92 @@ class MainScreenState extends State<MainScreen> {
     final FishingMethod method = await _selectCurrentFishingMethod();
     if (method != null) {
       widget.sharedPrefs.setString('fishingMethod', method.abbreviation);
-      setState(() {});
     }
   }
 
-  Future<void> _onPressStartTripButton() async {
-    showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS);
+  Future<Location> _determineLocation() async {
+    Location location;
+
+    // Show Snackbar and keep open
+    showTextSnackBar(_scaffoldKey, Messages.WAITING_FOR_GPS, duration: const Duration(hours: 99));
 
     try {
-      final Location location = await _locationProvider.location;
-      print(location);
+      location = await _locationProvider.location;
+
+      // Hide the waiting snackbar
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+
       if (location == null) {
         if (!await _locationProvider.locationServiceEnabled) {
           showTextSnackBar(_scaffoldKey, 'Location service is not enabled');
+        } else {
+          showTextSnackBar(_scaffoldKey, Messages.LOCATION_NOT_AVAILABLE);
         }
       }
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      final trip = Trip(startedAt: DateTime.now(), startLocation: location);
-      final int id = await _tripRepo.store(trip);
-      setState(() {});
-      showTextSnackBar(_scaffoldKey, 'Trip $id started');
     } catch (e) {
+      // Ensure previous snackbar closed because the error could happen any time
       _scaffoldKey.currentState.hideCurrentSnackBar();
       showTextSnackBar(_scaffoldKey, Messages.LOCATION_NOT_AVAILABLE);
       rethrow;
     }
+    return location;
+  }
+
+  Future<void> _onPressStartTripButton() async {
+    if (busy) {
+      return;
+    }
+
+    setState(() {
+      busy = true;
+    });
+
+    final Location location = await _determineLocation();
+
+    if (location == null) {
+      return;
+    }
+
+    try {
+      // Store the trip in db
+      final trip = Trip(startedAt: DateTime.now(), startLocation: location);
+      final int id = await _tripRepo.store(trip);
+
+      showTextSnackBar(_scaffoldKey, 'Trip $id started');
+    } catch (e) {
+      _scaffoldKey.currentState.hideCurrentSnackBar();
+      rethrow;
+    }
+    setState(() {
+      busy = false;
+    });
   }
 
   Future<void> _onPressEndTrip() async {
-    if (activeHaul != null) {
-      _scaffoldKey.currentState.showSnackBar(const SnackBar(content: Text('You must first end hauling/fishing')));
+    if (busy) {
       return;
     }
+
+    setState(() {
+      busy = true;
+    });
+
+    assert(activeHaul == null);
 
     final bool confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConfirmDialog('End Trip', Messages.TRIP_CONFIRM_END),
+      builder: (_) => const WestlakeConfirmDialog('End Trip', Messages.TRIP_CONFIRM_END),
     );
 
     if (confirmed == true) {
       final Location location = await _locationProvider.location;
+
+      if (location == null) {
+        showTextSnackBar(_scaffoldKey, 'Please enable location and try again.');
+        return;
+      }
+
       final Trip endedTrip = activeTrip.copyWith(endedAt: DateTime.now(), endLocation: location);
       await _tripRepo.store(endedTrip);
 
@@ -247,6 +294,9 @@ class MainScreenState extends State<MainScreen> {
 
       setState(() {});
     }
+    setState(() {
+      busy = false;
+    });
   }
 
   Future<void> _onPressEditTrip() async {
@@ -254,7 +304,7 @@ class MainScreenState extends State<MainScreen> {
       _scaffoldKey.currentContext,
       MaterialPageRoute(builder: (_) => EditTripScreen(activeTrip)),
     );
-    setState(() {});
+
     if (result == EditTripResult.TripCanceled)
       showTextSnackBar(_scaffoldKey, 'Trip canceled');
     else if (result == EditTripResult.Updated) showTextSnackBar(_scaffoldKey, 'Trip updated');
@@ -297,11 +347,8 @@ class MainScreenState extends State<MainScreen> {
     return Expanded(
       child: StripButton(
         labelText: title,
-        icon: Icon(
-          Icons.apps,
-          color: Colors.white,
-        ),
-        color: OlracColours.olspsBlue,
+        icon: const Icon(Icons.apps, color: Colors.white),
+        color: OlracColours.fauxPasBlue,
         onPressed: () async => await _onPressFishingMethodStripButton(),
       ),
     );
@@ -312,7 +359,7 @@ class MainScreenState extends State<MainScreen> {
     if (fishingMethod.type == FishingMethodType.Dynamic) {
       labelText = activeHaul == null ? 'Start Fishing' : 'End Fishing';
     } else {
-      labelText = 'Haul ${fishingMethod.name}';
+      labelText = activeHaul == null ? 'Haul Gear' : 'Haul ${fishingMethod.name}';
     }
 
     return Expanded(
@@ -348,7 +395,6 @@ class MainScreenState extends State<MainScreen> {
             onPressStartTrip: () async => await _onPressStartTripButton(),
             onPressCompletedTrip: (Trip trip) async {
               await Navigator.pushNamed(context, '/trip', arguments: trip);
-              setState(() {});
             },
           );
         }
@@ -367,7 +413,6 @@ class MainScreenState extends State<MainScreen> {
                 hauls: activeTrip.hauls,
                 onPressHaulItem: (int id, int index) async {
                   await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
-                  setState(() {});
                 },
               ),
             ),

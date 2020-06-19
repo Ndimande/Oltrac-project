@@ -6,7 +6,7 @@ import 'package:oltrace/framework/util.dart';
 class DateTimeEditor extends StatelessWidget {
   final DateTime initialDateTime;
   final Function onChanged;
-  final Text title;
+  final String title;
 
   const DateTimeEditor({
     @required this.title,
@@ -27,31 +27,30 @@ class DateTimeEditor extends StatelessWidget {
     Picker(
       selecteds: [],
       adapter: adapter,
-      title: Text(title.data),
+      title: Text(title, style: Theme.of(context).textTheme.subtitle1),
       onConfirm: (Picker picker, List<int> selectedIndices) => onChanged(picker, selectedIndices),
     ).showModal(context);
   }
 
-//  final DateTime
   @override
   Widget build(BuildContext context) {
     return Container(
-    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[350],width: 2))),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey[350], width: 1))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          title,
-          Row(
-            children: <Widget>[
-              FlatButton(
-                padding: const EdgeInsets.all(0),
-                child: Text(
+          Text(title, style: Theme.of(context).accentTextTheme.headline6),
+          FlatButton(
+            padding: const EdgeInsets.all(0),
+            onPressed: () => _onPressEditStartDateTime(context),
+            child: Row(
+              children: <Widget>[
+                Text(
                   friendlyDateTime(initialDateTime),
-                  style: const TextStyle(fontSize: 28),
-                ),
-                onPressed: () => _onPressEditStartDateTime(context),
-              )
-            ],
+                  style: Theme.of(context).textTheme.headline5,
+                )
+              ],
+            ),
           ),
         ],
       ),

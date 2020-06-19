@@ -17,7 +17,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Timer _longPressTimer;
   bool _backButtonBeingPressed = false;
   int _backButtonLongPressedSeconds = 0;
-  Color _backButtonColor = OlracColours.olspsBlue;
+  Color _backButtonColor = OlracColours.fauxPasBlue;
 
   String get _version => AppData.packageInfo.version + ' build ' + AppData.packageInfo.buildNumber;
 
@@ -30,7 +30,7 @@ class _AboutScreenState extends State<AboutScreen> {
   void _onTimerTick(Timer timer) {
     if (_backButtonBeingPressed) {
       setState(() {
-        _backButtonColor = _backButtonColor == OlracColours.olspsBlue ? Colors.deepOrange : OlracColours.olspsBlue;
+        _backButtonColor = _backButtonColor == OlracColours.fauxPasBlue ? Colors.deepOrange : OlracColours.fauxPasBlue;
         _backButtonLongPressedSeconds += 1;
       });
     } else {
@@ -42,7 +42,7 @@ class _AboutScreenState extends State<AboutScreen> {
       setState(() {
         _backButtonLongPressedSeconds = 0;
         _backButtonBeingPressed = false;
-        _backButtonColor = OlracColours.olspsBlue;
+        _backButtonColor = OlracColours.fauxPasBlue;
       });
       Navigator.pushNamed(_scaffoldKey.currentContext, '/developer');
       return;

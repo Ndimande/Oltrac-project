@@ -15,8 +15,8 @@ class InfoTable extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 10),
       child: Text(
         text,
-        style: TextStyle(
-          color: OlracColours.olspsBlue,
+        style: const TextStyle(
+          color: OlracColours.fauxPasBlue,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),

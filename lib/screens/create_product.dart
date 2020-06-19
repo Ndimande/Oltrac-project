@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/data/svg_icons.dart';
@@ -15,11 +16,9 @@ import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
 import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
-import 'package:oltrace/widgets/model_dropdown.dart';
 import 'package:oltrace/widgets/source_landing_info.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
+import 'package:olrac_widgets/westlake/westlake_text_input.dart';
 
 final _landingRepo = LandingRepository();
 
@@ -51,7 +50,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   ProductType _productType;
   PackagingType _packagingType;
 
-  String _tagCode;
   final TextEditingController _productUnitsController = TextEditingController();
   final TextEditingController _tagCodeController = TextEditingController();
 
@@ -85,7 +83,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     print(data.error);
     setState(() {
       _tagCodeController.text = data.id;
-      _tagCode = data.id;
     });
   }
 
@@ -95,7 +92,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       errorMessages.add('Invalid Quantity.');
     }
 
-    if (_tagCode == null) {
+    if (_tagCodeController.value == null || _tagCodeController.text == '') {
       errorMessages.add('No RFID tag has been scanned.');
     }
 
@@ -123,7 +120,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     final Position position = await widget.geoLocator.getCurrentPosition();
 
     final product = Product(
-      tagCode: _tagCode,
+      tagCode: _tagCodeController.text,
       createdAt: DateTime.now(),
       location: Location.fromPosition(position),
       packagingType: _packagingType,
@@ -137,7 +134,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     final Product savedProduct = product.copyWith(id: savedProductId);
 
     setState(() {
-      _tagCode = null;
       _productType = null;
       _packagingType = null;
       _productUnitsController.clear();
@@ -174,7 +170,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   bool _hasChanged() {
-    return _tagCode != null;
+    return _tagCodeController.text.isNotEmpty;
   }
 
   Future<bool> get onWillPop async {
@@ -185,7 +181,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     if (changed) {
       final bool confirmed = await showDialog<bool>(
         context: _scaffoldKey.currentContext,
-        builder: (_) => const ConfirmDialog(
+        builder: (_) => const WestlakeConfirmDialog(
           'Cancel',
           'Your unsaved changes will be lost. Are you sure you want to cancel creating this product tag?',
         ),
@@ -199,60 +195,48 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     return true;
   }
 
+  Widget _productSavedDialog(Product product) {
+
+    final String tagId = 'Tag ID: ${product.tagCode}';
+    final String productType = 'Product type: ${product.productType.name}';
+
+    return WestlakeDialog(
+      title: 'Product Created',
+      actions: <Widget>[
+        WestlakeDialogOption(text: 'Yes', onPressed: _onPressDialogYes),
+        WestlakeDialogOption(text: 'No', onPressed: _onPressDialogNo),
+        WestlakeDialogOption(text: 'Completed', onPressed: _onPressDialogDone),
+      ],
+      content: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              tagId,
+              style: Theme.of(context).textTheme.headline6.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              productType,
+              style: Theme.of(context).textTheme.headline6.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Do you want to create another product?',
+              style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<DialogResult> _showProductSavedDialog(Product product) {
-    const actionStyle = TextStyle(fontSize: 26, color: Colors.white);
     return showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        contentPadding: const EdgeInsets.all(15),
-        actions: <Widget>[
-          Container(
-            child: FlatButton(
-              child: const Text('Yes', style: actionStyle),
-              onPressed: _onPressDialogYes,
-            ),
-          ),
-          Container(
-            child: FlatButton(
-              child: const Text('Not now', style: actionStyle),
-              onPressed: _onPressDialogNo,
-            ),
-          ),
-          Container(
-            child: FlatButton(
-              child: const Text('Completed', style: actionStyle),
-              onPressed: _onPressDialogDone,
-            ),
-          ),
-        ],
-        content: SingleChildScrollView(
-          child: Container(
-            height: 250,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.check_circle_outline,
-                  size: 50,
-                  color: Colors.white,
-                ),
-                Text(
-                  '${product.productType.name} Tag\n${product.tagCode}\nsaved!',
-                  style: const TextStyle(fontSize: 26),
-                  textAlign: TextAlign.center,
-                ),
-                const Text(
-                  'Do you want to create another product?',
-                  style: TextStyle(fontSize: 20),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      builder: (_) => _productSavedDialog(product),
     );
   }
 
@@ -261,13 +245,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Quantity',
-              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              helperText: 'The total number of products associated with the tag',
-            ),
-            style: const TextStyle(fontSize: 30),
+          WestlakeTextInput(
+            label: 'Quantity',
             keyboardType: TextInputType.number,
             controller: _productUnitsController,
             validator: (value) {
@@ -295,13 +274,13 @@ class CreateProductScreenState extends State<CreateProductScreen> {
         children: <Widget>[
           const Text(
             'Sources',
-            style: TextStyle(fontSize: 20, color: OlracColours.olspsBlue),
+            style: TextStyle(fontSize: 20, color: OlracColours.fauxPasBlue),
           ),
           Column(
             children: _sourceLandings
                 .map<Widget>(
                   (Landing sl) => Container(
-                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: OlracColours.olspsBlue[300]))),
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: OlracColours.fauxPasBlue[300]))),
                     child: SourceLandingInfo(landing: sl),
                     height: 80,
                   ),
@@ -320,24 +299,30 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          TextFormField(
+          WestlakeTextInput(
+            label: 'Tag code',
             controller: _tagCodeController,
-            textCapitalization: TextCapitalization.words,
-            autocorrect: false,
-            style: const TextStyle(fontSize: 30),
-            decoration: InputDecoration(
-              labelText: 'Tag code',
-              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              helperText: 'Hold tag infront of reader to scan',
-            ),
-            onFieldSubmitted: (t) {},
-            onChanged: (String enteredText) {
-              setState(() {
-                _tagCode = enteredText;
-              });
-            },
+
             validator: (t) => t,
           ),
+//          TextFormField(
+//            controller: _tagCodeController,
+//            textCapitalization: TextCapitalization.words,
+//            autocorrect: false,
+//            style: const TextStyle(fontSize: 30),
+//            decoration: const InputDecoration(
+//              labelText: 'Tag code',
+//              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+//              helperText: 'Hold tag infront of reader to scan',
+//            ),
+//            onFieldSubmitted: (t) {},
+//            onChanged: (String enteredText) {
+//              setState(() {
+//                _tagCode = enteredText;
+//              });
+//            },
+//            validator: (t) => t,
+//          ),
         ],
       ),
     );

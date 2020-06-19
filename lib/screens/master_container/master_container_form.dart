@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:esys_flutter_share/esys_flutter_share.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/framework/util.dart' as util;
@@ -17,8 +15,7 @@ import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/screens/master_container/add_products.dart';
 import 'package:oltrace/screens/product.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-import 'package:oltrace/widgets/sharktrack_qr_image.dart';
-import 'package:oltrace/widgets/strip_button.dart';
+import 'package:oltrace/widgets/sharktrace_qr_image.dart';
 
 class MasterContainerFormScreen extends StatefulWidget {
   final List<Product> initialProducts;
@@ -67,10 +64,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     );
 
     await widget._masterContainerRepo.store(masterContainer);
-    final bool success = await _exportQR();
-    if (success) {
-      util.showTextSnackBar(_scaffoldKey, 'QR image saved to SharkTrack gallery.');
-    }
+
     Navigator.pop(context);
   }
 
@@ -179,7 +173,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
   }
 
   Widget _qrCode() {
-    return SharkTrackQrImage(
+    return SharkTraceQrImage(
       data: _tagCode,
       title: _tagCode,
       subtitle: _qrLabel(),

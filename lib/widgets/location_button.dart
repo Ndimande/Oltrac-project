@@ -6,21 +6,21 @@ class LocationButton extends StatelessWidget {
   final Location location;
   final double iconSize;
 
-  const LocationButton({@required this.location, this.iconSize = 26}): assert(location != null);
+  const LocationButton({@required this.location, this.iconSize = 30}) : assert(location != null);
+
+  Future<bool> onPressLocation() async => await MapsLauncher.launchCoordinates(location.latitude, location.longitude);
 
   @override
   Widget build(BuildContext context) {
-    final Function onPressLocation = () async => await MapsLauncher.launchCoordinates(
-              location.latitude,
-              location.longitude,
-            );
-    return IconButton(
-      padding: const EdgeInsets.all(0),
-      alignment: Alignment.center,
-      tooltip: location.toString(),
-      iconSize: iconSize,
-      icon: Icon(Icons.my_location),
-      onPressed: onPressLocation,
+    return Container(
+      padding: const EdgeInsets.all(2),
+      width: iconSize * 1.2,
+      height: iconSize * 1.2,
+      child: FlatButton(
+        padding: const EdgeInsets.all(0),
+        child: Icon(Icons.location_on, size: iconSize, color: Theme.of(context).primaryColor),
+        onPressed: onPressLocation,
+      ),
     );
   }
 }

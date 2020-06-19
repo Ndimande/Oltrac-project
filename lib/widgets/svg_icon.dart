@@ -13,7 +13,7 @@ class SvgIcon extends StatelessWidget {
     @required this.assetPath,
     this.width = 64,
     this.height = 64,
-    this.color = OlracColours.olspsBlue,
+    this.color = OlracColours.fauxPasBlue,
   });
 
   Widget _notFound() {

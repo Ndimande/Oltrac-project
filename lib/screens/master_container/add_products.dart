@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
 class AddProductsScreen extends StatefulWidget {
   final List<Product> alreadySelectedProducts;

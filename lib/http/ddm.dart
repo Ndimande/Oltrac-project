@@ -16,13 +16,14 @@ class DdmApi {
     final String imei = await ImeiPlugin.getImei();
     final headers = <String, String>{
       'Content-Type': 'application/json',
-      'SharkTrack-Version': AppData.packageInfo.version,
-      'SharkTrack-App': AppData.packageInfo.appName,
-      'SharkTrack-ID': AppData.packageInfo.packageName,
-      'SharkTrack-Debug': AppConfig.debugMode.toString(),
-      'SharkTrack-IMEI': imei,
-      'SharkTrack-Locale': Platform.localeName,
-      'SharkTrack-Device': AppData.deviceInfo.manufacturer + ' ' + AppData.deviceInfo.model,
+      'SharkTrace-Version': AppData.packageInfo.version,
+      'SharkTrace-App': AppData.packageInfo.appName,
+      'SharkTrace-ID': AppData.packageInfo.packageName,
+      'SharkTrace-Debug': AppConfig.debugMode.toString(),
+      'SharkTrace-IMEI': imei,
+      'SharkTrace-Locale': Platform.localeName,
+      'SharkTrace-Device': AppData.deviceInfo.manufacturer + ' ' + AppData.deviceInfo.model,
+      'SharkTrace-AndroidVersion': AppData.deviceInfo.version.toString(),
 
     };
 

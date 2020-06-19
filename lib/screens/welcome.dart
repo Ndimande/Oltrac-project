@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/app_config.dart';
 import 'package:oltrace/app_data.dart';
 import 'package:oltrace/data/countries.dart';
@@ -10,14 +11,12 @@ import 'package:oltrace/models/fishery_type.dart';
 import 'package:oltrace/models/profile.dart';
 import 'package:oltrace/models/skipper.dart';
 import 'package:oltrace/repositories/json.dart';
-import 'package:oltrace/widgets/model_dropdown.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 import 'package:uuid/uuid.dart';
 
-final TextStyle _sectionHeadingTextStyle = TextStyle(
+const TextStyle _sectionHeadingTextStyle = TextStyle(
   fontSize: 26,
   fontWeight: FontWeight.bold,
-  color: OlracColours.olspsBlue,
+  color: OlracColours.fauxPasBlue,
 );
 
 class WelcomeScreen extends StatefulWidget {
@@ -71,10 +70,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
           ),
           Container(
             padding: const EdgeInsets.only(left: 15),
-            child: Text(
-              'General',
-              style: _sectionHeadingTextStyle,
-            ),
+            child: Text('General', style: _sectionHeadingTextStyle),
           ),
           // Country
           Container(
@@ -110,10 +106,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'Vessel',
-                  style: _sectionHeadingTextStyle,
-                ),
+                Text('Vessel', style: _sectionHeadingTextStyle),
                 _buildVesselNameTextFormField(),
                 _buildVesselIdTextFormField(),
               ],
@@ -127,10 +120,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'Skipper',
-                  style: _sectionHeadingTextStyle,
-                ),
+                Text('Skipper', style: _sectionHeadingTextStyle),
                 _buildSkipperFirstNameTextFormField(),
                 _buildSkipperLastNameTextFormField(),
               ],
@@ -156,7 +146,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _vesselName = value;
         return null;
       },
-      onChanged: (String value) => setState((){}),
+      onChanged: (String value) => setState(() {}),
     );
   }
 
@@ -175,7 +165,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _vesselId = value;
         return null;
       },
-      onChanged: (String value) => setState((){}),
+      onChanged: (String value) => setState(() {}),
     );
   }
 
@@ -194,7 +184,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _skipperFirstName = value;
         return null;
       },
-      onChanged: (String value) => setState((){}),
+      onChanged: (String value) => setState(() {}),
     );
   }
 
@@ -214,7 +204,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
         _skipperLastName = value;
         return null;
       },
-      onChanged: (String value) => setState((){}),
+      onChanged: (String value) => setState(() {}),
     );
   }
 
@@ -276,7 +266,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Widget _saveButton() {
-    final bool allValid = _formKey?.currentState?.validate() == true && _selectedCountry != null && _selectedFisheryType != null;
+    final bool allValid =
+        _formKey?.currentState?.validate() == true && _selectedCountry != null && _selectedFisheryType != null;
 
     return StripButton(
       labelText: 'Save',

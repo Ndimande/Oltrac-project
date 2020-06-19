@@ -7,14 +7,10 @@ import 'package:oltrace/widgets/location_button.dart';
 
 class LocationEditor extends StatelessWidget {
   final Location location;
-  final Text title;
+  final String title;
   final Function(Location) onChanged;
 
-  const LocationEditor({
-    this.location,
-    this.title,
-    this.onChanged,
-  });
+  const LocationEditor({@required this.location, this.title, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -33,25 +29,32 @@ class LocationEditor extends StatelessWidget {
         onChanged(location.copyWith(longitude: value));
       },
     );
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            child: title,
+            child: Text(title, style: Theme.of(context).accentTextTheme.headline6),
             padding: const EdgeInsets.symmetric(vertical: 5),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  latitudePicker,
-                  longitudePicker,
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    latitudePicker,
+                    longitudePicker,
+                  ],
+                ),
               ),
-              LocationButton(location: location),
+              Padding(
+                padding: const EdgeInsets.all(5),
+                child: LocationButton(location: location),
+              ),
             ],
           )
         ],
@@ -89,14 +92,23 @@ class _CoordinatePicker extends StatelessWidget {
     onPressConfirm(coordinate.decimalValue);
   }
 
-  Widget get _title => Text(orientation == CoordinateOrientation.Latitude ? 'Latitude' : 'Longitude');
+  Widget _title() {
+    return Builder(
+      builder: (BuildContext context) {
+        return Text(
+          orientation == CoordinateOrientation.Latitude ? 'Latitude' : 'Longitude',
+          style: Theme.of(context).textTheme.caption,
+        );
+      },
+    );
+  }
 
   Picker _picker() {
     final coordinate = Coordinate.fromDecimal(decimalValue: decimalValue, coordinateOrientation: orientation);
 
     final List<int> degreesRange = _degreesRange(orientation);
-    final int degreeIndex = degreesRange.indexOf(coordinate.degrees);
 
+    final int degreeIndex = degreesRange.indexOf(coordinate.degrees);
     final int minuteIndex = _minutesRange.indexOf(coordinate.minutes);
     final int secondsIndex = _secondsRange.indexOf(roundDouble(coordinate.seconds, decimals: 1));
 
@@ -114,34 +126,37 @@ class _CoordinatePicker extends StatelessWidget {
     return Picker(
       selecteds: selectedIndexes,
       adapter: PickerDataAdapter<String>(pickerdata: _pickerData(orientation), isArray: true),
-      title: _title,
+      title: _title(),
       onConfirm: _onConfirm,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final coordinate = Coordinate.fromDecimal(decimalValue: decimalValue, coordinateOrientation: orientation);
+    final Coordinate coordinate = Coordinate.fromDecimal(
+      decimalValue: decimalValue,
+      coordinateOrientation: orientation,
+    );
+
     return Builder(
       builder: (BuildContext context) {
         final decoration = BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey[350], width: 2)),
+          border: Border(bottom: BorderSide(color: Colors.grey[350], width: 1)),
         );
 
-        return Container(
-          alignment: Alignment.centerLeft,
-          decoration: decoration,
-          width: 220,
-          child: FlatButton(
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            onPressed: () {
-              _picker().showModal(context);
-            },
+        return FlatButton(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          onPressed: () {
+            _picker().showModal(context);
+          },
+          child: Container(
+            alignment: Alignment.centerLeft,
+            decoration: decoration,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _title,
-                Text(coordinate.sexagesimalString, style: const TextStyle(fontSize: 28)),
+                _title(),
+                Text(coordinate.sexagesimalString, style: Theme.of(context).textTheme.headline5),
               ],
             ),
           ),
@@ -182,6 +197,7 @@ const _LONGITUDE_DIRECTION_INDEXES = <CompassDirection>[
   CompassDirection.E,
   CompassDirection.W,
 ];
+
 const _LATITUDE_COMPASS_DIRECTION_INDEXES = <CompassDirection>[
   CompassDirection.N,
   CompassDirection.S,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/westlake/forward_arrow.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/master_container.dart';
-import 'package:oltrace/widgets/forward_arrow.dart';
 import 'package:oltrace/widgets/master_container_icon.dart';
 
 class MasterContainerListItem extends StatelessWidget {
@@ -22,7 +22,7 @@ class MasterContainerListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: selected ? OlracColours.olspsBlue[50] : null,
+        color: selected ? OlracColours.fauxPasBlue[50] : null,
         border: Border(
             bottom: BorderSide(color: Colors.grey[300], width: 0.5),
             top: BorderSide(color: Colors.grey[300], width: 0.5)),
@@ -31,7 +31,7 @@ class MasterContainerListItem extends StatelessWidget {
         leading: MasterContainerIcon(indexNumber: listIndex),
         title: Text(masterContainer.tagCode),
         subtitle: Text(friendlyDateTime(masterContainer.createdAt)),
-        trailing: ForwardArrow(),
+        trailing: const ForwardArrow(),
         onTap: onTap != null ? () => onTap(masterContainer.id) : null,
       ),
     );

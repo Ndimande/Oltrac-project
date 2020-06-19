@@ -8,7 +8,7 @@ class NumberedBoat extends StatelessWidget {
   final double size;
   final Color color;
 
-  const NumberedBoat({this.number, this.size = 64, this.color = OlracColours.olspsBlue});
+  const NumberedBoat({this.number, this.size = 64, this.color = OlracColours.fauxPasBlue});
 
   @override
   Widget build(BuildContext context) {
@@ -34,3 +34,4 @@ class NumberedBoat extends StatelessWidget {
     );
   }
 }
+

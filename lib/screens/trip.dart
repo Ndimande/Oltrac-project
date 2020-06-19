@@ -2,15 +2,14 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/services/trip_upload.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 import 'package:oltrace/widgets/time_space.dart';
 
 final _tripRepo = TripRepository();
@@ -43,30 +42,27 @@ class TripScreenState extends State<TripScreen> {
   bool isActiveTrip;
 
   Future<void> _onPressEditTrip() async {
-    final EditTripResult result = await Navigator.push(
+    await Navigator.push(
       _scaffoldKey.currentContext,
       MaterialPageRoute(builder: (_) => EditTripScreen(_trip)),
     );
-    setState(() {});
-    if (result == EditTripResult.TripCanceled && _trip.isComplete) {
-      Navigator.pop(context);
-    } else if (EditTripResult.Updated == result) {
-      showTextSnackBar(_scaffoldKey, 'Trip updated');
-    }
   }
 
   Widget _buildTripInfo(Trip trip) {
     return Column(
       children: <Widget>[
         Container(
-          color: OlracColours.olspsBlue[50],
+          color: OlracColours.fauxPasBlue[50],
           padding: const EdgeInsets.all(10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              NumberedBoat(
-                number: trip.id,
-                color: _trip.isUploaded ? OlracColours.olspsDarkBlue : OlracColours.olspsBlue,
+              Hero(
+                tag: 'numbered_boat' + trip.id.toString(),
+                child: NumberedBoat(
+                  number: trip.id,
+                  color: _trip.isUploaded ? OlracColours.olspsDarkBlue : Theme.of(context).primaryColor,
+                ),
               ),
               const SizedBox(width: 15),
               Expanded(
@@ -94,12 +90,9 @@ class TripScreenState extends State<TripScreen> {
   Widget get editTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
           labelText: 'Edit',
-          color: OlracColours.olspsBlue,
+          color: OlracColours.fauxPasBlue,
           onPressed: _onPressEditTrip,
-          icon: Icon(
-            Icons.edit,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.edit, color: Colors.white),
         );
       });
 
@@ -114,7 +107,7 @@ class TripScreenState extends State<TripScreen> {
     return StripButton(
       labelText: label,
       disabled: trip.isUploaded,
-      color: OlracColours.olspsBlue,
+      color: OlracColours.fauxPasBlue,
       onPressed: onPress,
       icon: Icon(
         trip.isUploaded ? Icons.check_circle_outline : Icons.cloud_upload,
@@ -125,7 +118,7 @@ class TripScreenState extends State<TripScreen> {
 
   Future<bool> _confirmUseMobileData() async => await showDialog<bool>(
         context: context,
-        builder: (_) => const ConfirmDialog(
+        builder: (_) => const WestlakeConfirmDialog(
             'Use mobile data?', 'Using mobile data is disabled in settings. Would you still like to upload?'),
       );
 
@@ -133,7 +126,7 @@ class TripScreenState extends State<TripScreen> {
   Future<void> onPressUpload(Trip trip) async {
     final ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
 
-    if(connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult == ConnectivityResult.none) {
       showTextSnackBar(_scaffoldKey, 'No internet connection. Upload failed.');
       return;
     }
@@ -177,10 +170,10 @@ class TripScreenState extends State<TripScreen> {
       print('Trip uploaded');
       snackBarMessage = 'Trip upload complete.';
     } on DioError {
-      snackBarMessage = 'C';
+      snackBarMessage = 'Trip upload failed. Network Error.';
     } catch (e) {
       snackBarMessage = 'Trip upload failed. Something unexpected went wrong.';
-      handleError(e,null);
+      handleError(e, null);
       print('Error:');
       print(e.toString());
     }
@@ -209,7 +202,6 @@ class TripScreenState extends State<TripScreen> {
       hauls: _trip.hauls.reversed.toList(),
       onPressHaulItem: (int id, int index) async {
         await Navigator.pushNamed(context, '/haul', arguments: {'haulId': id, 'listIndex': index});
-        setState(() {});
       },
     );
   }

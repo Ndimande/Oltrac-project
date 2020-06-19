@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/framework/util.dart' as util;
 import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/master_container_icon.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
 class MasterContainerInfo extends StatelessWidget {
   final MasterContainer masterContainer;
@@ -61,7 +61,7 @@ class MasterContainerInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: OlracColours.olspsBlue[100],
+      color: OlracColours.fauxPasBlue[100],
       child: Column(
         children: <Widget>[
           Row(

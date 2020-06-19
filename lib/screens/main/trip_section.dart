@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/widgets/elapsed_counter.dart';
 import 'package:oltrace/widgets/location_button.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
 class TripSection extends StatelessWidget {
   final Trip trip;
@@ -27,108 +27,110 @@ class TripSection extends StatelessWidget {
           labelText: 'End Trip',
           color: hasActiveHaul ? Colors.grey : OlracColours.ninetiesRed,
           onPressed: () async => await onPressEndTrip(),
-          icon: Icon(
-            Icons.stop,
-            color: Colors.white,
-          ),
+          icon: const Icon(Icons.stop, color: Colors.white),
         );
       });
 
   Widget get editTripButton => Builder(builder: (BuildContext context) {
         return StripButton(
-          labelText: 'Edit',
-          color: OlracColours.olspsBlue,
-          onPressed: onPressEditTrip,
-          icon: Icon(
-            Icons.edit,
-            color: Colors.white,
-          ),
+          labelText: 'Master Container',
+          onPressed: onPressMasterContainerButton,
+          icon: const Icon(Icons.add, color: Colors.white),
         );
       });
 
-  Widget get tripInfo {
+  Widget _started() {
+    return Builder(builder: (BuildContext context) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Started', style: Theme.of(context).textTheme.caption),
+          Text(friendlyDateTime(trip.startedAt), style: Theme.of(context).textTheme.headline6)
+        ],
+      );
+    });
+  }
+
+  Widget _duration() {
+    return Builder(builder: (BuildContext context) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Duration', style: Theme.of(context).textTheme.caption),
+          ElapsedCounter(style: Theme.of(context).textTheme.headline6, startedDateTime: trip.startedAt),
+        ],
+      );
+    });
+  }
+
+  Widget tripInfo() {
+    return Builder(builder: (BuildContext context) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _started(),
+              _duration(),
+            ],
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _editTripButton() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 5),
+      child: IconButton(
+        onPressed: onPressEditTrip,
+        iconSize: 32,
+        icon: const Icon(Icons.edit, color: OlracColours.fauxPasBlue),
+      ),
+    );
+  }
+
+  Widget _stripButtons() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        LocationButton(location: trip.startLocation),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              child: Text(
-                'Start: ' + friendlyDateTime(trip.startedAt),
-                style: const TextStyle(fontSize: 18),
-              ),
-            ),
-            Container(
-              child: ElapsedCounter(
-                style: const TextStyle(fontSize: 18),
-                prefix: 'Duration: ',
-                startedDateTime: trip.startedAt,
-              ),
-            ),
-          ],
-        ),
+        Expanded(child: endTripButton, flex: 3),
+        Expanded(child: editTripButton, flex: 5),
       ],
     );
   }
 
-  Widget _masterContainerButton() {
-    return Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        IconButton(
-          onPressed: (){},
-          iconSize: 40,
-          icon: Icon(
-            Icons.inbox,
-            color: OlracColours.olspsBlue,
+  Widget _body() {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              NumberedBoat(number: trip.id),
+              const SizedBox(width: 5),
+              tripInfo(),
+            ],
           ),
-        ),
-        Container(
-          margin: const EdgeInsets.only(bottom: 5),
-          child: IconButton(
-            onPressed: onPressMasterContainerButton,
-            iconSize: 22,
-            icon: Icon(
-              Icons.add,
-              color: OlracColours.olspsBlue,
-            ),
-          ),
-        ),
-      ],
+          Row(
+            children: [
+              LocationButton(location: trip.startLocation),
+              const SizedBox(width: 5),
+              _editTripButton(),
+            ],
+          )
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: OlracColours.olspsBlue[50],
+      color: OlracColours.fauxPasBlue[50],
       child: Column(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    NumberedBoat(number: trip.id),
-                    const SizedBox(width: 5),
-                    tripInfo,
-                  ],
-                ),
-                _masterContainerButton(),
-              ],
-            ),
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(child: endTripButton),
-              Expanded(child: editTripButton),
-            ],
-          )
-        ],
+        children: <Widget>[_body(), _stripButtons()],
       ),
     );
   }

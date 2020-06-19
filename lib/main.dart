@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:background_fetch/background_fetch.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
@@ -35,7 +36,6 @@ import 'package:oltrace/screens/trip_history.dart';
 import 'package:oltrace/screens/welcome.dart';
 import 'package:package_info/package_info.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:background_fetch/background_fetch.dart';
 
 /// A connection to SQLite through sqlflite.
 Database _database;
@@ -167,100 +167,186 @@ class OlTraceAppState extends State<OlTraceApp> {
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: AppConfig.APP_TITLE,
-      theme: OlracThemes.westlake,
+      theme: ThemeData(
+        fontFamily: 'FiraSans',
+        dialogTheme: const DialogTheme(
+          backgroundColor: OlracColours.fauxPasBlue,
+          titleTextStyle: TextStyle(fontSize: 32, color: Colors.white),
+          contentTextStyle: TextStyle(fontSize: 20, color: Colors.white),
+        ),
+        primarySwatch: OlracColours.fauxPasBlue,
+        accentColor: OlracColours.olspsBlue,
+        // Black text
+        textTheme: const TextTheme(
+         button: TextStyle(color: Colors.white, fontSize: 23),
+          caption: TextStyle(fontSize: 14),
+        ),
+        highlightColor: OlracColours.fauxPasBlue,
+        // White text ?
+        primaryTextTheme: const TextTheme(
+          headline1: TextStyle(color: Colors.black),
+          headline2: TextStyle(color: Colors.black),
+          headline3: TextStyle(color: Colors.black),
+          headline4: TextStyle(color: Colors.black),
+          headline5: TextStyle(color: Colors.black),
+
+          /**
+           * Titles of list items
+           * AppBar main text
+           */
+          headline6: TextStyle(color: Colors.white, fontSize: 25),
+
+          bodyText1: TextStyle(color: Colors.black),
+          /**
+           * AppBar secondary text
+           */
+          bodyText2: TextStyle(color: Colors.white),
+          // Drawer menu items
+          caption: TextStyle(color: Colors.black),
+          button: TextStyle(color: Colors.white, fontSize: 23),
+
+          /**
+           * List item subtitles
+           */
+          subtitle1: TextStyle(color: OlracColours.fauxPasBlue),
+          subtitle2: TextStyle(color: OlracColours.fauxPasBlue),
+          // List item heading / Car items
+        ),
+        accentTextTheme: const TextTheme(
+          headline1: TextStyle(color: OlracColours.fauxPasBlue),
+          headline2: TextStyle(color: OlracColours.fauxPasBlue),
+          headline3: TextStyle(color: OlracColours.fauxPasBlue),
+          headline4: TextStyle(color: OlracColours.fauxPasBlue),
+          headline5: TextStyle(color: OlracColours.fauxPasBlue),
+          headline6: TextStyle(color: OlracColours.fauxPasBlue),
+
+          /**
+           * Titles of list items
+           * AppBar main text
+           */
+//          headline6: TextStyle(color: Colors.white,fontSize: 25),
+
+          bodyText1: TextStyle(color: OlracColours.fauxPasBlue),
+          /**
+           * AppBar secondary text
+           */
+          bodyText2: TextStyle(color: Colors.white),
+          // Drawer menu items
+          caption: TextStyle(color: OlracColours.fauxPasBlue),
+          button: TextStyle(color: Colors.white, fontSize: 23),
+
+          /**
+           * List item subtitles
+           */
+          subtitle1: TextStyle(color: OlracColours.fauxPasBlue),
+          subtitle2: TextStyle(color: OlracColours.fauxPasBlue),
+          // List item heading / Car items
+        ),
+        buttonTheme: const ButtonThemeData(buttonColor: OlracColours.fauxPasBlue, textTheme: ButtonTextTheme.primary),
+        colorScheme: const ColorScheme.light(primary: Colors.black),
+        scaffoldBackgroundColor: Colors.white,
+        cardTheme: const CardTheme(
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        ),
+        snackBarTheme: const SnackBarThemeData(
+          contentTextStyle: TextStyle(fontSize: 18),
+        ),
+      ),
       initialRoute: 'splash',
       onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute(builder: (_) {
-          switch (settings.name) {
-            case 'splash':
-              return SplashScreen();
+        return MaterialPageRoute(
+            maintainState: false,
+            builder: (_) {
+              switch (settings.name) {
+                case 'splash':
+                  return SplashScreen();
 
-            case '/':
-              return MainScreen();
+                case '/':
+                  return MainScreen();
 
-            case '/about':
-              return AboutScreen();
+                case '/about':
+                  return AboutScreen();
 
-            case '/trip':
-              final Trip trip = settings.arguments as Trip;
+                case '/trip':
+                  final Trip trip = settings.arguments as Trip;
 
-              return TripScreen(tripId: trip.id);
+                  return TripScreen(tripId: trip.id);
 
-            case '/haul':
-              final Map args = settings.arguments as Map<String, dynamic>;
-              final int haulId = args['haulId'] as int;
-              final int listIndex = args['listIndex'] as int;
+                case '/haul':
+                  final Map args = settings.arguments as Map<String, dynamic>;
+                  final int haulId = args['haulId'] as int;
+                  final int listIndex = args['listIndex'] as int;
 
-              assert(haulId != null);
-              assert(listIndex != null);
+                  assert(haulId != null);
+                  assert(listIndex != null);
 
-              return HaulScreen(haulId: haulId, listIndex: listIndex);
+                  return HaulScreen(haulId: haulId, listIndex: listIndex);
 
-            case '/fishing_methods':
-              return FishingMethodScreen();
+                case '/fishing_methods':
+                  return FishingMethodScreen();
 
-            case '/welcome':
-              return WelcomeScreen();
+                case '/welcome':
+                  return WelcomeScreen();
 
-            case '/trip_history':
-              return TripHistoryScreen();
+                case '/trip_history':
+                  return TripHistoryScreen();
 
-            case '/settings':
-              return SettingsScreen();
+                case '/settings':
+                  return SettingsScreen();
 
-            case '/landing':
-              final Map args = settings.arguments as Map<String, dynamic>;
-              final landingId = args['landingId'] as int;
-              final listIndex = args['listIndex'] as int;
+                case '/landing':
+                  final Map args = settings.arguments as Map<String, dynamic>;
+                  final landingId = args['landingId'] as int;
+                  final listIndex = args['listIndex'] as int;
 
-              assert(landingId != null);
-              assert(listIndex != null);
+                  assert(landingId != null);
+                  assert(listIndex != null);
 
-              return LandingScreen(landingId: landingId, listIndex: listIndex);
+                  return LandingScreen(landingId: landingId, listIndex: listIndex);
 
-            case '/create_landing':
-              final Haul haul = settings.arguments as Haul;
-              return LandingFormScreen(haulArg: haul);
+                case '/create_landing':
+                  final Haul haul = settings.arguments as Haul;
+                  return LandingFormScreen(haulArg: haul);
 
-            case '/edit_landing':
-              final Landing landing = settings.arguments as Landing;
-              return LandingFormScreen(landingArg: landing);
+                case '/edit_landing':
+                  final Landing landing = settings.arguments as Landing;
+                  return LandingFormScreen(landingArg: landing);
 
-            case '/create_product':
-              final Map args = settings.arguments as Map;
-              assert(args.containsKey('landings'));
-              assert(args.containsKey('haul'));
-              final List<Landing> sourceLandings = args['landings'] as List<Landing>;
+                case '/create_product':
+                  final Map args = settings.arguments as Map;
+                  assert(args.containsKey('landings'));
+                  assert(args.containsKey('haul'));
+                  final List<Landing> sourceLandings = args['landings'] as List<Landing>;
 
-              sourceLandings.forEach((Landing element) {
-                assert(element.id != null);
-              });
+                  sourceLandings.forEach((Landing element) {
+                    assert(element.id != null);
+                  });
 
-              final Haul sourceHaul = args['haul'] as Haul;
+                  final Haul sourceHaul = args['haul'] as Haul;
 
-              return CreateProductScreen(
-                initialSourceLandings: sourceLandings,
-                sourceHaul: sourceHaul,
-                listIndex: 0,
-              );
+                  return CreateProductScreen(
+                    initialSourceLandings: sourceLandings,
+                    sourceHaul: sourceHaul,
+                    listIndex: 0,
+                  );
 
-            case '/product':
-              final args = settings.arguments as Map<String, dynamic>;
-              final int productId = args['productId'] as int;
+                case '/product':
+                  final args = settings.arguments as Map<String, dynamic>;
+                  final int productId = args['productId'] as int;
 
-              return ProductScreen(productId: productId);
+                  return ProductScreen(productId: productId);
 
-            case '/add_source_landing':
-              final List<Landing> landings = settings.arguments as List<Landing>;
-              return AddSourceLandingsScreen(alreadySelectedLandings: landings);
+                case '/add_source_landing':
+                  final List<Landing> landings = settings.arguments as List<Landing>;
+                  return AddSourceLandingsScreen(alreadySelectedLandings: landings);
 
-            case '/developer':
-              return DiagnosticsScreen();
+                case '/developer':
+                  return DiagnosticsScreen();
 
-            default:
-              throw 'No such route: ${settings.name}';
-          }
-        });
+                default:
+                  throw 'No such route: ${settings.name}';
+              }
+            });
       },
     );
   }

@@ -5,7 +5,7 @@ import 'package:oltrace/framework/model.dart';
 class PackagingType extends Model {
   final String name;
 
-  const PackagingType({id, this.name}) : super(id: id);
+  const PackagingType({int id, this.name}) : super(id: id);
 
   PackagingType.fromMap(Map data)
       : name = data['name'],

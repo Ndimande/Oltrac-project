@@ -81,7 +81,8 @@ const List<Map<String, String>> appMigrations = [
         'product_units INTEGER NOT NULL DEFAULT 1, '
         'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, '
         'latitude REAL NOT NULL, '
-        'longitude REAL NOT NULL '
+        'longitude REAL NOT NULL, '
+        'factory INTEGER NOT NULL DEFAULT 0'
         ')',
     'down': 'DROP TABLE products'
   },

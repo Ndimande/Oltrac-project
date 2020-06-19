@@ -30,6 +30,7 @@ class Haul extends Model {
   /// The number of traps or hooks on the line
   final int hooksOrTraps;
 
+  /// Get a flat list of products in all landings
   List<Product> get products {
     final List<Product> uniqueProducts = <Product>[];
     landings.forEach(
@@ -45,6 +46,10 @@ class Haul extends Model {
   }
 
   int get totalLandingWeight => landings.fold(0, (total, Landing l) => total + l.weight);
+
+  bool get isActive => endedAt == null;
+
+  bool get isEnded => !isActive;
 
   const Haul({
     id,

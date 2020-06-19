@@ -8,71 +8,73 @@ const double drawerLabelFontSize = 20;
 const double drawerTextFontSize = 26;
 
 Widget _drawerHeader(Profile profile) {
-  final vesselName = Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Text(
-        'Vessel Name',
-        style: TextStyle(fontSize: drawerLabelFontSize,fontWeight: FontWeight.bold),
-      ),
-      Text(
-        profile.vesselName,
-        style: const TextStyle(fontSize: drawerTextFontSize),
-        overflow: TextOverflow.ellipsis,
-      ),
-    ],
-  );
-
-  final skipperName = Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Text(
-        'Skipper Name',
-        style: TextStyle(fontSize: drawerLabelFontSize,fontWeight: FontWeight.bold),
-      ),
-      Text(
-        profile.skipper.firstName + ' ' + profile.skipper.lastName,
-        style: const TextStyle(
-          fontSize: drawerTextFontSize,
+  return Builder(builder: (context) {
+    final vesselName = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Vessel Name',
+          style: Theme.of(context).textTheme.caption.copyWith(fontWeight: FontWeight.bold),
         ),
-        overflow: TextOverflow.ellipsis,
-      ),
-    ],
-  );
+        Text(
+          profile.vesselName,
+          style: Theme.of(context).primaryTextTheme.headline4,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
 
-  return DrawerHeader(
-    padding: const EdgeInsets.all(0),
-    margin: const EdgeInsets.all(0),
-    child: Container(
-      padding: const EdgeInsets.all(15),
-      color: OlracColours.olspsBlue[50],
-      child: Stack(
-        children: <Widget>[
-          Container(
-            child: const Image(
-              image: AssetImage('assets/images/olsps-logo.png'),
-              width: 100,
-            ),
-            alignment: Alignment.topRight,
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  vesselName,
-                  const SizedBox(height: 15),
-                  skipperName,
-                ],
+    final skipperName = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Skipper Name',
+          style: Theme.of(context).textTheme.caption.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          profile.skipper.firstName + ' ' + profile.skipper.lastName,
+          style: Theme.of(context).primaryTextTheme.headline4,
+
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
+    return DrawerHeader(
+
+      padding: const EdgeInsets.all(0),
+      margin: const EdgeInsets.all(0),
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        color: OlracColours.fauxPasBlue[50],
+        child: Stack(
+          children: <Widget>[
+            Container(
+              child: const Image(
+                image: AssetImage('assets/images/olsps-logo.png'),
+                width: 100,
               ),
-            ],
-          )
-        ],
+              alignment: Alignment.topRight,
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    vesselName,
+                    skipperName,
+                  ],
+                ),
+              ],
+            )
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  });
+
 }
 
 class MainDrawer extends StatelessWidget {
@@ -83,12 +85,12 @@ class MainDrawer extends StatelessWidget {
         return ListTile(
           leading: Icon(
             iconData,
-            color: OlracColours.olspsBlue,
+            color: OlracColours.fauxPasBlue,
             size: 36,
           ),
           title: Text(
             text,
-            style: TextStyle(fontSize: _drawerItemFontSize, color: Colors.black),
+            style: Theme.of(context).textTheme.headline5,
           ),
           onTap: onTap,
         );
@@ -108,8 +110,8 @@ class MainDrawer extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: <Widget>[
             _drawerHeader(AppData.profile),
-            Divider(
-              color: OlracColours.olspsBlue,
+            const Divider(
+              color: OlracColours.fauxPasBlue,
               height: 0,
               thickness: 5,
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/messages.dart';
 import 'package:oltrace/models/fishing_method_type.dart';
@@ -15,10 +16,8 @@ import 'package:oltrace/repositories/landing.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/haul/haul_info.dart';
-import 'package:oltrace/widgets/confirm_dialog.dart';
 import 'package:oltrace/widgets/landing_list_item.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
-import 'package:oltrace/widgets/strip_button.dart';
 
 final _landingRepo = LandingRepository();
 final _haulRepo = HaulRepository();
@@ -28,9 +27,9 @@ final _productRepo = ProductRepository();
 Future<Map<String, dynamic>> _load(int haulId) async {
   final Haul haul = await _haulRepo.find(haulId);
   final Trip activeTrip = await _tripRepo.getActive();
-  final bool isActiveTrip = activeTrip?.id == haul.tripId;
+  final bool isPartOfActiveTrip = activeTrip?.id == haul.tripId;
   final List<Landing> landings = await _landingRepo.forHaul(haul.id);
-
+  final Trip parentTrip = await _tripRepo.find(haul.tripId);
 
   final List<Product> flatProducts = [];
 
@@ -47,7 +46,8 @@ Future<Map<String, dynamic>> _load(int haulId) async {
   return {
     'haul': haul,
     'products': flatProducts,
-    'isActiveTrip': isActiveTrip,
+    'isActiveTrip': isPartOfActiveTrip,
+    'parentTripUploaded': parentTrip.isUploaded
   };
 }
 
@@ -79,6 +79,7 @@ class HaulScreenState extends State<HaulScreen> {
   List<Landing> _selectedLandings = [];
   bool _showProductList = false;
   bool _isActiveTrip;
+  bool _parentTripUploaded;
 
   void _onPressShowProductListSwitch(bool value) {
     setState(() {
@@ -92,7 +93,6 @@ class HaulScreenState extends State<HaulScreen> {
       '/product',
       arguments: {'productId': productId},
     );
-    setState(() {});
   }
 
   Future<void> _onPressLandingListItem(int landingId, int landingIndex) async {
@@ -107,14 +107,12 @@ class HaulScreenState extends State<HaulScreen> {
         'listIndex': landingIndex,
       },
     );
-
-    setState(() {});
   }
 
   Future<void> _onPressCancelHaul() async {
     final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
-      builder: (_) => const ConfirmDialog(
+      builder: (_) => const WestlakeConfirmDialog(
         'Cancel Haul',
         'Are you sure you want to cancel the haul? The haul will be removed. '
             'This action cannot be undone.',
@@ -130,7 +128,7 @@ class HaulScreenState extends State<HaulScreen> {
   Future<void> _onPressEndHaul() async {
     final bool confirmed = await showDialog<bool>(
       context: _scaffoldKey.currentContext,
-      builder: (_) => ConfirmDialog(
+      builder: (_) => WestlakeConfirmDialog(
         Messages.endHaulTitle(_haul),
         Messages.endHaulDialogContent(_haul),
       ),
@@ -145,7 +143,6 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
       await _haulRepo.store(endedHaul);
-      showTextSnackBar(_scaffoldKey, 'Haul ended', duration: const Duration(seconds: 1));
       setState(() {});
     }
   }
@@ -163,7 +160,6 @@ class HaulScreenState extends State<HaulScreen> {
     }
     widget.sharedPrefs.setBool('bulkMode', true);
     await Navigator.pushNamed(context, '/create_landing', arguments: _haul);
-    setState(() {});
   }
 
   Future<void> _onPressAddLandingButton() async {
@@ -174,7 +170,6 @@ class HaulScreenState extends State<HaulScreen> {
 
     widget.sharedPrefs.setBool('bulkMode', false);
     await Navigator.pushNamed(context, '/create_landing', arguments: _haul);
-    setState(() {});
   }
 
   Future<void> _onPressTagProduct() async {
@@ -183,9 +178,6 @@ class HaulScreenState extends State<HaulScreen> {
       return;
     }
     await Navigator.pushNamed(context, '/create_product', arguments: {'haul': _haul, 'landings': _selectedLandings});
-    setState(() {
-      _selectedLandings = [];
-    });
   }
 
   bool _landingIsSelected(Landing landing) {
@@ -217,7 +209,7 @@ class HaulScreenState extends State<HaulScreen> {
         color: OlracColours.olspsDarkBlue,
         child: Text(
           _showProductList ? 'Show Species List' : 'Show Tags List',
-          style: const TextStyle(fontSize: 18),
+          style: Theme.of(context).textTheme.subtitle1.copyWith(color: Colors.white),
         ),
         onPressed: () => _onPressShowProductListSwitch(!_showProductList),
       ),
@@ -301,9 +293,9 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _addSingleLandingButton() => StripButton(
-        icon: Icon(
+        icon: const Icon(
           Icons.add_circle,
-          color: Colors.white,
+          color: Colors.white
         ),
         color: OlracColours.ninetiesGreen,
         labelText: 'Single',
@@ -311,9 +303,9 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
   Widget _addBulkLandingButton() => StripButton(
-        icon: Icon(
+        icon: const Icon(
           Icons.add_circle,
-          color: Colors.white,
+          color: Colors.white
         ),
         color: OlracColours.olspsDarkBlue,
         labelText: 'Bulk',
@@ -321,11 +313,11 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
   Widget _tagProductButton() => StripButton(
-        icon: Icon(
+        icon: const Icon(
           Icons.add_circle,
-          color: Colors.white,
+          color: Colors.white
         ),
-        color: _selectedLandings.isNotEmpty ? OlracColours.olspsBlue : Colors.grey,
+        color: _selectedLandings.isNotEmpty ? OlracColours.fauxPasBlue : Colors.grey,
         labelText: 'Tag',
         onPressed: _onPressTagProduct,
       );
@@ -370,7 +362,7 @@ class HaulScreenState extends State<HaulScreen> {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(fontSize: 22, color: OlracColours.olspsBlue),
+        style: const TextStyle(fontSize: 22, color: OlracColours.fauxPasBlue),
       ),
     );
   }
@@ -408,6 +400,7 @@ class HaulScreenState extends State<HaulScreen> {
         _haul = snapshot.data['haul'];
         _products = snapshot.data['products'];
         _isActiveTrip = snapshot.data['isActiveTrip'];
+        _parentTripUploaded = snapshot.data['parentTripUploaded'];
 
         return Scaffold(
           key: _scaffoldKey,
@@ -424,6 +417,7 @@ class HaulScreenState extends State<HaulScreen> {
                   onPressCancelHaul: _onPressCancelHaul,
                   listIndex: widget.listIndex,
                   isActiveHaul: _haul.endedAt == null,
+                  isTripUploaded: _parentTripUploaded,
                 ),
                 _listsSection(_haul.landings),
                 if (_isActiveTrip) _bottomButtons(),

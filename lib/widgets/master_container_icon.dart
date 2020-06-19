@@ -8,7 +8,7 @@ class MasterContainerIcon extends StatelessWidget {
   Widget _containerIcon() {
     return Icon(
       Icons.inbox,
-      color: OlracColours.olspsBlue,
+      color: OlracColours.fauxPasBlue,
       size: 50,
     );
   }
@@ -19,7 +19,7 @@ class MasterContainerIcon extends StatelessWidget {
       child: Text(
         indexNumber.toString(),
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 22,color: OlracColours.olspsBlue),
+        style: TextStyle(fontSize: 22,color: OlracColours.fauxPasBlue),
       ),
     );
   }

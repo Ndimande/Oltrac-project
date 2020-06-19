@@ -21,12 +21,39 @@ class GroupedHaulsList extends StatelessWidget {
   })  : assert(hauls != null),
         assert(onPressHaulItem != null);
 
+  List<Map<String,dynamic>> _groupedByFishingMethod() => groupBy(hauls, (Haul haul) => haul.fishingMethod)
+      .entries
+      .map((entry) => {'fishingMethod': entry.key, 'hauls': entry.value})
+      .toList();
+
+  Widget fishingMethodIcon(String abbreviation) {
+    return Container(
+      width: 36,
+      height: 36,
+      child: SvgIcon(
+        assetPath: SvgIcons.path(abbreviation),
+        color: OlracColours.olspsDarkBlue,
+      ),
+    );
+  }
+
+  Widget _groupTitle(String fishingMethodName) {
+    return Builder(builder: (BuildContext context){
+      return Container(
+        child: Text(
+          fishingMethodName,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.headline5.copyWith(color: OlracColours.fauxPasBlue),
+        ),
+      );
+    });
+
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> groupedByFishingMethod = groupBy(hauls, (Haul haul) => haul.fishingMethod)
-        .entries
-        .map((entry) => {'fishingMethod': entry.key, 'hauls': entry.value})
-        .toList();
+    // Get the hauls grouped by fishing method
+    final List<Map<String, dynamic>> groupedByFishingMethod = _groupedByFishingMethod();
 
     return ListView.builder(
         addSemanticIndexes: true,
@@ -38,32 +65,16 @@ class GroupedHaulsList extends StatelessWidget {
           // Relative index in list
           int haulIndex = totalHauls;
 
-          final FishingMethod fishingMethod = fishingMethodGroup['fishingMethod'];
+          final FishingMethod fishingMethod = fishingMethodGroup['fishingMethod'] as FishingMethod;
 
-          final Widget svg = Container(
-            width: 36,
-            height: 36,
-            child: SvgIcon(
-              assetPath: SvgIcons.path(fishingMethod.abbreviation),
-              color: OlracColours.olspsDarkBlue,
-            ),
-          );
 
           return ExpansionTile(
-            backgroundColor: OlracColours.olspsBlue[50],
             initiallyExpanded: true,
             title: Row(
               children: <Widget>[
-                svg,
+                fishingMethodIcon(fishingMethod.abbreviation),
                 const SizedBox(width: 10),
-                Container(
-                  width: 220,
-                  child: Text(
-                    fishingMethodGroup['fishingMethod'].name,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 22, color: OlracColours.olspsDarkBlue),
-                  ),
-                )
+                _groupTitle(fishingMethodGroup['fishingMethod'].name)
               ],
             ),
             children: fishingMethodGroup['hauls']

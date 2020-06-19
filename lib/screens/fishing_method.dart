@@ -66,7 +66,7 @@ class FishingMethodScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Fishing Method')),
       body: Container(
-        color: OlracColours.olspsBlue,
+        color: OlracColours.fauxPasBlue,
         padding: const EdgeInsets.all(2),
         child: OrientationBuilder(
           builder: (context, orientation) {

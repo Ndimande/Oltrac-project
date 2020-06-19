@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
+import 'package:olrac_widgets/westlake/forward_arrow.dart';
 import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/landing.dart';
-import 'package:oltrace/widgets/forward_arrow.dart';
-import 'package:oltrace/widgets/landing_icon.dart';
+import 'package:oltrace/widgets/landing_list_item_icon.dart';
+import 'package:olrac_widgets/westlake/westlake_list_item.dart';
 
 class LandingListItem extends StatelessWidget {
   final Landing landing;
@@ -24,70 +25,60 @@ class LandingListItem extends StatelessWidget {
         assert(onPressed != null),
         assert(listIndex != null);
 
-  Text get _speciesName => Text(
-        landing.species.englishName,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  Widget _leading() => LandingListItemIcon(
+        landing: landing,
+        listIndex: listIndex,
       );
 
-  Text get individuals => Text(' (${landing.individuals})');
+  Widget _title() => Builder(builder: (context) {
+        return Text(
+          landing.species.englishName,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.headline6,
+        );
+      });
 
+  Widget _subtitle() => Builder(builder: (context) {
+        String lengthWeight = landing.weightKilograms;
+        if (landing.length != null) {
+          lengthWeight += ', ' + landing.lengthCentimeters;
+        }
 
-  Widget get _subtitle {
-    String lengthWeight = landing.weightKilograms;
-    if(landing.length != null) {
-      lengthWeight += ', ' + landing.lengthCentimeters;
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(lengthWeight),
-        Text(friendlyDateTime(landing.createdAt)),
-      ],
-    );
-  }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(lengthWeight, style: Theme.of(context).textTheme.subtitle1),
+            Text(friendlyDateTime(landing.createdAt), style: Theme.of(context).textTheme.caption),
+          ],
+        );
+      });
 
-  Widget get _trailingIcon {
+  Widget _trailing() {
     if (!isSelectable) {
-      return ForwardArrow();
+      return const ForwardArrow();
     }
 
     final icon = onLongPress == null || landing.doneTagging
-        ? ForwardArrow()
+        ? const ForwardArrow()
         : Icon(isSelected ? Icons.check_box : Icons.check_box_outline_blank);
 
     return IconButton(
       icon: icon,
       onPressed: landing.doneTagging ? null : onLongPress,
       iconSize: 30,
-      color: OlracColours.olspsBlue,
+      color: OlracColours.fauxPasBlue,
     );
   }
 
-  BoxDecoration get _decoration => BoxDecoration(
-        color: isSelected ? OlracColours.olspsBlue[50] : Colors.transparent,
-        border: listIndex == 1
-            ? Border(bottom: BorderSide(color: Colors.grey[300]), top: BorderSide(color: Colors.grey[300]))
-            : Border(top: BorderSide(color: Colors.grey[300])),
-      );
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: _decoration,
-      child: ListTile(
-        onLongPress: landing.doneTagging || !isSelectable ? null : onLongPress,
-        onTap: () => onPressed(listIndex),
-        leading: LandingIcon(
-          landing: landing,
-          listIndex: listIndex,
-        ),
-        title: _speciesName,
-        subtitle: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[_subtitle, _trailingIcon],
-        ),
-      ),
+    return WestlakeListItem(
+      onLongPress: landing.doneTagging || !isSelectable ? null : onLongPress,
+      onPressed: () => onPressed(listIndex),
+      leading: _leading(),
+      title: _title(),
+      subtitle: _subtitle(),
+      trailing: _trailing(),
     );
   }
 }

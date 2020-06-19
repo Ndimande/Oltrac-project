@@ -4,15 +4,12 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:imei_plugin/imei_plugin.dart';
 import 'package:intl/intl.dart';
 import 'package:oltrace/app_config.dart';
-
-
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry/sentry.dart';
 import 'package:uuid/uuid.dart';
