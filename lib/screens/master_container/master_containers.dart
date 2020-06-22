@@ -87,7 +87,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
             icon: Icon(Icons.add),
             color: OlracColours.ninetiesGreen,
             onPressed: _onPressCreateStripButton,
-            labelText: 'New Master Container',
+            labelText: 'Create Master Container',
           ),
         ),
       ],

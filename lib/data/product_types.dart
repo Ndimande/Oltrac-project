@@ -19,7 +19,7 @@ const List<ProductType> productTypes = <ProductType>[
   //ProductType(id: 11, name: 'Bait'),
   //ProductType(id: 12, name: 'Fish meal'),
 
-  ProductType(id: 13, name: 'Other'),
   ProductType(id: 14, name: 'Trunk – fins on'),
   ProductType(id: 15, name: 'Trunk – fins off'),
+  ProductType(id: 13, name: 'Other'),
 ];

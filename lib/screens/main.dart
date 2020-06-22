@@ -10,11 +10,13 @@ import 'package:oltrace/models/fishing_method.dart';
 import 'package:oltrace/models/fishing_method_type.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/providers/location.dart';
 import 'package:oltrace/providers/shared_preferences.dart';
 import 'package:oltrace/providers/user_prefs.dart';
 import 'package:oltrace/repositories/haul.dart';
+import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
 import 'package:oltrace/screens/fishing_method.dart';
@@ -35,12 +37,17 @@ Future<Map> _load() async {
   final Haul activeHaul = await _haulRepo.getActiveHaul();
   final Trip activeTrip = await _tripRepo.getActive();
 
+  List<Product> tripProducts = [];
+  if(activeTrip != null) {
+     tripProducts = await ProductRepository().forTrips([activeTrip.id]);
+  }
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
 
   return {
     'activeTrip': activeTrip,
     'activeHaul': activeHaul,
     'completedTrips': completedTrips,
+    'showMCButton': tripProducts.isNotEmpty,
   };
 }
 
@@ -70,6 +77,8 @@ class MainScreenState extends State<MainScreen> {
 
   /// Is the screen busy?
   bool busy = false;
+
+  bool showMCButton;
 
   /// Get the currently selected [FishingMethod].
   FishingMethod get _currentFishingMethod {
@@ -343,7 +352,7 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _fishingMethodStripButton(FishingMethod fishingMethod) {
-    final String title = fishingMethod == null ? 'Fishing Method' : 'Change Gear';
+    final String title = fishingMethod == null ? 'Fishing Method' : 'New Gear';
     return Expanded(
       child: StripButton(
         labelText: title,
@@ -359,7 +368,7 @@ class MainScreenState extends State<MainScreen> {
     if (fishingMethod.type == FishingMethodType.Dynamic) {
       labelText = activeHaul == null ? 'Start Fishing' : 'End Fishing';
     } else {
-      labelText = activeHaul == null ? 'Haul Gear' : 'Haul ${fishingMethod.name}';
+      labelText = activeHaul == null ? 'New Haul' : 'Haul ${fishingMethod.name}';
     }
 
     return Expanded(
@@ -406,6 +415,7 @@ class MainScreenState extends State<MainScreen> {
               hasActiveHaul: activeHaul != null,
               onPressEndTrip: () async => await _onPressEndTrip(),
               onPressEditTrip: _onPressEditTrip,
+              showMCButton: showMCButton,
               onPressMasterContainerButton: () async => await _onPressMasterContainerButton(),
             ),
             Expanded(
@@ -439,6 +449,7 @@ class MainScreenState extends State<MainScreen> {
           activeTrip = snapshot.data['activeTrip'] as Trip;
           activeHaul = snapshot.data['activeHaul'] as Haul;
           completedTrips = snapshot.data['completedTrips'] as List<Trip>;
+          showMCButton = snapshot.data['showMCButton'] as bool;
 
           return Scaffold(
             key: _scaffoldKey,

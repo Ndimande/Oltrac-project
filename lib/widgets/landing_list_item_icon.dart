@@ -54,10 +54,10 @@ class LandingListItemIcon extends StatelessWidget {
     );
 
     final Container bulkBinBText = Container(
-      margin: const EdgeInsets.only(top: 25, left: 2),
+      margin: const EdgeInsets.only(top: 25),
       child: const Text(
         'B',
-        style: TextStyle(color: OlracColours.olspsDarkBlue, fontSize: 16),
+        style: TextStyle(color: OlracColours.olspsDarkBlue, fontSize: 20,fontWeight: FontWeight.bold),
       ),
     );
 

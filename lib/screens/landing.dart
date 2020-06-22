@@ -96,7 +96,7 @@ class LandingScreenState extends State<LandingScreen> {
   }
 
   Future<void> _onPressDoneTagging() async {
-    if (_landing.products.isEmpty) {
+    if (_landing.products.isEmpty && !_landing.doneTagging) {
       showTextSnackBar(_scaffoldKey, 'You must tag at least one');
       return;
     }
@@ -146,9 +146,9 @@ class LandingScreenState extends State<LandingScreen> {
       items.add(_tagProductButton());
     }
 
-    if (_landing.products.isNotEmpty) {
+//    if (_landing.products.isNotEmpty) {
       items.add(_doneTaggingButton());
-    }
+//    }
 
     return Row(children: items.map((i) => Expanded(child: i)).toList());
   }

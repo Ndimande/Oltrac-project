@@ -41,7 +41,7 @@ class AddProductsScreenState extends State<AddProductsScreen> {
 
   Widget _noProducts() {
     return const Center(
-      child: Text('No eligble tags in this Trip'),
+      child: Text('No eligible tags in this trip'),
     );
   }
 

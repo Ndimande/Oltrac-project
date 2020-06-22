@@ -42,7 +42,7 @@ Future<Map<String, dynamic>> _load(int productId) async {
   final List<Landing> landings = await LandingRepository().forProduct(productId);
   final int haulId = landings.first.haulId;
   final Haul haul = await _haulRepo.find(haulId);
-  final Trip trip = await _tripRepo.find(haul.id);
+  final Trip trip = await _tripRepo.find(haul.tripId);
 
   return {
     'product': product.copyWith(landings: landings),

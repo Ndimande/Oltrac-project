@@ -13,6 +13,7 @@ class TripSection extends StatelessWidget {
   final Function onPressEndTrip;
   final Function onPressEditTrip;
   final Function onPressMasterContainerButton;
+  final bool showMCButton;
 
   const TripSection({
     @required this.trip,
@@ -20,6 +21,7 @@ class TripSection extends StatelessWidget {
     @required this.onPressEndTrip,
     @required this.onPressEditTrip,
     @required this.onPressMasterContainerButton,
+    @required this.showMCButton,
   }) : assert(onPressMasterContainerButton != null);
 
   Widget get endTripButton => Builder(builder: (BuildContext context) {
@@ -31,7 +33,7 @@ class TripSection extends StatelessWidget {
         );
       });
 
-  Widget get editTripButton => Builder(builder: (BuildContext context) {
+  Widget get masterContainerButton => Builder(builder: (BuildContext context) {
         return StripButton(
           labelText: 'Master Container',
           onPressed: onPressMasterContainerButton,
@@ -95,7 +97,8 @@ class TripSection extends StatelessWidget {
     return Row(
       children: <Widget>[
         Expanded(child: endTripButton, flex: 3),
-        Expanded(child: editTripButton, flex: 5),
+        if(showMCButton)
+        Expanded(child: masterContainerButton, flex: 5),
       ],
     );
   }
