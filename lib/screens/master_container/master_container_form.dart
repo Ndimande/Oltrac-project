@@ -204,7 +204,7 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('New Master Container'),
+        title: const Text('Create Master Container'),
       ),
       body: _body(),
     );

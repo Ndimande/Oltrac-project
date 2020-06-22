@@ -15,7 +15,18 @@ class ProductRepository extends DatabaseRepository<Product> {
   @override
   Future<Product> find(int id) async {
     final List<Map> results = await database.query(tableName, where: 'id = $id');
+    
+    if(results.isEmpty) {
+      return null;
+    }
+    
     return fromDatabaseMap(results.first);
+  }
+  
+  @override
+  Future<void> delete(int id) async {
+    await _removeLandingRelations(id);
+    await database.delete(tableName, where: 'id = $id');
   }
 
   Future<List<Product>> forLanding(int landingId) async {
@@ -93,7 +104,7 @@ class ProductRepository extends DatabaseRepository<Product> {
   }
 
   Future<void> _storeLandingRelations(Product product) async {
-    await _removeOldRelations(product);
+    await _removeLandingRelations(product.id);
     for (final Landing landing in product.landings) {
       await database.insert('product_has_landings', {
         'landing_id': landing.id,
@@ -102,8 +113,8 @@ class ProductRepository extends DatabaseRepository<Product> {
     }
   }
 
-  Future<int> _removeOldRelations(Product product) async {
-    return await database.delete('product_has_landings', where: 'product_id = ${product.id}');
+  Future<int> _removeLandingRelations(int productID) async {
+    return await database.delete('product_has_landings', where: 'product_id = $productID');
   }
 
   @override

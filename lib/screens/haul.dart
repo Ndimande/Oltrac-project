@@ -203,16 +203,10 @@ class HaulScreenState extends State<HaulScreen> {
   }
 
   Widget _toggleListButton() {
-    return Container(
-      margin: const EdgeInsets.only(right: 5),
-      child: RaisedButton(
-        color: OlracColours.olspsDarkBlue,
-        child: Text(
-          _showProductList ? 'Show Species List' : 'Show Tags List',
-          style: Theme.of(context).textTheme.subtitle1.copyWith(color: Colors.white),
-        ),
-        onPressed: () => _onPressShowProductListSwitch(!_showProductList),
-      ),
+    return StripButton(
+      color: OlracColours.olspsDarkBlue,
+      labelText: _showProductList ? 'Show Species List' : 'Show Tags List',
+      onPressed: () => _onPressShowProductListSwitch(!_showProductList),
     );
   }
 
@@ -221,9 +215,9 @@ class HaulScreenState extends State<HaulScreen> {
       margin: const EdgeInsets.only(right: 5),
       child: RaisedButton(
         color: OlracColours.ninetiesRed,
-        child: const Text(
+        child: Text(
           'Clear All',
-          style: TextStyle(fontSize: 18),
+          style: Theme.of(context).textTheme.headline6.copyWith(color: Colors.white),
         ),
         onPressed: _onPressClearAllButton,
       ),
@@ -240,9 +234,9 @@ class HaulScreenState extends State<HaulScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  _listsLabel(_showProductList ? 'Tag List' : 'Species List'),
-                  if (_selectedLandings.isNotEmpty) _clearSelectedButton(),
-                  if (_products.isNotEmpty && _selectedLandings.isEmpty) _toggleListButton(),
+                  Expanded(flex: 2, child: _listsLabel(_showProductList ? 'Tag List' : 'Species List')),
+                  if (_selectedLandings.isNotEmpty) Container(width: 200,child: _clearSelectedButton()),
+                  if (_products.isNotEmpty && _selectedLandings.isEmpty) Container(width: 200,child: _toggleListButton()),
                 ],
               ),
             ),
@@ -323,11 +317,16 @@ class HaulScreenState extends State<HaulScreen> {
       );
 
   Widget _bottomButtons() {
-    return Row(
-      children: <Widget>[
-        if (_selectedLandings.isEmpty) Expanded(child: _addSingleLandingButton()),
-        if (_selectedLandings.isEmpty) Expanded(child: _addBulkLandingButton()),
-        if (!_showProductList) Expanded(child: _tagProductButton()),
+    return Column(
+      children: [
+        Text('Add / Tag catches',style: Theme.of(context).textTheme.caption),
+        Row(
+          children: <Widget>[
+            if (_selectedLandings.isEmpty) Expanded(child: _addSingleLandingButton()),
+            if (_selectedLandings.isEmpty) Expanded(child: _addBulkLandingButton()),
+            if (!_showProductList) Expanded(child: _tagProductButton()),
+          ],
+        ),
       ],
     );
   }
