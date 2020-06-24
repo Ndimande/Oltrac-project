@@ -17,7 +17,7 @@ class AddProductsScreen extends StatefulWidget {
 
   Future<List<Product>> _load(int sourceTripId) async {
     final productRepo = ProductRepository();
-    return await productRepo.forTrips([sourceTripId]);
+    return await productRepo.forTrip(sourceTripId);
   }
 }
 

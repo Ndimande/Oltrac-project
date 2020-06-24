@@ -10,35 +10,49 @@ class MasterContainerInfo extends StatelessWidget {
   final MasterContainer masterContainer;
   final int indexNumber;
   final Function onPressDelete;
+  final bool showDeleteButton;
 
-  const MasterContainerInfo({this.masterContainer, @required this.indexNumber, this.onPressDelete}) : assert(indexNumber != null);
+  const MasterContainerInfo({
+    this.masterContainer,
+    @required this.indexNumber,
+    this.onPressDelete,
+    this.showDeleteButton = true,
+  }) : assert(indexNumber != null);
 
   Widget _tagCode() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Master Container ID',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text(masterContainer.tagCode ?? '-', style: const TextStyle(fontSize: 16)),
-      ],
-    );
+    return Builder(builder: (BuildContext context) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Master Container ID',
+            style: Theme.of(context).textTheme.caption,
+          ),
+          Text(
+            masterContainer.tagCode ?? '-',
+            style: Theme.of(context).textTheme.subtitle1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      );
+    });
   }
 
   Widget _dateCreated() {
-    return Row(
-      children: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Date Created', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(util.friendlyDateTime(masterContainer.createdAt), style: const TextStyle(fontSize: 16)),
-          ],
-        ),
-        LocationButton(location: masterContainer.location),
-      ],
-    );
+    return Builder(builder: (BuildContext context) {
+      return Row(
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('Date Created', style: Theme.of(context).textTheme.caption),
+              Text(util.friendlyDateTime(masterContainer.createdAt), style: Theme.of(context).textTheme.headline6),
+            ],
+          ),
+          LocationButton(location: masterContainer.location),
+        ],
+      );
+    });
   }
 
   Widget _details() {
@@ -50,11 +64,21 @@ class MasterContainerInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _tagCode(),
+              const SizedBox(height: 5),
               _dateCreated(),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _deleteButton() {
+    return StripButton(
+      color: OlracColours.ninetiesRed,
+      labelText: 'Delete',
+      icon: const Icon(Icons.delete),
+      onPressed: onPressDelete,
     );
   }
 
@@ -70,12 +94,7 @@ class MasterContainerInfo extends StatelessWidget {
               _details(),
             ],
           ),
-          StripButton(
-            color: OlracColours.ninetiesRed,
-            labelText: 'Delete',
-            icon: Icon(Icons.delete),
-            onPressed: onPressDelete,
-          ),
+          if (showDeleteButton) _deleteButton(),
         ],
       ),
     );

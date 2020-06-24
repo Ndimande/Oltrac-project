@@ -38,8 +38,8 @@ Future<Map> _load() async {
   final Trip activeTrip = await _tripRepo.getActive();
 
   List<Product> tripProducts = [];
-  if(activeTrip != null) {
-     tripProducts = await ProductRepository().forTrips([activeTrip.id]);
+  if (activeTrip != null) {
+    tripProducts = await ProductRepository().forTrip(activeTrip.id);
   }
   final List<Trip> completedTrips = await _tripRepo.getCompleted();
 
@@ -234,16 +234,9 @@ class MainScreenState extends State<MainScreen> {
       return;
     }
 
-    try {
-      // Store the trip in db
-      final trip = Trip(startedAt: DateTime.now(), startLocation: location);
-      final int id = await _tripRepo.store(trip);
+    final trip = Trip(startedAt: DateTime.now(), startLocation: location);
+    await _tripRepo.store(trip);
 
-      showTextSnackBar(_scaffoldKey, 'Trip $id started');
-    } catch (e) {
-      _scaffoldKey.currentState.hideCurrentSnackBar();
-      rethrow;
-    }
     setState(() {
       busy = false;
     });
@@ -298,8 +291,6 @@ class MainScreenState extends State<MainScreen> {
           print(e.error);
         }
       }
-
-      showTextSnackBar(_scaffoldKey, 'Trip ${endedTrip.id} ended');
 
       setState(() {});
     }

@@ -7,6 +7,7 @@ import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/edit_trip.dart';
+import 'package:oltrace/screens/master_container/master_containers.dart';
 import 'package:oltrace/services/trip_upload.dart';
 import 'package:oltrace/widgets/grouped_hauls_list.dart';
 import 'package:oltrace/widgets/numbered_boat.dart';
@@ -37,14 +38,27 @@ class TripScreen extends StatefulWidget {
 class TripScreenState extends State<TripScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Is the trip being uploaded?
   bool _uploading = false;
+
+  /// The trip we are viewing.
   Trip _trip;
+
+  /// Whether this is an active trip or not.
+  /// TODO remove since we don't use this anymore
   bool isActiveTrip;
 
   Future<void> _onPressEditTrip() async {
     await Navigator.push(
       _scaffoldKey.currentContext,
       MaterialPageRoute(builder: (_) => EditTripScreen(_trip)),
+    );
+  }
+
+  Future<void> _onPressMasterContainerButton() async {
+    await Navigator.push(
+      _scaffoldKey.currentContext,
+      MaterialPageRoute(builder: (_) => MasterContainersScreen(_trip.id)),
     );
   }
 
@@ -71,30 +85,42 @@ class TripScreenState extends State<TripScreen> {
                   children: <Widget>[
                     TimeSpace(label: 'Start', location: trip.startLocation, dateTime: trip.startedAt),
                     const SizedBox(height: 5),
-                    if (trip.endedAt != null)
-                      TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt),
+                    if (trip.isComplete) TimeSpace(label: 'End', location: trip.endLocation, dateTime: trip.endedAt),
                   ],
                 ),
               )
             ],
           ),
         ),
-        if (!_trip.isUploaded)
-          Row(
-            children: <Widget>[Expanded(child: editTripButton)],
-          ),
+        Row(
+          children: <Widget>[
+            if (!_trip.isUploaded) Expanded(flex: 2, child: _editTripButton()),
+            Expanded(flex: 3, child: _masterContainerButton())
+          ],
+        ),
       ],
     );
   }
 
-  Widget get editTripButton => Builder(builder: (BuildContext context) {
-        return StripButton(
-          labelText: 'Edit',
-          color: OlracColours.fauxPasBlue,
-          onPressed: _onPressEditTrip,
-          icon: const Icon(Icons.edit, color: Colors.white),
-        );
-      });
+  Widget _editTripButton() {
+    return Builder(builder: (BuildContext context) {
+      return StripButton(
+        labelText: 'Edit',
+        color: OlracColours.fauxPasBlue,
+        onPressed: _onPressEditTrip,
+        icon: const Icon(Icons.edit, color: Colors.white),
+      );
+    });
+  }
+
+  Widget _masterContainerButton() {
+    return StripButton(
+      labelText: 'Master Containers',
+      color: OlracColours.olspsDarkBlue,
+      onPressed: _onPressMasterContainerButton,
+      icon: const Icon(Icons.inbox, color: Colors.white),
+    );
+  }
 
   Widget get noHauls => Container(
         alignment: Alignment.center,
