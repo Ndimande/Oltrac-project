@@ -42,8 +42,8 @@ class SettingsScreenState extends State<SettingsScreen> {
 
   Widget _booleanOption({String title, String subtitle, bool value, Function(bool) onChanged}) {
     return SwitchListTile(
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-      title: Text(title, style: const TextStyle(fontSize: 20)),
+      subtitle: Text(subtitle, style: Theme.of(context).textTheme.caption),
+      title: Text(title, style: Theme.of(context).textTheme.headline6),
       value: value,
       onChanged: onChanged,
     );

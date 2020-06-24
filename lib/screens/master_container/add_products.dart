@@ -91,7 +91,7 @@ class AddProductsScreenState extends State<AddProductsScreen> {
 
   Widget _bottomButton() {
     return StripButton(
-      icon: Icon(Icons.add),
+      icon: const Icon(Icons.add),
       color: _selectedProducts.isEmpty ? Colors.grey : OlracColours.ninetiesGreen,
       labelText: 'Add Selected',
       onPressed: _selectedProducts.isEmpty ? null : _onPressAddSelectedStripButton,
@@ -121,9 +121,7 @@ class AddProductsScreenState extends State<AddProductsScreen> {
     return Column(
       children: <Widget>[
         _clearSelectionSection(),
-        Expanded(
-          child: _productList(),
-        ),
+        Expanded(child: _productList()),
         _bottomButton(),
       ],
     );
@@ -162,9 +160,7 @@ class AddProductsScreenState extends State<AddProductsScreen> {
         _products = snapshot.data as List<Product>;
 
         _excludeAlreadySelected(_products);
-//        _products.retainWhere(
-//          (Product p) => _alreadySelectedProducts.singleWhere((Product asp) => asp == p, orElse: () => null) == null,
-//        );
+
         return Scaffold(
           appBar: _appBar(),
           body: _body(),

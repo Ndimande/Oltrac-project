@@ -22,7 +22,7 @@ class UserPrefsProvider {
   }
 
   void init() {
-    final Map defaults = AppConfig.defaultUserSettings;
+    const Map defaults = AppConfig.defaultUserSettings;
     String key;
     key = 'uploadAutomatically';
     if (_sharedPreferences.getBool(key) == null) {

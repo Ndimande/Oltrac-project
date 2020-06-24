@@ -325,24 +325,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
             controller: _tagCodeController,
             validator: (t) => t,
           ),
-//          TextFormField(
-//            controller: _tagCodeController,
-//            textCapitalization: TextCapitalization.words,
-//            autocorrect: false,
-//            style: const TextStyle(fontSize: 30),
-//            decoration: const InputDecoration(
-//              labelText: 'Tag code',
-//              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-//              helperText: 'Hold tag infront of reader to scan',
-//            ),
-//            onFieldSubmitted: (t) {},
-//            onChanged: (String enteredText) {
-//              setState(() {
-//                _tagCode = enteredText;
-//              });
-//            },
-//            validator: (t) => t,
-//          ),
         ],
       ),
     );
@@ -393,12 +375,14 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  StripButton get _saveButton => StripButton(
-        icon: Icon(Icons.save, color: Colors.white),
-        labelText: 'Save',
-        color: OlracColours.ninetiesGreen,
-        onPressed: _onPressSaveButton,
-      );
+  StripButton _saveButton() {
+    return StripButton(
+      icon: const Icon(Icons.save, color: Colors.white),
+      labelText: 'Save',
+      color: OlracColours.ninetiesGreen,
+      onPressed: _onPressSaveButton,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -436,7 +420,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                 ),
               ),
             ),
-            _saveButton
+            _saveButton()
           ],
         ),
       ),

@@ -43,7 +43,7 @@ class AppConfig {
   /// The sqlite database filename
   static const String DATABASE_FILENAME = 'sharktrace.db';
 
-  static final migrations = appMigrations;
+  static const migrations = appMigrations;
 
   static final backgroundFetchConfig = BackgroundFetchConfig(
     minimumFetchInterval: 15,

@@ -48,10 +48,7 @@ class NoActiveTrip extends StatelessWidget {
           StripButton(
             labelText: 'Start Trip',
             color: OlracColours.ninetiesGreen,
-            icon: Icon(
-              Icons.play_arrow,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.play_arrow, color: Colors.white),
             onPressed: onPressStartTrip,
           )
         ],

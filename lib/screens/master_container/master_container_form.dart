@@ -152,20 +152,14 @@ class _MasterContainerFormScreenState extends State<MasterContainerFormScreen> {
             onPressed: _onPressSave,
             disabled: _childProducts.isEmpty || _tagCode == '',
             labelText: 'Save',
-            icon: Icon(
-              Icons.save,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.save, color: Colors.white),
           ),
         ),
         Expanded(
           child: StripButton(
             onPressed: _onPressAddProducts,
             labelText: 'Add Tags',
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.add, color: Colors.white),
           ),
         ),
       ],

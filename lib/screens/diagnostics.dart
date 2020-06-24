@@ -121,10 +121,10 @@ class DiagnosticsScreenState extends State<DiagnosticsScreen> {
       title: 'Environment',
       data: [
         ['debugMode', AppConfig.debugMode.toString()],
-        ['TRIP_UPLOAD_URL', AppConfig.TRIP_UPLOAD_URL],
+        const ['TRIP_UPLOAD_URL', AppConfig.TRIP_UPLOAD_URL],
         ['MAX_SOAK_HOURS_SELECTABLE', AppConfig.MAX_SOAK_HOURS_SELECTABLE.toString()],
         ['MAX_HISTORY_SELECTABLE', AppConfig.MAX_HISTORY_SELECTABLE.toString()],
-        ['DATABASE_FILENAME', AppConfig.DATABASE_FILENAME],
+        const ['DATABASE_FILENAME', AppConfig.DATABASE_FILENAME],
         ['RESET_DATABASE', AppConfig.RESET_DATABASE.toString()],
         [
           'SENTRY_DSN',
@@ -296,13 +296,9 @@ class _TripUploadQueueState extends State<_TripUploadQueue> {
   Widget get _heading {
     return Container(
       margin: const EdgeInsets.only(left: 5),
-      child: Text(
+      child: const Text(
         'Trip Upload JSON Preview',
-        style: TextStyle(
-          color: OlracColours.fauxPasBlue,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
+        style: TextStyle(color: OlracColours.fauxPasBlue, fontWeight: FontWeight.bold, fontSize: 20),
       ),
     );
   }
