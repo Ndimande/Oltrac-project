@@ -1,9 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:olrac_widgets/olrac_widgets.dart';
+import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/product.dart';
+import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/product_list_item.dart';
+
+final ProductRepository _productRepo = ProductRepository();
+
+Future<List<Product>> _productsAlreadyInMasterContainers() async {
+  final MasterContainerRepository masterContainerRepository = MasterContainerRepository();
+  final List<MasterContainer> masterContainers = await masterContainerRepository.all();
+
+  final List<Product> allProductsInMCs = [];
+
+  for (final MasterContainer mc in masterContainers) {
+    final List<Product> mcProducts = await _productRepo.forMasterContainer(mc.id);
+    allProductsInMCs.addAll(mcProducts);
+  }
+
+  return allProductsInMCs;
+}
+
+Future<List<Product>> _load(int sourceTripId) async {
+  final List<Product> alreadyInMCs = await _productsAlreadyInMasterContainers();
+  final List<Product> allInTrip = await _productRepo.forTrip(sourceTripId);
+
+  // Don't show products that are already in MCs
+  final List<Product> unused = allInTrip.where((Product pInTrip) {
+    return alreadyInMCs.firstWhere((Product pUsed) => pInTrip.tagCode == pUsed.tagCode, orElse: () => null) == null;
+  }).toList();
+
+  return unused;
+}
 
 class AddProductsScreen extends StatefulWidget {
   final List<Product> alreadySelectedProducts;
@@ -14,11 +44,6 @@ class AddProductsScreen extends StatefulWidget {
 
   @override
   AddProductsScreenState createState() => AddProductsScreenState(alreadySelectedProducts);
-
-  Future<List<Product>> _load(int sourceTripId) async {
-    final productRepo = ProductRepository();
-    return await productRepo.forTrip(sourceTripId);
-  }
 }
 
 class AddProductsScreenState extends State<AddProductsScreen> {
@@ -125,7 +150,7 @@ class AddProductsScreenState extends State<AddProductsScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: widget._load(widget.sourceTripId),
+      future: _load(widget.sourceTripId),
       builder: (BuildContext _, AsyncSnapshot snapshot) {
         if (snapshot.hasError) {
           return Scaffold(body: Text(snapshot.error.toString()));

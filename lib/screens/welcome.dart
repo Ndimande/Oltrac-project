@@ -258,10 +258,6 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     AppData.profile = profile;
     await JsonRepository().set('profile', profile);
 
-    showTextSnackBar(_scaffoldKey, 'Profile saved');
-    // Give them time to see the SnackBar
-    await Future.delayed(const Duration(seconds: 1));
-
     await Navigator.pushReplacementNamed(context, '/');
   }
 
@@ -272,10 +268,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     return StripButton(
       labelText: 'Save',
       color: allValid ? OlracColours.ninetiesGreen : Colors.grey,
-      icon: Icon(
-        Icons.save,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.save, color: Colors.white),
       onPressed: () async => _onPressSave(context),
     );
   }
@@ -322,7 +315,7 @@ Widget _welcomeTextFormField({
       style: const TextStyle(fontSize: 30),
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        labelStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         helperText: helperText,
       ),
       onFieldSubmitted: onFieldSubmitted,

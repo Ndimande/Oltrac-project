@@ -1,6 +1,8 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:oltrace/app_migrations.dart';
 
+const bool DEV_RESET_DB = false;
+
 class AppConfig {
   /// Is the app in debug mode?
   static final debugMode = (() {
@@ -10,7 +12,8 @@ class AppConfig {
   })();
 
   /// Drop and recreate the database if true
-  static const bool RESET_DATABASE = false;
+  // ignore: avoid_bool_literals_in_conditional_expressions, non_constant_identifier_names
+  static final bool RESET_DATABASE = debugMode ? false : DEV_RESET_DB;
 
   /// The title of the app
   static const String APP_TITLE = 'SharkTrace';
