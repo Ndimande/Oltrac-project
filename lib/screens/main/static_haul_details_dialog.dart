@@ -81,7 +81,7 @@ class _StaticHaulDetailsDialogState extends State<StaticHaulDetailsDialog> {
           Text('No. of Traps/Hooks', style: _labelStyle),
           const SizedBox(height: 5),
           Container(
-            margin: EdgeInsets.only(right: 50),
+            margin: const EdgeInsets.only(right: 50),
             padding: const EdgeInsets.all(5),
             color: Theme.of(context).accentColor,
             child: WestlakeTextInput(

@@ -4,6 +4,7 @@ import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:olrac_widgets/olrac_widgets.dart';
+import 'package:olrac_widgets/westlake/westlake_text_input.dart';
 import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/data/svg_icons.dart';
@@ -11,14 +12,15 @@ import 'package:oltrace/framework/util.dart';
 import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
+import 'package:oltrace/models/master_container.dart';
 import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
 import 'package:oltrace/repositories/landing.dart';
+import 'package:oltrace/repositories/master_container.dart';
 import 'package:oltrace/repositories/product.dart';
 import 'package:oltrace/widgets/source_landing_info.dart';
 import 'package:oltrace/widgets/svg_icon.dart';
-import 'package:olrac_widgets/westlake/westlake_text_input.dart';
 
 final _landingRepo = LandingRepository();
 
@@ -88,8 +90,10 @@ class CreateProductScreenState extends State<CreateProductScreen> {
 
   List<String> _getValidationErrors() {
     final List<String> errorMessages = [];
-    if (_productUnitsController.value == null || _productUnitsController.value.text == '') {
-      errorMessages.add('Invalid Quantity.');
+    if (_productUnitsController.value == null ||
+        _productUnitsController.value.text == '' ||
+        int.tryParse(_productUnitsController.text) == null) {
+      errorMessages.add('Invalid quantity.');
     }
 
     if (_tagCodeController.value == null || _tagCodeController.text == '') {
@@ -107,10 +111,28 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     return errorMessages;
   }
 
+  Future<bool> _tagCodeIsUsed(String tagCode) async {
+    final Product product = await ProductRepository().findByTagCode(tagCode);
+
+    if (product != null) {
+      return true;
+    }
+
+    final MasterContainer masterContainer = await MasterContainerRepository().findByTagCode(tagCode);
+
+    if (masterContainer != null) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<void> _onPressSaveButton() async {
     final List<String> errorMessages = _getValidationErrors();
 
-    final int productUnits = int.tryParse(_productUnitsController.text);
+    if (await _tagCodeIsUsed(_tagCodeController.text)) {
+      errorMessages.add('Tag code already in use');
+    }
 
     if (errorMessages.isNotEmpty) {
       showTextSnackBar(_scaffoldKey, errorMessages.join('\n'));
@@ -126,7 +148,7 @@ class CreateProductScreenState extends State<CreateProductScreen> {
       packagingType: _packagingType,
       productType: _productType,
       landings: _sourceLandings,
-      productUnits: productUnits,
+      productUnits: int.parse(_productUnitsController.text),
     );
 
     // Create a product
@@ -196,7 +218,6 @@ class CreateProductScreenState extends State<CreateProductScreen> {
   }
 
   Widget _productSavedDialog(Product product) {
-
     final String tagId = 'Tag ID: ${product.tagCode}';
     final String productType = 'Product type: ${product.productType.name}';
 
@@ -302,27 +323,8 @@ class CreateProductScreenState extends State<CreateProductScreen> {
           WestlakeTextInput(
             label: 'Tag code',
             controller: _tagCodeController,
-
             validator: (t) => t,
           ),
-//          TextFormField(
-//            controller: _tagCodeController,
-//            textCapitalization: TextCapitalization.words,
-//            autocorrect: false,
-//            style: const TextStyle(fontSize: 30),
-//            decoration: const InputDecoration(
-//              labelText: 'Tag code',
-//              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-//              helperText: 'Hold tag infront of reader to scan',
-//            ),
-//            onFieldSubmitted: (t) {},
-//            onChanged: (String enteredText) {
-//              setState(() {
-//                _tagCode = enteredText;
-//              });
-//            },
-//            validator: (t) => t,
-//          ),
         ],
       ),
     );
@@ -373,12 +375,14 @@ class CreateProductScreenState extends State<CreateProductScreen> {
     );
   }
 
-  StripButton get _saveButton => StripButton(
-        icon: Icon(Icons.save, color: Colors.white),
-        labelText: 'Save',
-        color: OlracColours.ninetiesGreen,
-        onPressed: _onPressSaveButton,
-      );
+  StripButton _saveButton() {
+    return StripButton(
+      icon: const Icon(Icons.save, color: Colors.white),
+      labelText: 'Save',
+      color: OlracColours.ninetiesGreen,
+      onPressed: _onPressSaveButton,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,15 +413,14 @@ class CreateProductScreenState extends State<CreateProductScreen> {
                     Container(padding: const EdgeInsets.symmetric(horizontal: 15), child: _quantityTextInput()),
 
                     // Tag code
-                    if (_productType != null && _packagingType != null)
-                      _tagCodeInput(),
+                    if (_productType != null && _packagingType != null) _tagCodeInput(),
                     const SizedBox(height: 10),
                     // Space for FAB
                   ],
                 ),
               ),
             ),
-            _saveButton
+            _saveButton()
           ],
         ),
       ),

@@ -3,7 +3,6 @@ import 'package:olrac_themes/olrac_themes.dart';
 import 'package:oltrace/app_data.dart';
 import 'package:oltrace/models/profile.dart';
 
-const double _drawerItemFontSize = 22;
 const double drawerLabelFontSize = 20;
 const double drawerTextFontSize = 26;
 
@@ -34,14 +33,12 @@ Widget _drawerHeader(Profile profile) {
         Text(
           profile.skipper.firstName + ' ' + profile.skipper.lastName,
           style: Theme.of(context).primaryTextTheme.headline4,
-
           overflow: TextOverflow.ellipsis,
         ),
       ],
     );
 
     return DrawerHeader(
-
       padding: const EdgeInsets.all(0),
       margin: const EdgeInsets.all(0),
       child: Container(
@@ -50,10 +47,7 @@ Widget _drawerHeader(Profile profile) {
         child: Stack(
           children: <Widget>[
             Container(
-              child: const Image(
-                image: AssetImage('assets/images/olsps-logo.png'),
-                width: 100,
-              ),
+              child: const Image(image: AssetImage('assets/images/olsps-logo.png'), width: 100),
               alignment: Alignment.topRight,
             ),
             Column(
@@ -74,11 +68,9 @@ Widget _drawerHeader(Profile profile) {
       ),
     );
   });
-
 }
 
 class MainDrawer extends StatelessWidget {
-
   Widget _listTile({IconData iconData, String text, Function onTap}) {
     return Builder(
       builder: (BuildContext context) {

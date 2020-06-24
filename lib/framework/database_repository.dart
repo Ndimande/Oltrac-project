@@ -18,6 +18,11 @@ abstract class DatabaseRepository<T extends Model> {
   /// Get item by id.
   Future<T> find(int id) async {
     final List<Map> results = await database.query(tableName, where: 'id = $id');
+
+    if (results.isEmpty) {
+      return null;
+    }
+
     return fromDatabaseMap(results.first);
   }
 

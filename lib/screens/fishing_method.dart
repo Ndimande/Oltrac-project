@@ -15,7 +15,6 @@ class FishingMethodScreen extends StatelessWidget {
 
   Widget _buildFishingMethodCard(FishingMethod method) {
     final Widget svg = LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-
       return Container(
         child: SvgIcon(
           height: constraints.maxWidth * 0.4, // we have to use height for width because height constraint is infinite
@@ -25,33 +24,32 @@ class FishingMethodScreen extends StatelessWidget {
       );
     });
 
-    final child = Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        svg,
-        Column(
-          children: <Widget>[
-            Text(
-              method.name,
-              style: TextStyle(fontSize: 18, color: Colors.black),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              '(${method.abbreviation})',
-              style: TextStyle(fontSize: 18, color: OlracColours.olspsDarkBlue),
-            ),
-          ],
-        )
-      ],
-    );
     return Builder(builder: (BuildContext context) {
       return Card(
         margin: const EdgeInsets.all(2),
         child: FlatButton(
           padding: const EdgeInsets.all(2),
-          child: child,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              svg,
+              Column(
+                children: <Widget>[
+                  Text(
+                    method.name,
+                    style: Theme.of(context).textTheme.headline6,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '(${method.abbreviation})',
+                    style: Theme.of(context).textTheme.headline6.copyWith(color: OlracColours.olspsDarkBlue),
+                  ),
+                ],
+              )
+            ],
+          ),
           onPressed: () async => _onCardPressed(context, method),
         ),
       );
@@ -59,7 +57,7 @@ class FishingMethodScreen extends StatelessWidget {
   }
 
   dynamic chunk(list, int perChunk) =>
-      list.isEmpty ? list : ([list.take(perChunk)]..addAll(chunk(list.skip(perChunk), perChunk)));
+      list.isEmpty ? list : ([list.take(perChunk), ...chunk(list.skip(perChunk), perChunk)]);
 
   @override
   Widget build(BuildContext context) {

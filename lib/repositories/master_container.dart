@@ -8,6 +8,16 @@ class MasterContainerRepository extends DatabaseRepository<MasterContainer> {
   @override
   final String tableName = 'master_containers';
 
+  Future<MasterContainer> findByTagCode(String tagCode) async {
+    final List<Map> results = await database.query(tableName, where: 'tag_code = $tagCode');
+
+    if (results.isEmpty) {
+      return null;
+    }
+
+    return fromDatabaseMap(results.first);
+  }
+
   Future<List<MasterContainer>> forTrip(int tripId) async {
     final List<MasterContainer> mcs = await MasterContainerRepository().all(where: 'trip_id = $tripId');
     final List<MasterContainer> updatedMcs = [];

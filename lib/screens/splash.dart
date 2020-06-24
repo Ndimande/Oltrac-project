@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> {
             _sharkTraceLogo(200),
             Text('Onboard'.toUpperCase(), style: _fontStyle(16), textAlign: TextAlign.center),
             Text(AppData.packageInfo?.version, style: _fontStyle(10)),
-            Divider(color: Colors.white, thickness: 1),
+            const Divider(color: Colors.white, thickness: 1),
             Text('Mobile Shark-Product Tracing Application', style: _fontStyle(10), textAlign: TextAlign.center),
           ],
         ),

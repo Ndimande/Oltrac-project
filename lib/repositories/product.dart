@@ -25,6 +25,16 @@ class ProductRepository extends DatabaseRepository<Product> {
     return fromDatabaseMap(results.first);
   }
 
+  Future<Product> findByTagCode(String tagCode) async {
+    final List<Map<String, dynamic>> results = await database.query(tableName, where: 'tag_code = $tagCode');
+
+    if (results.isEmpty) {
+      return null;
+    }
+
+    return fromDatabaseMap(results.first);
+  }
+
   @override
   Future<void> delete(int id) async {
     await _removeLandingRelations(id);
@@ -66,7 +76,10 @@ class ProductRepository extends DatabaseRepository<Product> {
       allProducts.addAll(products);
     }
 
-    return allProducts;
+    // Remove duplicates by calling toSet()
+    // There will be duplicates because several landings
+    // can reference the same product
+    return allProducts.toSet().toList();
   }
 
   @override

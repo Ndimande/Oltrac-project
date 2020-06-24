@@ -38,9 +38,8 @@ class Coordinate {
     int degrees,
     int minutes,
     double seconds,
-    CompassDirection compassDirection,
-  })  : compassDirection = compassDirection,
-        coordinateOrientation = compassDirection == CompassDirection.N || compassDirection == CompassDirection.S
+    this.compassDirection,
+  })  : coordinateOrientation = compassDirection == CompassDirection.N || compassDirection == CompassDirection.S
             ? CoordinateOrientation.Latitude
             : CoordinateOrientation.Longitude,
         decimalValue = _sexagesimal2decimal(

@@ -105,7 +105,6 @@ class _AboutScreenState extends State<AboutScreen> {
       ),
       alignment: Alignment.bottomCenter,
     );
-
   }
 
   Widget _sharkTrackLogo() {
@@ -128,10 +127,10 @@ class _AboutScreenState extends State<AboutScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             _sharkTrackLogo(),
-            Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: const TextStyle(fontSize: 30)),
-            const Text('Onboard', textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
+            Text(AppConfig.APP_TITLE, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline4),
+            Text('Onboard', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline5),
             Text(_version),
-            Text(_copyright, textAlign: TextAlign.center),
+            Text(_copyright, textAlign: TextAlign.center, style: Theme.of(context).textTheme.caption),
             _backButton(),
           ],
         ),

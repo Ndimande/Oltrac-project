@@ -73,7 +73,7 @@ const List<Map<String, String>> appMigrations = [
     'name': 'create_products_table',
     'up': 'CREATE TABLE products( '
         'id INTEGER PRIMARY KEY, '
-        'tag_code TEXT NOT NULL, '
+        'tag_code TEXT UNIQUE NOT NULL, '
         'product_type_id INTEGER NOT NULL, '
         'packaging_type_id INTEGER NOT NULL, '
         'weight INTEGER, '
