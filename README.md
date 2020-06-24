@@ -5,24 +5,6 @@
 A mobile app built on Flutter for tracking shark fins and other products.
 Minimum Android Version 5.0 (API 21)
 
-### Build runner 
-
-You must run build_runner to generate MobX code.
-```
-flutter packages pub run build_runner build
-```
-
-To run in watch mode:
-```
-flutter packages pub run build_runner watch
-```
-
-You can also use the convenience shell script `br.sh` as follows:
-```
-br.sh build
-br.sh watch
-```
-
 ### Notes
 
 Because `catch` is a reserved word in Dart. The word 'landing' is used in its place in the code.

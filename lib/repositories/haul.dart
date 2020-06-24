@@ -51,6 +51,7 @@ class HaulRepository extends DatabaseRepository<Haul> {
     await database.delete(tableName, where: 'id = $id');
   }
 
+  /// Get all the hauls for a Trip.
   Future<List<Haul>> forTrip(int tripId) async {
     final List<Map<String, dynamic>> results = await database.query(tableName, where: 'trip_id = $tripId');
 
@@ -64,7 +65,6 @@ class HaulRepository extends DatabaseRepository<Haul> {
       final List<Landing> landings = await LandingRepository().forHaul(haul.id);
       hauls.add(haul.copyWith(landings: landings));
     }
-
 
     return hauls;
   }

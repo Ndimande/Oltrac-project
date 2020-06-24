@@ -38,7 +38,7 @@ class AppConfig {
   static const int MAX_SOAK_HOURS_SELECTABLE = 500;
 
   /// The sqlite database filename
-  static const String DATABASE_FILENAME = 'sharktrack.db';
+  static const String DATABASE_FILENAME = 'sharktrace.db';
 
   static final migrations = appMigrations;
 

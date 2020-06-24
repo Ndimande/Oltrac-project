@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:olrac_themes/olrac_themes.dart';
 import 'package:olrac_widgets/olrac_widgets.dart';
 import 'package:oltrace/models/master_container.dart';
+import 'package:oltrace/models/trip.dart';
 import 'package:oltrace/repositories/master_container.dart';
+import 'package:oltrace/repositories/trip.dart';
 import 'package:oltrace/screens/master_container/master_container.dart';
 import 'package:oltrace/screens/master_container/master_container_form.dart';
 import 'package:oltrace/widgets/master_container_list_item.dart';
 
-
 Future<Map<String, dynamic>> _load(int tripId) async {
   final MasterContainerRepository _masterContainerRepo = MasterContainerRepository();
+  final TripRepository _tripRepo = TripRepository();
+
   final List<MasterContainer> masterContainers = await _masterContainerRepo.all(where: 'trip_id = $tripId');
+
+  final Trip trip = await _tripRepo.find(tripId);
   return <String, dynamic>{
     'masterContainers': masterContainers.reversed.toList(),
+    'tripIsActive': trip.isActive,
   };
 }
 
@@ -28,6 +34,7 @@ class MasterContainersScreen extends StatefulWidget {
 class _MasterContainersScreenState extends State<MasterContainersScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<MasterContainer> _masterContainers;
+  bool _tripIsActive;
 
   Future<void> _onPressCreateStripButton() async {
     await Navigator.push(
@@ -46,7 +53,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
       MaterialPageRoute(
         builder: (_) => MasterContainerScreen(
           masterContainerId: _masterContainers[index].id,
-          masterContainerIndex: index+1,
+          masterContainerIndex: index + 1,
         ),
       ),
     );
@@ -56,7 +63,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
   Widget _noMasterContainers() {
     return const Center(
       child: Text(
-        'No Master Containers for this Trip yet.\nTap the button below to begin.',
+        'No master containers for this trip.',
         style: TextStyle(fontSize: 20),
         textAlign: TextAlign.center,
       ),
@@ -68,7 +75,7 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
       itemCount: _masterContainers.length,
       itemBuilder: (BuildContext _, int index) {
         return MasterContainerListItem(
-          listIndex: index+1,
+          listIndex: index + 1,
           masterContainer: _masterContainers[index],
           onTap: (id) => _onTapListItem(index),
         );
@@ -82,14 +89,15 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
         Expanded(
           child: _masterContainers.isNotEmpty ? _masterContainerList() : _noMasterContainers(),
         ),
-        Container(
-          child: StripButton(
-            icon: Icon(Icons.add),
-            color: OlracColours.ninetiesGreen,
-            onPressed: _onPressCreateStripButton,
-            labelText: 'Create Master Container',
+        if (_tripIsActive)
+          Container(
+            child: StripButton(
+              icon: const Icon(Icons.add),
+              color: OlracColours.ninetiesGreen,
+              onPressed: _onPressCreateStripButton,
+              labelText: 'Create Master Container',
+            ),
           ),
-        ),
       ],
     );
   }
@@ -103,12 +111,15 @@ class _MasterContainersScreenState extends State<MasterContainersScreen> {
         if (snapshot.hasError) {
           return Scaffold(body: Text(snapshot.error.toString()));
         }
+
         // Show blank screen until ready
         if (!snapshot.hasData) {
           return const Scaffold();
         }
+
         final Map data = snapshot.data;
         _masterContainers = data['masterContainers'];
+        _tripIsActive = data['tripIsActive'] as bool;
 
         return Scaffold(
           key: _scaffoldKey,

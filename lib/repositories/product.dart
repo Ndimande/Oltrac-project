@@ -2,11 +2,13 @@ import 'package:oltrace/data/packaging_types.dart';
 import 'package:oltrace/data/product_types.dart';
 import 'package:oltrace/framework/database_repository.dart';
 import 'package:oltrace/framework/util.dart';
+import 'package:oltrace/models/haul.dart';
 import 'package:oltrace/models/landing.dart';
 import 'package:oltrace/models/location.dart';
 import 'package:oltrace/models/packaging_type.dart';
 import 'package:oltrace/models/product.dart';
 import 'package:oltrace/models/product_type.dart';
+import 'package:oltrace/repositories/haul.dart';
 
 class ProductRepository extends DatabaseRepository<Product> {
   @override
@@ -15,14 +17,14 @@ class ProductRepository extends DatabaseRepository<Product> {
   @override
   Future<Product> find(int id) async {
     final List<Map> results = await database.query(tableName, where: 'id = $id');
-    
-    if(results.isEmpty) {
+
+    if (results.isEmpty) {
       return null;
     }
-    
+
     return fromDatabaseMap(results.first);
   }
-  
+
   @override
   Future<void> delete(int id) async {
     await _removeLandingRelations(id);
@@ -51,35 +53,20 @@ class ProductRepository extends DatabaseRepository<Product> {
     return products;
   }
 
-  Future<List<Product>> forTrips(List<int> ids) async {
-    assert(ids != null && ids.isNotEmpty);
-    final String idList = ids.length == 1 ? ids.first.toString() : ids.join(', ');
-
-    final String columnNames = <String>[
-      'id',
-      'tag_code',
-      'product_type_id',
-      'packaging_type_id',
-      'product_units',
-      'created_at',
-    ].map((String column) => 'products.$column').join(', ');
-
-    final String sql =
-        'SELECT DISTINCT $columnNames FROM products '
-        'JOIN product_has_landings '
-        'JOIN landings JOIN hauls JOIN trips '
-        'WHERE trips.id IN ($idList)';
-
-    final List<Map<String, dynamic>> results = await database.rawQuery(sql);
-    final List<Product> products = [];
-
-
-    for (final Map result in results) {
-      final Product product = fromDatabaseMap(result);
-      products.add(product);
+  Future<List<Product>> forTrip(id) async {
+    final List<Haul> hauls = await HaulRepository().forTrip(id);
+    final List<Landing> allLandings = [];
+    for (final Haul haul in hauls) {
+      allLandings.addAll(haul.landings);
     }
 
-    return products.toList(); // make unique and return
+    final List<Product> allProducts = [];
+    for (final Landing landing in allLandings) {
+      final List<Product> products = await ProductRepository().forLanding(landing.id);
+      allProducts.addAll(products);
+    }
+
+    return allProducts;
   }
 
   @override
