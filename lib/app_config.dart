@@ -13,7 +13,7 @@ class AppConfig {
 
   /// Drop and recreate the database if true
   // ignore: avoid_bool_literals_in_conditional_expressions, non_constant_identifier_names
-  static final bool RESET_DATABASE = debugMode ? false : DEV_RESET_DB;
+  static final bool RESET_DATABASE = debugMode ? DEV_RESET_DB : false;
 
   /// The title of the app
   static const String APP_TITLE = 'SharkTrace';
