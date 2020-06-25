@@ -27,12 +27,15 @@ class Trip extends Model {
 
   final List<MasterContainer> masterContainers;
 
+  final String uuid;
+
   bool get isActive => endedAt == null;
 
   bool get isComplete => !isActive;
 
   const Trip({
     id,
+    @required this.uuid,
     @required this.startedAt,
     this.endedAt,
     this.hauls = const [],
@@ -40,7 +43,9 @@ class Trip extends Model {
     this.endLocation,
     this.isUploaded = false,
     this.masterContainers = const [],
-  }) : super(id: id);
+  })  : assert(uuid != null),
+        assert(startedAt != null),
+        super(id: id);
 
   Trip.fromMap(Map data)
       : startedAt = data['startedAt'] != null ? DateTime.parse(data['startedAt']) : null,
@@ -50,11 +55,13 @@ class Trip extends Model {
         endLocation = Location.fromMap(data['endLocation']),
         isUploaded = data['isUploaded'],
         masterContainers = (data['masterContainers'] as List).map((mc) => MasterContainer.fromMap(mc)).toList(),
+        uuid = data['uuid'],
         super.fromMap(data);
 
   @override
   Trip copyWith({
     int id,
+    String uuid,
     Profile vessel,
     DateTime startedAt,
     DateTime endedAt,
@@ -66,6 +73,7 @@ class Trip extends Model {
   }) {
     return Trip(
       id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
       startedAt: startedAt ?? this.startedAt,
       endedAt: endedAt ?? this.endedAt,
       hauls: hauls ?? this.hauls,
@@ -80,6 +88,7 @@ class Trip extends Model {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'uuid': uuid,
       'startedAt': startedAt == null ? null : startedAt.toUtc().toIso8601String(),
       'endedAt': endedAt == null ? null : endedAt.toUtc().toIso8601String(),
       'hauls': hauls.map((Haul haul) => haul.toMap()).toList(),

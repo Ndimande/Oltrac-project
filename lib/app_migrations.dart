@@ -21,6 +21,7 @@ const List<Map<String, String>> appMigrations = [
     'name': 'create_trips_table',
     'up': 'CREATE TABLE trips ( '
         'id INTEGER PRIMARY KEY, '
+        'uuid TEXT NOT NULL, '
         'started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, '
         'start_latitude REAL NOT NULL, '
         'start_longitude REAL NOT NULL, '

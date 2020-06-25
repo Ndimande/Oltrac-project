@@ -28,6 +28,7 @@ import 'package:oltrace/screens/main/trip_section.dart';
 import 'package:oltrace/screens/master_container/master_containers.dart';
 import 'package:oltrace/services/trip_upload.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 final _tripRepo = TripRepository();
 final _haulRepo = HaulRepository();
@@ -234,7 +235,11 @@ class MainScreenState extends State<MainScreen> {
       return;
     }
 
-    final trip = Trip(startedAt: DateTime.now(), startLocation: location);
+    final trip = Trip(
+      startedAt: DateTime.now(),
+      startLocation: location,
+      uuid: Uuid().v4(),
+    );
     await _tripRepo.store(trip);
 
     setState(() {

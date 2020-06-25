@@ -88,6 +88,7 @@ class TripRepository extends DatabaseRepository<Trip> {
 
     return Trip(
       id: result['id'],
+      uuid: result['uuid'],
       startedAt: startedAt,
       endedAt: endedAt,
       startLocation: Location(
@@ -103,6 +104,7 @@ class TripRepository extends DatabaseRepository<Trip> {
   Map<String, dynamic> toDatabaseMap(Trip trip) {
     return {
       'id': trip.id,
+      'uuid': trip.uuid,
       'started_at': trip.startedAt == null ? null : trip.startedAt.toIso8601String(),
       'ended_at': trip.endedAt == null ? null : trip.endedAt.toIso8601String(),
       'start_latitude': trip.startLocation.latitude,
