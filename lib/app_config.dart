@@ -1,7 +1,7 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:oltrace/app_migrations.dart';
 
-const bool DEV_RESET_DB = true;
+const bool DEV_RESET_DB = false;
 
 class AppConfig {
   /// Is the app in debug mode?

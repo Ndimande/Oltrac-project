@@ -231,7 +231,7 @@ packages:
       name: file
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.2.0"
+    version: "5.2.1"
   fixnum:
     dependency: transitive
     description:
@@ -457,10 +457,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: bc49359bc575a4848284b3f0ee447e24d7c66257
+      resolved-ref: "0067e5a1ac541ea4474b4d761a80e67a6ed5bdf0"
       url: "git@ssh.dev.azure.com:v3/Olrac/olrac_widgets/olrac_widgets"
     source: git
-    version: "0.0.1"
+    version: "0.0.2"
   package_config:
     dependency: transitive
     description:
@@ -649,7 +649,7 @@ packages:
       name: shelf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.6"
+    version: "0.7.7"
   shelf_web_socket:
     dependency: transitive
     description:
