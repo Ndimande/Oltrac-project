@@ -277,7 +277,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text('Profile'),
         centerTitle: true,
       ),
       key: _scaffoldKey,
