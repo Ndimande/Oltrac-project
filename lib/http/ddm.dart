@@ -23,8 +23,7 @@ class DdmApi {
       'SharkTrace-IMEI': imei,
       'SharkTrace-Locale': Platform.localeName,
       'SharkTrace-Device': AppData.deviceInfo.manufacturer + ' ' + AppData.deviceInfo.model,
-      'SharkTrace-AndroidVersion': AppData.deviceInfo.version.toString(),
-
+      'SharkTrace-AndroidVersion': AppData.deviceInfo.version.sdkInt.toString(),
     };
 
     final String json = jsonEncode(data.toMap());
