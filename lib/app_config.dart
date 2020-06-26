@@ -22,7 +22,7 @@ class AppConfig {
   static const String APP_SUBTITLE = 'Onboard';
 
   /// The URL to upload trips to
-  static const String TRIP_UPLOAD_URL = 'https://tracing.olracddm.com/incomings';
+  static const String TRIP_UPLOAD_URL = 'https://tracing.olracddm.com/submissions';
 
   /// The API key for this app for Sentry.io error reporting
   static const String SENTRY_DSN = 'https://46c3ef2535a2460a8a00c013f0738e17@sentry.io/3728395';
